@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Lista de Subcategorias</h2>
+
+  <ul>
+  {% for sub in subcategorias %}
+    <li>
+      <a href="{% url 'subcategory_detail' sub.pk %}">{{ sub.nome }}</a>
+       - (Categoria: {{ sub.categoria.nome }})
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

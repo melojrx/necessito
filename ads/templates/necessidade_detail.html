@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Necessidade{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Coluna Esquerda: Detalhes da Necessidade -->
+        <div class="col-md-8 mb-2">
+            <h2>{{ necessidade.titulo }}</h2>
+            <p><strong>Publicado em:</strong> {{ necessidade.data_criacao }}</p>
+            <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
+            <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
+            <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
+            <p><strong>Quantidade:</strong> {{ necessidade.quantidade }} </p>
+            <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
+            {% if user == necessidade.cliente %}
+                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
+                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
+            {% endif %}    
+        </div>
+
+        <!-- Coluna Direita: Cards -->
+        <div class="col-md-4">
+            <!-- Primeiro Card: Categoria e Contato -->
+            <div class="card mb-4 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Categoria</h5>
+                    <p class="card-text">{{ necessidade.categoria.nome }}</p>
+                    <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
+                    <hr>
+                    <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>Telefone</h5>
+                    <p class="card-text">{{ necessidade.cliente.telefone }}</p>
+                    <a href="#" class="btn btn-primary w-100">
+                        <i class="fas fa-comments me-2"></i> Chat
+                    </a>
+                </div>
+            </div>
+
+            <!-- Segundo Card: Informações do Anunciante -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Anunciante</h5>
+                    <p><strong>Nome:</strong> {{ necessidade.cliente.get_full_name|capfirst }}</p>
+                    <p><strong>Último Acesso:</strong> {{ necessidade.cliente.last_login|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Data de Cadastro:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</p>
+                    <p><strong>Endereço:</strong> {{ necessidade.cliente.endereco }}</p>
+                    <a href="{% url 'user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-user me-2"></i> Ver Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

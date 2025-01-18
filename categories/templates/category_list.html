@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Lista de Categorias</h2>
+  <ul>
+  {% for cat in categorias %}
+    <li>
+      <a href="{% url 'category_detail' cat.pk %}">{{ cat.nome }}</a>
+      <!-- Você pode exibir a descrição resumida, datas, etc. -->
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

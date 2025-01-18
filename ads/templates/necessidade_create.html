@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="display-4">Criar Anúncio</h3>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" class="form" id="ad-form">
+        {% csrf_token %}
+
+        <!-- Mensagens de erro ou sucesso (caso use django messages) -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- CATEGORIA -->
+        <div class="mb-3">
+          <label for="id_categoria" class="form-label">
+            {{ form.categoria.label }}
+          </label>
+          {{ form.categoria }}
+          <!-- 
+            O Django gera um <select> com as categorias carregadas na queryset 
+            do form. Precisamos apenas ter certeza de que no forms.py, 
+            "categoria" está com widget=Select(...).
+          -->
+        </div>
+
+        <!-- SUBCATEGORIA (será preenchida via AJAX) -->
+        <div class="mb-3">
+          <label for="id_subcategoria" class="form-label">
+            {{ form.subcategoria.label }}
+          </label>
+          
+          <!-- 
+            Subcategoria está no form, mas vamos substituir o "select" 
+            que o Django gera, pois iremos popular dinamicamente.
+            Duas opções:
+              A) Usar o <select> que o Django fornece, mas limpar e preencher via JS
+              B) Criar manualmente um <select> vazio
+          -->
+          
+          <!-- Opção A: Se quiser aproveitar o select do form: -->
+          {{ form.subcategoria }}
+          
+          <!-- 
+            Depois, no JS, faremos "document.getElementById('id_subcategoria').innerHTML = ''" 
+            e populamos com as opções. 
+          -->
+        </div>
+
+        <!-- TÍTULO -->
+        <div class="mb-3">
+          <label for="id_titulo" class="form-label">{{ form.titulo.label }}</label>
+          {{ form.titulo }}
+        </div>
+
+        <!-- DESCRIÇÃO -->
+        <div class="mb-3">
+          <label for="id_descricao" class="form-label">{{ form.descricao.label }}</label>
+          {{ form.descricao }}
+        </div>
+
+        <!-- QUANTIDADE -->
+        <div class="mb-3">
+          <label for="id_quantidade" class="form-label">{{ form.quantidade.label }}</label>
+          {{ form.quantidade }}
+        </div>
+
+        <!-- MEDIR NO LOCAL (Checkbox) -->
+        <div class="mb-3 form-check">
+          {{ form.medir_no_local }}
+          <label for="id_medir_no_local" class="form-check-label">
+            {{ form.medir_no_local.label }}
+          </label>
+        </div>
+
+        <!-- UNIDADE -->
+        <div class="mb-3">
+          <label for="id_unidade" class="form-label">{{ form.unidade.label }}</label>
+          {{ form.unidade }}
+        </div>
+
+        <!-- MARCA -->
+        <div class="mb-3">
+          <label for="id_marca" class="form-label">{{ form.marca.label }}</label>
+          {{ form.marca }}
+        </div>
+
+        <!-- TIPO -->
+        <div class="mb-3">
+          <label for="id_tipo" class="form-label">{{ form.tipo.label }}</label>
+          {{ form.tipo }}
+        </div>
+
+        <!-- BITOLA -->
+        <div class="mb-3">
+          <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
+          {{ form.bitola }}
+        </div>
+
+        <!-- COMPRIMENTO -->
+        <div class="mb-3">
+          <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
+          {{ form.compr }}
+        </div>
+
+        <!-- PESO -->
+        <div class="mb-3">
+          <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
+          {{ form.peso }}
+        </div>
+
+        <!-- ALTURA -->
+        <div class="mb-3">
+          <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
+          {{ form.altura }}
+        </div>
+
+        <!-- STATUS -->
+        <div class="mb-3">
+          <label for="id_status" class="form-label">{{ form.status.label }}</label>
+          {{ form.status }}
+        </div>
+
+        <!-- BOTÃO SUBMIT -->
+        <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
+      </form>
+    </div>
+  </div>
+
+  <a href="{% url 'necessidade_list' %}" class="btn btn-secondary mt-3">
+    Cancelar e Voltar para a Lista de Anúncios
+  </a>
+</div>
+
+<!-- SCRIPT AJAX PARA PREENCHER SUBCATEGORIAS -->
+<script>
+  (function() {
+    // Quando o user escolher uma CATEGORIA, iremos buscar subcategorias via AJAX
+    const categoriaSelect = document.getElementById('id_categoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
+
+    categoriaSelect.addEventListener('change', function() {
+      const catId = this.value;  // ID da categoria selecionada
+      if (!catId) {
+        // Se o usuário limpar/selecionar vazio, esvazia subcategorias
+        subcategoriaSelect.innerHTML = '<option value="">---</option>';
+        return;
+      }
+
+      // Faz a chamada ao endpoint (ex.: /categorias/<catId>/subcats-json/)
+      const url = `/categorias/${catId}/subcats-json/`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          // data.subcategorias = [ {id: 1, nome: 'X'}, {id:2, nome:'Y'}, ... ]
+          // Limpa as opções anteriores
+          subcategoriaSelect.innerHTML = '';
+
+          // Pode adicionar uma opção "Selecione..." se quiser
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = 'Selecione a Subcategoria';
+          subcategoriaSelect.appendChild(defaultOption);
+
+          // Adiciona cada subcategoria
+          data.subcategorias.forEach((sub) => {
+            let opt = document.createElement('option');
+            opt.value = sub.id;
+            opt.textContent = sub.nome;
+            subcategoriaSelect.appendChild(opt);
+          });
+        })
+        .catch(error => {
+          console.error('Erro ao buscar subcategorias:', error);
+        });
+    });
+  })();
+</script>
+{% endblock %}

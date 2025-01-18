@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Detalhes da Categoria</h2>
+  <p><strong>Nome:</strong> {{ categoria.nome }}</p>
+  <p><strong>Descrição:</strong> {{ categoria.descricao }}</p>
+  <p><strong>Criado em:</strong> {{ categoria.criado_em }}</p>
+  <p><strong>Modificado em:</strong> {{ categoria.modificado_em }}</p>
+
+  <!-- Exemplo: link para subcategorias dessa categoria -->
+  <a href="{% url 'subcategories_by_category' category_id=categoria.pk %}">
+    Ver Subcategorias
+  </a>
+{% endblock %}

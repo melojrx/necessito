@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Detalhes da Subcategoria</h2>
+  <p><strong>Nome:</strong> {{ subcategoria.nome }}</p>
+  <p><strong>Descrição:</strong> {{ subcategoria.descricao }}</p>
+  <p><strong>Categoria Principal:</strong> {{ subcategoria.categoria.nome }}</p>
+  <p><strong>Criado em:</strong> {{ subcategoria.criado_em }}</p>
+  <p><strong>Modificado em:</strong> {{ subcategoria.modificado_em }}</p>
+{% endblock %}

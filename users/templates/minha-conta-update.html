@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Conta{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h3 class="display-6">Editar Conta</h3>
+            <div class="card">   
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+            <a href="{% url 'minha_conta_detail' user.pk %}" class="btn btn-secondary mt-3">Cancelar e Voltar para detalhes do usuário</a>                                     
+    </div>
+{% endblock %}

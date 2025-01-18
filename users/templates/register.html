@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow" style="width: 100%; max-width: 400px;">
+        <div class="card-body">
+            <h4 class="card-title text-center mb-4">Criar uma conta</h4>
+            
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                
+                <!-- Mensagens de erro ou sucesso -->
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+                
+                <!-- Campo: first_name -->
+                <div class="mb-3">
+                    <label for="id_first_name" class="form-label">Nome:</label>
+                    {{ form.first_name }}
+                    <!-- Exibir erros específicos do campo e help_text, se houver -->
+                    {% for error in form.first_name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                    {% if form.first_name.help_text %}
+                        <small class="form-text text-muted">
+                            {{ form.first_name.help_text }}
+                        </small>
+                    {% endif %}
+                </div>
+                
+                <!-- Campo: last_name -->
+                <div class="mb-3">
+                    <label for="id_last_name" class="form-label">Sobrenome:</label>
+                    {{ form.last_name }}
+                    {% for error in form.last_name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Campo: email -->
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">Email:</label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Campo: password1 -->
+                <div class="mb-3">
+                    <label for="id_password1" class="form-label">Senha:</label>
+                    {{ form.password1 }}
+                    {% for error in form.password1.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Campo: password2 -->
+                <div class="mb-3">
+                    <label for="id_password2" class="form-label">Confirmar Senha:</label>
+                    {{ form.password2 }}
+                    {% for error in form.password2.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Botão de Registro -->
+                <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                
+                <!-- Link para login -->
+                <div class="mt-3 text-center">
+                    <span>Já tem conta? 
+                        <a href="{% url 'login' %}">Faça login</a>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

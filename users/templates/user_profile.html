@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- COLUNA ESQUERDA: INFORMAÇÕES DO USUÁRIO -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow">
+                <div class="card-body text-center">
+
+                    {% if user.foto and user.foto.url %}
+                    <img src="{{ user.foto.url }}" alt="Foto do usuário" class="rounded-circle"
+                        style="width: 120px; height: 120px; object-fit: cover;" />
+                    {% else %}
+                    <img src="/media/fotos_usuarios/avatar.png" alt="Foto padrão" class="rounded-circle"
+                        style="width: 120px; height: 120px; object-fit: cover;" />
+                    {% endif %}
+
+                    <h5 class="card-title mb-1">{{ user.get_full_name|capfirst }}</h5>
+                    
+                    <!-- Exemplo de "último acesso há X min" -->
+                    <p class="text-muted">
+                        último acesso há 
+                        {% if user.last_login %}
+                           {{ user.last_login|timesince }} atrás
+                        {% else %}
+                           n/d
+                        {% endif %}
+                    </p>
+                    
+                    <hr/>
+
+                    <!-- Informações básicas: data de cadastro, cidade, estado -->
+                    <p>
+                        <i class="fas fa-calendar-check me-1"></i> 
+                        Na Necessito desde {{ user.date_joined|date:"Y" }}<br/>
+                        <i class="fas fa-map-marker-alt me-1"></i> 
+                        {{ user.cidade }}, {{ user.estado }}
+                    </p>
+
+                    <!-- "Nível de cadastro" (exemplo de progress bar) -->
+                    <h6 class="mt-4">Nível de cadastro</h6>
+                    <div class="progress" style="height: 6px;">
+                        <!-- Ajuste width para representar % de completude -->
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: 70%;" aria-valuenow="70" 
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        (Ex.: E-mail verificado, Telefone verificado, Facebook etc.)
+                    </small>
+
+                    <!-- Botão "Quero uma loja profissional" -->
+                    <a href="#" class="btn btn-warning w-100 mt-3" style="font-weight: 500;">
+                        Perfil Necessito Profissional
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: HISTÓRICO E ANÚNCIOS -->
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Histórico 
+                    <!-- ícone de info (opcional) -->
+                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
+                       title="Informações sobre os últimos anúncios publicados"></i>
+                </h4>
+            </div>
+            
+            <!-- Card com estatísticas de anúncios -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">
+                        {{ total_anuncios_6meses|default:0 }} anúncios
+                    </h5>
+                    <p class="card-text text-muted mb-0">
+                        Publicados nos últimos 180 dias
+                    </p>
+                </div>
+            </div>
+
+            <!-- Título: Anúncios do vendedor -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Anúncios do vendedor</h5>
+                <small class="text-muted">
+                    {{ anuncios_count|default:0 }} de {{ total_anuncios_6meses|default:0 }} publicados
+                </small>
+            </div>
+
+            <!-- Barra de busca e filtros -->
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Ex: Apartamento 2 quartos" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option>Categoria</option>
+                        <!-- Preencher categorias dinamicamente -->
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option>Localização</option>
+                        <!-- Preencher localizações dinamicamente -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ordenar por -->
+            <div class="d-flex align-items-center mb-3">
+                <label class="me-2 text-muted">Ordenar por</label>
+                <select class="form-select w-auto">
+                    <option>Mais recentes</option>
+                    <option>Mais antigos</option>
+                </select>
+            </div>
+
+            <!-- Se não tiver anúncios -->
+            {% if anuncios|length == 0 %}
+            <div class="card card-body text-center border-0">
+                <!-- Ícone de placeholder -->
+                <!-- <img src="https://via.placeholder.com/80x80.png?text=NoAds"  -->
+                     <!-- alt="Sem anúncios" class="mb-3" /> -->
+                <p class="mb-0">Este vendedor ainda não possui anúncios publicados.</p>
+            </div>
+            {% else %}
+            <!-- Se tiver anúncios, listamos cada um -->
+            {% for anuncio in anuncios %}
+            <div class="card mb-3 shadow-sm">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <!-- Imagem do anúncio (caso exista) -->
+                        {% if anuncio.imagem_principal %}
+                        <img src="{{ anuncio.imagem_principal.url }}" 
+                             class="img-fluid rounded-start" alt="{{ anuncio.titulo }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/400x300.png?text=Anúncio" 
+                             class="img-fluid rounded-start" alt="{{ anuncio.titulo }}">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                            <p class="card-text text-muted">
+                                {{ anuncio.descricao|truncatechars:80 }}
+                            </p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    Publicado em {{ anuncio.data_criacao|date:"d/m/Y" }}
+                                </small>
+                            </p>
+                            <a href="#" class="btn btn-primary btn-sm">
+                                Ver detalhes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+<header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="font-size: 14px;">
+        <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}" >
+            <i class="fas fa-store"></i> Necessito.br
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="font-size: 14px;">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav" style="font-size: 14px;">
+            <ul class="navbar-nav ms-auto" style="font-size: 14px;">
+            {% if user.is_authenticated %}
+                <!-- Botão do Usuário -->
+                 
+                <li class="nav-item dropdown" style="font-size: 14px;">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                     Olá, {{ user.first_name|capfirst }}!
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="userDropdown" style="font-size: 14px;">
+                    <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}" style="font-size: 14px;"><i class="fas fa-user"></i> Minha Conta</a></li>
+                    <li><a class="dropdown-item" href="{% url 'necessidade_list' %}" style="font-size: 14px;"><i class="fas fa-clipboard-list"></i> Meus Anúncios</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}" style="font-size: 14px;"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+                    </ul>
+                </li>
+                <!-- Botão "Anunciar grátis" -->
+                <li class="nav-item me-3" style="font-size: 14px;">
+                <a href="{% url 'necessidade_create' %}" class="btn btn-primary text-white fw-regular px-4 py-2" style="border-radius: 20px; font-size: 14px;">
+                    <i class="fas fa-bullhorn"></i> Anunciar grátis
+                </a>
+                </li>
+                {% else %}
+                <!-- Links de Login e Registro -->
+                <li class="nav-item" style="font-size: 14px;">
+                <a class="nav-link" href="{% url 'login' %}" style="font-size: 14px;"><i class="fas fa-sign-in-alt"></i> Login</a>
+                </li>
+                <li class="nav-item" style="font-size: 14px;">
+                <a class="nav-link" href="{% url 'register' %}" style="font-size: 14px;"><i class="fas fa-user-plus"></i> Registrar</a>
+                </li>
+            {% endif %}
+            <form style="font-size: 14px;">
+                <div class="input-group">
+                <input type="text" class="form-control" placeholder="O que você procura?" style="font-size: 14px;">
+                <button class="btn btn-primary" type="submit" style="font-size: 14px;">Buscar</button>
+                </div>
+            </form>
+            </ul>
+        </div>
+        </div>
+    </nav>
+    
+</header>

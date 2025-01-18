@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="display-4">Editar Anúncio</h3>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" class="form" id="ad-form">
+        {% csrf_token %}
+        <!-- Mensagens de erro ou sucesso (caso use django messages) -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- CATEGORIA -->
+        <div class="mb-3">
+          <label for="id_categoria" class="form-label">
+            {{ form.categoria.label }}
+          </label>
+          {{ form.categoria }}
+        </div>
+
+        <!-- SUBCATEGORIA (via AJAX) -->
+        <div class="mb-3">
+          <label for="id_subcategoria" class="form-label">
+            {{ form.subcategoria.label }}
+          </label>
+          {{ form.subcategoria }}
+        </div>
+
+        <!-- TÍTULO -->
+        <div class="mb-3">
+          <label for="id_titulo" class="form-label">{{ form.titulo.label }}</label>
+          {{ form.titulo }}
+        </div>
+
+        <!-- DESCRIÇÃO -->
+        <div class="mb-3">
+          <label for="id_descricao" class="form-label">{{ form.descricao.label }}</label>
+          {{ form.descricao }}
+        </div>
+
+        <!-- QUANTIDADE -->
+        <div class="mb-3">
+          <label for="id_quantidade" class="form-label">{{ form.quantidade.label }}</label>
+          {{ form.quantidade }}
+        </div>
+
+        <!-- MEDIR NO LOCAL -->
+        <div class="mb-3 form-check">
+          {{ form.medir_no_local }}
+          <label for="id_medir_no_local" class="form-check-label">
+            {{ form.medir_no_local.label }}
+          </label>
+        </div>
+
+        <!-- UNIDADE -->
+        <div class="mb-3">
+          <label for="id_unidade" class="form-label">{{ form.unidade.label }}</label>
+          {{ form.unidade }}
+        </div>
+
+        <!-- MARCA -->
+        <div class="mb-3">
+          <label for="id_marca" class="form-label">{{ form.marca.label }}</label>
+          {{ form.marca }}
+        </div>
+
+        <!-- TIPO -->
+        <div class="mb-3">
+          <label for="id_tipo" class="form-label">{{ form.tipo.label }}</label>
+          {{ form.tipo }}
+        </div>
+
+        <!-- BITOLA -->
+        <div class="mb-3">
+          <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
+          {{ form.bitola }}
+        </div>
+
+        <!-- COMPRIMENTO -->
+        <div class="mb-3">
+          <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
+          {{ form.compr }}
+        </div>
+
+        <!-- PESO -->
+        <div class="mb-3">
+          <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
+          {{ form.peso }}
+        </div>
+
+        <!-- ALTURA -->
+        <div class="mb-3">
+          <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
+          {{ form.altura }}
+        </div>
+
+        <!-- STATUS -->
+        <div class="mb-3">
+          <label for="id_status" class="form-label">{{ form.status.label }}</label>
+          {{ form.status }}
+        </div>
+
+        <!-- BOTÃO SUBMIT -->
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Botão de Cancelar/Voltar -->
+  <!-- Se quiser voltar para o detalhe, use object.pk ou form.instance.pk -->
+  <a href="{% url 'necessidade_detail' object.pk %}" class="btn btn-secondary mt-3">
+    Cancelar e Voltar para o Detalhe do Anúncio
+  </a>
+</div>
+
+<!-- SCRIPT AJAX PARA PREENCHER SUBCATEGORIAS -->
+<script>
+  (function() {
+    const categoriaSelect = document.getElementById('id_categoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
+
+    categoriaSelect.addEventListener('change', function() {
+      const catId = this.value;
+      if (!catId) {
+        subcategoriaSelect.innerHTML = '<option value="">---</option>';
+        return;
+      }
+
+      const url = `/categorias/${catId}/subcats-json/`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          subcategoriaSelect.innerHTML = '';
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = 'Selecione a Subcategoria';
+          subcategoriaSelect.appendChild(defaultOption);
+
+          data.subcategorias.forEach((sub) => {
+            let opt = document.createElement('option');
+            opt.value = sub.id;
+            opt.textContent = sub.nome;
+            subcategoriaSelect.appendChild(opt);
+          });
+        })
+        .catch(error => {
+          console.error('Erro ao buscar subcategorias:', error);
+        });
+    });
+  })();
+</script>
+{% endblock %}

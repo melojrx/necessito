@@ -11,14 +11,57 @@
             <p><strong>Publicado em:</strong> {{ necessidade.data_criacao }}</p>
             <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
             <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
-            <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
             <p><strong>Quantidade:</strong> {{ necessidade.quantidade }} </p>
             <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
+            <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
             {% if user == necessidade.cliente %}
                 <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
                 <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
-            {% endif %}    
+            {% endif %}  
+            <hr>
+            <h3 class="mb-4">Localização</h3>
+            <div class="d-flex justify-content-around">
+                <p><strong>CEP:</strong> {{necessidade.cliente.cep}}</p>
+                <p><strong>Cidade:</strong> {{necessidade.cliente.cidade}}</p>
+                <p><strong>Bairro:</strong> {{necessidade.cliente.bairro}}</p>
+            </div>
+            <hr>
+            <h3>Orçamentos Recebidos</h3>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Fornecedor</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                        <th>Anexo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for orcamento in necessidade.orcamentos.all %}
+                    <tr>
+                        <td>{{ orcamento.fornecedor.get_full_name }}</td>
+                        <td>R$ {{ orcamento.valor }}</td>
+                        <td>{{ orcamento.status|capfirst }}</td>
+                        <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if orcamento.arquivo_anexo %}
+                            <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-file-download me-2"></i> Baixar
+                            </a>
+                            {% else %}
+                            <span class="badge bg-danger">Sem anexo</span>
+                            {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum orçamento recebido ainda.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        
 
         <!-- Coluna Direita: Cards -->
         <div class="col-md-4">
@@ -29,11 +72,16 @@
                     <p class="card-text">{{ necessidade.categoria.nome }}</p>
                     <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
                     <hr>
-                    <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>Telefone</h5>
-                    <p class="card-text">{{ necessidade.cliente.telefone }}</p>
-                    <a href="#" class="btn btn-primary w-100">
-                        <i class="fas fa-comments me-2"></i> Chat
-                    </a>
+                    <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}</h5>
+                    
+                    <div class="d-flex justify-content-around mt-3">
+                        <a href="#" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="Iniciar uma conversa via chat">
+                            <i class="fas fa-comments"></i> Chat
+                        </a>
+                        <a href="{% url 'submeter_orcamento' necessidade.pk %}" class="btn btn-warning" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="Enviar orçamento para este anúncio">
+                            <i class="fas fa-folder-plus"></i> Submeter Orçamento
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -53,5 +101,28 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializa os popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            var popover = new bootstrap.Popover(popoverTriggerEl);
+
+            // Adiciona eventos para mostrar/ocultar o popover
+            popoverTriggerEl.addEventListener('mouseover', function () {
+                popover.show();
+            });
+            popoverTriggerEl.addEventListener('mouseout', function () {
+                popover.hide();
+            });
+
+            return popover;
+        });
+    });
+</script>
+
 {% endblock %}
+
+
+
 

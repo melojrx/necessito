@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from users.models import User
 from categories.models import Categoria, SubCategoria
 
@@ -24,6 +25,9 @@ class Necessidade(models.Model):
         ('cancelado', 'Cancelado'),
     ], default='ativo')
     data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    def get_absolute_url(self):
+        return reverse('necessidade_detail', args=[str(self.pk)])
 
     def __str__(self):
         return self.titulo

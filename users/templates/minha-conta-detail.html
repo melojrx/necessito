@@ -16,9 +16,7 @@
             <p><strong>Último Acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
             {% if user == request.user %}
                 <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-primary">Editar Conta</a>
-                <a href="{% url 'user_profile' user.pk %}" class="btn btn-secondary">
-                    <i class="fas fa-user me-2"></i> Ver Perfil Público
-                </a>
+                <a href="{% url 'user_profile' user.pk %}" class="btn btn-secondary">Ver Perfil Público</a>
             {% endif %}
         </div>
     </div>

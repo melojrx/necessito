@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
 from django.urls import reverse
@@ -6,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from ads.models import Necessidade
+from categories.models import Categoria
 from users.forms import CustomUserCreationForm, UserUpdateForm, UserLoginForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -74,22 +76,59 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         # Aqui, 'self.object' é o usuário atualizado
         return reverse('minha_conta_detail', kwargs={'pk': self.object.pk})
     
+import datetime
+from django.utils import timezone
+
 class UserProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'user_profile.html'
     context_object_name = 'user'
-    
-    def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            user = context['user']
-            
-            six_months_ago = timezone.now() - datetime.timedelta(days=180)
-            
-            # Filtra os anúncios criados depois de 'six_months_ago'
-            total_anuncios_6meses = Necessidade.objects.filter(
-                cliente=user,
-                data_criacao__gte=six_months_ago
-            ).count()
 
-            context['total_anuncios_6meses'] = total_anuncios_6meses
-            return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()  # Usuário do perfil
+        query_params = self.request.GET
+
+        # Filtro inicial de anúncios
+        anuncios = Necessidade.objects.filter(cliente=user)
+
+        # Filtros
+        search_query = query_params.get('search', '')
+        if search_query:
+            anuncios = anuncios.filter(descricao__icontains=search_query)
+
+        categoria_id = query_params.get('categoria')
+        if categoria_id:
+            anuncios = anuncios.filter(categoria_id=categoria_id)
+
+        cidade = query_params.get('cidade', '')
+        if cidade:
+            anuncios = anuncios.filter(cliente__cidade__icontains=cidade)
+
+        # Ordenação
+        order_by = query_params.get('order_by', '-data_criacao')  # Default: mais recentes
+        anuncios = anuncios.order_by(order_by)
+
+        # Total de anúncios nos últimos 180 dias
+        six_months_ago = timezone.now() - datetime.timedelta(days=180)
+        total_anuncios_6meses = Necessidade.objects.filter(
+            cliente=user,
+            data_criacao__gte=six_months_ago
+        ).count()
+
+        # Categorias e cidades disponíveis para os filtros
+        categorias_disponiveis = anuncios.values('categoria__id', 'categoria__nome').distinct()
+        cidades_disponiveis = anuncios.values('cliente__cidade').distinct()
+
+        context.update({
+            'anuncios': anuncios,
+            'categorias': categorias_disponiveis,
+            'cidades': cidades_disponiveis,
+            'total_anuncios_6meses': total_anuncios_6meses,
+            'search_query': search_query,
+            'categoria_id': categoria_id,
+            'cidade': cidade,
+            'order_by': order_by,
+        })
+        return context
+

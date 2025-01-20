@@ -27,14 +27,14 @@
             </div>
             <hr>
             <h3>Orçamentos Recebidos</h3>
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover table-bordered">
                 <thead>
                     <tr>
                         <th>Fornecedor</th>
                         <th>Valor</th>
                         <th>Status</th>
                         <th>Data</th>
-                        <th>Anexo</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,8 +46,8 @@
                         <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
                         <td>
                             {% if orcamento.arquivo_anexo %}
-                            <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary">
-                                <i class="fas fa-file-download me-2"></i> Baixar
+                            <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Baixar Anexo">
+                                <i class="fas fa-file-download" ></i> 
                             </a>
                             {% else %}
                             <span class="badge bg-danger">Sem anexo</span>
@@ -75,10 +75,10 @@
                     <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}</h5>
                     
                     <div class="d-flex justify-content-around mt-3">
-                        <a href="#" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="Iniciar uma conversa via chat">
+                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Iniciar Chat com o Anunciante">
                             <i class="fas fa-comments"></i> Chat
                         </a>
-                        <a href="{% url 'submeter_orcamento' necessidade.pk %}" class="btn btn-warning" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="Enviar orçamento para este anúncio">
+                        <a href="{% url 'submeter_orcamento' necessidade.pk %}" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Enviar orçamento para este anúncio">
                             <i class="fas fa-folder-plus"></i> Submeter Orçamento
                         </a>
                     </div>
@@ -101,7 +101,7 @@
         </div>
     </div>
 </div>
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Inicializa os popovers
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
@@ -119,7 +119,7 @@
             return popover;
         });
     });
-</script>
+</script> -->
 
 {% endblock %}
 

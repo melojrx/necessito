@@ -5,45 +5,63 @@
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">Meus Anúncios</h1>
-
-        <div class="row mb-5">
-            <div class="col-md-6">
-              <form method="get" action="{% url 'necessidade_list' %}">
-                <div class="input-group">
-                  <input type="text" class="form-control" name="search" placeholder="Buscar por descrição" value="{{ request.GET.search }}">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                  </button>
-                </div>
-              </form>
-            </div>
-           
-            <div class="col-md-6">
-              <a href="{% url 'necessidade_create' %}" class="btn btn-success float-end">
-                <i class="bi bi-plus"></i> Novo Anúncio
-              </a>
-            </div>
-            
-        </div>
-
-    <div class="row">
-        {% for necessidade in necessidades %}
-        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-            <div class="card h-100 shadow">
-                <div class="card-body">
-                    <h5 class="card-title">{{ necessidade.titulo }}</h5>
-                    <p class="card-text">{{ necessidade.descricao|truncatechars:100 }}</p>
-                </div>
-                <div class="card-footer d-flex justify-content-between">
-                    <a href="{% url 'necessidade_detail' necessidade.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
-                    <div>
-                        <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+    <div class="row align-items-center mb-4">
+      <!-- Formulário de busca -->
+      <div class="col-lg-8 col-md-8 col-sm-12">
+          <form method="get" action="{% url 'necessidade_list' %}">
+              <div class="row g-2">
+                  <!-- Campo de busca -->
+                  <div class="col-lg-5 col-md-6 col-sm-12">
+                      <div class="input-group">
+                          <input type="text" class="form-control" name="search" placeholder="Buscar por descrição" value="{{ request.GET.search }}">
+                      </div>
+                  </div>
+                  <!-- Campo de seleção de status -->
+                  <div class="col-lg-4 col-md-6 col-sm-12">
+                      <select class="form-select" name="status">
+                          <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
+                          <option value="ativo" {% if request.GET.status == 'ativo' %}selected{% endif %}>Ativo</option>
+                          <option value="em_andamento" {% if request.GET.status == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+                          <option value="finalizado" {% if request.GET.status == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                          <option value="cancelado" {% if request.GET.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                      </select>
+                  </div>
+                  <!-- Botão de buscar -->
+                  <div class="col-lg-3 col-md-12 col-sm-12">
+                      <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-search"></i> Buscar
+                      </button>
+                  </div>
+              </div>
+          </form>
+      </div>
+      <!-- Botão "Novo Anúncio" -->
+      <div class="col-lg-4 col-md-4 col-sm-12 text-end">
+          <a href="{% url 'necessidade_create' %}" class="btn btn-success">
+              <i class="bi bi-plus"></i> Novo Anúncio
+          </a>
+      </div>
+  </div>
+  
+        <div class="row">
+            {% for necessidade in necessidades %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ necessidade.titulo }}</h5>
+                        <p class="card-text">{{ necessidade.descricao|truncatechars:100 }}</p>
+                        <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
+                      </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{% url 'necessidade_detail' necessidade.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                        <div>
+                            <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 </div>
 {% endblock %}

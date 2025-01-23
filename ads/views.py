@@ -23,15 +23,18 @@ class NecessidadeListView(ListView):
     context_object_name = 'necessidades'
     
     def get_queryset(self):
-        # Filtra as necessidades pelo usuário logado e ordena por data
+        # Filtra as necessidades pelo cliente logado
         queryset = Necessidade.objects.filter(cliente=self.request.user).order_by('-data_criacao')
-    
-        # Obtém o parâmetro de busca da requisição (GET)
-        search_query = self.request.GET.get('search', None)
         
-        # Se houver um termo de busca, filtra o queryset pela descrição
+        # Aplica filtro de descrição, se fornecido
+        search_query = self.request.GET.get('search', None)
         if search_query:
             queryset = queryset.filter(descricao__icontains=search_query)
+        
+        # Aplica filtro de status, se fornecido
+        status_filter = self.request.GET.get('status', None)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
         
         return queryset
 

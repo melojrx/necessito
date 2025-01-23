@@ -14,9 +14,14 @@
         {% for categoria in categorias_populares %}
         <div class="col-lg-3 col-md-4 col-sm-6">
             <div class="card mb-4">
+                {% if categoria.imagem_local %}
+                <img src="{{ categoria.imagem_local.url }}" class="card-img-top" alt="{{ categoria.nome }}">
+                {% elif categoria.url_imagem_externa %}
+                <img src="{{ categoria.url_imagem_externa }}" class="card-img-top" alt="{{ categoria.nome }}">
+                {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ categoria.nome }}</h5>
-                    <p class="card-text">{{ categoria.descricao|truncatechars:50 }}</p>
+                    <!-- <p class="card-text">{{ categoria.descricao|truncatechars:50 }}</p> -->
 
                 </div>
             </div>

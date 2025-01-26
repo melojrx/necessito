@@ -26,6 +26,7 @@ class Orcamento(models.Model):
         ('rejeitado', 'Rejeitado'),
     ], default='pendente')
     data_criacao = models.DateTimeField(auto_now_add=True)
+    modificado_em = models.DateTimeField(blank=True, null=True, auto_now=True)
 
     def __str__(self):
         return f"Orçamento de {self.fornecedor.get_full_name()} para {self.anuncio.titulo}"

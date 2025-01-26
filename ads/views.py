@@ -42,13 +42,25 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     model = Necessidade
     template_name = 'necessidade_create.html'
     form_class = AdsForms
-    # fields = ['categoria', 'titulo', 'descricao', 'quantidade', 'unidade']
     success_url = reverse_lazy('home')
-    
+
     def form_valid(self, form):
         # Associa o usuário autenticado ao campo cliente
         form.instance.cliente = self.request.user
+        # Captura o IP do usuário
+        form.instance.ip_usuario = self.get_client_ip()
         return super().form_valid(form)
+
+    def get_client_ip(self):
+        """
+        Captura o IP do cliente a partir da requisição.
+        """
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = self.request.META.get('REMOTE_ADDR')
+        return ip
 
 class NecessidadeDetailView(DetailView):
     model = Necessidade

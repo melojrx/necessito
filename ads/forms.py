@@ -1,6 +1,6 @@
 from django import forms
 from ads.models import Necessidade
-from categories.models import Categoria, SubCategoria
+
 
 class AdsForms(forms.ModelForm):
     class Meta:
@@ -20,6 +20,7 @@ class AdsForms(forms.ModelForm):
             'peso',
             'altura',
             'status',
+            'duracao',  
         ]
         widgets = {
             'categoria': forms.Select(attrs={'class': 'form-control'}),
@@ -40,6 +41,10 @@ class AdsForms(forms.ModelForm):
             'altura': forms.NumberInput(attrs={'class': 'form-control'}),
 
             'status': forms.Select(attrs={'class': 'form-control'}),
+            'duracao': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex.: 7 dias, 3:00:00'
+            }),  # Widget para duracao
         }
         labels = {
             'categoria': 'Categoria',
@@ -56,11 +61,13 @@ class AdsForms(forms.ModelForm):
             'peso': 'Peso (Kg)',
             'altura': 'Altura (m)',
             'status': 'Status',
+            'duracao': 'Duração',  # Rótulo para duracao
         }
         help_texts = {
             'unidade': 'Ex.: m², unidades, kg',
             'bitola': 'Em milímetros (mm)',
-            'compr': 'Em metros (m)',
-            'peso': 'Em quilogramas (Kg)',
-            'altura': 'Em metros (m)',
+            'compr': 'Ex: metros (m)',
+            'peso': 'Ex: quilogramas (Kg)',
+            'altura': 'Ex: metros (m)',
+            'duracao': 'Informe a duração (Ex.: 7 dias, 3:00:00)',  # Ajuda para duracao
         }

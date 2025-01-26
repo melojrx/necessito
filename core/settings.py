@@ -130,3 +130,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/home'
 LOGOUT_REDIRECT_URL = '/'
+
+# Configurações relacionadas a proxies e balanceadores de carga
+USE_X_FORWARDED_HOST = True
+
+# Indica que o Django deve respeitar o cabeçalho X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

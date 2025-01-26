@@ -24,8 +24,10 @@ class Necessidade(models.Model):
         ('finalizado', 'Finalizado'),
         ('cancelado', 'Cancelado'),
     ], default='ativo')
+    ip_usuario = models.GenericIPAddressField(blank=True, null=True, help_text="Endereço IP do usuário que cadastrou o anúncio")
+    duracao = models.CharField(max_length=20, blank=True, null=True, help_text="Duração do serviço ou entrega (ex.: 7 dias, 3 horas)")
     data_criacao = models.DateTimeField(auto_now_add=True)
-    
+
     def get_absolute_url(self):
         return reverse('necessidade_detail', args=[str(self.pk)])
 

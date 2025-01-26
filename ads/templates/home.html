@@ -12,8 +12,8 @@
     <h2 class="mb-4">Categorias Populares</h2>
     <div class="row text-center">
         {% for categoria in categorias_populares %}
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card mb-4">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card">
                 {% if categoria.imagem_local %}
                 <img src="{{ categoria.imagem_local.url }}" class="card-img-top" alt="{{ categoria.nome }}">
                 {% elif categoria.url_imagem_externa %}
@@ -31,21 +31,45 @@
 
     <!-- Anúncios em Destaque -->
     <h2 class="mb-4 mt-5">Anúncios em Destaque</h2>
-    <div class="row">
+    <style>
+        .card {
+            display: flex;
+            flex-direction: column; /* Coloca os elementos em uma coluna */
+            justify-content: space-between; /* Espaço entre o título e o botão */
+            min-height: 100%; /* Todos os cards com a mesma altura */
+        }
+    
+        .card-body {
+            flex-grow: 1; /* Faz o corpo ocupar o espaço disponível */
+            display: flex;
+            flex-direction: column; /* Organiza o conteúdo na vertical */
+            justify-content: space-between; /* Distribui espaço entre os elementos */
+        }
+    
+        .card .btn {
+            margin-top: auto; /* Empurra o botão para o final do card */
+            align-self: flex-start; /* Opcional: Alinha o botão à esquerda */
+        }
+      </style>
+    <div class="row d-flex align-items-stretch">
         {% for anuncio in anuncios_populares %}
-        <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card mb-4">
+        <div class="col-lg-4 col-md-4 col-sm-6 d-flex mb-4">
+            <div class="card flex-fill">
                 <div class="card-body">
-                    <h5 class="card-title" >{{ anuncio.titulo }}</h5>
-                    <p class="card-text">{{ anuncio.descricao|truncatechars:50 }}</p>
+                    <h5 class="card-title">{{ anuncio.titulo }}</h5>
                     <p class="card-text">{{ anuncio.categoria }}</p>
                     <p class="card-text"><i class="fas fa-map-marker-alt"></i> {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}</p>
-                    <p class="card-text"> {{ anuncio.data_criacao }}</p>
-                    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary">Ver mais</a>
+                    <p class="card-text">{{ anuncio.data_criacao }}</p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary">Ver mais</a>
+                        {% if anuncio.duracao  %}
+                            <p class="badge text-bg-secondary">{{  anuncio.duracao }}</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
-    </div>
+    </div>    
 </div>
 {% endblock %}

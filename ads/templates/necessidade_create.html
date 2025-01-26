@@ -83,6 +83,7 @@
         <div class="mb-3">
           <label for="id_unidade" class="form-label">{{ form.unidade.label }}</label>
           {{ form.unidade }}
+          <small class="form-text text-muted">{{ form.unidade.help_text }}</small>
         </div>
 
         <!-- MARCA -->
@@ -101,25 +102,36 @@
         <div class="mb-3">
           <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
           {{ form.bitola }}
+          <small class="form-text text-muted">{{ form.bitola.help_text }}</small>
         </div>
 
         <!-- COMPRIMENTO -->
         <div class="mb-3">
           <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
           {{ form.compr }}
+          <small class="form-text text-muted">{{ form.compr.help_text }}</small>
         </div>
 
         <!-- PESO -->
         <div class="mb-3">
           <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
           {{ form.peso }}
+          <small class="form-text text-muted">{{ form.peso.help_text }}</small>
         </div>
 
         <!-- ALTURA -->
         <div class="mb-3">
           <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
           {{ form.altura }}
+          <small class="form-text text-muted">{{ form.altura.help_text }}</small>
         </div>
+
+        <!-- DURAÇÃO -->
+        <div class="mb-3">
+          {{ form.duracao.label_tag }}
+          {{ form.duracao }}
+          <small class="form-text text-muted">{{ form.duracao.help_text }}</small>
+      </div>
 
         <!-- STATUS -->
         <div class="mb-3">

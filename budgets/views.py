@@ -24,11 +24,18 @@ class SubmeterOrcamentoView(LoginRequiredMixin, CreateView):
         anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], status='ativo')
         form.instance.anuncio = anuncio
         form.instance.fornecedor = self.request.user
+
         # Replicar os campos do anúncio
         form.instance.descricao = anuncio.descricao
         form.instance.quantidade = anuncio.quantidade
         form.instance.unidade = anuncio.unidade
         form.instance.marca = anuncio.marca
+
+        # Alterar o status do anúncio para "em andamento"
+        if anuncio.status == 'ativo':
+            anuncio.status = 'em andamento'
+            anuncio.save(update_fields=['status'])  # Atualiza apenas o campo status
+
         messages.success(self.request, "Orçamento submetido com sucesso!")
         return super().form_valid(form)
 

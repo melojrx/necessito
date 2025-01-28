@@ -3,22 +3,90 @@
 {% block title %}Minha Conta{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-2">
+    <h3 class="display-7">Detalhes da Conta</h3>
     <div class="row">
-        <!-- Coluna Esquerda: Detalhes do Usuário -->
-        <div class="col-md-8 mb-2">
-            <h1>Detalhes da Conta</h1>
-            <p><strong>Nome:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Telefone:</strong> {{ user.telefone }}</p>
-            <p><strong>Endereço:</strong> {{ user.endereco }}</p>
-            <p><strong>Data de Cadastro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
-            <p><strong>Último Acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
-            {% if user == request.user %}
-                <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-primary">Editar Conta</a>
-                <a href="{% url 'user_profile' user.pk %}" class="btn btn-secondary">Ver Perfil Público</a>
-            {% endif %}
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Imagem no canto superior esquerdo -->
+                    <div class="d-flex align-items-start">
+                        <!-- Imagem do usuário -->
+                        <div class="me-3">
+                            {% if user.foto %}
+                            <img src="{{ user.foto.url }}" alt="Foto de {{ user.first_name }}" class="img-fluid rounded-circle" style="max-width: 200px;">
+                            {% else %}
+                            <img src="{{ MEDIA_URL }}fotos_usuarios/avatar.png" alt="Foto padrão" class="img-fluid rounded-circle" style="max-width: 200px;">
+                            {% endif %}
+                        </div>
+
+                        <!-- Detalhes do usuário -->
+                        <div>
+                            {% if user.first_name or user.last_name %}
+                            <p class="card-text"><strong>Nome:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                            {% endif %}
+
+                            {% if user.email %}
+                            <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
+                            {% endif %}
+
+                            {% if user.telefone %}
+                            <p class="card-text"><strong>Telefone:</strong> {{ user.telefone }}</p>
+                            {% endif %}
+
+                            {% if user.endereco %}
+                            <p class="card-text"><strong>Endereço:</strong> {{ user.endereco }}</p>
+                            {% endif %}
+
+                            {% if user.bairro %}
+                            <p class="card-text"><strong>Bairro:</strong> {{ user.bairro }}</p>
+                            {% endif %}
+
+                            {% if user.cep %}
+                            <p class="card-text"><strong>CEP:</strong> {{ user.cep }}</p>
+                            {% endif %}
+
+                            {% if user.cidade %}
+                            <p class="card-text"><strong>Cidade:</strong> {{ user.cidade }}</p>
+                            {% endif %}
+
+                            {% if user.estado %}
+                            <p class="card-text"><strong>Estado:</strong> {{ user.estado }}</p>
+                            {% endif %}
+
+                            {% if user.cpf %}
+                            <p class="card-text"><strong>CPF:</strong> {{ user.cpf }}</p>
+                            {% endif %}
+
+                            {% if user.cnpj %}
+                            <p class="card-text"><strong>CNPJ:</strong> {{ user.cnpj }}</p>
+                            {% endif %}
+
+                            {% if object.comprovante_endereco %}
+                            <p class="card-text">
+                                <strong>Comprovante de Endereço:</strong> 
+                                <a href="{{ object.comprovante_endereco.url }}" target="_blank" class="btn btn-link">Download</a>
+                            </p>
+                            {% endif %}
+
+                            {% if user.date_joined %}
+                            <p class="card-text"><strong>Data de Cadastro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                            {% endif %}
+
+                            {% if user.last_login %}
+                            <p class="card-text"><strong>Último Acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+
+                            {% if user == request.user %}
+                            <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-warning">Editar Conta</a>
+                            <a href="{% url 'user_profile' user.pk %}" class="btn btn-info">Ver Perfil Público</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Voltar para tela inicial</a>
 </div>
 {% endblock %}

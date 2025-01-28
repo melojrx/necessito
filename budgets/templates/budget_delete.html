@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Deletar Orçamento{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="display-7">Deletar Orçamento</h3>
+    <div class="card">
+        <div class="card-body">
+          <p class="card-text">Tem certeza de que deseja excluir seu orçamento para o anuncio <strong>{{ object.anuncio }}</strong> ?</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Excluir</button>
+            </form>
+            <a href="{% url 'budget_list' %}" class="btn btn-secondary mt-3">Cancelar e Voltar para a Lista de Orçamentos</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="display-7">Editar Orçamento</h3>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" class="form" enctype="multipart/form-data"> 
+        {% csrf_token %}
+        
+        <!-- Exibe mensagens de erro ou sucesso -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </form>
+
+      <!-- Botão de Cancelar/Voltar -->
+      <a href="{% url 'budget_detail' object.pk %}" class="btn btn-secondary mt-3">
+        Cancelar e Voltar para o Detalhe do Orçamento
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="display-7">Detalhes do Orçamento</h3>
+  <div class="card">
+    <div class="card-body">
+      {% if object.anuncio %}
+      <h4 class="card-title">Descrição: {{ object.anuncio }}</h4>
+      {% endif %}
+      
+      {% if object.status %}
+      <p class="card-text">Status: {{ object.status|capfirst }}</p>
+      {% endif %}
+      
+      {% if object.quantidade %}
+      <p class="card-text">Quantidade: {{ object.quantidade }}</p>
+      {% endif %}
+      
+      {% if object.valor %}
+      <p class="card-text">Valor: R$ {{ object.valor }}</p>
+      {% endif %}
+      
+      {% if object.unidade %}
+      <p class="card-text">Unidade: {{ object.unidade }}</p>
+      {% endif %}
+      
+      {% if object.marca %}
+      <p class="card-text">Marca: {{ object.marca }}</p>
+      {% endif %}
+      
+      {% if object.prazo_validade %}
+      <p class="card-text">Prazo de Validade: {{ object.prazo_validade }}</p>
+      {% endif %}
+      
+      {% if object.prazo_entrega %}
+      <p class="card-text">Prazo de Entrega: {{ object.prazo_entrega }}</p>
+      {% endif %}
+      
+      {% if object.data_criacao %}
+      <p class="card-text">Data de submissão: {{ object.data_criacao }}</p>
+      {% endif %}
+      
+      {% if object.observacao %}
+      <p class="card-text">Observações: {{ object.observacao }}</p>
+      {% endif %}
+      
+      {% if object.arquivo_anexo %}
+      <p class="card-text">
+        Arquivo Anexo: 
+        <a href="{{ object.arquivo_anexo.url }}" target="_blank" class="btn btn-link">
+          Download
+        </a>
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  <a href="{% url 'budget_list' %}" class="btn btn-secondary mt-3">Voltar para a Lista de Orçamentos</a>
+</div>
+{% endblock %}

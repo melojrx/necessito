@@ -18,11 +18,13 @@ class Necessidade(models.Model):
     compr = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Metros")
     peso = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Kilogramas")
     altura = models.FloatField(blank=True, default=0.0, help_text="Ex.: Metros")
+    # Status e Rastreamento.
     status = models.CharField(max_length=20, choices=[
-        ('ativo', 'Ativo'),
-        ('em_andamento', 'Em andamento'),
-        ('finalizado', 'Finalizado'),
-        ('cancelado', 'Cancelado'),
+        ('ativo', 'Ativo'), # Anúncio ativo e disponível para orçamentos
+        ('em_andamento', 'Em andamento'), # Anúncio com orçamento em andamento disparado após o aceite pelo anunciate.
+        ('em_atendimento', 'Em atendimento'), # Anúncio com orçamento aceito pelo anunciante e pelo fornecedor. 
+        ('finalizado', 'Finalizado'), # Após a entrega do serviço ou produto, o anúncio é finalizado manualmente pelo anunciante.
+        ('cancelado', 'Cancelado'), # Anúncio cancelado pelo anunciante.
     ], default='ativo')
     ip_usuario = models.GenericIPAddressField(blank=True, null=True, help_text="Endereço IP do usuário que cadastrou o anúncio")
     duracao = models.CharField(max_length=20, blank=True, null=True, help_text="Duração do serviço ou entrega (ex.: 7 dias, 3 horas)")

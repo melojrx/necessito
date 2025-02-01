@@ -15,9 +15,10 @@
           <div class="col-lg-4 col-md-6 col-sm-12">
             <select class="form-select" name="status">
               <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
-              <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>pendente</option>
-              <option value="aceito" {% if request.GET.status == 'aceito' %}selected{% endif %}>aceito</option>
-              <option value="refeitado" {% if request.GET.status == 'refeitado' %}selected{% endif %}>refeitado</option>
+              <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+              <option value="aguardando_aceite_fornecedor" {% if request.GET.status == 'aguardando_aceite_fornecedor' %}selected{% endif %}>Aguardando aceite do fornecedor</option>
+              <option value="aceito" {% if request.GET.status == 'aceito' %}selected{% endif %}>Aceito</option>
+              <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
             </select>
           </div>
           <div class="col-lg-3 col-md-12 col-sm-12">
@@ -36,11 +37,26 @@
         <div class="card-body">
             <h5 class="card-title">{{ orcamento.anuncio }}</h5>
             <p class="card-text">{{ orcamento.descricao|truncatechars:100 }}</p>
-            <span class="badge text-bg-warning">Status: {{ orcamento.status|capfirst}}</span>
+            <span class="badge 
+              {% if orcamento.status == 'pendente' %} text-bg-secondary
+              {% elif orcamento.status == 'aguardando_aceite_fornecedor' %} text-bg-warning
+              {% elif orcamento.status == 'aceito' %} text-bg-success
+              {% elif orcamento.status == 'rejeitado' %} text-bg-danger
+              {% endif %}">
+              Status: {{ orcamento.status|capfirst }}
+            </span>
           </div>
         <div class="card-footer d-flex justify-content-between">
             <a href="{% url 'budget_detail' orcamento.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
             <div>
+                {% if orcamento.status == 'aguardando_aceite_fornecedor' %}
+                <button class="btn btn-success btn-sm btn-aceitar-fornecedor"
+                  data-url="{% url 'aceitar_orcamento_fornecedor' orcamento.id %}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmarAceiteFornecedorModal">
+                Aceitar
+                </button>
+                {% endif %}
                 <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning btn-sm">Editar</a>
                 <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
             </div>
@@ -50,4 +66,56 @@
   {% endfor %}
   </div>
 </div> 
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmarAceiteFornecedorModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="modalLabel">Confirmar Aceite do Orçamento</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+              Você confirma o aceite deste orçamento? O anúncio entrará em atendimento.
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-success" id="confirmarAceiteFornecedorBtn">Aceitar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      let aceitarFornecedorUrl = null;
+
+      // Captura a URL ao abrir o modal
+      document.querySelectorAll('.btn-aceitar-fornecedor').forEach(btn => {
+          btn.addEventListener('click', function () {
+              aceitarFornecedorUrl = this.getAttribute('data-url');
+          });
+      });
+
+      // Envia requisição AJAX ao clicar no botão de confirmação
+      document.getElementById('confirmarAceiteFornecedorBtn').addEventListener('click', function () {
+          if (aceitarFornecedorUrl) {
+              fetch(aceitarFornecedorUrl, {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}',
+                      'Content-Type': 'application/json'
+                  },
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      location.reload();
+                  } else {
+                      alert('Erro ao aceitar orçamento: ' + (data.error || 'Tente novamente.'));
+                  }
+              });
+          }
+      });
+  });
+</script>
 {% endblock %}

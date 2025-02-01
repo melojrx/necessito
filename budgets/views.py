@@ -1,4 +1,6 @@
+from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
@@ -42,6 +44,76 @@ class SubmeterOrcamentoView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         # Redireciona de volta para os detalhes do anúncio
         return self.object.anuncio.get_absolute_url()
+
+class OrcamentoAceitarView(LoginRequiredMixin, View):
+    """ View para o anunciante aceitar um orçamento """
+    
+    def post(self, request, *args, **kwargs):
+        orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
+
+        # Verifica se o orçamento ainda está pendente
+        if orcamento.status != 'pendente':
+            return JsonResponse({'error': 'Este orçamento já foi processado e não pode mais ser aceito!'}, status=400)
+
+        # Verifica se o usuário logado é o dono do anúncio
+        if request.user != orcamento.anuncio.cliente:
+            return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
+
+        # Atualiza o status do orçamento e mantém o status do anúncio
+        orcamento.status = 'aguardando_aceite_fornecedor'
+        orcamento.save()
+
+        orcamento.anuncio.status = 'em_andamento'
+        orcamento.anuncio.save(update_fields=['status'])
+
+        messages.success(request, "Orçamento aceito com sucesso!")
+        return JsonResponse({'success': True, 'message': 'Orçamento aceito com sucesso!'}) 
+
+class OrcamentoFornecedorAceitarView(LoginRequiredMixin, View):
+    """ View para o fornecedor aceitar um orçamento """
+    
+    def post(self, request, *args, **kwargs):
+        orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
+
+        # Verifica se o usuário logado é o fornecedor do orçamento
+        if request.user != orcamento.fornecedor:
+            return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
+
+        # Atualiza o status do orçamento para "aceito"
+        orcamento.status = 'aceito'
+        orcamento.save()
+
+        # Atualiza o status do anúncio para "em_atendimento"
+        orcamento.anuncio.status = 'em_atendimento'
+        orcamento.anuncio.save(update_fields=['status'])
+
+        messages.success(request, "Orçamento aceito pelo fornecedor com sucesso!")
+        return JsonResponse({'success': True, 'message': 'Orçamento aceito com sucesso!'})
+
+class OrcamentoRejeitarView(LoginRequiredMixin, View):
+    """ View para o dono do anúncio rejeitar um orçamento """
+
+    def post(self, request, *args, **kwargs):
+        orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
+
+        # Verifica se o orçamento ainda está pendente
+        if orcamento.status != 'pendente':
+            return JsonResponse({'error': 'Este orçamento já foi processado e não pode mais ser rejeitado!'}, status=400)
+
+        # Verifica se o usuário logado é o dono do anúncio
+        if request.user != orcamento.anuncio.cliente:
+            return JsonResponse({'error': 'Você não tem permissão para rejeitar este orçamento!'}, status=403)
+
+        # Verifica se o anúncio está em andamento
+        if orcamento.anuncio.status != 'em_andamento':
+            return JsonResponse({'error': 'Você só pode rejeitar orçamentos enquanto o anúncio está em andamento!'}, status=400)
+
+        # Atualiza o status do orçamento para "rejeitado"
+        orcamento.status = 'rejeitado'
+        orcamento.save()
+
+        messages.success(request, "Orçamento rejeitado com sucesso!")
+        return JsonResponse({'success': True, 'message': 'Orçamento rejeitado com sucesso!'})
 
 class budgetListView(LoginRequiredMixin, ListView):
     model = Orcamento

@@ -15,9 +15,9 @@
             <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
             <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
             {% if user == necessidade.cliente %}
-                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
-                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
-            {% endif %}  
+            <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
+            <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
+            {% endif %}
             <hr>
             <h3 class="mb-4">Localização</h3>
             <div class="d-flex justify-content-around">
@@ -46,11 +46,57 @@
                         <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
                         <td>
                             {% if orcamento.arquivo_anexo %}
-                            <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Baixar Anexo">
-                                <i class="fas fa-file-download" ></i> 
+                            {% if user == necessidade.cliente or user == orcamento.fornecedor %}
+                            <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Baixar Anexo">
+                                <i class="fas fa-file-download"></i>
                             </a>
                             {% else %}
+                            <span class="badge bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Você não tem permissão para baixar este anexo">
+                                <i class="fas fa-lock"></i> Restrito
+                            </span>
+                            {% endif %}
+                            {% else %}
                             <span class="badge bg-danger">Sem anexo</span>
+                            {% endif %}
+
+                            {% if user == necessidade.cliente %}
+                            {% if orcamento.status == "pendente" %}
+                            <!-- Botão ativo para aceitar orçamento -->
+                            <button class="btn btn-success btn-aceitar"
+                                data-url="{% url 'aceitar_orcamento' orcamento.id %}" data-bs-toggle="modal"
+                                data-bs-target="#confirmarAceiteModal" title="Aceitar Orçamento">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            {% else %}
+                            <!-- Botão desabilitado com tooltip funcional -->
+                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Orçamento já processado. Não pode ser aceito.">
+                                <button class="btn btn-success" disabled>
+                                    <i class="fas fa-thumbs-up"></i>
+                                </button>
+                            </span>
+                            {% endif %}
+                            {% endif %}
+
+                            {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
+                            {% if orcamento.status == "pendente" %}
+                            <!-- Botão ativo para rejeitar orçamento -->
+                            <button class="btn btn-danger btn-rejeitar"
+                                data-url="{% url 'rejeitar_orcamento' orcamento.id %}" data-bs-toggle="modal"
+                                data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                            {% else %}
+                            <!-- Botão desabilitado com tooltip funcional -->
+                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Orçamento já processado. Não pode ser rejeitado.">
+                                <button class="btn btn-danger" disabled>
+                                    <i class="fas fa-thumbs-down"></i>
+                                </button>
+                            </span>
+                            {% endif %}
                             {% endif %}
                     </tr>
                     {% empty %}
@@ -61,7 +107,7 @@
                 </tbody>
             </table>
         </div>
-        
+
 
         <!-- Coluna Direita: Cards -->
         <div class="col-md-4">
@@ -73,16 +119,22 @@
                     <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
                     <hr>
                     <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}</h5>
-                    
+
                     <div class="d-flex justify-content-around mt-3">
-                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Iniciar Chat com o Anunciante">
-                            <i class="fas fa-comments"></i> 
+                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Iniciar Chat com o Anunciante">
+                            <i class="fas fa-comments"></i>
                         </a>
-                        <a href="{% url 'submeter_orcamento' necessidade.pk %}" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="top" title="Enviar orçamento para este anúncio">
-                            <i class="fas fa-folder-plus"></i> 
-                        </a>
-                        <a href="#" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Iniciar contato via WhatsApp">
-                            <i class="fab fa-whatsapp"></i> 
+                        <span data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="{% if necessidade.status != 'ativo' %}Este anúncio está {{ necessidade.status }}. Não é possível submeter orçamento.{% else %}Enviar orçamento para este anúncio{% endif %}">
+                            <a href="{% if necessidade.status == 'ativo' %}{% url 'submeter_orcamento' necessidade.pk %}{% else %}#{% endif %}"
+                                class="btn btn-warning {% if necessidade.status != 'ativo' %}disabled{% endif %}">
+                                <i class="fas fa-folder-plus"></i>
+                            </a>
+                        </span>
+                        <a href="#" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="Iniciar contato via WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
                         </a>
                     </div>
                 </div>
@@ -104,28 +156,112 @@
         </div>
     </div>
 </div>
-<!-- <script>
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmarAceiteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirmar Aceite do Orçamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja aceitar este orçamento?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarAceiteBtn">Aceitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal de Confirmação de Rejeição -->
+<div class="modal fade" id="confirmarRejeicaoModal" tabindex="-1" aria-labelledby="modalRejeicaoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRejeicaoLabel">Confirmar Rejeição do Orçamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja rejeitar este orçamento?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarRejeicaoBtn">Rejeitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Inicializa os popovers
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-            var popover = new bootstrap.Popover(popoverTriggerEl);
+        let aceitarUrl = null;
 
-            // Adiciona eventos para mostrar/ocultar o popover
-            popoverTriggerEl.addEventListener('mouseover', function () {
-                popover.show();
+        // Captura a URL ao abrir o modal
+        document.querySelectorAll('.btn-aceitar').forEach(btn => {
+            btn.addEventListener('click', function () {
+                aceitarUrl = this.getAttribute('data-url');
             });
-            popoverTriggerEl.addEventListener('mouseout', function () {
-                popover.hide();
-            });
+        });
 
-            return popover;
+        // Envia requisição AJAX ao clicar no botão de confirmação
+        document.getElementById('confirmarAceiteBtn').addEventListener('click', function () {
+            if (aceitarUrl) {
+                fetch(aceitarUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Erro ao aceitar orçamento: ' + (data.error || 'Tente novamente.'));
+                        }
+                    });
+            }
         });
     });
-</script> -->
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let rejeitarUrl = null;
+
+        // Captura a URL ao abrir o modal de rejeição
+        document.querySelectorAll('.btn-rejeitar').forEach(btn => {
+            btn.addEventListener('click', function () {
+                rejeitarUrl = this.getAttribute('data-url');
+            });
+        });
+
+        // Envia requisição AJAX ao clicar no botão de confirmação
+        document.getElementById('confirmarRejeicaoBtn').addEventListener('click', function () {
+            if (rejeitarUrl) {
+                fetch(rejeitarUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Erro ao rejeitar orçamento: ' + (data.error || 'Tente novamente.'));
+                        }
+                    });
+            }
+        });
+    });
+</script>
+
 
 {% endblock %}
-
-
-
-

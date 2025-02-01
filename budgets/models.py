@@ -19,11 +19,12 @@ class Orcamento(models.Model):
     arquivo_anexo = models.FileField(upload_to='orcamentos_anexos/', blank=True, null=True)
     observacao = models.TextField(blank=True, help_text="Comentários adicionais sobre o orçamento")
 
-    # Status e rastreamento
-    status = models.CharField(max_length=20, choices=[
-        ('pendente', 'Pendente'),
-        ('aceito', 'Aceito'),
-        ('rejeitado', 'Rejeitado'),
+    # Status e rastreamento. 
+    status = models.CharField(max_length=50, choices=[
+        ('pendente', 'Pendente'), # Aguardando aceite do anunciante
+        ('aguardando_aceite_fornecedor', 'Aguardando aceite do fornecedor'), # Aguardando aceite do fornecedor (disparado após aceite do anunciante)
+        ('aceito', 'Aceito'), # Orçamento aceito e em andamento (disparado após aceite do fornecedor)
+        ('rejeitado', 'Rejeitado'), # Orçamento rejeitado pelo anunciante
     ], default='pendente')
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(blank=True, null=True, auto_now=True)

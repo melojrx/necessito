@@ -18,6 +18,19 @@
             <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
             <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
             {% endif %}
+            {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
+            {% for orcamento in necessidade.orcamentos.all %}
+            {% if orcamento.status == 'aceito' %}
+            <button class="btn btn-primary btn-finalizar" data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+                data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Finalizar Anúncio">
+                <i class="fas fa-check-circle"></i> Finalizar Anúncio
+            </button>
+
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+
             <hr>
             <h3 class="mb-4">Localização</h3>
             <div class="d-flex justify-content-around">
@@ -83,21 +96,21 @@
                             {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
                             {% if orcamento.status == "pendente" %}
                             <!-- Botão ativo para rejeitar orçamento -->
-                            <button class="btn btn-danger btn-rejeitar"
-                                data-url="{% url 'rejeitar_orcamento' orcamento.id %}" data-bs-toggle="modal"
-                                data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
+                            <button class="btn btn-danger btn-rejeitar" data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
+                                data-bs-toggle="modal" data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
                                 <i class="fas fa-thumbs-down"></i>
                             </button>
                             {% else %}
                             <!-- Botão desabilitado com tooltip funcional -->
                             <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="Orçamento já processado. Não pode ser rejeitado.">
+                                title="Este orçamento já foi processado e não pode ser rejeitado.">
                                 <button class="btn btn-danger" disabled>
                                     <i class="fas fa-thumbs-down"></i>
                                 </button>
                             </span>
                             {% endif %}
                             {% endif %}
+
                     </tr>
                     {% empty %}
                     <tr>
@@ -125,13 +138,20 @@
                             title="Iniciar Chat com o Anunciante">
                             <i class="fas fa-comments"></i>
                         </a>
-                        <span data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="{% if necessidade.status != 'ativo' %}Este anúncio está {{ necessidade.status }}. Não é possível submeter orçamento.{% else %}Enviar orçamento para este anúncio{% endif %}">
-                            <a href="{% if necessidade.status == 'ativo' %}{% url 'submeter_orcamento' necessidade.pk %}{% else %}#{% endif %}"
-                                class="btn btn-warning {% if necessidade.status != 'ativo' %}disabled{% endif %}">
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
+                                     Você não pode submeter orçamento neste anúncio.
+                                     {% else %}
+                                     Enviar orçamento para este anúncio
+                                     {% endif %}">
+                            <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
+                                     {% url 'submeter_orcamento' necessidade.pk %}
+                                     {% else %}#{% endif %}"
+                                class="btn btn-warning 
+                                      {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}">
                                 <i class="fas fa-folder-plus"></i>
                             </a>
                         </span>
+
                         <a href="#" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
                             title="Iniciar contato via WhatsApp">
                             <i class="fab fa-whatsapp"></i>
@@ -193,8 +213,25 @@
         </div>
     </div>
 </div>
-
-
+<!-- Modal de Confirmação de Finalização do Anuncio -->
+<div class="modal fade" id="confirmarFinalizacaoModal" tabindex="-1" aria-labelledby="modalFinalizacaoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFinalizacaoLabel">Confirmar Finalização</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja finalizar este anúncio? Essa ação não poderá ser desfeita.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmarFinalizacaoBtn">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -262,6 +299,51 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let finalizarUrl = null;
 
+        // Captura a URL ao abrir o modal
+        document.querySelector('.btn-finalizar').addEventListener('click', function () {
+            finalizarUrl = this.getAttribute('data-url');
+        });
+
+        // Envia requisição AJAX ao clicar no botão de confirmação
+        document.getElementById('confirmarFinalizacaoBtn').addEventListener('click', function () {
+            if (finalizarUrl) {
+                fetch(finalizarUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Fecha o modal
+                            const modal = document.getElementById('confirmarFinalizacaoModal');
+                            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                            bootstrapModal.hide();
+
+                            // Exibe mensagem de sucesso
+                            alert(data.message);
+
+                            // Atualiza a página para refletir o novo status
+                            location.reload();
+                        } else {
+                            // Exibe o erro retornado
+                            alert('Erro ao finalizar anúncio: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro na requisição:', error);
+                        alert('Erro inesperado. Tente novamente.');
+                    });
+            }
+        });
+    });
+
+</script>
 
 {% endblock %}

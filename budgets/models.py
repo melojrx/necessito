@@ -22,7 +22,7 @@ class Orcamento(models.Model):
     # Status e rastreamento. 
     status = models.CharField(max_length=50, choices=[
         ('pendente', 'Pendente'), # Aguardando aceite do anunciante
-        ('aguardando_aceite_fornecedor', 'Aguardando aceite do fornecedor'), # Aguardando aceite do fornecedor (disparado após aceite do anunciante)
+        ('Aguardando aceite do fornecedor', 'Aguardando aceite do fornecedor'), # Aguardando aceite do fornecedor (disparado após aceite do anunciante)
         ('aceito', 'Aceito'), # Orçamento aceito e em andamento (disparado após aceite do fornecedor)
         ('rejeitado', 'Rejeitado'), # Orçamento rejeitado pelo anunciante
     ], default='pendente')

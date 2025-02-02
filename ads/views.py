@@ -1,4 +1,8 @@
+from pyexpat.errors import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
@@ -79,5 +83,33 @@ class NecessidadeDeleteView(DeleteView):
     model = Necessidade
     template_name = 'necessidade_delete.html'
     success_url = reverse_lazy('necessidade_list')
+
+class FinalizarAnuncioView(LoginRequiredMixin, View):
+    """ View para finalizar um anúncio """
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Obter o anúncio associado ao cliente logado
+            anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], cliente=request.user)
+
+            # Verificar se o status do anúncio é "em atendimento"
+            if anuncio.status != 'em_atendimento':
+                return JsonResponse({'success': False, 'error': 'O anúncio só pode ser finalizado quando está em atendimento.'}, status=400)
+
+            # Verificar se há pelo menos um orçamento com status "aceito"
+            orcamento_aceito = anuncio.orcamentos.filter(status='aceito').exists()
+            if not orcamento_aceito:
+                return JsonResponse({'success': False, 'error': 'Não há orçamentos aceitos para este anúncio.'}, status=400)
+
+            # Alterar o status do anúncio para "finalizado"
+            anuncio.status = 'finalizado'
+            anuncio.save(update_fields=['status'])
+
+            # Retornar resposta JSON indicando sucesso
+            return JsonResponse({'success': True, 'message': 'Anúncio finalizado com sucesso!'})
+
+        except Exception as e:
+            # Tratar erros inesperados
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 

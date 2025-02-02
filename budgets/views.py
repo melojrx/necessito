@@ -17,13 +17,13 @@ class SubmeterOrcamentoView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Obter o anúncio pelo ID passado na URL
-        anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], status='ativo')
+        anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], status__in=['ativo', 'em_andamento'])
         context['anuncio'] = anuncio
         return context
 
     def form_valid(self, form):
         # Obter o anúncio e vincular ao orçamento
-        anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], status='ativo')
+        anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], status__in=['ativo', 'em_andamento'])
         form.instance.anuncio = anuncio
         form.instance.fornecedor = self.request.user
 
@@ -33,9 +33,9 @@ class SubmeterOrcamentoView(LoginRequiredMixin, CreateView):
         form.instance.unidade = anuncio.unidade
         form.instance.marca = anuncio.marca
 
-        # Alterar o status do anúncio para "em andamento"
+        # Alterar o status do anúncio SOMENTE se ele ainda estiver "ativo"
         if anuncio.status == 'ativo':
-            anuncio.status = 'em andamento'
+            anuncio.status = 'em_andamento'
             anuncio.save(update_fields=['status'])  # Atualiza apenas o campo status
 
         messages.success(self.request, "Orçamento submetido com sucesso!")

@@ -1,55 +1,81 @@
 <header>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="font-size: 14px;">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}" >
-            <i class="fas fa-store"></i> Necessito.br
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" style="font-size: 14px;">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav" style="font-size: 14px;">
-            <ul class="navbar-nav ms-auto" style="font-size: 14px;">
-            {% if user.is_authenticated %}
-                <!-- Botão do Usuário -->
-                 
-                <li class="nav-item dropdown" style="font-size: 14px;">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                     Olá, {{ user.first_name|capfirst }}!
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="userDropdown" style="font-size: 14px;">
-                    <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}" style="font-size: 14px;"><i class="fas fa-user"></i> Minha Conta</a></li>
-                    <li><a class="dropdown-item" href="{% url 'necessidade_list' %}" style="font-size: 14px;"><i class="fas fa-bullhorn"></i> Meus Anúncios</a></li>
-                    <li><a class="dropdown-item" href="{% url 'budget_list' %}" style="font-size: 14px;"><i class="far fa-list-alt"></i></i> Meus Orçamentos</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{% url 'logout' %}" style="font-size: 14px;"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
-                    </ul>
-                </li>
-                <!-- Botão "Anunciar grátis" -->
-                <li class="nav-item me-3" style="font-size: 14px;">
-                <a href="{% url 'necessidade_create' %}" class="btn btn-primary text-white fw-regular px-4 py-2" style="border-radius: 20px; font-size: 14px;">
-                    <i class="fas fa-bullhorn"></i> Anunciar grátis
-                </a>
-                </li>
-                {% else %}
-                <!-- Links de Login e Registro -->
-                <li class="nav-item" style="font-size: 14px;">
-                <a class="nav-link" href="{% url 'login' %}" style="font-size: 14px;"><i class="fas fa-sign-in-alt"></i> Login</a>
-                </li>
-                <li class="nav-item" style="font-size: 14px;">
-                <a class="nav-link" href="{% url 'register' %}" style="font-size: 14px;"><i class="fas fa-user-plus"></i> Registrar</a>
-                </li>
-            {% endif %}
-            <form style="font-size: 14px;">
-                <div class="input-group">
-                <input type="text" class="form-control" placeholder="O que você procura?" style="font-size: 14px;">
-                <button class="btn btn-primary" type="submit" style="font-size: 14px;">Buscar</button>
-                </div>
-            </form>
-            </ul>
-        </div>
+            <!-- Logo -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-store"></i> Necessito.br
+            </a>
+
+            <!-- Botão do menu mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Menu principal -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+
+                    {% if user.is_authenticated %}
+                    <!-- Dropdown do Usuário -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Olá, {{ user.first_name|capfirst }}!
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}">
+                                    <i class="fas fa-user"></i> Minha Conta
+                                </a></li>
+                            <li><a class="dropdown-item" href="{% url 'necessidade_list' %}">
+                                    <i class="fas fa-bullhorn"></i> Meus Anúncios
+                                </a></li>
+                            <li><a class="dropdown-item" href="{% url 'budget_list' %}">
+                                    <i class="far fa-list-alt"></i> Meus Orçamentos
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> Sair
+                                </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Botão "Anunciar grátis" -->
+                    <li class="nav-item ms-lg-3">
+                        <a href="{% url 'necessidade_create' %}"
+                            class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center me-2"
+                            style="font-size: 14px; height: 45px; min-width: 180px; white-space: nowrap;">
+                            <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
+                        </a>
+                    </li>
+
+                    {% else %}
+                    <!-- Links de Login e Registro -->
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'login' %}" style="font-size: 14px; white-space: nowrap;">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'register' %}" style="font-size: 14px; white-space: nowrap;">
+                            <i class="fas fa-user-plus me-2"></i> Registrar
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Barra de Pesquisa -->
+                    <li class="nav-item w-100 mt-2 mt-lg-0">
+                        <form class="d-flex">
+                            <input type="text" class="form-control me-2" placeholder="O que você procura?">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
-    
 </header>

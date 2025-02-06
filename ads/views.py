@@ -17,8 +17,10 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         # Buscar as 4 últimas categorias
         context['categorias_populares'] = Categoria.objects.order_by('-id')[:5]
-        # Buscar os 3 últimos anúncios (necessidades)
-        context['anuncios_populares'] = Necessidade.objects.order_by('-id')[:4]
+        # Buscar os 3 últimos anúncios (necessidades), excluindo finalizados e cancelados
+        context['anuncios_populares'] = Necessidade.objects.exclude(
+            status__in=['finalizado', 'cancelado']
+        ).order_by('-id')[:4]
         return context
     
 class NecessidadeListView(ListView):

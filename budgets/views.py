@@ -105,7 +105,7 @@ class OrcamentoRejeitarView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Você não tem permissão para rejeitar este orçamento!'}, status=403)
 
         # Verifica se o anúncio está em andamento
-        if orcamento.anuncio.status != 'em_andamento':
+        if orcamento.anuncio.status == 'em_andamento' or 'Em andamento':
             return JsonResponse({'error': 'Você só pode rejeitar orçamentos enquanto o anúncio está em andamento!'}, status=400)
 
         # Atualiza o status do orçamento para "rejeitado"

@@ -15,7 +15,7 @@
                     <img src="{{ user.foto.url }}" alt="Foto do usuário" class="rounded-circle"
                         style="width: 120px; height: 120px; object-fit: cover;" />
                     {% else %}
-                    <img src="/media/fotos_usuarios/avatar.png" alt="Foto padrão" class="rounded-circle"
+                    <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle"
                         style="width: 120px; height: 120px; object-fit: cover;" />
                     {% endif %}
 
@@ -37,8 +37,10 @@
                     <p>
                         <i class="fas fa-calendar-check me-1"></i> 
                         Na Necessito desde {{ user.date_joined|date:"Y" }}<br/>
+                        {% if user.cidade and user.estado  %}
                         <i class="fas fa-map-marker-alt me-1"></i> 
                         {{ user.cidade }}, {{ user.estado }}
+                        {% endif %}
                     </p>
 
                     <!-- "Nível de cadastro" (exemplo de progress bar) -->

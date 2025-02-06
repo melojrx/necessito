@@ -93,7 +93,7 @@
                             {% endif %}
                             {% endif %}
 
-                            {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
+                            {% if user == necessidade.cliente and necessidade.status == "em_andamento" or "Em andamento" %}
                             {% if orcamento.status == "pendente" %}
                             <!-- Botão ativo para rejeitar orçamento -->
                             <button class="btn btn-danger btn-rejeitar" data-url="{% url 'rejeitar_orcamento' orcamento.id %}"

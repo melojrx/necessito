@@ -1,14 +1,17 @@
 from pyexpat.errors import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
 from ads.forms import AdsForms
+from rankings.forms import AvaliacaoForm
+from rankings.models import Avaliacao
 from .models import Necessidade
 from categories.models import Categoria
+
 
 class HomeView(TemplateView):
     template_name = 'home.html'  # Diretamente o nome do arquivo
@@ -22,27 +25,30 @@ class HomeView(TemplateView):
             status__in=['finalizado', 'cancelado']
         ).order_by('-id')[:4]
         return context
-    
+
+
 class NecessidadeListView(ListView):
     model = Necessidade
     template_name = 'necessidade_list.html'
     context_object_name = 'necessidades'
-    
+
     def get_queryset(self):
         # Filtra as necessidades pelo cliente logado
-        queryset = Necessidade.objects.filter(cliente=self.request.user).order_by('-data_criacao')
-        
+        queryset = Necessidade.objects.filter(
+            cliente=self.request.user).order_by('-data_criacao')
+
         # Aplica filtro de descrição, se fornecido
         search_query = self.request.GET.get('search', None)
         if search_query:
             queryset = queryset.filter(descricao__icontains=search_query)
-        
+
         # Aplica filtro de status, se fornecido
         status_filter = self.request.GET.get('status', None)
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        
+
         return queryset
+
 
 class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     model = Necessidade
@@ -68,11 +74,34 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
             ip = self.request.META.get('REMOTE_ADDR')
         return ip
 
+
 class NecessidadeDetailView(DetailView):
     model = Necessidade
     template_name = 'necessidade_detail.html'
     context_object_name = 'necessidade'
     success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona o formulário de avaliação e o fornecedor ao contexto para renderização no template.
+        """
+        context = super().get_context_data(**kwargs)
+        necessidade = self.get_object()
+
+        # Buscar o orçamento aceito relacionado ao anúncio
+        from budgets.models import Orcamento
+        orcamento_aceito = Orcamento.objects.filter(
+            anuncio=necessidade, status='aceito').first()
+
+        # Adicionar o fornecedor (se existir) ao contexto
+        context['fornecedor'] = orcamento_aceito.fornecedor if orcamento_aceito else None
+
+        # Adicionar o formulário de avaliação ao contexto
+        context['avaliacao_form'] = AvaliacaoForm(
+            user=self.request.user, anuncio=necessidade)
+
+        return context
+
 
 class NecessidadeUpdateView(UpdateView):
     model = Necessidade
@@ -81,10 +110,12 @@ class NecessidadeUpdateView(UpdateView):
     # fields = ['categoria', 'titulo', 'descricao', 'quantidade', 'unidade']
     success_url = reverse_lazy('necessidade_list')
 
+
 class NecessidadeDeleteView(DeleteView):
     model = Necessidade
     template_name = 'necessidade_delete.html'
     success_url = reverse_lazy('necessidade_list')
+
 
 class FinalizarAnuncioView(LoginRequiredMixin, View):
     """ View para finalizar um anúncio """
@@ -92,14 +123,16 @@ class FinalizarAnuncioView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             # Obter o anúncio associado ao cliente logado
-            anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'], cliente=request.user)
+            anuncio = get_object_or_404(
+                Necessidade, pk=self.kwargs['pk'], cliente=request.user)
 
             # Verificar se o status do anúncio é "em atendimento"
             if anuncio.status != 'em_atendimento':
                 return JsonResponse({'success': False, 'error': 'O anúncio só pode ser finalizado quando está em atendimento.'}, status=400)
 
             # Verificar se há pelo menos um orçamento com status "aceito"
-            orcamento_aceito = anuncio.orcamentos.filter(status='aceito').exists()
+            orcamento_aceito = anuncio.orcamentos.filter(
+                status='aceito').exists()
             if not orcamento_aceito:
                 return JsonResponse({'success': False, 'error': 'Não há orçamentos aceitos para este anúncio.'}, status=400)
 
@@ -113,5 +146,3 @@ class FinalizarAnuncioView(LoginRequiredMixin, View):
         except Exception as e:
             # Tratar erros inesperados
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-

@@ -4,109 +4,117 @@
 {% block title %}Minha Conta{% endblock %}
 
 {% block content %}
-<div class="container mt-2">
-    <h3 class="display-7">Detalhes da Conta</h3>
-    <div class="card mb-3">
-        <div class="row g-0">
-            <div class="col-md-4 d-flex justify-content-center align-items-center">
-                {% if user.foto %}
+<style>
+    .star-rating {
+        font-size: 1.2rem;
+        color: #ffd700; /* Cor das estrelas */
+    }
+    
+    .star-rating i {
+        margin-right: 2px;
+    }
+</style>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Minha Conta</h3>
+            {% if user == request.user %}
+            <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar Conta
+            </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Coluna da foto -->
+                <div class="col-md-4 text-center">
+                    {% if user.foto %}
                     <img src="{{ user.foto.url }}" alt="Foto de {{ user.first_name }}" 
-                        class="img-fluid rounded-circle" style="max-width: 200px;">
-                {% else %}
-                    <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" 
-                        class="img-fluid rounded-circle" style="max-width: 200px;">
-                {% endif %}
-            </div>
-            <div class="col-md 8">
-                <div class="card-body">
-                <!-- Detalhes do usuário -->
-                    <div>
-                        {% if user.first_name or user.last_name %}
-                        <p class="card-text"><strong>Nome:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-                        {% endif %}
+                        class="img-fluid rounded-circle mb-3 shadow" style="max-width: 200px;">
+                    {% else %}
+                    <img src="{% static 'images/default-user.png' %}" alt="Foto padrão" 
+                        class="img-fluid rounded-circle mb-3 shadow" style="max-width: 200px;">
+                    {% endif %}
+                </div>
 
-                        {% if user.email %}
-                        <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
-                        {% endif %}
-
-                        {% if user.telefone %}
-                        <p class="card-text"><strong>Telefone:</strong> {{ user.telefone }}</p>
-                        {% endif %}
-
-                        {% if user.endereco %}
-                        <p class="card-text"><strong>Endereço:</strong> {{ user.endereco }}</p>
-                        {% endif %}
-
-                        {% if user.bairro %}
-                        <p class="card-text"><strong>Bairro:</strong> {{ user.bairro }}</p>
-                        {% endif %}
-
-                        {% if user.cep %}
-                        <p class="card-text"><strong>CEP:</strong> {{ user.cep }}</p>
-                        {% endif %}
-
-                        {% if user.cidade %}
-                        <p class="card-text"><strong>Cidade:</strong> {{ user.cidade }}</p>
-                        {% endif %}
-
-                        {% if user.estado %}
-                        <p class="card-text"><strong>Estado:</strong> {{ user.estado }}</p>
-                        {% endif %}
-
-                        {% if user.cpf %}
-                        <p class="card-text"><strong>CPF:</strong> {{ user.cpf }}</p>
-                        {% endif %}
-
-                        {% if user.cnpj %}
-                        <p class="card-text"><strong>CNPJ:</strong> {{ user.cnpj }}</p>
-                        {% endif %}
-
-                        {% if object.comprovante_endereco %}
-                        <p class="card-text">
-                            <strong>Comprovante de Endereço:</strong> 
-                            <a href="{{ object.comprovante_endereco.url }}" target="_blank" class="btn btn-link">Download</a>
-                        </p>
-                        {% endif %}
-
-                        {% if user.date_joined %}
-                        <p class="card-text"><strong>Data de Cadastro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
-                        {% endif %}
-
-                        {% if user.last_login %}
-                        <p class="card-text"><strong>Último Acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
-                        {% endif %}
-
-                        <div class="mt-2 mb-3">
-                            <p class="card-text"><strong>Perfis do Usuário:</strong></p>
-                            <div>
-                                {% if user.is_client %}
-                                <span class="badge bg-primary me-1" style="font-size: 14px;" data-bs-toggle="tooltip" title="Este usuário pode criar anúncios">
-                                    <i class="fas fa-bullhorn"></i> Anunciante
-                                </span>
-                                {% endif %}
-                                {% if user.is_supplier %}
-                                <span class="badge bg-success me-1" style="font-size: 14px;" data-bs-toggle="tooltip" title="Este usuário pode fornecer produtos ou serviços">
-                                    <i class="fas fa-truck"></i> Fornecedor
-                                </span>
-                                {% endif %}
-                                {% if not user.is_client and not user.is_supplier %}
-                                <span class="badge bg-secondary" style="font-size: 14px;" data-bs-toggle="tooltip" title="Sem função definida">
-                                    <i class="fas fa-user"></i> Ainda não definido
-                                </span>
-                                {% endif %}
-                            </div>
+                <!-- Coluna de detalhes -->
+                <div class="col-md-8">
+                    <h4 class="text-primary">{{ user.first_name }} {{ user.last_name }}</h4>
+                    <!-- NOVA SEÇÃO: AVALIAÇÕES -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <!-- Ícones de Estrelas -->
+                        <div class="star-rating">
+                            {% for i in "12345"|make_list %}
+                                {% with i|add:"0" as current_star %}
+                                    {% if current_star <= media_estrelas %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        {% if current_star|add:"-0.5" <= media_estrelas %}
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endwith %}
+                            {% endfor %}
                         </div>
-                        
-
-                        {% if user == request.user %}
-                        <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-warning">Editar Conta</a>
-                        <a href="{% url 'user_profile' user.pk %}" class="btn btn-info">Ver Perfil Público</a>
-                        {% endif %}
+                        <!-- Texto da Média -->
+                        <span class="text-muted">
+                            {{ media_estrelas }} / 5 ({{ total_avaliacoes }} avaliações)
+                        </span>
                     </div>
+                    {% if user.is_client or user.is_supplier %}
+                    <p class="text-muted">
+                        {% if user.is_client %}
+                        <i class="fas fa-bullhorn text-primary"></i> Anunciante
+                        {% endif %}
+                        {% if user.is_supplier %}
+                        <i class="fas fa-truck text-success ms-2"></i> Fornecedor
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    <p><strong>Registrado desde:</strong> {{ user.date_joined|date:"F Y" }}</p>
+                    <p><strong>Último acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+
+                    <!-- Informações detalhadas -->
+                    <hr>
+                    <h5>Informações Pessoais</h5>
+                    <ul class="list-unstyled">
+                        {% if user.email %}
+                        <li><strong>Email:</strong> {{ user.email }}</li>
+                        {% endif %}
+                        {% if user.telefone %}
+                        <li><strong>Telefone:</strong> {{ user.telefone }}</li>
+                        {% endif %}
+                        {% if user.endereco %}
+                        <li><strong>Endereço:</strong> {{ user.endereco }}, {{ user.bairro }}, {{ user.cidade }} - {{ user.estado }}</li>
+                        {% endif %}
+                        {% if user.cep %}
+                        <li><strong>CEP:</strong> {{ user.cep }}</li>
+                        {% endif %}
+                        {% if user.cpf %}
+                        <li><strong>CPF:</strong> {{ user.cpf }}</li>
+                        {% endif %}
+                        {% if user.cnpj %}
+                        <li><strong>CNPJ:</strong> {{ user.cnpj }}</li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- Botões de Ação -->
+                    {% if user == request.user %}
+                    <div class="mt-3">
+                        <a href="{% url 'user_profile' user.pk %}" class="btn btn-info">
+                            <i class="fas fa-user"></i> Ver Perfil Público
+                        </a>
+                        <a href="{% url 'home' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar para tela inicial
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Voltar para tela inicial</a>
 </div>
 {% endblock %}

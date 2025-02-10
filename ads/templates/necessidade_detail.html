@@ -14,10 +14,33 @@
             <p><strong>Quantidade:</strong> {{ necessidade.quantidade }} </p>
             <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
             <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
-            {% if user == necessidade.cliente %}
-            <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-primary">Editar</a>
-            <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">Excluir</a>
-            {% endif %}
+            <div class="d-flex align-items-centermb-3">
+                {% if user == necessidade.cliente %}
+                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">Editar</a>
+                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">Excluir</a>
+                {% endif %}
+
+                <!-- Avaliação -->
+                {% if user == necessidade.cliente or user == fornecedor %}
+                <form action="{% url 'avaliar_negociacao' necessidade.pk %}" method="post" class="d-inline ms-auto">
+                    {% csrf_token %}
+                    <label for="estrelas" class="form-label me-2">Avalie este anúncio:</label>
+                    <select name="estrelas" id="estrelas" class="form-select form-select-sm d-inline-block"
+                        style="width: auto;" {% if not necessidade.status == "finalizado" %} disabled {% endif %}>
+                        <option value="5" {% if not necessidade.status == "finalizado" %} selected {% endif %}>★★★★★</option>
+                        <option value="4">★★★★</option>
+                        <option value="3">★★★</option>
+                        <option value="2">★★</option>
+                        <option value="1">★</option>
+                    </select>
+                    <button type="submit" class="btn btn-success btn-sm ms-2" {% if not necessidade.status == "finalizado" %}
+                        disabled {% endif %}>
+                        Enviar
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
             {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
             {% for orcamento in necessidade.orcamentos.all %}
             {% if orcamento.status == 'aceito' %}
@@ -26,7 +49,6 @@
                 data-bs-placement="top" title="Finalizar Anúncio">
                 <i class="fas fa-check-circle"></i> Finalizar Anúncio
             </button>
-
             {% endif %}
             {% endfor %}
             {% endif %}
@@ -34,9 +56,9 @@
             <hr>
             <h3 class="mb-4">Localização</h3>
             <div class="d-flex justify-content-around">
-                <p><strong>CEP:</strong> {{necessidade.cliente.cep}}</p>
-                <p><strong>Cidade:</strong> {{necessidade.cliente.cidade}}</p>
-                <p><strong>Bairro:</strong> {{necessidade.cliente.bairro}}</p>
+                <p><strong>CEP:</strong> {{ necessidade.cliente.cep }}</p>
+                <p><strong>Cidade:</strong> {{ necessidade.cliente.cidade }}</p>
+                <p><strong>Bairro:</strong> {{ necessidade.cliente.bairro }}</p>
             </div>
             <hr>
             <h3>Orçamentos Recebidos</h3>
@@ -111,6 +133,7 @@
                             {% endif %}
                             {% endif %}
 
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -120,7 +143,6 @@
                 </tbody>
             </table>
         </div>
-
 
         <!-- Coluna Direita: Cards -->
         <div class="col-md-4">
@@ -176,6 +198,7 @@
         </div>
     </div>
 </div>
+
 <!-- Modal de Confirmação -->
 <div class="modal fade" id="confirmarAceiteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">

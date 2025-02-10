@@ -5,14 +5,32 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from ads.models import Necessidade
-from categories.models import Categoria
+from rankings.models import Avaliacao
 from users.forms import CustomUserCreationForm, UserUpdateForm, UserLoginForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, UpdateView
+from django.db.models import Avg
+
+def minha_conta(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    
+    # Calcular média e total de avaliações
+    avaliacoes = Avaliacao.objects.filter(avaliado=user)
+    total_avaliacoes = avaliacoes.count()
+    media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
+    media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
+    
+    context = {
+        'user': user,
+        'media_estrelas': media_estrelas,
+        'total_avaliacoes': total_avaliacoes,
+    }
+    
+    return render(request, 'minha-conta-detail.html', context)
 
 
 @csrf_exempt

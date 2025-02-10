@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "ads",
     "categories",
     "budgets",
+    "rankings",
 ]
 
 MIDDLEWARE = [

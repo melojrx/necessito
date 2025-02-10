@@ -11,6 +11,7 @@ urlpatterns = [
     path("users/", include('users.urls')),
     path('categorias/', include('categories.urls')),
     path('orcamentos/', include('budgets.urls')),
+    path('rankings/', include('rankings.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

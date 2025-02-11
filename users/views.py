@@ -15,23 +15,6 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, UpdateView
 from django.db.models import Avg
 
-def minha_conta(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
-    
-    # Calcular média e total de avaliações
-    avaliacoes = Avaliacao.objects.filter(avaliado=user)
-    total_avaliacoes = avaliacoes.count()
-    media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
-    media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
-    
-    context = {
-        'user': user,
-        'media_estrelas': media_estrelas,
-        'total_avaliacoes': total_avaliacoes,
-    }
-    
-    return render(request, 'minha-conta-detail.html', context)
-
 
 @csrf_exempt
 def login_view(request):
@@ -78,10 +61,27 @@ class UserDetailView(DetailView):
     form_class = UserUpdateForm
     template_name = 'minha-conta-detail.html'
     success_url = reverse_lazy('minha_conta_detail')
+    context_object_name = 'user'
     
     def get_object(self, queryset=None):
         # Retorna o user que está logado
         return self.request.user
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user = self.get_object()  # Obtém o usuário da CBV
+        avaliacoes = Avaliacao.objects.filter(avaliado=user)
+
+        total_avaliacoes = avaliacoes.count()
+        media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
+        media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
+
+        # Adicionando os valores ao contexto do template
+        context['media_estrelas'] = media_estrelas
+        context['total_avaliacoes'] = total_avaliacoes
+
+        return context
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
     model = User
@@ -106,6 +106,12 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         user = self.get_object()  # Usuário do perfil
         query_params = self.request.GET
+        
+        avaliacoes = Avaliacao.objects.filter(avaliado=user)
+        
+        total_avaliacoes = avaliacoes.count()
+        media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
+        media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
 
         # Filtro inicial de anúncios
         anuncios = Necessidade.objects.filter(cliente=user)
@@ -147,6 +153,8 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
             'categoria_id': categoria_id,
             'cidade': cidade,
             'order_by': order_by,
+            'media_estrelas': media_estrelas,
+            'total_avaliacoes': total_avaliacoes,
         })
         return context
 

@@ -6,12 +6,17 @@
 {% block content %}
 <style>
     .star-rating {
+        display: flex;
+        gap: 3px;
         font-size: 1.2rem;
-        color: #ffd700; /* Cor das estrelas */
     }
     
-    .star-rating i {
-        margin-right: 2px;
+    .star-rating .fas.fa-star {
+        color: #ffd700; /* Amarelo */
+    }
+    
+    .star-rating .far.fa-star {
+        color: #e0e0e0; /* Cinza claro */
     }
 </style>
 <div class="container mt-5">
@@ -29,11 +34,11 @@
                 <!-- Coluna da foto -->
                 <div class="col-md-4 text-center">
                     {% if user.foto %}
-                    <img src="{{ user.foto.url }}" alt="Foto de {{ user.first_name }}" 
+                    <img src="{{ user.foto.url }}" alt="Foto de {{ user.first_name }}"
                         class="img-fluid rounded-circle mb-3 shadow" style="max-width: 200px;">
                     {% else %}
-                    <img src="{% static 'images/default-user.png' %}" alt="Foto padrão" 
-                        class="img-fluid rounded-circle mb-3 shadow" style="max-width: 200px;">
+                    <img src="{% static 'img/R.jpg' %}" alt="Foto padrão" class="img-fluid rounded-circle mb-3 shadow"
+                        style="max-width: 200px;">
                     {% endif %}
                 </div>
 
@@ -41,26 +46,19 @@
                 <div class="col-md-8">
                     <h4 class="text-primary">{{ user.first_name }} {{ user.last_name }}</h4>
                     <!-- NOVA SEÇÃO: AVALIAÇÕES -->
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <!-- Ícones de Estrelas -->
+                    <div class="d-flex align-items-center gap-2 mb-3">
                         <div class="star-rating">
-                            {% for i in "12345"|make_list %}
-                                {% with i|add:"0" as current_star %}
-                                    {% if current_star <= media_estrelas %}
-                                        <i class="fas fa-star text-warning"></i>
-                                    {% else %}
-                                        {% if current_star|add:"-0.5" <= media_estrelas %}
-                                            <i class="fas fa-star-half-alt text-warning"></i>
-                                        {% else %}
-                                            <i class="far fa-star text-warning"></i>
-                                        {% endif %}
-                                    {% endif %}
+                            {% for i in "12345" %}
+                            {% with forloop.counter as current_star %}
+                            {% if current_star <= media_estrelas %} <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                <i class="far fa-star text-warning"></i>
+                                {% endif %}
                                 {% endwith %}
-                            {% endfor %}
+                                {% endfor %}
                         </div>
-                        <!-- Texto da Média -->
                         <span class="text-muted">
-                            {{ media_estrelas }} / 5 ({{ total_avaliacoes }} avaliações)
+                            {{ media_estrelas|floatformat:1 }} / 5 ({{ total_avaliacoes }} avaliações)
                         </span>
                     </div>
                     {% if user.is_client or user.is_supplier %}
@@ -73,7 +71,7 @@
                         {% endif %}
                     </p>
                     {% endif %}
-                    
+
                     <p><strong>Registrado desde:</strong> {{ user.date_joined|date:"F Y" }}</p>
                     <p><strong>Último acesso:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
 
@@ -88,7 +86,8 @@
                         <li><strong>Telefone:</strong> {{ user.telefone }}</li>
                         {% endif %}
                         {% if user.endereco %}
-                        <li><strong>Endereço:</strong> {{ user.endereco }}, {{ user.bairro }}, {{ user.cidade }} - {{ user.estado }}</li>
+                        <li><strong>Endereço:</strong> {{ user.endereco }}, {{ user.bairro }}, {{ user.cidade }} -
+                            {{ user.estado }}</li>
                         {% endif %}
                         {% if user.cep %}
                         <li><strong>CEP:</strong> {{ user.cep }}</li>

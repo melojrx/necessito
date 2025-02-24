@@ -22,6 +22,7 @@
                           <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
                           <option value="ativo" {% if request.GET.status == 'ativo' %}selected{% endif %}>Ativo</option>
                           <option value="em_andamento" {% if request.GET.status == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+                          <option value="em_atendimento" {% if request.GET.status == 'em_atendimento' %}selected{% endif %}>Em atendimento</option>
                           <option value="finalizado" {% if request.GET.status == 'finalizado' %}selected{% endif %}>Finalizado</option>
                           <option value="cancelado" {% if request.GET.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
                       </select>
@@ -50,8 +51,24 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ necessidade.titulo }}</h5>
                     <p class="card-text">{{ necessidade.descricao|truncatechars:100 }}</p>
-                    <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
-                    </div>
+                    {% with status=necessidade.status %}
+                      <span class="badge 
+                          {% if status == 'ativo' %}
+                            text-bg-primary
+                          {% elif status == 'em_andamento' %}
+                            text-bg-info
+                          {% elif status == 'em_atendimento' %}
+                            text-bg-warning
+                          {% elif status == 'finalizado' %}
+                            text-bg-success
+                          {% elif status == 'cancelado' %}
+                            text-bg-secondary
+                          {% endif %}">
+                          Status: {{ necessidade.get_status_display }}
+                      </span>
+                    {% endwith %}
+                </div>
+                
                 <div class="card-footer d-flex justify-content-between">
                     <a href="{% url 'necessidade_detail' necessidade.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
                     <div>

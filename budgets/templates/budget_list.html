@@ -43,7 +43,7 @@
               {% elif orcamento.status == 'aceito' %} text-bg-success
               {% elif orcamento.status == 'rejeitado' %} text-bg-danger
               {% endif %}">
-              Status: {{ orcamento.status|capfirst }}
+              Status: {{ orcamento.get_status_display }}
             </span>
           </div>
         <div class="card-footer d-flex justify-content-between">

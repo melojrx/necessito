@@ -77,7 +77,7 @@
                     <tr>
                         <td>{{ orcamento.fornecedor.get_full_name }}</td>
                         <td>R$ {{ orcamento.valor }}</td>
-                        <td>{{ orcamento.status|capfirst }}</td>
+                        <td>{{ orcamento.get_status_display }}</td>
                         <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
                         <td>
                             {% if orcamento.arquivo_anexo %}
@@ -151,7 +151,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Categoria</h5>
                     <p class="card-text">{{ necessidade.categoria.nome }}</p>
-                    <span class="badge text-bg-success">Status: {{ necessidade.status|capfirst}}</span>
+                    <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst}}</span>
                     <hr>
                     <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}</h5>
 
@@ -174,10 +174,6 @@
                             </a>
                         </span>
 
-                        <a href="#" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="Iniciar contato via WhatsApp">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
                     </div>
                 </div>
             </div>

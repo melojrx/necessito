@@ -40,7 +40,7 @@ class AdsForms(forms.ModelForm):
             'peso': forms.NumberInput(attrs={'class': 'form-control'}),
             'altura': forms.NumberInput(attrs={'class': 'form-control'}),
 
-            'status': forms.Select(attrs={'class': 'form-control'}),
+            # 'status': forms.Select(attrs={'class': 'form-control'}),
             'duracao': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex.: 7 dias, 3:00:00'
@@ -60,7 +60,7 @@ class AdsForms(forms.ModelForm):
             'compr': 'Comprimento (m)',
             'peso': 'Peso (Kg)',
             'altura': 'Altura (m)',
-            'status': 'Status',
+            # 'status': 'Status',
             'duracao': 'Duração',  # Rótulo para duracao
         }
         help_texts = {

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load extras %}
 
 {% block title %}Minha Conta{% endblock %}
 
@@ -79,24 +80,33 @@
                     <hr>
                     <h5>Informações Pessoais</h5>
                     <ul class="list-unstyled">
+                        {% if user.preferred_categories.all %}
+                        <li><strong>Categorias Preferidas:</strong>
+                            <ul>
+                                {% for cat in user.preferred_categories.all %}
+                                    <li>{{ cat.nome }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
                         {% if user.email %}
                         <li><strong>Email:</strong> {{ user.email }}</li>
                         {% endif %}
                         {% if user.telefone %}
-                        <li><strong>Telefone:</strong> {{ user.telefone }}</li>
+                        <li><strong>Telefone:</strong> {{ user.telefone|mask_phone }}</li>
                         {% endif %}
                         {% if user.endereco %}
                         <li><strong>Endereço:</strong> {{ user.endereco }}, {{ user.bairro }}, {{ user.cidade }} -
                             {{ user.estado }}</li>
                         {% endif %}
                         {% if user.cep %}
-                        <li><strong>CEP:</strong> {{ user.cep }}</li>
+                        <li><strong>CEP:</strong> {{ user.cep|mask_cep }}</li>
                         {% endif %}
                         {% if user.cpf %}
-                        <li><strong>CPF:</strong> {{ user.cpf }}</li>
+                        <li><strong>CPF:</strong> {{ user.cpf|mask_cpf }}</li>
                         {% endif %}
                         {% if user.cnpj %}
-                        <li><strong>CNPJ:</strong> {{ user.cnpj }}</li>
+                        <li><strong>CNPJ:</strong> {{ user.cnpj|mask_cnpj }}</li>
                         {% endif %}
                     </ul>
 

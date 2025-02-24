@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from categories.models import Categoria
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -38,6 +39,11 @@ class User(AbstractUser):
     estado = models.CharField(max_length=2, blank=True)
     cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
     cnpj = models.CharField(max_length=18, unique=True, null=True, blank=True)
+    preferred_categories = models.ManyToManyField(
+        Categoria,
+        blank=True,
+        related_name='users_preferred'
+    )
     comprovante_endereco = models.FileField(upload_to='comprovantes/', blank=True, null=True)
     foto = models.ImageField(upload_to='fotos_usuarios/', blank=True, null=True)
     date_joined = models.DateTimeField('date joined', auto_now_add=True)

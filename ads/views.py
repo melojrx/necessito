@@ -18,12 +18,39 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Buscar as 4 últimas categorias
+
+        # 1) Categorias populares (já existente)
         context['categorias_populares'] = Categoria.objects.order_by('-id')[:5]
-        # Buscar os 3 últimos anúncios (necessidades), excluindo finalizados e cancelados
+
+        # 2) Anúncios populares (já existente)
         context['anuncios_populares'] = Necessidade.objects.exclude(
             status__in=['finalizado', 'cancelado']
         ).order_by('-id')[:4]
+
+        # 3) Lógica para anúncios com base nas categorias preferidas
+        user = self.request.user
+        if user.is_authenticated:
+            # Verifica se o usuário possui categorias preferidas
+            preferred_cats = user.preferred_categories.all()
+            if preferred_cats.exists():
+                # Se tiver categorias, filtra anúncios ativos nessas categorias, em ordem crescente
+                anuncios_preferidos = Necessidade.objects.filter(
+                    categoria__in=preferred_cats,
+                    status='ativo'
+                ).order_by('data_criacao')  # ou .order_by('titulo'), .order_by('data_criacao'), etc.
+            else:
+                # Não há categorias preferidas: pega anúncios ativos de forma aleatória
+                anuncios_preferidos = Necessidade.objects.filter(
+                    status='ativo'
+                ).order_by('data_criacao')[:4]  # limite de 4, por exemplo
+        else:
+            # Usuário não autenticado: exibe também anúncios ativos aleatórios
+            anuncios_preferidos = Necessidade.objects.filter(
+                status='ativo'
+            ).order_by('data_criacao')[:4]
+
+        context['anuncios_preferidos'] = anuncios_preferidos
+
         return context
 
 

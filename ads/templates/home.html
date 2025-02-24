@@ -50,7 +50,7 @@
             margin-top: auto; /* Empurra o botão para o final do card */
             align-self: flex-start; /* Opcional: Alinha o botão à esquerda */
         }
-      </style>
+    </style>
     <div class="row d-flex align-items-stretch">
         {% for anuncio in anuncios_populares %}
         <div class="col-lg-4 col-md-4 col-sm-6 d-flex mb-4">
@@ -70,6 +70,33 @@
             </div>
         </div>
         {% endfor %}
-    </div>    
+    </div> 
+    {% if anuncios_preferidos %}
+    <h2 class="mb-4 mt-5">Baseado nas suas Categorias Preferidas</h2>
+    <div class="row d-flex align-items-stretch">
+        {% for anuncio in anuncios_preferidos %}
+            <div class="col-lg-4 col-md-4 col-sm-6 d-flex mb-4">
+                <div class="card flex-fill">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                        <p class="card-text">{{ anuncio.categoria }}</p>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}
+                        </p>
+                        <p class="card-text">{{ anuncio.data_criacao }}</p>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary">Ver mais</a>
+                            {% if anuncio.duracao %}
+                                <p class="badge text-bg-secondary">{{ anuncio.duracao }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+  
 </div>
 {% endblock %}

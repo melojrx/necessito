@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.forms import ValidationError
 from categories.models import Categoria
+from users.utils import validate_cpf
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -62,3 +64,18 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.first_name
+    
+    def clean(self):
+        """
+        Validações do Model (chamadas quando form.is_valid() -> form.save()
+        ou se chamarmos user.full_clean() manualmente).
+        """
+        super().clean()
+        if self.cpf:  # Se o campo estiver preenchido
+            # Use nossa função validate_cpf
+            try:
+                # Se for válido, armazenar apenas dígitos
+                self.cpf = validate_cpf(self.cpf)
+            except ValidationError as e:
+                # Repassa erro para o Model
+                raise ValidationError({'cpf': e.message})

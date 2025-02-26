@@ -11,7 +11,40 @@ class Necessidade(models.Model):
     descricao = models.TextField()
     quantidade = models.FloatField()
     medir_no_local = models.BooleanField(default=False)
-    unidade = models.CharField(max_length=50, help_text="Ex.: m², unidades, kg")
+    unidade = models.CharField(max_length=50, choices=[
+        ('un', 'Unidade'),
+        ('cx', 'Caixa'),
+        ('pc', 'Peça'),
+        ('kg', 'Kilograma'),
+        ('m', 'Metro'),
+        ('m2', 'Metro Quadrado'),
+        ('m3', 'Metro Cúbico'),
+        ('cm', 'Centímetro'),
+        ('mm', 'Milímetro'),
+        ('l', 'Litro'),
+        ('g', 'Grama'),
+        ('h', 'Hora'),
+        ('d', 'Dia'),
+        ('mês', 'Mês'),
+        ('ano', 'Ano'),
+        ('m²', 'Metro Quadrado'),
+        ('m³', 'Metro Cúbico'),
+        ('cm²', 'Centímetro Quadrado'),
+        ('cm³', 'Centímetro Cúbico'),
+        ('mm²', 'Milímetro Quadrado'),
+        ('mm³', 'Milímetro Cúbico'),
+        ('l', 'Litro'),
+        ('ml', 'Mililitro'),
+        ('g', 'Grama'),
+        ('mg', 'Miligrama'),
+        ('km', 'Quilograma'),
+        ('h', 'Hora'),
+        ('d', 'Dia'),
+        ('mês', 'Mês'),
+        ('ano', 'Ano'),
+        
+    ], default='un'
+    )
     marca = models.CharField(max_length=100, blank=True)
     tipo = models.CharField(max_length=100, blank=True)
     bitola = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Milímetros")

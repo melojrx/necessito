@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from users.models import User
 from categories.models import Categoria
+from users.utils import validate_cpf
 
 class UserLoginForm(forms.Form):
     email = forms.EmailField(
@@ -144,4 +145,15 @@ def clean_preferred_categories(self):
     if cats and len(cats) > 2:
         raise forms.ValidationError("Você só pode escolher no máximo 2 categorias.")
     return cats
+
+def clean_cpf(self):
+        """
+        Valida o CPF e armazena somente dígitos.
+        """
+        cpf = self.cleaned_data.get('cpf')
+        if cpf:
+            # Chama a função de validação
+            cpf_digits = validate_cpf(cpf)
+            return cpf_digits
+        return cpf
 

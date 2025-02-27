@@ -31,7 +31,8 @@ def login_view(request):
             messages.success(request, "Login realizado com sucesso!")
             return redirect('home')  
         else:
-            messages.error(request, "Email ou senha inválidos.")  # Ou você pode confiar no form para exibir o erro
+             # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
+            messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
 
     return render(request, 'login.html', {'form': form})
 

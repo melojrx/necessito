@@ -18,6 +18,9 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-xup#03vag3x1dtuvnlw16r5kdwjepy577ac53cxi0ia5(5rbm5"
 
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -34,12 +37,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
+    "django_recaptcha",
     "users",
     "ads",
     "categories",
     "budgets",
     "rankings",
+    
 ]
 
 MIDDLEWARE = [

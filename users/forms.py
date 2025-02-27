@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from users.models import User
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from categories.models import Categoria
 from users.utils import validate_cpf
 
@@ -19,6 +21,15 @@ class UserLoginForm(forms.Form):
             'class': 'form-control',
             'placeholder': '********'
         })
+    )
+    
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-theme': 'light',  # ou 'dark'
+                'data-size': 'normal'   # ou 'compact'
+            }
+        )
     )
 
     def clean(self):

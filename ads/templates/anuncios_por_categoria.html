@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+  <h1 class="mb-3">Anúncios em {{ categoria.nome }}</h1>
+  {% if anuncios %}
+    <div class="row">
+      {% for anuncio in anuncios %}
+        <div class="col-md-4">
+          <div class="card mb-3">
+            <div class="card-body">
+            <h5 class="card-title">{{ anuncio.titulo }}</h5>
+            <p class="card-text">{{ anuncio.subcategoria }}</p>
+            {% with status=anuncio.status %}
+            <span class="badge 
+                {% if status == 'ativo' %}
+                text-bg-primary
+                {% elif status == 'em_andamento' %}
+                text-bg-info
+                {% elif status == 'em_atendimento' %}
+                text-bg-warning
+                {% elif status == 'finalizado' %}
+                text-bg-success
+                {% elif status == 'cancelado' %}
+                text-bg-secondary
+                {% endif %} mb-3">
+                Status: {{ anuncio.get_status_display }}
+            </span>
+            {% endwith %}
+            <p><strong>Localização:</strong> {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}</p>
+            <p><strong>Publicado por:</strong> {{ anuncio.cliente.get_full_name }}</p>
+            <p><strong>Publicado em:</strong> {{ anuncio.data_criacao }}</p>
+            <a href="{% url 'necessidade_detail' anuncio.id %}" class="btn btn-primary">Ver Detalhes</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">Nenhum anúncio encontrado nesta categoria.</p>
+  {% endif %}
+
+  <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Voltar para a tela inicial</a>
+</div>
+{% endblock %}

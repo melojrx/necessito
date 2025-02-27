@@ -43,7 +43,7 @@ class Necessidade(models.Model):
         ('mês', 'Mês'),
         ('ano', 'Ano'),
         
-    ], default='un'
+    ], default='Unidade'
     )
     marca = models.CharField(max_length=100, blank=True)
     tipo = models.CharField(max_length=100, blank=True)

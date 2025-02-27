@@ -14,15 +14,16 @@
         {% for categoria in categorias_populares %}
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card">
-                {% if categoria.imagem_local %}
+                <!-- {% if categoria.imagem_local %}
                 <img src="{{ categoria.imagem_local.url }}" class="card-img-top" alt="{{ categoria.nome }}">
                 {% elif categoria.url_imagem_externa %}
                 <img src="{{ categoria.url_imagem_externa }}" class="card-img-top" alt="{{ categoria.nome }}">
-                {% endif %}
+                {% endif %} -->
                 <div class="card-body">
-                    <h5 class="card-title">{{ categoria.nome }}</h5>
+                    <a href="{% url 'anuncios_por_categoria' categoria.id %}" style="text-decoration:none" >
+                        <h5>{{ categoria.nome }}</h5>
+                      </a>
                     <!-- <p class="card-text">{{ categoria.descricao|truncatechars:50 }}</p> -->
-
                 </div>
             </div>
         </div>
@@ -96,7 +97,31 @@
             </div>
         {% endfor %}
     </div>
-{% endif %}
-  
+    {% endif %}
+    {% if anuncios_proximos %}
+    <h2 class="mb-4 mt-5">Anúncios Próximos</h2>
+    <div class="row d-flex align-items-stretch">
+        {% for anuncio in anuncios_proximos %}
+            <div class="col-lg-4 col-md-4 col-sm-6 d-flex mb-4">
+                <div class="card flex-fill">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                        <p class="card-text">{{ anuncio.categoria }}</p>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}
+                        </p>
+                        <p class="card-text">{{ anuncio.data_criacao }}</p>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary">Ver mais</a>
+                            {% if anuncio.duracao %}
+                                <p class="badge text-bg-secondary">{{ anuncio.duracao }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

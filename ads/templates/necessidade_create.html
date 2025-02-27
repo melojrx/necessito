@@ -2,56 +2,24 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-  <h3 class="display-4">Criar Anúncio</h3>
+<div class="container">
+  <h3 class="display-7">Criar Anúncio</h3>
 
   <div class="card">
     <div class="card-body">
       <form method="post" class="form" id="ad-form">
         {% csrf_token %}
-
         <!-- Mensagens de erro ou sucesso (caso use django messages) -->
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-          {% endfor %}
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            <strong>Erro ao criar anúncio:</strong>
+            <ul>
+              {% for field, errors in form.errors.items %}
+                <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
+              {% endfor %}
+            </ul>
+          </div>
         {% endif %}
-
-        <!-- CATEGORIA -->
-        <div class="mb-3">
-          <label for="id_categoria" class="form-label">
-            {{ form.categoria.label }}
-          </label>
-          {{ form.categoria }}
-          <!-- 
-            O Django gera um <select> com as categorias carregadas na queryset 
-            do form. Precisamos apenas ter certeza de que no forms.py, 
-            "categoria" está com widget=Select(...).
-          -->
-        </div>
-
-        <!-- SUBCATEGORIA (será preenchida via AJAX) -->
-        <div class="mb-3">
-          <label for="id_subcategoria" class="form-label">
-            {{ form.subcategoria.label }}
-          </label>
-          
-          <!-- 
-            Subcategoria está no form, mas vamos substituir o "select" 
-            que o Django gera, pois iremos popular dinamicamente.
-            Duas opções:
-              A) Usar o <select> que o Django fornece, mas limpar e preencher via JS
-              B) Criar manualmente um <select> vazio
-          -->
-          
-          <!-- Opção A: Se quiser aproveitar o select do form: -->
-          {{ form.subcategoria }}
-          
-          <!-- 
-            Depois, no JS, faremos "document.getElementById('id_subcategoria').innerHTML = ''" 
-            e populamos com as opções. 
-          -->
-        </div>
 
         <!-- TÍTULO -->
         <div class="mb-3">
@@ -65,12 +33,39 @@
           {{ form.descricao }}
         </div>
 
-        <!-- QUANTIDADE -->
-        <div class="mb-3">
-          <label for="id_quantidade" class="form-label">{{ form.quantidade.label }}</label>
-          {{ form.quantidade }}
+        <!-- CATEGORIA E SUBCATEGORIA -->
+        <div class="row mb-3">
+          <!-- CATEGORIA -->
+          <div class="col-md-6">
+              <label for="id_categoria" class="form-label">
+                  {{ form.categoria.label }}
+              </label>
+              {{ form.categoria }}
+          </div>
+
+          <!-- SUBCATEGORIA -->
+          <div class="col-md-6">
+              <label for="id_subcategoria" class="form-label">
+                  {{ form.subcategoria.label }}
+              </label>
+              {{ form.subcategoria }}
+          </div>
         </div>
 
+        <!-- QUANTIDADE e UNIDADE-->
+        <div class="row">
+          <div class="col-md-6">
+            <label for="id_quantidade" class="form-label">{{ form.quantidade.label }}</label>
+            {{ form.quantidade }}
+          </div>
+
+          <!-- UNIDADE -->
+          <div class="col-md-6">
+            <label for="id_unidade" class="form-label">{{ form.unidade.label }}</label>
+            {{ form.unidade }}
+            <small class="form-text text-muted">{{ form.unidade.help_text }}</small>
+          </div>
+        </div>
         <!-- MEDIR NO LOCAL (Checkbox) -->
         <div class="mb-3 form-check">
           {{ form.medir_no_local }}
@@ -79,53 +74,50 @@
           </label>
         </div>
 
-        <!-- UNIDADE -->
-        <div class="mb-3">
-          <label for="id_unidade" class="form-label">{{ form.unidade.label }}</label>
-          {{ form.unidade }}
-          <small class="form-text text-muted">{{ form.unidade.help_text }}</small>
-        </div>
-
         <!-- MARCA -->
-        <div class="mb-3">
-          <label for="id_marca" class="form-label">{{ form.marca.label }}</label>
-          {{ form.marca }}
-        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_marca" class="form-label">{{ form.marca.label }}</label>
+            {{ form.marca }}
+          </div>
 
-        <!-- TIPO -->
-        <div class="mb-3">
-          <label for="id_tipo" class="form-label">{{ form.tipo.label }}</label>
-          {{ form.tipo }}
+          <!-- TIPO -->
+          <div class="col-md-6 mb-3">
+            <label for="id_tipo" class="form-label">{{ form.tipo.label }}</label>
+            {{ form.tipo }}
+          </div>
         </div>
-
         <!-- BITOLA -->
-        <div class="mb-3">
-          <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
-          {{ form.bitola }}
-          <small class="form-text text-muted">{{ form.bitola.help_text }}</small>
-        </div>
+         <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
+            {{ form.bitola }}
+            <small class="form-text text-muted">{{ form.bitola.help_text }}</small>
+          </div>
 
         <!-- COMPRIMENTO -->
-        <div class="mb-3">
-          <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
-          {{ form.compr }}
-          <small class="form-text text-muted">{{ form.compr.help_text }}</small>
+          <div class="col-md-6 mb-3">
+            <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
+            {{ form.compr }}
+            <small class="form-text text-muted">{{ form.compr.help_text }}</small>
+          </div>
         </div>
 
         <!-- PESO -->
-        <div class="mb-3">
-          <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
-          {{ form.peso }}
-          <small class="form-text text-muted">{{ form.peso.help_text }}</small>
-        </div>
+         <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
+            {{ form.peso }}
+            <small class="form-text text-muted">{{ form.peso.help_text }}</small>
+          </div>
 
         <!-- ALTURA -->
-        <div class="mb-3">
-          <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
-          {{ form.altura }}
-          <small class="form-text text-muted">{{ form.altura.help_text }}</small>
+          <div class="col-md-6 mb-3">
+            <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
+            {{ form.altura }}
+            <small class="form-text text-muted">{{ form.altura.help_text }}</small>
+          </div>
         </div>
-
         <!-- DURAÇÃO -->
         <div class="mb-3">
           {{ form.duracao.label_tag }}
@@ -134,10 +126,10 @@
       </div>
 
         <!-- STATUS -->
-        <div class="mb-3">
+        <!-- <div class="mb-3">
           <label for="id_status" class="form-label">{{ form.status.label }}</label>
           {{ form.status }}
-        </div>
+        </div> -->
 
         <!-- BOTÃO SUBMIT -->
         <button type="submit" class="btn btn-primary">Publicar Anúncio</button>

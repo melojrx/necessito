@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     FinalizarAnuncioView, HomeView, NecessidadeListView, NecessidadeCreateView,
-    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView
+    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView
 )
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path('necessidades/<int:pk>/editar/', NecessidadeUpdateView.as_view(), name='necessidade_update'),
     path('necessidades/<int:pk>/excluir/', NecessidadeDeleteView.as_view(), name='necessidade_delete'),
     path('necessidades/<int:pk>/finalizar/', FinalizarAnuncioView.as_view(), name='finalizar_anuncio'),
+    path('necessidades/categoria/<int:category_id>/', AnunciosPorCategoriaListView.as_view(), name='anuncios_por_categoria'),
 ]
 

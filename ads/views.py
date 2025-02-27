@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-
+from django.contrib import messages
+import requests
 from ads.forms import AdsForms
 from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
@@ -50,9 +51,27 @@ class HomeView(TemplateView):
             ).order_by('data_criacao')[:4]
 
         context['anuncios_preferidos'] = anuncios_preferidos
+        
+        # 4) Anúncios próximos (cidade do usuário)
+        anuncios_proximos = Necessidade.objects.none()
+        anuncios_estado = Necessidade.objects.none()
+
+        if user.is_authenticated and hasattr(user, 'cidade') and user.cidade:
+            anuncios_proximos = Necessidade.objects.filter(
+                status__in=['ativo', 'em_andamento'],
+                cliente__cidade=user.cidade
+            ).order_by('-data_criacao')[:5]  # Limite de 5 anúncios
+
+            # Se não houver anúncios na cidade, buscar no estado
+            if not anuncios_proximos.exists() and hasattr(user, 'estado') and user.estado:
+                anuncios_estado = Necessidade.objects.filter(
+                    status__in=['ativo', 'em_andamento'],
+                    cliente__estado=user.estado
+                ).order_by('-data_criacao')[:5]
+
+        context['anuncios_proximos'] = anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
 
         return context
-
 
 class NecessidadeListView(ListView):
     model = Necessidade
@@ -76,7 +95,6 @@ class NecessidadeListView(ListView):
 
         return queryset
 
-
 class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     model = Necessidade
     template_name = 'necessidade_create.html'
@@ -84,23 +102,28 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        # Associa o usuário autenticado ao campo cliente
+        print("🔍 Formulário validado!")  # Debug para saber se está entrando aqui
         form.instance.cliente = self.request.user
-        # Captura o IP do usuário
         form.instance.ip_usuario = self.get_client_ip()
-        return super().form_valid(form)
+        form.instance.status = 'ativo'
+
+        response = super().form_valid(form)
+        messages.success(self.request, "Anúncio criado com sucesso!")
+
+        return response  # Ou return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        print("⚠️ Erros no formulário:", form.errors)  # Debug de erro
+        messages.error(self.request, "Erro ao criar anúncio. Verifique os campos e tente novamente.")
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_client_ip(self):
-        """
-        Captura o IP do cliente a partir da requisição.
-        """
-        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = self.request.META.get('REMOTE_ADDR')
-        return ip
-
+        """ Obtém o IP público do usuário utilizando um serviço externo. """
+        try:
+            response = requests.get("https://api64.ipify.org?format=json", timeout=5)
+            return response.json().get("ip", "Desconhecido")
+        except requests.RequestException:
+            return "Desconhecido"
 
 class NecessidadeDetailView(DetailView):
     model = Necessidade
@@ -129,7 +152,6 @@ class NecessidadeDetailView(DetailView):
 
         return context
 
-
 class NecessidadeUpdateView(UpdateView):
     model = Necessidade
     form_class = AdsForms
@@ -137,12 +159,10 @@ class NecessidadeUpdateView(UpdateView):
     # fields = ['categoria', 'titulo', 'descricao', 'quantidade', 'unidade']
     success_url = reverse_lazy('necessidade_list')
 
-
 class NecessidadeDeleteView(DeleteView):
     model = Necessidade
     template_name = 'necessidade_delete.html'
     success_url = reverse_lazy('necessidade_list')
-
 
 class FinalizarAnuncioView(LoginRequiredMixin, View):
     """ View para finalizar um anúncio """
@@ -173,3 +193,25 @@ class FinalizarAnuncioView(LoginRequiredMixin, View):
         except Exception as e:
             # Tratar erros inesperados
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+class AnunciosPorCategoriaListView(ListView):
+    """Lista os anúncios filtrados por uma categoria específica"""
+    model = Necessidade
+    template_name = 'anuncios_por_categoria.html'
+    context_object_name = 'anuncios'
+
+    def get_queryset(self):
+        """Filtra os anúncios pela categoria passada na URL"""
+        categoria_id = self.kwargs.get('category_id')
+        self.categoria = get_object_or_404(Categoria, id=categoria_id)
+        
+        return Necessidade.objects.filter(
+            categoria=self.categoria,
+            status__in=['ativo', 'em_andamento']
+        ).order_by('-data_criacao')  # Ordena pelos mais recentes
+
+    def get_context_data(self, **kwargs):
+        """Adiciona a categoria ao contexto"""
+        context = super().get_context_data(**kwargs)
+        context['categoria'] = self.categoria
+        return context

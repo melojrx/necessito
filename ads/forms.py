@@ -19,32 +19,28 @@ class AdsForms(forms.ModelForm):
             'compr',
             'peso',
             'altura',
-            'status',
+            
             'duracao',  
         ]
         widgets = {
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'subcategoria': forms.Select(attrs={'class': 'form-control'}),
-
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'quantidade': forms.NumberInput(attrs={'class': 'form-control'}),
-
             'medir_no_local': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-
-            'unidade': forms.TextInput(attrs={'class': 'form-control'}),
+            'unidade': forms.Select(attrs={'class': 'form-control'}),
             'marca': forms.TextInput(attrs={'class': 'form-control'}),
             'tipo': forms.TextInput(attrs={'class': 'form-control'}),
             'bitola': forms.NumberInput(attrs={'class': 'form-control'}),
             'compr': forms.NumberInput(attrs={'class': 'form-control'}),
             'peso': forms.NumberInput(attrs={'class': 'form-control'}),
             'altura': forms.NumberInput(attrs={'class': 'form-control'}),
-
-            # 'status': forms.Select(attrs={'class': 'form-control'}),
             'duracao': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex.: 7 dias, 3:00:00'
-            }),  # Widget para duracao
+            }), 
+             
         }
         labels = {
             'categoria': 'Categoria',
@@ -60,8 +56,7 @@ class AdsForms(forms.ModelForm):
             'compr': 'Comprimento (m)',
             'peso': 'Peso (Kg)',
             'altura': 'Altura (m)',
-            # 'status': 'Status',
-            'duracao': 'Duração',  # Rótulo para duracao
+            'duracao': 'Duração', 
         }
         help_texts = {
             'unidade': 'Ex.: m², unidades, kg',
@@ -69,5 +64,5 @@ class AdsForms(forms.ModelForm):
             'compr': 'Ex: metros (m)',
             'peso': 'Ex: quilogramas (Kg)',
             'altura': 'Ex: metros (m)',
-            'duracao': 'Informe a duração (Ex.: 7 dias, 3:00:00)',  # Ajuda para duracao
+            'duracao': 'Informe a duração (Ex.: 7 dias, 3:00:00)',  
         }

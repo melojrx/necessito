@@ -3,7 +3,7 @@
         <div class="container">
             <!-- Logo -->
             <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-store"></i> Necessito.br
+                <i class="fas fa-building me-1"></i> Necessito.br
             </a>
 
             <!-- Botão do menu mobile -->
@@ -14,11 +14,19 @@
 
             <!-- Menu principal -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
+                <ul class="navbar-nav ms-auto align-items-start">
+
+                    <!-- Links de navegação -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notificações">
+                            <i class="fas fa-bell"></i>
+                        </a>
+                    </li>
+                    
 
                     {% if user.is_authenticated %}
                     <!-- Dropdown do Usuário -->
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown mb-2">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             Olá, {{ user.first_name|capfirst }}!
@@ -50,6 +58,7 @@
                             <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
                         </a>
                     </li>
+                    
 
                     {% else %}
                     <!-- Links de Login e Registro -->

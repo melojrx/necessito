@@ -20,7 +20,7 @@
         color: #e0e0e0; /* Cinza claro */
     }
 </style>
-<div class="container mt-5">
+<div class="container">
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <h3 class="mb-0">Minha Conta</h3>
@@ -112,7 +112,7 @@
 
                     <!-- Botões de Ação -->
                     {% if user == request.user %}
-                    <div class="mt-3">
+                    <div class="mt-3 d-flex flex-column flex-md-row gap-1">
                         <a href="{% url 'user_profile' user.pk %}" class="btn btn-info">
                             <i class="fas fa-user"></i> Ver Perfil Público
                         </a>

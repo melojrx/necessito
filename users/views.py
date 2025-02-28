@@ -159,3 +159,22 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
         })
         return context
 
+from django.contrib.auth import views as auth_views
+
+class MyPasswordResetView(auth_views.PasswordResetView):
+    # Força o domínio a ser "necessito.br" no link enviado
+    domain_override = "necessito.br"
+
+    # Altera o remetente
+    from_email = "Necessito <no-reply@necessito.br>"
+
+    # Personaliza o assunto
+    subject_template_name = "password_reset_subject.txt"
+
+    # Personaliza o corpo do e-mail (formato texto)
+    email_template_name = "password_reset_email.html"
+
+    # Caso queira adicionar um template HTML:
+    # html_email_template_name = "password_reset_email_html.html"
+    
+    # É possível também definir success_url, etc. se quiser

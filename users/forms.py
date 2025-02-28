@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, SetPasswordForm, PasswordChangeForm
 from users.models import User
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
@@ -168,3 +168,42 @@ def clean_cpf(self):
             return cpf_digits
         return cpf
 
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajustar o campo 'email' para vir com a classe do Bootstrap
+        self.fields['email'].widget = forms.EmailInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite seu e-mail'
+            }
+        )
+
+class CustomSetPasswordForm(SetPasswordForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        # Adicionar atributos de classe e placeholders
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Nova senha'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirme a nova senha'
+        })
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        self.fields['old_password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Senha atual'
+        })
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Nova senha'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirme a nova senha'
+        })

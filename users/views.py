@@ -47,7 +47,8 @@ def register_view(request):
             messages.success(request, "Registrado com sucesso! Faça login para começar.")
             return redirect('login')
         else:
-            messages.error(request, "Erro ao registrar. Verifique os dados informados.")
+           # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
+            messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
     else:
         form = CustomUserCreationForm()
     

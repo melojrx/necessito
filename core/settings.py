@@ -161,10 +161,10 @@ DEFAULT_FROM_EMAIL = "Necessito <no-reply@necessito.br>"
 EMAIL_SUBJECT_PREFIX = "[Necessito]"
 
 # Em produção, configure o envio de e-mails com o Gmail
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'necessitobr@gmail.com'
-# EMAIL_HOST_PASSWORD = 'SUA_SENHA_OU_APP_PASSWORD'
-# DEFAULT_FROM_EMAIL = 'Necessito <necessitobr@gmail.com>'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'necessitobr@gmail.com'
+EMAIL_HOST_PASSWORD = 'jbpk deme rlnm ltsa'
+DEFAULT_FROM_EMAIL = 'Necessito <necessitobr@gmail.com>'

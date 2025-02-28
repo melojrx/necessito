@@ -48,6 +48,15 @@ class CustomUserCreationForm(UserCreationForm):
     password1 = forms.CharField(label="Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label="Confirmação de Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-theme': 'light',  # ou 'dark'
+                'data-size': 'normal'   # ou 'compact'
+            }
+        )
+    )
+    
     class Meta:
         model = User
         fields = ['email', 'first_name', 'last_name', 'password1', 'password2', 'is_client', 'is_supplier']
@@ -63,6 +72,8 @@ class CustomUserCreationForm(UserCreationForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
+        
+        
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")

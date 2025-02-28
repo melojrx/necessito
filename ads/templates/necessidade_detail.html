@@ -22,7 +22,7 @@
                 <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">Excluir</a>
                 {% endif %}
 
-                <!-- Avaliação
+                <!-- Avaliação -->
                 {% if user == necessidade.cliente or user == fornecedor %}
                 <form action="{% url 'avaliar_negociacao' necessidade.pk %}" method="post" class="d-inline ms-auto">
                     {% csrf_token %}
@@ -40,7 +40,7 @@
                         Enviar
                     </button>
                 </form>
-                {% endif %} -->
+                {% endif %}
             </div>
 
             {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}

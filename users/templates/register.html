@@ -14,6 +14,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- Google Font: Nunito Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,200;0,400;0,600;0,800;1,200;1,400;1,600;1,800&display=swap" rel="stylesheet">
+    <!-- Script do Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <style>
     body {
@@ -83,6 +85,16 @@
                     {{ form.password2 }}
                     {% for error in form.password2.errors %}
                         <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- reCAPTCHA -->
+                <div class="mb-3 d-flex justify-content-center">
+                    <div>
+                    {{ form.captcha }}
+                    </div>
+                    {% for error in form.captcha.errors %}
+                    <div class="text-danger small">{{ error }}</div>
                     {% endfor %}
                 </div>
                 

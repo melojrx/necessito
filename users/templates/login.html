@@ -22,11 +22,20 @@
     body {
         font-family: 'Nunito Sans', sans-serif;
     }
+    @media (max-width: 768px) {
+      /* Ajustes para mobile */
+      .card {
+          margin: 1rem;
+      }
+      .card-body {
+          padding: 1.5rem !important;
+      }
+  }
 </style>
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-  <div class="card shadow" style="max-width: 400px; width: 100%;">
+  <div class="card shadow" style="max-width: 600px; width: 100%;">
     <div class="card-body">
       <h4 class="text-center mb-4">Acesse sua conta</h4>
 
@@ -57,9 +66,14 @@
         <!-- Campo Password -->
         <div class="mb-3">
           <label for="id_password" class="form-label">{{ form.password.label }}</label>
-          {{ form.password }}
+          <div class="input-group">  <!-- Adicionamos o container input-group -->
+              {{ form.password }}
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password')">
+                  <i class="fas fa-eye"></i>
+              </button>
+          </div>
           {% for error in form.password.errors %}
-            <div class="text-danger small">{{ error }}</div>
+              <div class="text-danger small">{{ error }}</div>
           {% endfor %}
         </div>
 
@@ -84,4 +98,18 @@
     </div>
   </div>
 </div>
+<script>
+  function togglePassword(fieldId) {
+      const passwordField = document.getElementById(fieldId);
+      const icon = passwordField.nextElementSibling.querySelector('i');
+      
+      if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+          passwordField.type = 'password';
+          icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+  }
+</script>
 {% endblock %}

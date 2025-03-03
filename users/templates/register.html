@@ -21,46 +21,59 @@
     body {
         font-family: 'Nunito Sans', sans-serif;
     }
+    .form-control:focus {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        border-color: #86b7fe;
+    }
+    @media (max-width: 768px) {
+        /* Ajustes para mobile */
+        .card {
+            margin: 1rem;
+        }
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+    
 </style>
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card shadow" style="width: 100%; max-width: 400px;">
+    <div class="card shadow" style="width: 100%; max-width: 600px;">
         <div class="card-body">
             <h4 class="card-title text-center mb-4">Criar uma conta</h4>
             
             <form method="post" action="{% url 'register' %}">
                 {% csrf_token %}
-                
                 <!-- Mensagens de erro ou sucesso -->
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
                 
-                <!-- Campo: first_name -->
-                <div class="mb-3">
-                    <label for="id_first_name" class="form-label">Nome:</label>
-                    {{ form.first_name }}
-                    <!-- Exibir erros específicos do campo e help_text, se houver -->
-                    {% for error in form.first_name.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                    {% if form.first_name.help_text %}
-                        <small class="form-text text-muted">
-                            {{ form.first_name.help_text }}
-                        </small>
-                    {% endif %}
+                <div class="row">
+                    <!-- Campo: first_name  -->
+                    <div class="col-lg-6 col-sm-12 mb-3">
+                        <label for="id_first_name" class="form-label">Nome:</label>
+                        {{ form.first_name }}
+                        <!-- Exibir erros específicos do campo e help_text, se houver -->
+                        {% for error in form.first_name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                        {% if form.first_name.help_text %}
+                            <small class="form-text text-muted">
+                                {{ form.first_name.help_text }}
+                            </small>
+                        {% endif %}
+                    </div>
+                    <!-- Campo: last_name -->
+                    <div class="col-lg-6 col-sm-12 mb-3">
+                        <label for="id_last_name" class="form-label">Sobrenome:</label>
+                        {{ form.last_name }}
+                        {% for error in form.last_name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
                 </div>
-                
-                <!-- Campo: last_name -->
-                <div class="mb-3">
-                    <label for="id_last_name" class="form-label">Sobrenome:</label>
-                    {{ form.last_name }}
-                    {% for error in form.last_name.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                
                 <!-- Campo: email -->
                 <div class="mb-3">
                     <label for="id_email" class="form-label">Email:</label>
@@ -70,19 +83,29 @@
                     {% endfor %}
                 </div>
                 
-                <!-- Campo: password1 -->
+                <!-- Campo: password1 com toggle -->
                 <div class="mb-3">
                     <label for="id_password1" class="form-label">Senha:</label>
-                    {{ form.password1 }}
+                    <div class="input-group">
+                        {{ form.password1 }}
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password1')" area-label="Mostrar Senha">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     {% for error in form.password1.errors %}
                         <div class="text-danger small">{{ error }}</div>
                     {% endfor %}
                 </div>
-                
-                <!-- Campo: password2 -->
+
+                <!-- Campo: password2 com toggle -->
                 <div class="mb-3">
                     <label for="id_password2" class="form-label">Confirmar Senha:</label>
-                    {{ form.password2 }}
+                    <div class="input-group">
+                        {{ form.password2 }}
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password2')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     {% for error in form.password2.errors %}
                         <div class="text-danger small">{{ error }}</div>
                     {% endfor %}
@@ -111,4 +134,18 @@
         </div>
     </div>
 </div>
+<script>
+    function togglePassword(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const icon = passwordField.nextElementSibling.querySelector('i');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
 {% endblock %}

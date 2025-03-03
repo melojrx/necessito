@@ -3,30 +3,31 @@
 
 {% block content %}
 <style>
-  /* Estilização do upload */
-  #id_imagens {
-    border: 2px dashed #ccc;
-    padding: 20px;
-    border-radius: 8px;
-  }
+  
+    .preview-item .card:hover {
+        transform: translateY(-3px);
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .object-fit-cover {
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .btn-danger {
+        transition: all 0.2s ease;
+    }
+    
+    .btn-danger:hover {
+        transform: scale(1.05);
+    }
+    </style>
 
-  #id_imagens:hover {
-    border-color: #0d6efd;
-    background-color: #f8f9fa;
-  }
-
-  /* Ajuste da pré-visualização */
-  #image-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-</style>
 <div class="container">
   <h3 class="display-7">Criar Anúncio</h3>
   <div class="card">
     <div class="card-body">
-      <form method="post" class="form" id="ad-form" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" id="ad-form" novalidate>
         {% csrf_token %}
         <!-- Mensagens de erro ou sucesso (caso use django messages) -->
         {% if form.errors %}
@@ -144,23 +145,25 @@
           <small class="form-text text-muted">{{ form.duracao.help_text }}</small>
       </div>
 
-        <!-- STATUS -->
-        <!-- <div class="mb-3">
-          <label for="id_status" class="form-label">{{ form.status.label }}</label>
-          {{ form.status }}
-        </div> -->
-
-        <!-- Campo de Imagens -->
+       <!-- Imagens -->
         <div class="mb-3">
           <label class="form-label">{{ form.imagens.label }}</label>
           {{ form.imagens }}
           <small class="form-text text-muted">{{ form.imagens.help_text }}</small>
           {% for error in form.imagens.errors %}
-              <div class="invalid-feedback d-block">{{ error }}</div>
+            <div class="alert alert-danger mt-2">{{ error }}</div>
           {% endfor %}
         </div>
-        <!-- Pré-visualização de imagens (opcional) -->
-        <div class="mb-3" id="image-preview"></div>
+        
+        <!-- Seção de Pré-Visualização --> 
+        <div class="row mt-4" id="image-preview">
+          <div class="col-12">
+            <h5 class="mb-3">
+              <i class="fas fa-images fa-fw me-2 text-primary"></i>Pré-visualização das Imagens
+            </h5>
+            <div class="row" id="preview-container"></div>
+          </div>
+        </div>
 
         <!-- BOTÃO SUBMIT -->
         <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
@@ -218,30 +221,76 @@
     });
   })();
 </script>
+<!-- Pré-visualização dinâmica -->
 <script>
   document.getElementById('id_imagens').addEventListener('change', function(e) {
-      const files = e.target.files;
-      const maxFiles = 3;
+      const container = document.getElementById('preview-container');
+      container.innerHTML = '';
       
-      if(files.length > maxFiles) {
-          alert(`Você pode selecionar no máximo ${maxFiles} imagens`);
-          e.target.value = '';
-      }
-      
-      // Pré-visualização
-      const preview = document.getElementById('image-preview');
-      preview.innerHTML = '';
-      Array.from(files).slice(0, maxFiles).forEach(file => {
+      Array.from(this.files).slice(0, 3).forEach((file, index) => {
           const reader = new FileReader();
+          
           reader.onload = function(e) {
+              // Criar elemento card
+              const col = document.createElement('div');
+              col.className = 'col-md-4 mb-4 preview-item';
+              
+              const card = document.createElement('div');
+              card.className = 'card h-100 shadow-sm';
+              
+              // Imagem
+              const imgWrapper = document.createElement('div');
+              imgWrapper.className = 'ratio ratio-1x1';
+              
               const img = document.createElement('img');
               img.src = e.target.result;
-              img.className = 'img-thumbnail m-2';
-              img.style.maxWidth = '150px';
-              preview.appendChild(img);
-          }
+              img.className = 'card-img-top object-fit-cover';
+              img.alt = `Pré-visualização ${index + 1}`;
+              
+              // Footer do Card
+              const cardFooter = document.createElement('div');
+              cardFooter.className = 'card-footer bg-transparent border-top-0 d-flex justify-content-between align-items-center';
+              
+              // Nome do arquivo
+              const fileName = document.createElement('small');
+              fileName.className = 'text-muted text-truncate';
+              fileName.textContent = file.name;
+              
+              // Botão de Remover
+              const removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.className = 'btn btn-danger btn-sm';
+              removeBtn.innerHTML = `
+                  <i class="fas fa-trash-alt fa-fw me-1"></i>
+                  <span class="d-none d-md-inline">Remover</span>
+              `;
+              
+              // Função de remoção
+              removeBtn.onclick = () => {
+                  // Remover do preview
+                  col.remove();
+                  // Atualizar o input de arquivo
+                  const dataTransfer = new DataTransfer();
+                  Array.from(document.getElementById('id_imagens').files)
+                      .filter((_, i) => i !== index)
+                      .forEach(file => dataTransfer.items.add(file));
+                  document.getElementById('id_imagens').files = dataTransfer.files;
+              };
+  
+              // Montagem dos elementos
+              imgWrapper.appendChild(img);
+              cardFooter.appendChild(fileName);
+              cardFooter.appendChild(removeBtn);
+              
+              card.appendChild(imgWrapper);
+              card.appendChild(cardFooter);
+              col.appendChild(card);
+              container.appendChild(col);
+          };
+          
           reader.readAsDataURL(file);
       });
   });
   </script>
+  
 {% endblock %}

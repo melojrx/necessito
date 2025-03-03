@@ -69,3 +69,17 @@ class Necessidade(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+class AnuncioImagem(models.Model):
+    anuncio = models.ForeignKey('Necessidade', on_delete=models.CASCADE, related_name='imagens')
+    imagem = models.ImageField(upload_to='anuncios/%Y/%m/%d/')
+    criado_em = models.DateTimeField(auto_now_add=True)
+    modificado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-criado_em']
+        verbose_name = 'Imagem do Anúncio'
+        verbose_name_plural = 'Imagens dos Anúncios'
+
+    def __str__(self):
+        return f"Imagem {self.id} - {self.anuncio.titulo}"

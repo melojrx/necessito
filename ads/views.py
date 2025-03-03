@@ -1,6 +1,6 @@
 from pyexpat.errors import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -10,7 +10,7 @@ import requests
 from ads.forms import AdsForms
 from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
-from .models import Necessidade
+from .models import AnuncioImagem, Necessidade
 from categories.models import Categoria
 
 
@@ -97,32 +97,31 @@ class NecessidadeListView(ListView):
 
 class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     model = Necessidade
-    template_name = 'necessidade_create.html'
     form_class = AdsForms
+    template_name = 'necessidade_create.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        print("🔍 Formulário validado!")  # Debug para saber se está entrando aqui
-        form.instance.cliente = self.request.user
-        form.instance.ip_usuario = self.get_client_ip()
-        form.instance.status = 'ativo'
+        # Salvar a instância principal primeiro
+        self.object = form.save(commit=False)
+        self.object.cliente = self.request.user
+        self.object.ip_usuario = self.get_client_ip()
+        self.object.status = 'ativo'
+        self.object.save()
 
-        response = super().form_valid(form)
+        # Processar imagens
+        imagens = self.request.FILES.getlist('imagens')
+        for img in imagens[:3]:  # Garante o limite máximo
+            AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+
         messages.success(self.request, "Anúncio criado com sucesso!")
-
-        return response  # Ou return redirect(self.success_url)
-
-    def form_invalid(self, form):
-        print("⚠️ Erros no formulário:", form.errors)  # Debug de erro
-        messages.error(self.request, "Erro ao criar anúncio. Verifique os campos e tente novamente.")
-        return self.render_to_response(self.get_context_data(form=form))
+        return super().form_valid(form)
 
     def get_client_ip(self):
-        """ Obtém o IP público do usuário utilizando um serviço externo. """
         try:
-            response = requests.get("https://api64.ipify.org?format=json", timeout=5)
+            response = requests.get("https://api64.ipify.org?format=json", timeout=3)
             return response.json().get("ip", "Desconhecido")
-        except requests.RequestException:
+        except Exception:
             return "Desconhecido"
 
 class NecessidadeDetailView(DetailView):

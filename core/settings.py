@@ -168,3 +168,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'necessitobr@gmail.com'
 EMAIL_HOST_PASSWORD = 'jbpk deme rlnm ltsa'
 DEFAULT_FROM_EMAIL = 'Necessito <necessitobr@gmail.com>'
+
+# Tamanho máximo de upload (5MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880

@@ -4,3 +4,5 @@ media
 __pycache__/
 *.txt
 users.mb
+.sh
+.vscode/

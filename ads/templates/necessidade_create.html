@@ -2,12 +2,31 @@
 {% load static %}
 
 {% block content %}
+<style>
+  /* Estilização do upload */
+  #id_imagens {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  #id_imagens:hover {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+  }
+
+  /* Ajuste da pré-visualização */
+  #image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
 <div class="container">
   <h3 class="display-7">Criar Anúncio</h3>
-
   <div class="card">
     <div class="card-body">
-      <form method="post" class="form" id="ad-form">
+      <form method="post" class="form" id="ad-form" enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Mensagens de erro ou sucesso (caso use django messages) -->
         {% if form.errors %}
@@ -131,6 +150,18 @@
           {{ form.status }}
         </div> -->
 
+        <!-- Campo de Imagens -->
+        <div class="mb-3">
+          <label class="form-label">{{ form.imagens.label }}</label>
+          {{ form.imagens }}
+          <small class="form-text text-muted">{{ form.imagens.help_text }}</small>
+          {% for error in form.imagens.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <!-- Pré-visualização de imagens (opcional) -->
+        <div class="mb-3" id="image-preview"></div>
+
         <!-- BOTÃO SUBMIT -->
         <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
       </form>
@@ -187,4 +218,30 @@
     });
   })();
 </script>
+<script>
+  document.getElementById('id_imagens').addEventListener('change', function(e) {
+      const files = e.target.files;
+      const maxFiles = 3;
+      
+      if(files.length > maxFiles) {
+          alert(`Você pode selecionar no máximo ${maxFiles} imagens`);
+          e.target.value = '';
+      }
+      
+      // Pré-visualização
+      const preview = document.getElementById('image-preview');
+      preview.innerHTML = '';
+      Array.from(files).slice(0, maxFiles).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.className = 'img-thumbnail m-2';
+              img.style.maxWidth = '150px';
+              preview.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+      });
+  });
+  </script>
 {% endblock %}

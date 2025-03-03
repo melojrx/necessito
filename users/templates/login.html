@@ -31,6 +31,12 @@
           padding: 1.5rem !important;
       }
   }
+  .btn {
+    transition: all 0.3s ease;
+  }
+  .btn:hover {
+      transform: translateY(-1px);
+  }
 </style>
 
 {% block content %}
@@ -68,7 +74,7 @@
           <label for="id_password" class="form-label">{{ form.password.label }}</label>
           <div class="input-group">  <!-- Adicionamos o container input-group -->
               {{ form.password }}
-              <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password')">
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password')" aria-label="Mostrar senha">
                   <i class="fas fa-eye"></i>
               </button>
           </div>

@@ -21,10 +21,6 @@
     body {
         font-family: 'Nunito Sans', sans-serif;
     }
-    .form-control:focus {
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-        border-color: #86b7fe;
-    }
     @media (max-width: 768px) {
         /* Ajustes para mobile */
         .card {
@@ -34,7 +30,23 @@
             padding: 1.5rem !important;
         }
     }
-    
+    .btn {
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    #password-strength-container {
+        transition: all 0.3s ease;
+    }
+    #password-requirements li {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+        transition: all 0.2s ease;
+    }
+    .progress-bar {
+        transition: width 0.5s ease, background-color 0.5s ease;
+    }
 </style>
 
 {% block content %}
@@ -97,6 +109,20 @@
                     {% endfor %}
                 </div>
 
+                <!-- Adicione isto após o campo de senha e antes do campo de confirmar senha -->
+                <div class="mt-3" id="password-strength-container">
+                    <div class="progress mb-2" style="height: 5px;">
+                        <div id="password-strength-bar" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small class="form-text text-muted" id="password-strength-text"></small>
+                    <ul class="list-unstyled mt-2" id="password-requirements">
+                        <li class="text-danger" id="length"><i class="fas fa-times-circle"></i> Mínimo 8 caracteres</li>
+                        <li class="text-danger" id="uppercase"><i class="fas fa-times-circle"></i> Letra maiúscula</li>
+                        <li class="text-danger" id="number"><i class="fas fa-times-circle"></i> Número</li>
+                        <li class="text-danger" id="special"><i class="fas fa-times-circle"></i> Caractere especial</li>
+                    </ul>
+                </div>
+
                 <!-- Campo: password2 com toggle -->
                 <div class="mb-3">
                     <label for="id_password2" class="form-label">Confirmar Senha:</label>
@@ -148,4 +174,41 @@
         }
     }
 </script>
+<!-- Calculador de Força de Senha -->
+<script>
+    document.getElementById('id_password1').addEventListener('input', function(e) {
+        const password = e.target.value;
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+    
+        // Atualizar ícones dos requisitos
+        Object.keys(requirements).forEach(key => {
+            const element = document.getElementById(key);
+            if(requirements[key]) {
+                element.classList.remove('text-danger');
+                element.classList.add('text-success');
+                element.querySelector('i').className = 'fas fa-check-circle';
+            } else {
+                element.classList.remove('text-success');
+                element.classList.add('text-danger');
+                element.querySelector('i').className = 'fas fa-times-circle';
+            }
+        });
+    
+        // Calcular força da senha
+        const strength = Object.values(requirements).filter(Boolean).length;
+        const colors = ['bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
+        const messages = ['Muito fraca', 'Fraca', 'Boa', 'Forte'];
+        
+        strengthBar.style.width = `${(strength/4)*100}%`;
+        strengthBar.className = `progress-bar ${colors[strength-1]}`;
+        strengthText.textContent = `Força: ${messages[strength-1] || 'Muito fraca'}`;
+    });
+    </script>
 {% endblock %}

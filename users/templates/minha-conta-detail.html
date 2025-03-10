@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load extras %}
+<!-- {% load extras %} -->
 
 {% block title %}Minha Conta{% endblock %}
 
@@ -42,15 +42,13 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <!-- Coluna da foto -->
+                        <!-- Coluna da foto -->
                 <div class="col-md-4 text-center">
-                    {% if user.foto %}
-                    <img src="{{ user.foto.url }}" alt="Foto de {{ user.first_name }}"
-                        class="img-fluid rounded-circle mb-3 shadow" style="max-width: 200px;">
-                    {% else %}
-                    <img src="{% static 'img/R.jpg' %}" alt="Foto padrão" class="img-fluid rounded-circle mb-3 shadow"
-                        style="max-width: 200px;">
-                    {% endif %}
+                    <img src="{{ user.foto_url }}" 
+                        alt="Foto de {{ user.get_full_name|default:user.email }}"
+                        class="img-fluid rounded-circle mb-3 shadow-lg"
+                        style="width: 200px; height: 200px; object-fit: cover;">
+                     
                 </div>
 
                 <!-- Coluna de detalhes -->

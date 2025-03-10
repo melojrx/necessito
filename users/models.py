@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.forms import ValidationError
 from categories.models import Categoria
+from core import settings
 from users.utils import validate_cpf
 
 class UserManager(BaseUserManager):
@@ -47,7 +48,13 @@ class User(AbstractUser):
         related_name='users_preferred'
     )
     comprovante_endereco = models.FileField(upload_to='comprovantes/', blank=True, null=True)
-    foto = models.ImageField(upload_to='fotos_usuarios/', blank=True, null=True)
+    foto = models.ImageField(
+        upload_to='fotos_usuarios/',
+        blank=True,
+        null=True,
+        verbose_name='Foto de perfil',
+        help_text='Envie uma imagem quadrada para melhor visualização (recomendado 400x400px)'
+    )
     date_joined = models.DateTimeField('date joined', auto_now_add=True)
 
     USERNAME_FIELD = 'email'  # Define email como identificador principal
@@ -79,3 +86,8 @@ class User(AbstractUser):
             except ValidationError as e:
                 # Repassa erro para o Model
                 raise ValidationError({'cpf': e.message})
+    @property
+    def foto_url(self):
+        if self.foto:
+            return self.foto.url
+        return f'{settings.MEDIA_URL}fotos_usuarios/avatar.png'

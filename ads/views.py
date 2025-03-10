@@ -21,7 +21,7 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         # 1) Categorias populares (já existente)
-        context['categorias_populares'] = Categoria.objects.order_by('-id')[:5]
+        context['categorias_populares'] = Categoria.objects.order_by('-id')[:12]
 
         # 2) Anúncios populares (já existente)
         context['anuncios_populares'] = Necessidade.objects.exclude(

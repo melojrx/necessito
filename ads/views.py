@@ -1,4 +1,5 @@
 from pyexpat.errors import messages
+from itertools import islice
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -14,6 +15,11 @@ from .models import AnuncioImagem, Necessidade
 from categories.models import Categoria
 
 
+from itertools import islice
+from django.views.generic import TemplateView
+from categories.models import Categoria
+from .models import Necessidade
+
 class HomeView(TemplateView):
     template_name = 'home.html'  # Diretamente o nome do arquivo
 
@@ -24,9 +30,13 @@ class HomeView(TemplateView):
         context['categorias_populares'] = Categoria.objects.order_by('-id')[:12]
 
         # 2) Anúncios populares (já existente)
-        context['anuncios_populares'] = Necessidade.objects.exclude(
+        anuncios_populares = Necessidade.objects.exclude(
             status__in=['finalizado', 'cancelado']
-        ).order_by('-id')[:4]
+        ).order_by('-id')[:8]  # Limita a 8 anúncios para exemplo
+
+        # Divide os anúncios em grupos de 4
+        anuncios_grouped = [list(islice(anuncios_populares, i, i + 4)) for i in range(0, len(anuncios_populares), 4)]
+        context['anuncios_populares'] = anuncios_grouped
 
         # 3) Lógica para anúncios com base nas categorias preferidas
         user = self.request.user
@@ -38,19 +48,21 @@ class HomeView(TemplateView):
                 anuncios_preferidos = Necessidade.objects.filter(
                     categoria__in=preferred_cats,
                     status='ativo'
-                ).order_by('data_criacao')  # ou .order_by('titulo'), .order_by('data_criacao'), etc.
+                ).order_by('data_criacao')[:8]  # ou .order_by('titulo'), .order_by('data_criacao'), etc.
             else:
                 # Não há categorias preferidas: pega anúncios ativos de forma aleatória
                 anuncios_preferidos = Necessidade.objects.filter(
                     status='ativo'
-                ).order_by('data_criacao')[:4]  # limite de 4, por exemplo
+                ).order_by('data_criacao')[:8]  # limite de 4, por exemplo
         else:
             # Usuário não autenticado: exibe também anúncios ativos aleatórios
             anuncios_preferidos = Necessidade.objects.filter(
                 status='ativo'
-            ).order_by('data_criacao')[:4]
+            ).order_by('data_criacao')[:8]
 
-        context['anuncios_preferidos'] = anuncios_preferidos
+        # Divide os anúncios em grupos de 4
+        anuncios_preferidos_grouped = [list(islice(anuncios_preferidos, i, i + 4)) for i in range(0, len(anuncios_preferidos), 4)]
+        context['anuncios_preferidos'] = anuncios_preferidos_grouped
         
         # 4) Anúncios próximos (cidade do usuário)
         anuncios_proximos = Necessidade.objects.none()
@@ -69,7 +81,10 @@ class HomeView(TemplateView):
                     cliente__estado=user.estado
                 ).order_by('-data_criacao')[:5]
 
-        context['anuncios_proximos'] = anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
+        # Divide os anúncios em grupos de 4
+        anuncios_proximos_final = anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
+        anuncios_proximos_grouped = [list(islice(anuncios_proximos_final, i, i + 4)) for i in range(0, len(anuncios_proximos_final), 4)]
+        context['anuncios_proximos'] = anuncios_proximos_grouped
 
         return context
 

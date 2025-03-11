@@ -1,13 +1,58 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Detalhes da Categoria</h2>
-  <p><strong>Nome:</strong> {{ categoria.nome }}</p>
-  <p><strong>Descrição:</strong> {{ categoria.descricao }}</p>
-  <p><strong>Criado em:</strong> {{ categoria.criado_em }}</p>
-  <p><strong>Modificado em:</strong> {{ categoria.modificado_em }}</p>
 
-  <!-- Exemplo: link para subcategorias dessa categoria -->
-  <a href="{% url 'subcategories_by_category' category_id=categoria.pk %}">
-    Ver Subcategorias
-  </a>
+<div class="container">
+  <div class="card shadow-sm">
+    <div class="card-header bg-light d-flex ">
+      <div class="col-6">
+        <h3 class="mb-0">Detalhes da Categoria</h3>
+      </div>
+      <div class="col-6 d-flex justify-content-end gap-2">
+        <!-- <a href="#" class="btn btn-warning btn-sm">
+          <i class="fas fa-edit"></i> </a>
+        <a href="#" class="btn btn-danger btn-sm">
+          <i class="fas fa-trash-alt"></i> </a> -->
+      </div>
+    </div>
+    <div class="card-body">
+      {% if object.nome %}
+      <h4 class="card-title">Nome: {{ categoria.nome }}</h4>
+      {% endif %}
+      
+      {% if object.descricao %}
+      <p class="card-text">Descrição: <strong>{{ categoria.descricao|capfirst }}</strong></p>
+      {% endif %}
+      
+      {% if object.criado_em %}
+      <p class="card-text">Criado em: <strong>{{ categoria.criado_em }}</strong></p>
+      {% endif %}
+
+      <hr class="my-4">
+
+      <h4 class="card-title">Subcategorias Relacionadas</h4>
+        <ul class="list-group">
+            {% for subcategoria in subcategorias %}
+                <li class="list-group-item">
+                    <strong>{{ subcategoria.nome }}</strong> - {{ subcategoria.descricao }}
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">Nenhuma subcategoria cadastrada.</li>
+            {% endfor %}
+        </ul>
+
+
+
+      
+      {% if object.anuncio %}
+      <a href="{% url 'necessidade_detail' object.anuncio.pk %}" class="btn btn-primary">
+         Ver Detalhes do Anúncio
+      </a>
+    {% endif %}
+    </div>
+  </div>
+  <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Voltar para a Lista de Categorias</a>
+</div>
+
+
+  
 {% endblock %}

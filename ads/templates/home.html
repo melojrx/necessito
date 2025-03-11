@@ -20,7 +20,7 @@
                 <img src="{{ categoria.url_imagem_externa }}" class="card-img-top" alt="{{ categoria.nome }}">
                 {% endif %} -->
                 <div class="card-body">
-                    <a href="{% url 'anuncios_por_categoria' categoria.id %}" style="text-decoration:none" >
+                    <a href="{% url 'category_detail' categoria.id %}" style="text-decoration:none" >
                         <h5>{{ categoria.nome }}</h5>
                       </a>
                     <!-- <p class="card-text">{{ categoria.descricao|truncatechars:50 }}</p> -->

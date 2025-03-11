@@ -34,18 +34,22 @@ class CategoryListView(ListView):
 
 class CategoryDetailView(DetailView):
     """Exibe detalhes de uma categoria específica."""
+     # Aqui, a view pega a PK da URL (pk=<int:pk>)
     model = Categoria
-    template_name = 'categories/category_detail.html'
+    template_name = 'category_detail.html'
     context_object_name = 'categoria'
-    # Aqui, a view pega a PK da URL (pk=<int:pk>)
-
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subcategorias'] = self.object.subcategorias.all()  # Obtém as subcategorias da categoria
+        return context
+   
 # ========== SUBCATEGORIAS ==========
 
 class SubCategoryListView(ListView):
     """Lista subcategorias, podendo filtrar por categoria."""
     model = SubCategoria
-    template_name = 'categories/subcategory_list.html'
+    template_name = 'subcategory_list.html'
     context_object_name = 'subcategorias'
 
     def get_queryset(self):
@@ -61,5 +65,5 @@ class SubCategoryListView(ListView):
 class SubCategoryDetailView(DetailView):
     """Exibe detalhes de uma subcategoria específica."""
     model = SubCategoria
-    template_name = 'categories/subcategory_detail.html'
+    template_name = 'subcategory_detail.html'
     context_object_name = 'subcategoria'

@@ -39,16 +39,35 @@
 
 <!-- Categorias Populares -->
 <h2 class="mb-4 mt-5">Categorias Populares</h2>
-<div class="row d-flex ">
-    {% for categoria in categorias_populares %}
-    <div class="col-lg-2 col-md-3 col-sm-4 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <a href="{% url 'category_detail' categoria.id %}" class="text-decoration-none"><h5 class="card-title">{{ categoria.nome }}</h5></a>
+<div id="categoriasCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% for categoria_group in categorias_populares %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <div class="row d-flex align-items-stretch">
+                {% for categoria in categoria_group %}
+                <div class="col-lg-2 col-md-3 col-sm-4 d-flex mb-4">
+                    <div class="card flex-fill">
+                        <div class="card-body">
+                            <a href="{% if categoria.id %}{% url 'category_detail' categoria.id %}{% else %}#{% endif %}" class="text-decoration-none text-dark">
+                                <h5 class="card-title fw-medium">{{ categoria.nome }}</h5>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
-    </div></a>
-    {% endfor %}
+        {% endfor %}
+    </div>
+    <!-- Controles do Carousel -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Próximo</span>
+    </button>
 </div>
 
 <style>
@@ -232,4 +251,6 @@
     </button>
 </div>
 {% endif %}
+
+
 {% endblock %}

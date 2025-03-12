@@ -24,8 +24,19 @@
             <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
             <div class="d-flex align-items-centermb-3">
                 {% if user == necessidade.cliente %}
-                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">Editar</a>
-                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">Excluir</a>
+                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2"><i class="fa-solid fa-trash-can"></i> Excluir</a>
+                {% endif %}
+                {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
+                {% for orcamento in necessidade.orcamentos.all %}
+                {% if orcamento.status == 'aceito' %}
+                <button class="btn btn-primary btn-finalizar" data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+                    data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Finalizar Anúncio">
+                    <i class="fas fa-check-circle"></i> Finalizar Anúncio
+                </button>
+                {% endif %}
+                {% endfor %}
                 {% endif %}
 
                 <!-- Avaliação -->
@@ -48,19 +59,6 @@
                 </form>
                 {% endif %}
             </div>
-
-            {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
-            {% for orcamento in necessidade.orcamentos.all %}
-            {% if orcamento.status == 'aceito' %}
-            <button class="btn btn-primary btn-finalizar" data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
-                data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" data-bs-toggle="tooltip"
-                data-bs-placement="top" title="Finalizar Anúncio">
-                <i class="fas fa-check-circle"></i> Finalizar Anúncio
-            </button>
-            {% endif %}
-            {% endfor %}
-            {% endif %}
-
             <hr>
             <!-- Galeria de Imagens -->
             {% if necessidade.imagens.all %}

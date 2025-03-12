@@ -26,8 +26,9 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1) Categorias populares (já existente)
-        context['categorias_populares'] = Categoria.objects.order_by('-id')[:12]
+        # 1) Categorias populares
+        categorias_populares = Categoria.objects.order_by('-id')[:24]  # Limita a 24 categorias (2 slides de 12)
+        context['categorias_populares'] = [list(islice(categorias_populares, i, i + 12)) for i in range(0, len(categorias_populares), 12)]
 
         # 2) Anúncios populares (já existente)
         anuncios_populares = Necessidade.objects.exclude(

@@ -16,9 +16,7 @@
         transition: transform 0.2s ease; /* Adiciona transição suave */
     }
 
-    /* Efeito de zoom ao passar o mouse */
-    
-
+   
     /* Ajustes para o carousel */
     .carousel {
         padding: 0 40px; /* Adiciona espaçamento interno */
@@ -53,6 +51,41 @@
     {% endfor %}
 </div>
 
+<style>
+    /* Estilos personalizados para os cards */
+    .card {
+        height: 100%; /* Faz o card ocupar toda a altura disponível */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-img-top {
+        height: 200px; /* Altura fixa para as imagens */
+        object-fit: cover; /* Mantém a proporção da imagem */
+    }
+
+    .card-body {
+        flex-grow: 1; /* Faz o corpo do card ocupar o espaço restante */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Distribui o espaço entre os elementos */
+    }
+
+    .card-title {
+        font-size: 1.1rem; /* Tamanho do título */
+        font-weight: bold; /* Negrito no título */
+    }
+
+    .card-text {
+        font-size: 0.9rem; /* Tamanho do texto */
+        margin-bottom: 0.5rem; /* Espaçamento entre os textos */
+    }
+
+    .badge {
+        font-size: 0.8rem; /* Tamanho do badge */
+    }
+</style>
+
 <!-- Anúncios Populares -->
 <h2 class="mb-4 mt-5">Anúncios Populares</h2>
 <div id="anunciosPopularesCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -68,14 +101,16 @@
                             {% if anuncio.imagens.first %}
                             <img src="{{ anuncio.imagens.first.imagem.url }}" class="card-img-top" alt="{{ anuncio.titulo }}">
                             {% else %}
-                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary">
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="height: 200px;">
                                 <p class="text-center">Anúncio sem imagem</p>
                             </div>
                             {% endif %}
                             <div class="card-body">
-                                <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                                <h6 class="card-title">{{ anuncio.titulo }}</h6>
                                 <p class="card-text">{{ anuncio.categoria }}</p>
+                                {% if anuncio.cliente.cidade or anuncio.cliente.estado %}
                                 <p class="card-text"><i class="fas fa-map-marker-alt"></i> {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}</p>
+                                {% endif %}
                                 <p class="card-text">{{ anuncio.data_criacao }}</p>
                                 {% if anuncio.duracao %}
                                 <p class="badge text-bg-secondary">{{ anuncio.duracao }}</p>
@@ -116,12 +151,12 @@
                             {% if anuncio.imagens.first %}
                             <img src="{{ anuncio.imagens.first.imagem.url }}" class="card-img-top" alt="{{ anuncio.titulo }}">
                             {% else %}
-                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary">
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="height: 200px;">
                                 <p class="text-center">Anúncio sem imagem</p>
                             </div>
                             {% endif %}
                             <div class="card-body">
-                                <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                                <h6 class="card-title">{{ anuncio.titulo }}</h6>
                                 <p class="card-text">{{ anuncio.categoria }}</p>
                                 <p class="card-text"><i class="fas fa-map-marker-alt"></i> {{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}</p>
                                 <p class="card-text">{{ anuncio.data_criacao }}</p>
@@ -165,7 +200,7 @@
                             {% if anuncio.imagens.first %}
                             <img src="{{ anuncio.imagens.first.imagem.url }}" class="card-img-top" alt="{{ anuncio.titulo }}">
                             {% else %}
-                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary">
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light text-secondary" style="height: 200px;">
                                 <p class="text-center">Anúncio sem imagem</p>
                             </div>
                             {% endif %}

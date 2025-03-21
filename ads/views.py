@@ -1,3 +1,4 @@
+from django.utils import timezone
 from pyexpat.errors import messages
 from itertools import islice
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 import requests
 from ads.forms import AdsForms
+from notifications.models import Notification
 from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
 from .models import AnuncioImagem, Necessidade
@@ -129,6 +131,31 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
         imagens = self.request.FILES.getlist('imagens')
         for img in imagens[:3]:  # Garante o limite máximo
             AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+        
+        # Calcula a diferença de dias
+        # Usamos data_criacao (DateTimeField, auto_now_add=True) que você tem no model Necessidade
+        time_diff = timezone.now() - self.object.data_criacao
+        # days_diff = time_diff.days  # Quantos dias inteiros passaram
+
+        # Formata “Há 0 dias” ou “Há 1 dia” ou “Há 2 dias” etc.
+        # if days_diff == 0:
+        #     dias_str = "Hoje"  # ou "Há menos de 1 dia"
+        # elif days_diff == 1:
+        #     dias_str = "Há 1 dia"
+        # else:
+        #     dias_str = f"Há {days_diff} dias"
+
+        # Cria a notificação com HTML embutido
+        Notification.objects.create(
+            user=self.request.user,
+            message=(
+                f"<strong>Novo Anúncio Criado</strong><br>"
+                # f"<strong>{self.object.titulo}</strong><br>"
+                # f"<strong>{self.object.id}</strong><br>"
+                # f"<i class='fas fa-clock'></i> {dias_str}"
+            ),
+            necessidade=self.object
+        )
 
         messages.success(self.request, "Anúncio criado com sucesso!")
         return super().form_valid(form)

@@ -12,6 +12,7 @@ urlpatterns = [
     path('categorias/', include('categories.urls')),
     path('orcamentos/', include('budgets.urls')),
     path('rankings/', include('rankings.urls')),
+    path('notifications/', include('notifications.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

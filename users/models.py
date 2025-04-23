@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.forms import ValidationError
+from django.core.validators import RegexValidator
 from categories.models import Categoria
 from core import settings
 from users.utils import validate_cpf
@@ -39,7 +40,7 @@ class User(AbstractUser):
     bairro = models.CharField(max_length=100, blank=True)
     cep = models.CharField(max_length=15, blank=True)
     cidade = models.CharField(max_length=100, blank=True)
-    estado = models.CharField(max_length=2, blank=True)
+    estado = models.CharField(max_length=2, blank=True, validators=[RegexValidator(r'^[A-Z]{2}$', 'Use siglas como CE, SP, RJ …')])
     cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
     cnpj = models.CharField(max_length=18, unique=True, null=True, blank=True)
     preferred_categories = models.ManyToManyField(
@@ -91,3 +92,7 @@ class User(AbstractUser):
         if self.foto:
             return self.foto.url
         return f'{settings.MEDIA_URL}fotos_usuarios/avatar.png'
+    
+    @property
+    def result_type(self):
+        return 'user'

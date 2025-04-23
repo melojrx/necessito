@@ -66,6 +66,10 @@ class Necessidade(models.Model):
 
     def get_absolute_url(self):
         return reverse('necessidade_detail', args=[str(self.pk)])
+    
+    @property
+    def result_type(self):
+        return 'ads'
 
     def __str__(self):
         return self.titulo

@@ -31,6 +31,10 @@ class Categoria(models.Model):
 
     class Meta:
         ordering = ['nome']
+        
+    @property
+    def result_type(self):
+        return 'categoria'
 
     def __str__(self):
         return self.nome
@@ -94,3 +98,7 @@ class SubCategoria(models.Model):
 
     def __str__(self):
         return f"{self.nome} (Categoria: {self.categoria.nome})"
+    
+    @property
+    def result_type(self):
+        return 'subcategoria'

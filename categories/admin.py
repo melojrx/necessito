@@ -4,7 +4,7 @@ from .models import Categoria, SubCategoria
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'criado_em', 'modificado_em')
+    list_display = ('nome', 'criado_em', 'modificado_em', 'icone')
     search_fields = ('nome',)
     readonly_fields = ('imagem_preview',)
 

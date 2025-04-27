@@ -26,6 +26,11 @@ class Categoria(models.Model):
         null=True,
         help_text="URL de uma imagem externa"
     )
+    icone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Classe do ícone do Font Awesome (ex: 'fas fa-wrench')"
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(auto_now=True)
 

@@ -55,7 +55,7 @@
                               class="w-100">
                       
                           <!-- sigla escolhida (enviada no submit) -->
-                          <input type="hidden" name="state" id="stateInput" value="{{ selected_state }}">
+                          <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
                       
                           <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
                       
@@ -83,16 +83,22 @@
                               </button>
                       
                               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
-                                {% for st in states %}
                                 <li>
-                                  <a class="dropdown-item {% if st.abbreviation == selected_state %}active{% endif %}"
-                                     href="#"
-                                     data-state="{{ st.abbreviation }}">
-                                    {{ st.abbreviation }}   <!-- APENAS a sigla -->
+                                  <a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
+                                    Todos os estados
                                   </a>
                                 </li>
+                                {% for st in states %}
+                                  <li>
+                                    <a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
+                                       href="#"
+                                       data-state="{{ st.abbreviation }}">
+                                      {{ st.abbreviation }}
+                                    </a>
+                                  </li>
                                 {% endfor %}
                               </ul>
+                              
                             </div>
                       
                             <!-- lupa -->

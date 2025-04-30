@@ -1,6 +1,8 @@
 from django.views.generic import ListView
+from django.contrib import messages
 from django.db.models import Q, Prefetch
 from ads.models import Necessidade, Categoria, AnuncioImagem
+import math
 
 class NecessidadeSearchAllView(ListView):
     model = Necessidade
@@ -18,17 +20,15 @@ class NecessidadeSearchAllView(ListView):
             )
         )
 
-        self.state_sigla = self.request.GET.get("state", "CE").upper()
-        qs = qs.filter(cliente__estado=self.state_sigla)
+        self.state_sigla = self.request.GET.get("state", "todos").upper()
+        if self.state_sigla != "TODOS":
+            qs = qs.filter(cliente__estado=self.state_sigla)
 
         self.term = self.request.GET.get("q", "").strip()
         self.campos = self.request.GET.getlist("campos") or []
-        
         self.cliente = self.request.GET.get("cliente", "").strip()
         if self.cliente:
             qs = qs.filter(cliente__first_name__icontains=self.cliente)
-
-        
 
         if self.term:
             conditions = Q()
@@ -49,6 +49,43 @@ class NecessidadeSearchAllView(ListView):
                 Q(cliente__bairro__icontains=self.local)
             )
 
+        # Filtro por geolocalização
+        lat = self.request.GET.get("lat")
+        lon = self.request.GET.get("lon")
+        raio_km = self.request.GET.get("raio", "0")
+
+        # Exibe alerta se raio > 0 mas sem localização
+        if raio_km and float(raio_km) > 0 and (not lat or not lon):
+            messages.warning(self.request, "Para aplicar o filtro de raio, é necessário ativar sua localização.")
+
+        if lat and lon and raio_km:
+            try:
+                lat = float(lat)
+                lon = float(lon)
+                raio_km = float(raio_km)
+
+                if raio_km > 0:
+                    def haversine(lat1, lon1, lat2, lon2):
+                        R = 6371
+                        dlat = math.radians(lat2 - lat1)
+                        dlon = math.radians(lon2 - lon1)
+                        a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
+                        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                        return R * c
+
+                    resultado_ids = []
+                    for anuncio in qs:
+                        cliente = anuncio.cliente
+                        if cliente.lat and cliente.lon:
+                            distancia = haversine(lat, lon, cliente.lat, cliente.lon)
+                            if distancia <= raio_km:
+                                resultado_ids.append(anuncio.id)
+
+                    qs = qs.filter(id__in=resultado_ids) if resultado_ids else Necessidade.objects.none()
+
+            except (ValueError, TypeError):
+                pass
+
         return qs.order_by("-data_criacao")
 
     def get_context_data(self, **kwargs):
@@ -57,7 +94,10 @@ class NecessidadeSearchAllView(ListView):
         ctx["state"] = self.state_sigla
         ctx["local"] = self.local
         ctx["campos"] = self.campos
+        ctx["cliente"] = self.cliente
+        ctx["lat"] = self.request.GET.get("lat", "")
+        ctx["lon"] = self.request.GET.get("lon", "")
+        ctx["raio"] = self.request.GET.get("raio", "0")
         ctx["menu_categorias"] = Categoria.objects.all()
         ctx["opcoes_campos"] = ["titulo", "descricao", "categoria", "subcategoria"]
-        ctx["cliente"] = self.cliente
         return ctx

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  {% if term %}“{{ term }}” – {% endif %}Anúncios em {{ state }}
+  {% if term %}"{{ term }}" – {% endif %}Anúncios em {{ state }}
 {% endblock %}
 
 {% block content %}
@@ -12,9 +12,9 @@
     {% include "components/_menu_lateral.html" %}
 
     <main class="col-12 col-lg-10">
-
+      
       <h2 class="h4 fw-semibold mb-1">
-        {% if term %}Resultados para “{{ term }}”{% else %}Todos os anúncios{% endif %} em {{ state }}
+        {% if term %}Resultados para "{{ term }}"{% else %}Todos os anúncios{% endif %} em {{ state }}
       </h2>
       <p class="small text-muted mb-3">
         {{ page_obj.start_index }} – {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados
@@ -59,12 +59,15 @@
           <i class="fas fa-undo-alt me-1"></i> Limpar Filtros
         </a>
         {% endif %}
-
       </div>
 
-      <!-- Formulário único de filtros -->
+      <!-- Formulário de Filtros -->
       <form method="get" class="mb-4">
         <input type="hidden" name="state" value="{{ state }}">
+        <input type="hidden" name="lat" id="lat" value="{{ lat }}">
+        <input type="hidden" name="lon" id="lon" value="{{ lon }}">
+        <input type="hidden" name="raio" id="raio" value="{{ raio|default:0 }}">
+
         <div class="row g-2 align-items-center mb-3">
           <div class="col-md-4">
             <input type="text" name="q" class="form-control rounded-4" placeholder="Buscar por título, descrição, categoria ou subcategoria" value="{{ term }}">
@@ -85,7 +88,7 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="row g-2 align-items-center mb-3">
           <div class="col-md-6">
             <label class="form-label fw-semibold small">Onde buscar:</label>
             {% for op in opcoes_campos %}
@@ -94,6 +97,18 @@
                 <label class="form-check-label">{{ op|title }}</label>
               </div>
             {% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold small">
+              Raio de busca (km): <span id="raioValor">{{ raio|default:"0" }}</span> km
+            </label>
+            <input type="range"
+                   class="form-range"
+                   min="0"
+                   max="2000"
+                   step="1"
+                   id="sliderRaio"
+                   value="{{ raio|default:0 }}">
           </div>
         </div>
       </form>
@@ -160,27 +175,13 @@
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-mark {
-  background-color: #fff3cd;
-  padding: 0 3px;
-  border-radius: 3px;
-}
-.listing-card:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-}
-</style>
-{% endblock %}
-
 {% block extra_scripts %}
 <script>
   function usarLocalizacaoAtual() {
     const btn = document.getElementById('btn-localizacao');
     const originalContent = btn.innerHTML;
-    
+
     if (navigator.geolocation) {
-      // Mostra spinner e desabilita o botão
       btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Localizando...`;
       btn.disabled = true;
 
@@ -188,32 +189,22 @@ mark {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
-          const data = await response.json();
+        document.getElementById('lat').value = lat;
+        document.getElementById('lon').value = lon;
 
-          if (data && data.address) {
-            const cidade = data.address.city || data.address.town || data.address.village || '';
-            const bairro = data.address.suburb || '';
-
-            let localizacao = bairro && cidade ? `${bairro}, ${cidade}` : cidade || bairro;
-
-            if (localizacao) {
-              document.querySelector('input[name="local"]').value = localizacao;
-            } else {
-              alert("Não foi possível determinar a sua cidade ou bairro.");
-            }
-          } else {
-            alert("Não foi possível obter informações de localização.");
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        if (data && data.address) {
+          const cidade = data.address.city || data.address.town || data.address.village || '';
+          const bairro = data.address.suburb || '';
+          const localizacao = bairro && cidade ? `${bairro}, ${cidade}` : cidade || bairro;
+          if (localizacao) {
+            document.querySelector('input[name="local"]').value = localizacao;
           }
-
-        } catch (error) {
-          alert("Erro ao consultar serviço de localização.");
-        } finally {
-          // Restaura o botão
-          btn.innerHTML = originalContent;
-          btn.disabled = false;
         }
+
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
 
       }, function() {
         alert("Não foi possível obter sua localização atual.");
@@ -225,5 +216,23 @@ mark {
       alert("Geolocalização não é suportada pelo seu navegador.");
     }
   }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const sliderRaio = document.getElementById('sliderRaio');
+    const raioValor = document.getElementById('raioValor');
+    const raioHidden = document.getElementById('raio');
+
+    sliderRaio.addEventListener('input', function () {
+      raioValor.textContent = this.value;
+      raioHidden.value = this.value;
+    });
+
+    const form = sliderRaio.closest("form");
+    if (form) {
+      form.addEventListener("submit", function () {
+        raioHidden.value = sliderRaio.value;
+      });
+    }
+  });
 </script>
 {% endblock %}

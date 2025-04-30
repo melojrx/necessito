@@ -1,3 +1,4 @@
+import requests
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.forms import ValidationError
@@ -13,6 +14,20 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+
+        # Buscar coordenadas com base no CEP se possível
+        cep = extra_fields.get("cep", "").replace("-", "").strip()
+        if cep:
+            try:
+                response = requests.get(f"https://nominatim.openstreetmap.org/search?format=json&q={cep}", headers={"User-Agent": "DjangoApp"})
+                if response.status_code == 200:
+                    data = response.json()
+                    if data:
+                        user.lat = float(data[0]['lat'])
+                        user.lon = float(data[0]['lon'])
+            except Exception as e:
+                pass  # Em produção, registrar o erro
+
         user.save(using=self._db)
         return user
 
@@ -43,6 +58,8 @@ class User(AbstractUser):
     estado = models.CharField(max_length=2, blank=True, validators=[RegexValidator(r'^[A-Z]{2}$', 'Use siglas como CE, SP, RJ …')])
     cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
     cnpj = models.CharField(max_length=18, unique=True, null=True, blank=True)
+    lat = models.FloatField(null=True, blank=True)
+    lon = models.FloatField(null=True, blank=True)
     preferred_categories = models.ManyToManyField(
         Categoria,
         blank=True,
@@ -72,7 +89,7 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.first_name
-    
+
     def clean(self):
         """
         Validações do Model (chamadas quando form.is_valid() -> form.save()
@@ -87,12 +104,13 @@ class User(AbstractUser):
             except ValidationError as e:
                 # Repassa erro para o Model
                 raise ValidationError({'cpf': e.message})
+
     @property
     def foto_url(self):
         if self.foto:
             return self.foto.url
         return f'{settings.MEDIA_URL}fotos_usuarios/avatar.png'
-    
+
     @property
     def result_type(self):
         return 'user'

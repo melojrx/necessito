@@ -16,7 +16,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-xup#03vag3x1dtuvnlw16r5kdwjepy577ac53cxi0ia5(5rbm5"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
 
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
@@ -178,14 +179,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = "Necessito <no-reply@necessito.br>"
 EMAIL_SUBJECT_PREFIX = "[Necessito]"
 
-# Em produção, configure o envio de e-mails com o Gmail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'necessitobr@gmail.com'
-EMAIL_HOST_PASSWORD = 'jbpk deme rlnm ltsa'
-DEFAULT_FROM_EMAIL = 'Necessito <necessitobr@gmail.com>'
+# Backend de e-mail
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Necessito <no-reply@necessito.br>")
+EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "[Necessito]")
 
 # Tamanho máximo de upload (5MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB

@@ -26,11 +26,20 @@ class Categoria(models.Model):
         null=True,
         help_text="URL de uma imagem externa"
     )
+    icone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Classe do ícone do Font Awesome (ex: 'fas fa-wrench')"
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['nome']
+        
+    @property
+    def result_type(self):
+        return 'categoria'
 
     def __str__(self):
         return self.nome
@@ -94,3 +103,7 @@ class SubCategoria(models.Model):
 
     def __str__(self):
         return f"{self.nome} (Categoria: {self.categoria.nome})"
+    
+    @property
+    def result_type(self):
+        return 'subcategoria'

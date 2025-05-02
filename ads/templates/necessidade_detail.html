@@ -1,84 +1,110 @@
 {% extends 'base.html' %}
-
 {% load custom_filters %}
+{% load static %}
+
 
 {% block title %}Detalhes da Necessidade{% endblock %}
 
 {% block content %}
+
 <style>
+    /* ---------- Galeria ---------- */
     .carousel-item img {
-        max-height: 400px; /* Ajuste a altura conforme necessário */
-        object-fit: cover; /* Mantém a proporção da imagem */
+        max-height: 400px;      /* limita a altura da imagem */
+        object-fit: cover;      /* mantém a proporção */
     }
-</style>
-<div class="container">
+
+ </style>   
+    
+ <div class="container">
     <div class="row">
-        <!-- Coluna Esquerda: Detalhes da Necessidade -->
+        {# ========================= COLUNA ESQUERDA ======================== #}
         <div class="col-md-8 mb-2">
+
+            {# ---- Cabeçalho do anúncio ---- #}
             <h2>{{ necessidade.titulo }}</h2>
             <p><strong>Publicado em:</strong> {{ necessidade.data_criacao }}</p>
             <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
             <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
-            <p><strong>Quantidade:</strong> {{ necessidade.quantidade }} </p>
+            <p><strong>Quantidade:</strong> {{ necessidade.quantidade }}</p>
             <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
             <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
-            <div class="d-flex align-items-centermb-3">
+
+            {# ---- Botões de ação (editar, excluir, finalizar, avaliar) ---- #}
+            <div class="d-flex align-items-center mb-3">
+
+                {# Editar / Excluir – apenas para o cliente dono #}
                 {% if user == necessidade.cliente %}
-                <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
-                <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2"><i class="fa-solid fa-trash-can"></i> Excluir</a>
-                {% endif %}
-                {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
-                {% for orcamento in necessidade.orcamentos.all %}
-                {% if orcamento.status == 'aceito' %}
-                <button class="btn btn-primary btn-finalizar" data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
-                    data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" data-bs-toggle="tooltip"
-                    data-bs-placement="top" title="Finalizar Anúncio">
-                    <i class="fas fa-check-circle"></i> Finalizar Anúncio
-                </button>
-                {% endif %}
-                {% endfor %}
+                  <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">
+                      <i class="fa-solid fa-pen-to-square"></i> Editar
+                  </a>
+                  <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">
+                      <i class="fa-solid fa-trash-can"></i> Excluir
+                  </a>
                 {% endif %}
 
-                <!-- Avaliação -->
-                {% if user == necessidade.cliente or user == fornecedor %}
-                <form action="{% url 'avaliar_negociacao' necessidade.pk %}" method="post" class="d-inline ms-auto">
-                    {% csrf_token %}
-                    <label for="estrelas" class="form-label me-2">Avalie este anúncio:</label>
-                    <select name="estrelas" id="estrelas" class="form-select form-select-sm d-inline-block"
-                        style="width: auto;" {% if not necessidade.status == "finalizado" %} disabled {% endif %}>
-                        <option value="5" {% if not necessidade.status == "finalizado" %} selected {% endif %}>★★★★★</option>
-                        <option value="4">★★★★</option>
-                        <option value="3">★★★</option>
-                        <option value="2">★★</option>
-                        <option value="1">★</option>
-                    </select>
-                    <button type="submit" class="btn btn-success btn-sm ms-2" {% if not necessidade.status == "finalizado" %}
-                        disabled {% endif %}>
-                        Enviar
-                    </button>
-                </form>
+                {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
+                {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
+                  {% for orcamento in necessidade.orcamentos.all %}
+                    {% if orcamento.status == 'aceito' %}
+                      <button class="btn btn-primary btn-finalizar"
+                              data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#confirmarFinalizacaoModal"
+                              title="Finalizar Anúncio">
+                        <i class="fas fa-check-circle"></i> Finalizar Anúncio
+                      </button>
+                    {% endif %}
+                  {% endfor %}
                 {% endif %}
+
+              {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
+              {% if necessidade.status == 'finalizado' %}
+              {% if user == necessidade.cliente and not avaliacao_cliente %}
+              <!-- Cliente ainda não avaliou -->
+              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#avaliacaoModal">
+                <i class="fas fa-star me-1"></i> Avaliar Negociação
+              </a>
+              {% elif user == fornecedor and not avaliacao_fornecedor %}
+              <!-- Fornecedor ainda não avaliou -->
+              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#avaliacaoModal">
+                <i class="fas fa-star me-1"></i> Avaliar Negociação
+              </a>
+              {% endif %}
+              {% endif %}
+
+
             </div>
+
             <hr>
-            <!-- Galeria de Imagens -->
+
+            {# ---- Galeria de imagens do anúncio ---- #}
             {% if necessidade.imagens.all %}
             <div class="row mb-4">
                 <div class="col-md-12">
                     <h3>Galeria de Imagens</h3>
+
                     <div id="galeriaCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             {% for imagem in necessidade.imagens.all %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <img src="{{ imagem.imagem.url }}" class="d-block w-100" alt="Imagem {{ forloop.counter }}">
-                            </div>
+                              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                  <img src="{{ imagem.imagem.url }}"
+                                       class="d-block w-100"
+                                       alt="Imagem {{ forloop.counter }}">
+                              </div>
                             {% endfor %}
                         </div>
-                        <!-- Controles do Carousel -->
-                        <button class="carousel-control-prev" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="prev">
+
+                        <!-- Controles -->
+                        <button class="carousel-control-prev" type="button"
+                                data-bs-target="#galeriaCarousel" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Anterior</span>
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="next">
+                        <button class="carousel-control-next" type="button"
+                                data-bs-target="#galeriaCarousel" data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Próximo</span>
                         </button>
@@ -86,18 +112,16 @@
                 </div>
             </div>
             {% endif %}
-            
+
             <hr>
+
+            {# ---- Tabela de orçamentos recebidos ---- #}
             <h3>Orçamentos Recebidos</h3>
             <div class="table-responsive">
                 <table class="table table-striped table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>Fornecedor</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th>Data</th>
-                            <th>Ações</th>
+                            <th>Fornecedor</th><th>Valor</th><th>Status</th><th>Data</th><th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,135 +130,142 @@
                             <td>{{ orcamento.fornecedor.get_full_name }}</td>
                             <td>{{ orcamento.valor|moeda_brasileira }}</td>
                             <td>
-                                <span class="badge 
-                                {% if orcamento.status == 'pendente' %} text-bg-secondary
-                                {% elif orcamento.status == 'aguardando_aceite_fornecedor' %} text-bg-warning
-                                {% elif orcamento.status == 'aceito' %} text-bg-success
-                                {% elif orcamento.status == 'rejeitado' %} text-bg-danger
-                                {% endif %}">
-                                Status: {{ orcamento.get_status_display }}
+                                <span class="badge
+                                    {% if orcamento.status == 'pendente' %}text-bg-secondary
+                                    {% elif orcamento.status == 'aguardando_aceite_fornecedor' %}text-bg-warning
+                                    {% elif orcamento.status == 'aceito' %}text-bg-success
+                                    {% elif orcamento.status == 'rejeitado' %}text-bg-danger{% endif %}">
+                                    Status: {{ orcamento.get_status_display }}
+                                </span>
                             </td>
-                            
                             <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
                             <td>
+                                {# Ações: baixar anexo, aceitar, rejeitar #}
                                 <div class="d-flex flex-wrap gap-2">
+                                    {# --- Anexo --- #}
                                     {% if orcamento.arquivo_anexo %}
-                                    {% if user == necessidade.cliente or user == orcamento.fornecedor %}
-                                    <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-primary"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Baixar Anexo">
-                                        <i class="fas fa-file-download"></i>
-                                    </a>
+                                      {% if user == necessidade.cliente or user == orcamento.fornecedor %}
+                                          <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
+                                             class="btn btn-primary" data-bs-toggle="tooltip"
+                                             title="Baixar Anexo">
+                                              <i class="fas fa-file-download"></i>
+                                          </a>
+                                      {% else %}
+                                          <span class="badge bg-secondary" data-bs-toggle="tooltip"
+                                                title="Você não tem permissão para baixar este anexo">
+                                              <i class="fas fa-lock"></i> Restrito
+                                          </span>
+                                      {% endif %}
                                     {% else %}
-                                    <span class="badge bg-secondary" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Você não tem permissão para baixar este anexo">
-                                        <i class="fas fa-lock"></i> Restrito
-                                    </span>
-                                    {% endif %}
-                                    {% else %}
-                                    <span class="badge bg-danger">Sem anexo</span>
+                                      <span class="badge bg-danger">Sem anexo</span>
                                     {% endif %}
 
+                                    {# --- Aceitar orçamento --- #}
                                     {% if user == necessidade.cliente %}
-                                    {% if orcamento.status == "pendente" %}
-                                    <button class="btn btn-success btn-aceitar"
-                                        data-url="{% url 'aceitar_orcamento' orcamento.id %}" data-bs-toggle="modal"
-                                        data-bs-target="#confirmarAceiteModal" title="Aceitar Orçamento">
-                                        <i class="fas fa-thumbs-up"></i>
-                                    </button>
-                                    {% else %}
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Orçamento já processado. Não pode ser aceito.">
-                                        <button class="btn btn-success" disabled>
+                                      {% if orcamento.status == "pendente" %}
+                                        <button class="btn btn-success btn-aceitar"
+                                                data-url="{% url 'aceitar_orcamento' orcamento.id %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmarAceiteModal"
+                                                title="Aceitar Orçamento">
                                             <i class="fas fa-thumbs-up"></i>
                                         </button>
-                                    </span>
-                                    {% endif %}
+                                      {% else %}
+                                        <button class="btn btn-success" disabled
+                                                title="Orçamento já processado">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                      {% endif %}
                                     {% endif %}
 
+                                    {# --- Rejeitar orçamento --- #}
                                     {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
-                                    {% if orcamento.status == "pendente" %}
-                                    <button class="btn btn-danger btn-rejeitar"
-                                        data-url="{% url 'rejeitar_orcamento' orcamento.id %}" data-bs-toggle="modal"
-                                        data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
-                                        <i class="fas fa-thumbs-down"></i>
-                                    </button>
-                                    {% else %}
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Este orçamento já foi processado e não pode ser rejeitado.">
-                                        <button class="btn btn-danger" disabled>
+                                      {% if orcamento.status == "pendente" %}
+                                        <button class="btn btn-danger btn-rejeitar"
+                                                data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmarRejeicaoModal"
+                                                title="Rejeitar Orçamento">
                                             <i class="fas fa-thumbs-down"></i>
                                         </button>
-                                    </span>
-                                    {% endif %}
+                                      {% else %}
+                                        <button class="btn btn-danger" disabled
+                                                title="Orçamento já processado">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                      {% endif %}
                                     {% endif %}
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center">Nenhum orçamento recebido ainda.</td>
-                        </tr>
+                        <tr><td colspan="5" class="text-center">Nenhum orçamento recebido ainda.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-        <!-- Coluna Direita: Cards -->
+
+        {# ========================= COLUNA DIREITA (CARDS) ======================== #}
         <div class="col-md-4">
-            <!-- Primeiro Card: Categoria e Contato -->
+
+            {# ----- Card Categoria + contatos ----- #}
             <div class="card mb-4 shadow">
                 <div class="card-body">
                     <h5 class="card-title"><i class="fa-solid fa-icons"></i> Categoria</h5>
                     <p class="card-text">{{ necessidade.categoria.nome }}</p>
-                    <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst}}</span>
+                    <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst }}</span>
                     <hr>
-                    <h5 class="card-title"><i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}</h5>
+                    <h5 class="card-title">
+                        <i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}
+                    </h5>
 
                     <div class="d-flex justify-content-around mt-3">
-                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="Iniciar Chat com o Anunciante">
+                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip"
+                           title="Iniciar Chat com o Anunciante">
                             <i class="fas fa-comments"></i>
                         </a>
-                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
-                                     Você não pode submeter orçamento neste anúncio.
-                                     {% else %}
-                                     Enviar orçamento para este anúncio
-                                     {% endif %}">
-                            <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
-                                     {% url 'submeter_orcamento' necessidade.pk %}
-                                     {% else %}#{% endif %}"
-                                class="btn btn-warning 
-                                      {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}">
-                                <i class="fas fa-folder-plus"></i>
-                            </a>
-                        </span>
 
+                        {# Botão Submeter Orçamento (desabilita se não puder) #}
+                        <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
+                                     {% url 'submeter_orcamento' necessidade.pk %}
+                                 {% else %}#{% endif %}"
+                           class="btn btn-warning
+                                  {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
+                           data-bs-toggle="tooltip"
+                           title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
+                                     Você não pode submeter orçamento neste anúncio.
+                                  {% else %}
+                                     Enviar orçamento para este anúncio
+                                  {% endif %}">
+                            <i class="fas fa-folder-plus"></i>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Segundo Card: Informações do Anunciante -->
+            {# ----- Card Anunciante ----- #}
             <div class="card mb-4 shadow">
                 <div class="card-body">
-                    <h5 class="card-title"> <i class="fas fa-bullhorn text-primary"></i> Anunciante</h5>
+                    <h5 class="card-title"><i class="fas fa-bullhorn text-primary"></i> Anunciante</h5>
                     <p><strong>Nome:</strong> {{ necessidade.cliente.get_full_name|capfirst }}</p>
                     <p><strong>Último Acesso:</strong> {{ necessidade.cliente.last_login|date:"d/m/Y H:i" }}</p>
                     <p><strong>Data de Cadastro:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</p>
-                    <a href="{% url 'user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
-                        <i class="fas fa-user me-2"></i> Ver Perfil
+                    <a href="{% url 'user_profile' necessidade.cliente.pk %}"
+                       class="btn btn-secondary w-100">
+                       <i class="fas fa-user me-2"></i> Ver Perfil
                     </a>
                 </div>
             </div>
 
-            <!-- Localização no Mapa -->
+            {# ----- Card Localização (mapa OpenStreetMap via Leaflet) ----- #}
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="card-title"> <i class="fas fa-map-marker-alt"></i> Localização</h5>
+                    <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Localização</h5>
                     <p><strong>Cidade:</strong> {{ necessidade.cliente.cidade }}</p>
                     <p><strong>Estado:</strong> {{ necessidade.cliente.estado }}</p>
                     <p><strong>Bairro:</strong> {{ necessidade.cliente.bairro }}</p>
                     <p><strong>CEP:</strong> {{ necessidade.cliente.cep }}</p>
-                    <!-- Mapa -->
                     <div id="map" style="height: 300px; width: 100%;"></div>
                 </div>
             </div>
@@ -242,213 +273,216 @@
     </div>
 </div>
 
-<!-- Modal de Confirmação -->
-<div class="modal fade" id="confirmarAceiteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Confirmar Aceite do Orçamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                Tem certeza que deseja aceitar este orçamento?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="confirmarAceiteBtn">Aceitar</button>
-            </div>
-        </div>
+
+
+<!-- Modal: Aceitar orçamento -->
+<div class="modal fade" id="confirmarAceiteModal" tabindex="-1" aria-labelledby="modalAceiteLabel" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="modalAceiteLabel">Confirmar Aceite do Orçamento</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
     </div>
-</div>
-<!-- Modal de Confirmação de Rejeição -->
-<div class="modal fade" id="confirmarRejeicaoModal" tabindex="-1" aria-labelledby="modalRejeicaoLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalRejeicaoLabel">Confirmar Rejeição do Orçamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                Tem certeza que deseja rejeitar este orçamento?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmarRejeicaoBtn">Rejeitar</button>
-            </div>
-        </div>
+    <div class="modal-body">Tem certeza que deseja aceitar este orçamento?</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="button" class="btn btn-success" id="confirmarAceiteBtn">Aceitar</button>
     </div>
-</div>
-<!-- Modal de Confirmação de Finalização do Anuncio -->
-<div class="modal fade" id="confirmarFinalizacaoModal" tabindex="-1" aria-labelledby="modalFinalizacaoLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalFinalizacaoLabel">Confirmar Finalização</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                Tem certeza que deseja finalizar este anúncio? Essa ação não poderá ser desfeita.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="confirmarFinalizacaoBtn">Finalizar</button>
-            </div>
-        </div>
-    </div>
+  </div></div>
 </div>
 
+<!-- Modal: Rejeitar orçamento -->
+<div class="modal fade" id="confirmarRejeicaoModal" tabindex="-1" aria-labelledby="modalRejeicaoLabel" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="modalRejeicaoLabel">Confirmar Rejeição do Orçamento</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    </div>
+    <div class="modal-body">Tem certeza que deseja rejeitar este orçamento?</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="button" class="btn btn-danger" id="confirmarRejeicaoBtn">Rejeitar</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Modal: Finalizar anúncio -->
+<div class="modal fade" id="confirmarFinalizacaoModal" tabindex="-1" aria-labelledby="modalFinalizacaoLabel" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="modalFinalizacaoLabel">Confirmar Finalização</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    </div>
+    <div class="modal-body">Tem certeza que deseja finalizar este anúncio? Essa ação não poderá ser desfeita.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="confirmarFinalizacaoBtn">Finalizar</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="avaliacaoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Avaliar Negociação</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+              <!-- apenas este container vazio -->
+              <div id="avaliacao-form-container" class="text-center py-4">
+                  <i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário...
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let aceitarUrl = null;
+/* ------------------------------------------------------------------
+   ACEITAR ORÇAMENTO (AJAX)
+------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  let aceitarUrl = null;
 
-        // Captura a URL ao abrir o modal
-        document.querySelectorAll('.btn-aceitar').forEach(btn => {
-            btn.addEventListener('click', function () {
-                aceitarUrl = this.getAttribute('data-url');
-            });
-        });
+  // Armazena a URL quando clica no botão aceitar
+  document.querySelectorAll('.btn-aceitar').forEach(btn => {
+    btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
+  });
 
-        // Envia requisição AJAX ao clicar no botão de confirmação
-        document.getElementById('confirmarAceiteBtn').addEventListener('click', function () {
-            if (aceitarUrl) {
-                fetch(aceitarUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Erro ao aceitar orçamento: ' + (data.error || 'Tente novamente.'));
-                        }
-                    });
-            }
+  // Confirma a operação via modal
+  document.getElementById('confirmarAceiteBtn').addEventListener('click', () => {
+    if (!aceitarUrl) return;
+    fetch(aceitarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
+});
+</script>
+
+<script>
+/* ------------------------------------------------------------------
+   REJEITAR ORÇAMENTO (AJAX)
+------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  let rejeitarUrl = null;
+
+  document.querySelectorAll('.btn-rejeitar').forEach(btn => {
+    btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
+  });
+
+  document.getElementById('confirmarRejeicaoBtn').addEventListener('click', () => {
+    if (!rejeitarUrl) return;
+    fetch(rejeitarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
+});
+</script>
+
+<script>
+/* ------------------------------------------------------------------
+   FINALIZAR ANÚNCIO (AJAX)
+------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  let finalizarUrl = null;
+
+  const finalizarBtn = document.querySelector('.btn-finalizar');
+  if (finalizarBtn) {
+    finalizarBtn.addEventListener('click', () => finalizarUrl = finalizarBtn.getAttribute('data-url'));
+  }
+
+  document.getElementById('confirmarFinalizacaoBtn').addEventListener('click', () => {
+    if (!finalizarUrl) return;
+    fetch(finalizarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
+        alert(data.message || 'Anúncio finalizado.');
+        location.reload();
+      } else {
+        alert(data.error || 'Erro ao finalizar.');
+      }
+    })
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
+});
+</script>
+
+<script>
+/* ------------------------------------------------------------------
+   MAPA (Leaflet + Nominatim)
+------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Converte CEP em coordenada
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length) {
+        const { lat, lon } = data[0];
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup('Localização aproximada do anunciante.')
+          .openPopup();
+        map.setView([lat, lon], 13);
+      }
+    })
+    .catch(console.error);
+});
+</script>
+<script>
+  /* -----------------------------------------------------------------------
+     Carregamento dinâmico do formulário de avaliação
+     - Dispara ao abrir o modal #avaliacaoModal
+     - Busca o HTML via AJAX (X-Requested-With) e injeta em
+       #avaliacao-form-container
+  ------------------------------------------------------------------------ */
+  document.addEventListener('DOMContentLoaded', () => {
+    const modalEl = document.getElementById('avaliacaoModal');
+    const formContainer = document.getElementById('avaliacao-form-container');
+  
+    modalEl.addEventListener('show.bs.modal', () => {
+      /* Mostra spinner enquanto busca o conteúdo */
+      formContainer.innerHTML =
+        '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
+  
+      fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }  // indica requisição AJAX
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Falha ao carregar o formulário');
+          }
+          return response.text();
+        })
+        .then(html => {
+          formContainer.innerHTML = html;  // injeta o HTML retornado
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          formContainer.innerHTML =
+            '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
         });
     });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let rejeitarUrl = null;
+  });
+  </script>
+  
+  
 
-        // Captura a URL ao abrir o modal de rejeição
-        document.querySelectorAll('.btn-rejeitar').forEach(btn => {
-            btn.addEventListener('click', function () {
-                rejeitarUrl = this.getAttribute('data-url');
-            });
-        });
-
-        // Envia requisição AJAX ao clicar no botão de confirmação
-        document.getElementById('confirmarRejeicaoBtn').addEventListener('click', function () {
-            if (rejeitarUrl) {
-                fetch(rejeitarUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Erro ao rejeitar orçamento: ' + (data.error || 'Tente novamente.'));
-                        }
-                    });
-            }
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let finalizarUrl = null;
-
-        // Captura a URL ao abrir o modal
-        document.querySelector('.btn-finalizar').addEventListener('click', function () {
-            finalizarUrl = this.getAttribute('data-url');
-        });
-
-        // Envia requisição AJAX ao clicar no botão de confirmação
-        document.getElementById('confirmarFinalizacaoBtn').addEventListener('click', function () {
-            if (finalizarUrl) {
-                fetch(finalizarUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Fecha o modal
-                            const modal = document.getElementById('confirmarFinalizacaoModal');
-                            const bootstrapModal = bootstrap.Modal.getInstance(modal);
-                            bootstrapModal.hide();
-
-                            // Exibe mensagem de sucesso
-                            alert(data.message);
-
-                            // Atualiza a página para refletir o novo status
-                            location.reload();
-                        } else {
-                            // Exibe o erro retornado
-                            alert('Erro ao finalizar anúncio: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro na requisição:', error);
-                        alert('Erro inesperado. Tente novamente.');
-                    });
-            }
-        });
-    });
-
-</script>
-<!-- Geolocalização Mapa -->
-<script>
-    // Função para inicializar o mapa
-    function initMap() {
-        // Coordenadas aproximadas do Brasil (centro do mapa)
-        const map = L.map('map').setView([-14.2350, -51.9253], 5);
-
-        // Adiciona o tile layer do OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        // Exemplo de CEP (substitua pelo CEP do anunciante)
-        const cep = "{{ necessidade.cliente.cep }}";
-
-        // Usa o Nominatim para geocodificação (converter CEP em coordenadas)
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cep}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    const lat = parseFloat(data[0].lat);
-                    const lng = parseFloat(data[0].lon);
-
-                    // Adiciona um marcador no mapa
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('Localização aproximada do anunciante.')
-                        .openPopup();
-
-                    // Centraliza o mapa no marcador
-                    map.setView([lat, lng], 13);
-                } else {
-                    console.error("CEP não encontrado.");
-                }
-            })
-            .catch(error => console.error("Erro ao buscar coordenadas:", error));
-    }
-
-    // Inicializa o mapa quando a página carregar
-    document.addEventListener('DOMContentLoaded', initMap);
-</script>
 {% endblock %}

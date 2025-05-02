@@ -58,15 +58,17 @@
                     <!-- NOVA SEÇÃO: AVALIAÇÕES -->
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-2 mt-2">
                         <div class="star-rating">
-                            {% for i in "12345" %}
-                            {% with forloop.counter as current_star %}
-                            {% if current_star <= media_estrelas %} <i class="fas fa-star text-warning"></i>
-                                {% else %}
+                            {% for i in estrelas_cheias|make_list %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% endfor %}
+                            {% if estrelas_meia %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            {% endif %}
+                            {% for i in estrelas_vazias|make_list %}
                                 <i class="far fa-star text-warning"></i>
-                                {% endif %}
-                                {% endwith %}
-                                {% endfor %}
+                            {% endfor %}
                         </div>
+                        
                         <span class="text-muted">
                             {{ media_estrelas|floatformat:1 }} / 5 ({{ total_avaliacoes }} avaliações)
                         </span>

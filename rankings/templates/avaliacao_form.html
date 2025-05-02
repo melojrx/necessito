@@ -1,0 +1,77 @@
+<!-- rankings/templates/rankings/avaliacao_form.html -->
+{% load static %}
+<style>
+  .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      direction: rtl;
+  }
+  
+  .star-rating input {
+      display: none;
+  }
+  
+  .star-rating label {
+      width: 30px;
+      height: 30px;
+      background: url('/static/img/star-empty.svg') no-repeat center center;
+      background-size: contain;
+  }
+  
+  .star-rating input:checked ~ label,
+  .star-rating label:hover,
+  .star-rating label:hover ~ label {
+      background-image: url('/static/img/star-filled.svg');
+  }
+  </style>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <!-- Cabeçalho do modal -->
+      <div class="modal-header">
+        <h5 class="modal-title">Avaliar {{ avaliado.get_full_name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+  
+      <!-- Corpo do modal -->
+      <div class="modal-body">
+        <form method="post" action="{% url 'avaliar_negociacao' necessidade.pk %}">
+          {% csrf_token %}
+  
+          <!-- Texto introdutório com base no tipo de avaliação -->
+          <p class="mb-3">
+            {% if tipo_avaliacao == 'fornecedor' %}
+              Avalie o fornecedor com base nos seguintes critérios:
+            {% else %}
+              Avalie o cliente com base nos seguintes critérios:
+            {% endif %}
+          </p>
+  
+          <!-- Campos de avaliação -->
+          <div class="rating-criteria">
+            {% for field in form %}
+              {% if field.name|slice:":9" == "criterio_" %}
+                <div class="mb-3">
+                  <label class="form-label">{{ field.label }}</label>
+                  <div class="star-rating-container">
+                    {{ field }}
+                    <div class="rating-labels d-flex justify-content-between">
+                      <small>Nada satisfeito</small>
+                      <small>Muito satisfeito</small>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+  
+          <!-- Rodapé do modal com os botões -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

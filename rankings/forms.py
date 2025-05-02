@@ -1,46 +1,58 @@
+from django.forms.widgets import RadioSelect
+from django.utils.safestring import mark_safe
 from django import forms
-from django.core.validators import MinValueValidator, MaxValueValidator
 from .models import Avaliacao
-from budgets.models import Orcamento  # Importando corretamente
+
+class StarRadioWidget(RadioSelect):
+    template_name = 'widgets/star_radio_widget.html'
+
+    def render(self, name, value, attrs=None, renderer=None):
+        output = []
+        for i in reversed(range(1, 6)):
+            checked = 'checked' if str(value) == str(i) else ''
+            output.append(f'''
+                <input id="star{i}_{name}" type="radio" name="{name}" value="{i}" {checked}/>
+                <label for="star{i}_{name}"></label>
+            ''')
+        return mark_safe(f'<div class="star-rating">{"".join(output)}</div>')
 
 class AvaliacaoForm(forms.ModelForm):
-    """Formulário para avaliação de fornecedor, cliente ou negociação"""
-
-    estrelas = forms.IntegerField(
-        required=True,
-        widget=forms.Select(
-            choices=[(i, f"{i} ⭐") for i in range(1, 6)],
-            attrs={'class': 'form-select form-select-sm d-inline-block', 'style': 'width: auto;'}
-        ),
-        validators=[
-            MinValueValidator(1, 'A avaliação não pode ser INFERIOR a 1 estrela'),
-            MaxValueValidator(5, 'A avaliação não pode ser SUPERIOR a 5 estrelas')
-        ]
-    )
-
     class Meta:
         model = Avaliacao
-        fields = ['estrelas']
+        fields = []
 
     def __init__(self, *args, **kwargs):
-        """Filtra as opções disponíveis no campo tipo_avaliacao com base no usuário e no contexto"""
         self.user = kwargs.pop('user', None)
         self.anuncio = kwargs.pop('anuncio', None)
-        super(AvaliacaoForm, self).__init__(*args, **kwargs)
+        self.tipo_avaliacao = kwargs.pop('tipo_avaliacao', None)
+        super().__init__(*args, **kwargs)
+        self.add_criterio_fields()
 
-        # 🔹 Correção: Buscar o fornecedor do anúncio corretamente
-        self.fornecedor = None
-        if self.anuncio:
-            orcamento_aceito = Orcamento.objects.filter(anuncio=self.anuncio, status='aceito').first()
-            self.fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
+    def add_criterio_fields(self):
+        criterios = []
 
-    def clean(self):
-        """Validações personalizadas para garantir consistência"""
-        cleaned_data = super().clean()
-        estrelas = cleaned_data.get('estrelas')
+        if self.tipo_avaliacao == 'cliente':
+            criterios = [
+                ('rapidez_respostas', 'Rapidez nas respostas'),
+                ('pagamento_acordado', 'Pagamento conforme acordado'),
+                ('urbanidade_negociacao', 'Urbanidade na negociação'),
+            ]
+        elif self.tipo_avaliacao == 'fornecedor':
+            criterios = [
+                ('qualidade_produto', 'Qualidade do Produto'),
+                ('pontualidade_entrega', 'Pontualidade na entrega'),
+                ('atendimento', 'Atendimento'),
+                ('precos_mercado', 'Preços praticados de acordo com o Mercado'),
+            ]
 
-        # Garantir que as estrelas estejam dentro do intervalo permitido
-        if estrelas and (estrelas < 1 or estrelas > 5):
-            self.add_error('estrelas', 'As estrelas devem estar entre 1 e 5.')
-
-        return cleaned_data
+        for criterio_key, criterio_label in criterios:
+            field_name = f'criterio_{criterio_key}'
+            self.fields[field_name] = forms.ChoiceField(
+                label=criterio_label,
+                choices=[(i, "") for i in range(1, 6)],
+                widget=StarRadioWidget(),  # Usa o widget personalizado aqui
+                required=True,
+                initial=5
+            )
+    
+    

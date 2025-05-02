@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 import requests
 from ads.forms import AdsForms
+from budgets.models import Orcamento
 from notifications.models import Notification
 from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
@@ -174,23 +175,42 @@ class NecessidadeDetailView(DetailView):
     success_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
-        """
-        Adiciona o formulário de avaliação e o fornecedor ao contexto para renderização no template.
-        """
         context = super().get_context_data(**kwargs)
         necessidade = self.get_object()
 
         # Buscar o orçamento aceito relacionado ao anúncio
-        from budgets.models import Orcamento
         orcamento_aceito = Orcamento.objects.filter(
             anuncio=necessidade, status='aceito').first()
 
-        # Adicionar o fornecedor (se existir) ao contexto
-        context['fornecedor'] = orcamento_aceito.fornecedor if orcamento_aceito else None
+        fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
+        context['fornecedor'] = fornecedor
 
-        # Adicionar o formulário de avaliação ao contexto
-        context['avaliacao_form'] = AvaliacaoForm(
-            user=self.request.user, anuncio=necessidade)
+        # Verificar se cliente já avaliou
+        avaliacao_cliente = Avaliacao.objects.filter(
+            anuncio=necessidade,
+            usuario=necessidade.cliente
+        ).exists()
+
+        # Verificar se fornecedor já avaliou
+        avaliacao_fornecedor = Avaliacao.objects.filter(
+            anuncio=necessidade,
+            usuario=fornecedor
+        ).exists() if fornecedor else False
+
+        # Verificar se o usuário atual já avaliou
+        ja_avaliou_usuario_atual = Avaliacao.objects.filter(
+            anuncio=necessidade,
+            usuario=self.request.user
+        ).exists()
+
+        # Passar flags no contexto
+        context.update({
+            'avaliacao_cliente': avaliacao_cliente,
+            'avaliacao_fornecedor': avaliacao_fornecedor,
+            'ja_avaliou_usuario_atual': ja_avaliou_usuario_atual,
+            'avaliacao_form': AvaliacaoForm(user=self.request.user, anuncio=necessidade),
+            'orcamento_aceito': orcamento_aceito
+        })
 
         return context
 

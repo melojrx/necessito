@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views import View
 from django.contrib import messages
 
@@ -129,7 +130,8 @@ class AvaliacaoCreateView(View):
             avaliacao.calcular_media()
 
             messages.success(request, 'Sua avaliação foi registrada com sucesso.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
+            return redirect(f"{reverse('necessidade_detail', kwargs={'pk': necessidade.pk})}?show_modal=True")
+
 
         # Se o formulário for inválido, exibe novamente com os erros
         context = {

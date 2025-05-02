@@ -1,6 +1,6 @@
 from django.utils import timezone
 from pyexpat.errors import messages
-from itertools import islice
+from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -16,8 +16,6 @@ from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
 from .models import AnuncioImagem, Necessidade
 from categories.models import Categoria
-
-
 from itertools import islice
 from django.views.generic import TemplateView
 from categories.models import Categoria
@@ -177,6 +175,8 @@ class NecessidadeDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         necessidade = self.get_object()
+        context['show_modal'] = self.request.GET.get('show_modal') == 'True'
+       
 
         # Buscar o orçamento aceito relacionado ao anúncio
         orcamento_aceito = Orcamento.objects.filter(
@@ -277,3 +277,27 @@ class AnunciosPorCategoriaListView(ListView):
         context = super().get_context_data(**kwargs)
         context['categoria'] = self.categoria
         return context
+
+def enviar_mensagem(request, pk):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        telefone = request.POST.get('telefone')
+        email = request.POST.get('email')
+        mensagem = request.POST.get('mensagem')
+        
+        necessidade = Necessidade.objects.get(pk=pk)
+        destinatario = necessidade.cliente.email
+        
+        assunto = f"Contato sobre o anúncio '{necessidade.titulo}' no Necessito.com"
+        mensagem_completa = f"De: {nome}\nTelefone: {telefone}\nEmail: {email}\n\n{mensagem}"
+        
+        send_mail(
+            assunto,
+            mensagem_completa,
+            email,  # Remetente
+            [destinatario],  # Destinatário
+            fail_silently=False
+        )
+        
+        messages.success(request, 'Mensagem enviada com sucesso!')
+        return redirect('necessidade_detail', pk=pk)

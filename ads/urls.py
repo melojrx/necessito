@@ -3,6 +3,7 @@ from .views import (
     FinalizarAnuncioView, HomeView, NecessidadeListView, NecessidadeCreateView,
     NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView
 )
+from ads import views
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -13,5 +14,7 @@ urlpatterns = [
     path('necessidades/<int:pk>/excluir/', NecessidadeDeleteView.as_view(), name='necessidade_delete'),
     path('necessidades/<int:pk>/finalizar/', FinalizarAnuncioView.as_view(), name='finalizar_anuncio'),
     path('necessidades/categoria/<int:category_id>/', AnunciosPorCategoriaListView.as_view(), name='anuncios_por_categoria'),
+    path('necessidade/<int:pk>/enviar-mensagem/', views.enviar_mensagem, name='enviar_mensagem'),
+
 ]
 

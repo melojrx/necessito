@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.contrib import messages
-from .models import Avaliacao
+
+from rankings.forms import AvaliacaoForm
+from .models import Avaliacao, AvaliacaoCriterio
 from ads.models import Necessidade
 from budgets.models import Orcamento  # Importando o modelo correto
 from django.utils.timezone import now
@@ -9,69 +11,134 @@ from django.utils.timezone import now
 class AvaliacaoCreateView(View):
     """Gerencia o registro de avaliações de anúncios"""
 
-    def post(self, request, pk):
+    def get(self, request, pk):
+        """
+        Exibe o formulário de avaliação.
+        - Se a requisição for AJAX (abertura do modal), devolve só o HTML
+          do formulário (`avaliacao_form_modal.html`).
+        - Caso contrário, renderiza a página completa
+          (`avaliacao_form.html`).
+        """
         necessidade = get_object_or_404(Necessidade, pk=pk)
 
-        # 🔹 Buscar pelo campo 'anuncio', não 'necessidade'
+        # ------------------------------------------------------------
+        # 1) Verificações de status e permissão
+        # ------------------------------------------------------------
+        if necessidade.status != "finalizado":
+            messages.error(request, "Apenas anúncios finalizados podem ser avaliados.")
+            return redirect("necessidade_detail", pk=necessidade.pk)
+
+        orcamento_aceito = Orcamento.objects.filter(
+            anuncio=necessidade, status="aceito"
+        ).first()
+        fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
+
+        if request.user not in (necessidade.cliente, fornecedor):
+            messages.error(request, "Você não tem permissão para avaliar este anúncio.")
+            return redirect("necessidade_detail", pk=necessidade.pk)
+
+        if Avaliacao.objects.filter(
+            usuario=request.user, anuncio=necessidade
+        ).exists():
+            messages.error(request, "Você já avaliou este anúncio.")
+            return redirect("necessidade_detail", pk=necessidade.pk)
+
+        # ------------------------------------------------------------
+        # 2) Tipo (cliente ↔ fornecedor) e criação do formulário
+        # ------------------------------------------------------------
+        if request.user == necessidade.cliente:
+            tipo_avaliacao = "fornecedor"
+            avaliado = fornecedor
+        else:
+            tipo_avaliacao = "cliente"
+            avaliado = necessidade.cliente
+
+        form = AvaliacaoForm(
+            user=request.user,
+            anuncio=necessidade,
+            tipo_avaliacao=tipo_avaliacao,
+        )
+
+        context = {
+            "form": form,
+            "necessidade": necessidade,
+            "tipo_avaliacao": tipo_avaliacao,
+            "avaliado": avaliado,
+        }
+
+        # ------------------------------------------------------------
+        # 3) Saída: fragmento ou página completa
+        # ------------------------------------------------------------
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            # Chamada via fetch() para o modal → devolve SÓ o formulário
+            return render(request, "avaliacao_form_modal.html", context)
+
+        # Renderização convencional da página
+        return render(request, "avaliacao_form.html", context)
+
+    def post(self, request, pk):
+        """Processa o envio do formulário de avaliação"""
+        necessidade = get_object_or_404(Necessidade, pk=pk)
+
+        # Verifica permissões novamente (mesma lógica do método GET)
         orcamento_aceito = Orcamento.objects.filter(anuncio=necessidade, status='aceito').first()
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
 
-        # Verifica se o usuário é o anunciante ou o fornecedor do orçamento aceito
         if request.user != necessidade.cliente and request.user != fornecedor:
             messages.error(request, 'Você não tem permissão para avaliar este anúncio.')
             return redirect('necessidade_detail', pk=necessidade.pk)
 
-        # Obtém os dados do formulário
-        estrelas = request.POST.get('estrelas')
-
-        if not estrelas or not estrelas.isdigit():
-            messages.error(request, 'Por favor, selecione uma quantidade válida de estrelas.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
-
-        estrelas = int(estrelas)
-
-        # Define quem será avaliado com base no avaliador
-        if request.user == necessidade.cliente and fornecedor:
-            avaliado = fornecedor
+        # Define o tipo de avaliação e quem será avaliado
+        if request.user == necessidade.cliente:
             tipo_avaliacao = 'fornecedor'
-        elif request.user == fornecedor:
-            avaliado = necessidade.cliente
-            tipo_avaliacao = 'cliente'
+            avaliado = fornecedor
         else:
-            messages.error(request, 'Erro ao processar a avaliação.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
+            tipo_avaliacao = 'cliente'
+            avaliado = necessidade.cliente
 
-        # 🔹 Ajuste: Definir um usuário válido para a avaliação da negociação
-        usuario_para_negociacao = fornecedor if request.user == necessidade.cliente else necessidade.cliente
-
-        # ✅ **Verificar se o usuário já avaliou o anúncio**
-        avaliacao_existente = Avaliacao.objects.filter(
-            usuario=request.user,
-            anuncio=necessidade
-        ).exists()
-
-        if avaliacao_existente:
-            messages.error(request, 'Você já avaliou este anúncio.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
-
-        # Registra avaliação para a negociação
-        Avaliacao.objects.get_or_create(
-            usuario=request.user,
-            avaliado=usuario_para_negociacao,
+        # Cria o formulário com os dados enviados via POST
+        form = AvaliacaoForm(
+            request.POST,
+            user=request.user,
             anuncio=necessidade,
-            tipo_avaliacao='negociacao',
-            defaults={'estrelas': estrelas, 'data_avaliacao': now()}
+            tipo_avaliacao=tipo_avaliacao
         )
 
-        # Registra avaliação para o outro usuário (fornecedor ou cliente)
-        Avaliacao.objects.get_or_create(
-            usuario=request.user,
-            avaliado=avaliado,
-            anuncio=necessidade,
-            tipo_avaliacao=tipo_avaliacao,
-            defaults={'estrelas': estrelas, 'data_avaliacao': now()}
-        )
+        if form.is_valid():
+            # Cria o registro principal da avaliação
+            avaliacao = Avaliacao.objects.create(
+                usuario=request.user,
+                avaliado=avaliado,
+                anuncio=necessidade,
+                tipo_avaliacao=tipo_avaliacao
+            )
 
-        messages.success(request, 'Sua avaliação foi registrada com sucesso.')
-        return redirect('necessidade_detail', pk=necessidade.pk)
+            # Cria os registros dos critérios de avaliação
+            criterios_salvos = []
+            for field_name, value in form.cleaned_data.items():
+                if field_name.startswith('criterio_'):
+                    criterio_key = field_name.replace('criterio_', '')
+                    criterio = AvaliacaoCriterio.objects.create(
+                        avaliacao=avaliacao,
+                        criterio=criterio_key,
+                        estrelas=value
+                    )
+                    criterios_salvos.append(criterio)
+
+            # Calcula a média das avaliações
+            avaliacao.calcular_media()
+
+            messages.success(request, 'Sua avaliação foi registrada com sucesso.')
+            return redirect('necessidade_detail', pk=necessidade.pk)
+
+        # Se o formulário for inválido, exibe novamente com os erros
+        context = {
+            'form': form,
+            'necessidade': necessidade,
+            'tipo_avaliacao': tipo_avaliacao,
+            'avaliado': avaliado
+        }
+
+        return render(request, 'avaliacao_form.html', context)
+
 

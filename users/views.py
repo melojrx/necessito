@@ -60,28 +60,27 @@ def logout_view(request):
 
 class UserDetailView(DetailView):
     model = User
-    form_class = UserUpdateForm
     template_name = 'minha-conta-detail.html'
-    success_url = reverse_lazy('minha_conta_detail')
     context_object_name = 'user'
-    
+    success_url = reverse_lazy('minha_conta_detail')
+
     def get_object(self, queryset=None):
-        # Retorna o user que está logado
         return self.request.user
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.get_object()
 
-        user = self.get_object()  # Obtém o usuário da CBV
         avaliacoes = Avaliacao.objects.filter(avaliado=user)
-
         total_avaliacoes = avaliacoes.count()
-        media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
-        media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
 
-        # Adicionando os valores ao contexto do template
-        context['media_estrelas'] = media_estrelas
-        context['total_avaliacoes'] = total_avaliacoes
+        media_estrelas = avaliacoes.aggregate(avg=Avg('media_estrelas'))['avg'] or 0
+        media_estrelas = round(media_estrelas, 1)
+
+        context.update({
+            'media_estrelas': media_estrelas,
+            'total_avaliacoes': total_avaliacoes
+        })
 
         return context
 
@@ -106,19 +105,28 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.get_object()  # Usuário do perfil
-        query_params = self.request.GET
-        
-        avaliacoes = Avaliacao.objects.filter(avaliado=user)
-        
-        total_avaliacoes = avaliacoes.count()
-        media_estrelas = avaliacoes.aggregate(avg=Avg('estrelas'))['avg'] or 0
-        media_estrelas = round(media_estrelas, 1)  # Arredonda para 1 casa decimal
+        user = self.get_object()
 
-        # Filtro inicial de anúncios
+        # ======================
+        # BLOCO DE AVALIAÇÕES
+        # ======================
+        avaliacoes = Avaliacao.objects.filter(avaliado=user)
+        total_avaliacoes = avaliacoes.count()
+        media_estrelas = avaliacoes.aggregate(avg=Avg('media_estrelas'))['avg'] or 0
+        media_estrelas = round(media_estrelas, 1)
+
+        # Cálculo de estrelas cheias, meia estrela, vazias
+        estrelas_cheias = int(media_estrelas)
+        estrelas_meia = 1 if (media_estrelas - estrelas_cheias) >= 0.5 else 0
+        estrelas_vazias = 5 - estrelas_cheias - estrelas_meia
+
+        # ======================
+        # BLOCO DE ANÚNCIOS
+        # ======================
+        query_params = self.request.GET
+
         anuncios = Necessidade.objects.filter(cliente=user)
 
-        # Filtros
         search_query = query_params.get('search', '')
         if search_query:
             anuncios = anuncios.filter(descricao__icontains=search_query)
@@ -131,8 +139,7 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
         if cidade:
             anuncios = anuncios.filter(cliente__cidade__icontains=cidade)
 
-        # Ordenação
-        order_by = query_params.get('order_by', '-data_criacao')  # Default: mais recentes
+        order_by = query_params.get('order_by', '-data_criacao')
         anuncios = anuncios.order_by(order_by)
 
         # Total de anúncios nos últimos 180 dias
@@ -142,11 +149,22 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
             data_criacao__gte=six_months_ago
         ).count()
 
-        # Categorias e cidades disponíveis para os filtros
         categorias_disponiveis = anuncios.values('categoria__id', 'categoria__nome').distinct()
         cidades_disponiveis = anuncios.values('cliente__cidade').distinct()
 
+        # ======================
+        # ATUALIZA O CONTEXTO
+        # ======================
         context.update({
+            # Avaliações
+            'avaliacoes': avaliacoes,
+            'total_avaliacoes': total_avaliacoes,
+            'media_estrelas': media_estrelas,
+            'estrelas_cheias': estrelas_cheias,
+            'estrelas_meia': estrelas_meia,
+            'estrelas_vazias': estrelas_vazias,
+
+            # Anúncios
             'anuncios': anuncios,
             'categorias': categorias_disponiveis,
             'cidades': cidades_disponiveis,
@@ -155,9 +173,8 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
             'categoria_id': categoria_id,
             'cidade': cidade,
             'order_by': order_by,
-            'media_estrelas': media_estrelas,
-            'total_avaliacoes': total_avaliacoes,
         })
+
         return context
 
 from django.contrib.auth import views as auth_views

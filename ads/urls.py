@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     FinalizarAnuncioView, HomeView, NecessidadeListView, NecessidadeCreateView,
-    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView
+    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView, DashboardView, anuncios_geolocalizados, geolocalizar_usuario
 )
 
 urlpatterns = [
@@ -13,5 +13,9 @@ urlpatterns = [
     path('necessidades/<int:pk>/excluir/', NecessidadeDeleteView.as_view(), name='necessidade_delete'),
     path('necessidades/<int:pk>/finalizar/', FinalizarAnuncioView.as_view(), name='finalizar_anuncio'),
     path('necessidades/categoria/<int:category_id>/', AnunciosPorCategoriaListView.as_view(), name='anuncios_por_categoria'),
+    path('necessidades/dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('api/anuncios-geolocalizados/', anuncios_geolocalizados, name='anuncios_geolocalizados'),
+    path('api/geolocalizar-usuario/', geolocalizar_usuario, name='geolocalizar_usuario'),
+
 ]
 

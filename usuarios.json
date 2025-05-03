@@ -1,0 +1,42 @@
+[
+    {
+      "nome": "Daniela Elza Rocha",
+      "email": "daniela.elza.rocha@sadefem.com.br",
+      "senha": "NUMRWjsr0Y",
+      "cpf": "949.755.746-91",
+      "data_nasc": "02/05/1999",
+      "celular": "(33) 99622-4096",
+      "endereco": "Rua Espírito Santo 104",
+      "bairro": "Palmeiras do Resplendor",
+      "cep": "39790-972",
+      "cidade": "Água Boa",
+      "estado": "MG"
+    },
+    {
+      "nome": "Luiz Igor Melo",
+      "email": "luiz-melo91@gabiaatelier.com.br",
+      "senha": "RPt9ZDE2PL",
+      "cpf": "203.515.703-06",
+      "data_nasc": "14/01/1992",
+      "celular": "(88) 98301-7822",
+      "endereco": "Rua Principal, s/n",
+      "bairro": "Centro",
+      "cep": "62957-973",
+      "cidade": "Açude dos Pinheiros",
+      "estado": "CE"
+    },
+    {
+      "nome": "Pedro Rafael Oliver dos Santos",
+      "email": "pedro_rafael_dossantos@ulbra.edu.br",
+      "senha": "32ktekZArT",
+      "cpf": "468.203.873-77",
+      "data_nasc": "05/03/1991",
+      "celular": "(88) 98204-4428",
+      "endereco": "Rua João Soares Lima, s/n",
+      "bairro": "Centro",
+      "cep": "63887-973",
+      "cidade": "Águas Belas",
+      "estado": "CE"
+    }
+  ]
+  

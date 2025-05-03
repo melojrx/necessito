@@ -3,7 +3,7 @@ from pyexpat.errors import messages
 from itertools import islice
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -16,8 +16,6 @@ from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
 from .models import AnuncioImagem, Necessidade
 from categories.models import Categoria
-
-
 from itertools import islice
 from django.views.generic import TemplateView
 from categories.models import Categoria
@@ -277,3 +275,81 @@ class AnunciosPorCategoriaListView(ListView):
         context = super().get_context_data(**kwargs)
         context['categoria'] = self.categoria
         return context
+    
+from ads.metrics import get_ads_metrics, get_anuncios_criados_vs_finalizados, get_quantidade_anuncios_finalizados_por_categoria, get_quantidade_usuarios_por_tipo, get_valores_metrics, get_valores_por_mes
+    
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ads_metrics'] = get_ads_metrics()
+        context['valores_metrics'] = get_valores_metrics()
+        context['grafico_valores_por_mes'] = get_valores_por_mes()
+        context['grafico_categorias'] = get_quantidade_anuncios_finalizados_por_categoria()
+        context['grafico_usuarios'] = get_quantidade_usuarios_por_tipo()
+        context['grafico_anuncios'] = get_anuncios_criados_vs_finalizados()
+        return context
+
+def anuncios_geolocalizados(request):
+    anuncios = Necessidade.objects.filter(
+        cliente__lat__isnull=False,
+        cliente__lon__isnull=False
+    ).select_related('cliente')
+
+    print(f"Total de anúncios retornados: {anuncios.count()}")  # 🔍 debug
+
+    data = [{
+        'id': anuncio.id,
+        'titulo': anuncio.titulo,
+        'cidade': anuncio.cliente.cidade,
+        'estado': anuncio.cliente.estado,
+        'lat': anuncio.cliente.lat,
+        'lon': anuncio.cliente.lon,
+        'status': anuncio.status,
+        'cliente_id': anuncio.cliente.id  
+    } for anuncio in anuncios]
+
+    print(data)  # 🔍 debug
+    return JsonResponse(data, safe=False)
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+import requests
+
+User = get_user_model()
+
+@csrf_exempt
+def geolocalizar_usuario(request):
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({'erro': 'ID de usuário não fornecido'}, status=400)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'erro': 'Usuário não encontrado'}, status=404)
+
+    if user.lat and user.lon:
+        return JsonResponse({'lat': user.lat, 'lon': user.lon})
+
+    # monta endereço
+    endereco = f"{user.cidade}, {user.estado}, Brasil"
+
+    try:
+        resp = requests.get(
+            'https://nominatim.openstreetmap.org/search',
+            params={'q': endereco, 'format': 'json'}
+        )
+        data = resp.json()
+        if data:
+            user.lat = float(data[0]['lat'])
+            user.lon = float(data[0]['lon'])
+            user.save(update_fields=['lat', 'lon'])
+            return JsonResponse({'lat': user.lat, 'lon': user.lon})
+        else:
+            return JsonResponse({'erro': 'Não encontrado no Nominatim'}, status=404)
+    except Exception as e:
+        return JsonResponse({'erro': str(e)}, status=500)
+

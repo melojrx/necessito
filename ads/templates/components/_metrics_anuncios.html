@@ -1,0 +1,49 @@
+<!-- Metricas anuncios
+- Quantidade total de anúncios
+- Quantidade de anúncios ativos 
+- Quantidade total de Anuncios Finalizados
+- Quantidade total de Orçamentos enviados 
+-->
+
+<div class="card mt-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h5 class="card-title">Total de Anúncios</h5>
+              <p class="card-text display-6">{{ ads_metrics.total_ads }}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <h5 class="card-title">Anúncios Ativos</h5>
+              <p class="card-text display-6">{{ ads_metrics.active_ads }}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-warning text-dark">
+            <div class="card-body">
+              <h5 class="card-title">Anúncios Finalizados</h5>
+              <p class="card-text display-6">{{ ads_metrics.finished_ads }}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-info text-white">
+            <div class="card-body">
+              <h5 class="card-title">Total de Orçamentos</h5>
+              <p class="card-text display-6">{{ ads_metrics.total_budgets }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

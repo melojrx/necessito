@@ -1,0 +1,56 @@
+<!-- Metricas Valores
+- Valor Total de Transações concluidas - Valor Total de Anúncios Finalizados: 
+👉 Soma dos valores dos anúncios que foram finalizados com uma negociação concluída.
+Por quê? Mostra o valor financeiro efetivo movimentado na plataforma.
+- Valor Total de Orçamentos Enviados: 
+👉 Soma de todos os orçamentos enviados pelos fornecedores, independente de aceitação.
+Por quê? Mostra o potencial econômico gerado pelos fornecedores.
+- Valor Total de Transações em Andamento:
+👉 Soma dos valores dos anúncios que estão em andamento, ou seja, que ainda não foram finalizados.
+Taxa de Conversão de Anúncios (%)
+👉 (Anúncios finalizados ÷ Anúncios criados) × 100
+Por quê? Mede eficiência da plataforma em gerar negócios.
+-->
+<div class="card mt-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <h5 class="card-title">Valor Transações Concluídas</h5>
+              <p class="card-text display-6">R$ {{ valores_metrics.valor_total_transacoes_concluidas }}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-primary text-white">
+            <div class="card-body">
+              <h5 class="card-title">Valor Orçamentos Enviados</h5>
+              <p class="card-text display-6">R$ {{ valores_metrics.valor_total_orcamentos_enviados }}
+            </p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-warning text-dark">
+            <div class="card-body">
+              <h5 class="card-title">Transações em Andamento</h5>
+              <p class="card-text display-6">R$ {{ valores_metrics.valor_total_transacoes_andamento }}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-md-3">
+          <div class="card bg-info text-white">
+            <div class="card-body">
+              <h5 class="card-title">Taxa de Conversão (%)</h5>
+              <p class="card-text display-6">{{ valores_metrics.taxa_conversao }}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

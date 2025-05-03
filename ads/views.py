@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 import requests
 from ads.forms import AdsForms
+from django.core.mail import send_mail
 from budgets.models import Orcamento
 from notifications.models import Notification
 from rankings.forms import AvaliacaoForm
@@ -175,6 +176,8 @@ class NecessidadeDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         necessidade = self.get_object()
+        context['show_modal'] = self.request.GET.get('show_modal') == 'True'
+
 
         # Buscar o orçamento aceito relacionado ao anúncio
         orcamento_aceito = Orcamento.objects.filter(
@@ -353,3 +356,26 @@ def geolocalizar_usuario(request):
     except Exception as e:
         return JsonResponse({'erro': str(e)}, status=500)
 
+def enviar_mensagem(request, pk):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        telefone = request.POST.get('telefone')
+        email = request.POST.get('email')
+        mensagem = request.POST.get('mensagem')
+        
+        necessidade = Necessidade.objects.get(pk=pk)
+        destinatario = necessidade.cliente.email
+        
+        assunto = f"Contato sobre o anúncio '{necessidade.titulo}' no Necessito.com"
+        mensagem_completa = f"De: {nome}\nTelefone: {telefone}\nEmail: {email}\n\n{mensagem}"
+        
+        send_mail(
+            assunto,
+            mensagem_completa,
+            email,  # Remetente
+            [destinatario],  # Destinatário
+            fail_silently=False
+        )
+        
+        messages.success(request, 'Mensagem enviada com sucesso!')
+        return redirect('necessidade_detail', pk=pk)

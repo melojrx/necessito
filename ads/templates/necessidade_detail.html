@@ -221,10 +221,9 @@
                     </h5>
 
                     <div class="d-flex justify-content-around mt-3">
-                        <a href="#" class="btn btn-primary" data-bs-toggle="tooltip"
-                           title="Iniciar Chat com o Anunciante">
-                            <i class="fas fa-comments"></i>
-                        </a>
+                      <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante">
+                        <i class="fas fa-comments"></i>
+                      </a>
 
                         {# Botão Submeter Orçamento (desabilita se não puder) #}
                         <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
@@ -271,6 +270,114 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Modal: Contato com o Anunciante -->
+<div class="modal fade" id="contatoAnuncianteModal" tabindex="-1" aria-labelledby="contatoAnuncianteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <!-- Botão Fechar no canto superior direito -->
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Fechar"></button>
+
+      <div class="modal-body d-flex p-0">
+
+        <!-- LADO ESQUERDO: INFO DO ANUNCIANTE no topo -->
+        <div class="col-md-4 bg-light p-3 ">
+          <div class="text-center mt-4">
+            {% if necessidade.cliente.foto %}
+              <img src="{{ necessidade.cliente.foto.url }}" alt="Foto" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+            {% else %}
+              <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+            {% endif %}
+
+            <h5 class="mt-2">{{ necessidade.cliente.get_full_name }}</h5>
+
+            <a href="#" class="btn btn-outline-primary btn-sm mt-2" id="toggleTelefoneBtn">
+              <i class="fas fa-phone-alt me-1"></i> <span id="toggleTelefoneText">Ver telefone</span>
+            </a>
+
+            <small class="text-muted d-block mt-1">Código da oferta: {{ necessidade.id }}</small>
+
+            <p class="text-muted small mt-2" id="telefoneInfo" style="display: none;">
+              {{ necessidade.cliente.telefone }}
+            </p>
+          </div>
+        </div>
+
+        <!-- LADO DIREITO: FORMULÁRIO -->
+        <div class="col-md-8 p-4">
+          <h4>Entrar em Contato</h4>
+          <form method="post" action="{% url 'enviar_mensagem' necessidade.pk %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="nome" class="form-label">Nome</label>
+              <input type="text" class="form-control" id="nome" name="nome" value="{{ user.get_full_name }}" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="telefone" class="form-label">Telefone</label>
+              <input type="text" class="form-control" id="telefone" name="telefone" value="{{ user.telefone }}">
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">E-mail</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="mensagem" class="form-label">Mensagem</label>
+              <textarea class="form-control" id="mensagem" name="mensagem" rows="4" required>Olá, gostaria de ter mais informações sobre o anúncio "{{ necessidade.titulo }}" que encontrei no Necessito.com. Aguardo seu contato, obrigado.</textarea>
+            </div>
+
+            <div class="form-check mb-3">
+              <input type="checkbox" class="form-check-input" id="contato_similar" name="contato_similar">
+              <label class="form-check-label" for="contato_similar">
+                Gostaria de receber o contato de anunciantes com ofertas similares
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Enviar Mensagem</button>
+
+            <p class="small text-muted mt-2">
+              Ao "Ver telefone" e/ou "Enviar mensagem" você aceita os <a href="#">Termos de uso</a> e <a href="#">Política de privacidade</a>.
+            </p>
+          </form>
+
+          <div class="alert alert-warning mt-2 small">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            Evite cair em golpes: Nunca faça depósitos ou transferências sem conferência e/ou visita no local.
+            <a href="#">Saiba como se proteger</a>.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Agradecimento -->
+<div class="modal fade" id="avaliacaoAgradecimentoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+
+      <div class="modal-header bg-primary text-white justify-content-center">
+        <h5 class="modal-title">Avalie seu atendimento</h5>
+      </div>
+
+      <div class="modal-body">
+        <img src="{% static 'img/logo2.png' %}" alt="Obrigado" class="img-fluid mb-3" style="max-height: 200px;">
+        <!-- <img src="https://via.placeholder.com/200x200?text=Obrigado" alt="Obrigado" class="img-fluid mb-3"> -->
+
+        <h5 class="fw-bold">Obrigado por participar da avaliação</h5>
+        <p class="text-muted">Sua opinião é valiosa e nos ajudará a melhorar ainda mais nossos serviços.</p>
+
+        <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">Concluir avaliação</button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 
@@ -481,8 +588,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
   });
-  </script>
+</script>
   
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('toggleTelefoneBtn');
+    const toggleText = document.getElementById('toggleTelefoneText');
+    const telefoneInfo = document.getElementById('telefoneInfo');
+
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (telefoneInfo.style.display === 'none') {
+        telefoneInfo.style.display = 'block';
+        toggleText.textContent = 'Ocultar telefone';
+      } else {
+        telefoneInfo.style.display = 'none';
+        toggleText.textContent = 'Ver telefone';
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.querySelector('#contatoAnuncianteModal .btn-close');
+    const modalEl = document.getElementById('contatoAnuncianteModal');
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+    closeBtn.addEventListener('click', function () {
+      modalInstance.hide();
+    });
+  });
+</script>
+
+{% if show_modal %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
+    modalAgradecimento.show();
+  });
+  </script>
+  {% endif %}
   
 
 {% endblock %}

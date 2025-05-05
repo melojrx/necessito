@@ -313,7 +313,6 @@ def anuncios_geolocalizados(request):
         'cliente_id': anuncio.cliente.id  
     } for anuncio in anuncios]
 
-    print(data)  # 🔍 debug
     return JsonResponse(data, safe=False)
 
 from django.http import JsonResponse

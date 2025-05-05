@@ -25,7 +25,7 @@
         <span class="badge bg-light border border-primary text-primary rounded-pill py-2 px-3">
           <i class="fas fa-map-marker-alt me-2"></i>
           Localização: {{ local|title }}
-          <a href="?q={{ term }}&state={{ state }}" class="text-decoration-none ms-2 text-danger">
+          <a href="?q={{ term }}&state={{ state }}{% if status %}&status={{ status }}{% endif %}" class="text-decoration-none ms-2 text-danger">
             <i class="fas fa-times-circle"></i>
           </a>
         </span>
@@ -35,18 +35,29 @@
         <span class="badge bg-light border border-info text-info rounded-pill py-2 px-3">
           <i class="fas fa-user me-2"></i>
           Anunciante: {{ cliente|title }}
-          <a href="?q={{ term }}&state={{ state }}" class="text-decoration-none ms-2 text-danger">
+          <a href="?q={{ term }}&state={{ state }}{% if status %}&status={{ status }}{% endif %}" class="text-decoration-none ms-2 text-danger">
             <i class="fas fa-times-circle"></i>
           </a>
         </span>
         {% endif %}
 
+        {% if status %}
+        <span class="badge bg-light border border-warning text-warning rounded-pill py-2 px-3">
+          <i class="fas fa-info-circle me-2"></i>
+          Status: {{ status|title }}
+          <a href="?q={{ term }}&state={{ state }}{% if local %}&local={{ local }}{% endif %}{% if cliente %}&cliente={{ cliente }}{% endif %}{% for c in campos %}&campos={{ c }}{% endfor %}"
+            class="text-decoration-none ms-2 text-danger">
+            <i class="fas fa-times-circle"></i>
+          </a>
+        </span>
+        {% endif %}
+  
         {% if campos %}
         <div class="d-flex flex-wrap gap-2">
           {% for campo in campos %}
           <span class="badge bg-primary-subtle border border-primary text-primary rounded-pill py-2 px-3">
             <i class="fas fa-search me-1"></i> {{ campo|title }}
-            <a href="?q={{ term }}&state={{ state }}&local={{ local }}{% for c in campos %}{% if c != campo %}&campos={{ c }}{% endif %}{% endfor %}"
+            <a href="?q={{ term }}&state={{ state }}&local={{ local }}{% if status %}&status={{ status }}{% endif %}{% for c in campos %}{% if c != campo %}&campos={{ c }}{% endif %}{% endfor %}"
               class="text-danger ms-2 text-decoration-none">
               <i class="fas fa-times-circle"></i>
             </a>
@@ -55,7 +66,7 @@
         </div>
         {% endif %}
 
-        {% if term or local or cliente %}
+        {% if term or local or cliente or status %}
         <a href="?state={{ state }}" class="btn btn-outline-secondary btn-sm rounded-pill">
           <i class="fas fa-undo-alt me-1"></i> Limpar Filtros
         </a>
@@ -63,7 +74,7 @@
       </div>
 
       <!-- Formulário de Filtros -->
-      <form method="get" class="mb-4">
+      <form method="get" id="searchForm" class="mb-4">
         <input type="hidden" name="state" value="{{ state }}">
         <input type="hidden" name="lat" id="lat" value="{{ lat }}">
         <input type="hidden" name="lon" id="lon" value="{{ lon }}">
@@ -82,6 +93,17 @@
             <input type="text" name="cliente" class="form-control rounded-4" placeholder="Nome do anunciante"
               value="{{ cliente }}">
           </div>
+          <div class="col-md-3">
+            <select name="status" class="form-select rounded-4" id="statusSelect">
+              <option value="ativo" {% if status == "ativo" %}selected{% endif %}>Ativo</option>
+              <option value="em_andamento" {% if status == "em_andamento" %}selected{% endif %}>Em Andamento</option>
+              <option value="em_atendimento" {% if status == "em_atendimento" %}selected{% endif %}>Em Atendimento</option>
+              <option value="finalizado" {% if status == "finalizado" %}selected{% endif %}>Finalizado</option>
+              <option value="cancelado" {% if status == "cancelado" %}selected{% endif %}>Cancelado</option>
+              <option value="" {% if not status %}selected{% endif %}>Todos os Status</option>
+            </select>
+          </div>
+          
           <div class="col-auto d-flex align-items-end gap-2">
             <button type="button" class="btn btn-outline-success rounded-pill px-3" id="btn-localizacao"
               onclick="usarLocalizacaoAtual()">
@@ -114,14 +136,15 @@
             </div>
             {% endfor %}
           </div>
+          {% if raio %}
           <div class="col-md-6">
             <label class="form-label fw-semibold small">
               Raio de busca (km): <span id="raioValor">{{ raio|default:"0" }}</span> km
             </label>
             <input type="range" placeholder="Raio de busca (km)" class="form-range" min="0" max="2000" step="1"
               id="sliderRaio" value="{{ raio|default:0 }}">
-
           </div>
+          {%  endif %}
         </div>
       </form>
 
@@ -164,7 +187,7 @@
           {% if page_obj.has_previous %}
           <li class="page-item">
             <a class="page-link"
-              href="?q={{ term }}&state={{ state }}&page={{ page_obj.previous_page_number }}">&laquo;</a>
+              href="?q={{ term }}&state={{ state }}{% if status %}&status={{ status }}{% endif %}&page={{ page_obj.previous_page_number }}">&laquo;</a>
           </li>
           {% endif %}
           {% for num in paginator.page_range %}
@@ -172,14 +195,14 @@
           <li class="page-item active"><span class="page-link">{{ num }}</span></li>
           {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %} 
           <li class="page-item">
-            <a class="page-link" href="?q={{ term }}&state={{ state }}&page={{ num }}">{{ num }}</a>
+            <a class="page-link" href="?q={{ term }}&state={{ state }}{% if status %}&status={{ status }}{% endif %}&page={{ num }}">{{ num }}</a>
           </li>
             {% endif %}
             {% endfor %}
             {% if page_obj.has_next %}
             <li class="page-item">
               <a class="page-link"
-                href="?q={{ term }}&state={{ state }}&page={{ page_obj.next_page_number }}">&raquo;
+                href="?q={{ term }}&state={{ state }}{% if status %}&status={{ status }}{% endif %}&page={{ page_obj.next_page_number }}">&raquo;
               </a>
             </li>
             {% endif %}
@@ -239,15 +262,33 @@
     const raioValor = document.getElementById('raioValor');
     const raioHidden = document.getElementById('raio');
 
-    sliderRaio.addEventListener('input', function () {
-      raioValor.textContent = this.value;
-      raioHidden.value = this.value;
-    });
+    if (sliderRaio) {
+      sliderRaio.addEventListener('input', function () {
+        raioValor.textContent = this.value;
+        raioHidden.value = this.value;
+      });
 
-    const form = sliderRaio.closest("form");
-    if (form) {
-      form.addEventListener("submit", function () {
-        raioHidden.value = sliderRaio.value;
+      const form = sliderRaio.closest("form");
+      if (form) {
+        form.addEventListener("submit", function () {
+          raioHidden.value = sliderRaio.value;
+        });
+      }
+    }
+
+    // Garantir que os parâmetros de status e estado sejam enviados corretamente
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+      searchForm.addEventListener('submit', function(e) {
+        // Garantir que o status seja incluído mesmo se vazio
+        const statusSelect = document.getElementById('statusSelect');
+        if (statusSelect) {
+          const statusInput = document.createElement('input');
+          statusInput.type = 'hidden';
+          statusInput.name = 'status';
+          statusInput.value = statusSelect.value;
+          this.appendChild(statusInput);
+        }
       });
     }
   });

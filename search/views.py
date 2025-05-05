@@ -11,25 +11,33 @@ class NecessidadeSearchAllView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
+        # Iniciar com todos os anúncios sem filtro fixo de status
         qs = (
             Necessidade.objects
-            .filter(status="ativo")
             .select_related("categoria", "subcategoria", "cliente")
             .prefetch_related(
                 Prefetch("imagens", queryset=AnuncioImagem.objects.order_by("id"))
             )
         )
 
+        # Filtro de status - agora com valor padrão "ativo" se não for especificado
+        self.status = self.request.GET.get("status", "ativo").strip()
+        if self.status:
+            qs = qs.filter(status=self.status)
+
+        # Filtro de estado
         self.state_sigla = self.request.GET.get("state", "todos").upper()
         if self.state_sigla != "TODOS":
             qs = qs.filter(cliente__estado=self.state_sigla)
 
-        self.term = self.request.GET.get("q", "").strip()
-        self.campos = self.request.GET.getlist("campos") or []
+        # Filtro por cliente
         self.cliente = self.request.GET.get("cliente", "").strip()
         if self.cliente:
             qs = qs.filter(cliente__first_name__icontains=self.cliente)
 
+        # Filtro por termo de busca
+        self.term = self.request.GET.get("q", "").strip()
+        self.campos = self.request.GET.getlist("campos") or []
         if self.term:
             conditions = Q()
             if not self.campos or "titulo" in self.campos:
@@ -42,6 +50,7 @@ class NecessidadeSearchAllView(ListView):
                 conditions |= Q(subcategoria__nome__icontains=self.term)
             qs = qs.filter(conditions)
 
+        # Filtro por localidade
         self.local = self.request.GET.get("local", "").strip()
         if self.local:
             qs = qs.filter(
@@ -100,4 +109,6 @@ class NecessidadeSearchAllView(ListView):
         ctx["raio"] = self.request.GET.get("raio", "0")
         ctx["menu_categorias"] = Categoria.objects.all()
         ctx["opcoes_campos"] = ["titulo", "descricao", "categoria", "subcategoria"]
+        ctx["status"] = self.status
+
         return ctx

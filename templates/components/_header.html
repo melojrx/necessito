@@ -2,7 +2,25 @@
 
 <header>
 <style>
-    /* ---------- Estilização específica ---------- */
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem;
+    }
+    
+    .list-group-item.bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
     .search-bar{
         border:1px solid #dadce0;          /* cor bem suave */
         background:#fff;
@@ -31,7 +49,47 @@
     .search-bar .dropdown-toggle:hover{
         color:#0d6efd;
     }
+    @keyframes bellShake {
+        0% { transform: rotate(0); }
+        15% { transform: rotate(5deg); }
+        30% { transform: rotate(-5deg); }
+        45% { transform: rotate(4deg); }
+        60% { transform: rotate(-4deg); }
+        75% { transform: rotate(2deg); }
+        85% { transform: rotate(-2deg); }
+        92% { transform: rotate(1deg); }
+        100% { transform: rotate(0); }
+    }
+    
+    .bell-animation {
+        animation: bellShake 2s infinite;
+        transform-origin: top center;
+    }
+    /* Estilos para o off-canvas de notificações */
+#offcanvasNotifications .list-group-item {
+    transition: background-color 0.3s ease;
+}
+
+#offcanvasNotifications .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+#pagination-container {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+}
+
+/* Animação de fade para as notificações */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#notifications-container .list-group-item {
+    animation: fadeIn 0.3s ease;
+}
 </style>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
@@ -114,13 +172,12 @@
                     <li class="nav-item position-relative">
                         <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
                             data-bs-target="#offcanvasNotifications" aria-controls="offcanvasNotifications">
-                            <i class="fas fa-bell me-2"></i>
+                            <i class="fas fa-bell me-2 {% if unread_notifications_count > 0 %}bell-animation{% endif %}"></i>
                             <span>Notificações</span>
-
+                    
                             <!-- Badge se houver notificações não lidas -->
                             {% if unread_notifications_count > 0 %}
-                            <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 {{ unread_notifications_count }}
                             </span>
                             {% endif %}
@@ -185,70 +242,51 @@
             </div>
         </div>
     </nav>
-<style>
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #e9ecef;
-        padding: 1rem;
-    }
-    
-    .list-group-item.bg-light {
-        background-color: #f8f9fa !important;
-    }
-    
-    .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
-    }
-</style>
     <!-- Off Canvas Notificações -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications" aria-labelledby="offcanvasNotificationsLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasNotificationsLabel" style="color: #0B5ED7;">
-            <i class="fa-solid fa-bell"></i> Notificações
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        {% if user.is_authenticated %}
-            {% with user.notifications.all as user_notifications %}
-                {% if user_notifications %}
-                    <div class="list-group">
-                        {% for notificacao in user_notifications %}
-                            <div class="list-group-item {% if not notificacao.is_read %} bg-light {% endif %}">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <div class="mb-1">{{ notificacao.message|safe }}</div>
-                                    <small><i class='fas fa-clock'></i> {{ notificacao.created_at|timesince }} atrás</small>
-                                </div>
-                                <div class="d-flex w-100 justify-content-between">
-                                {% if notificacao.necessidade %}
-                                    <a href="{% url 'necessidade_detail' notificacao.necessidade.id %}" class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-bullhorn me-2"></i> Visualizar Anúncio
-                                    </a>
-                                {% endif %}
-                                {% if not notificacao.is_read %}
-                                    <a href="{% url 'notification_mark_read' notificacao.id %}" class="btn btn-sm btn-secondary mt-2">
-                                        <i class="fa-solid fa-circle-xmark"></i> Marcar como lido
-                                    </a>
-                                {% endif %}
-                            </div>
-                            </div>
-                        {% endfor %}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications" aria-labelledby="offcanvasNotificationsLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasNotificationsLabel" style="color: #0B5ED7;">
+                <i class="fa-solid fa-bell"></i> Notificações
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% if user.is_authenticated %}
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="{% url 'notification_mark_all_read' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-check-double me-1"></i> Marcar todas como lidas
+                    </a>
+                </div>
+                
+                <!-- Container para as notificações -->
+                <div class="list-group" id="notifications-container">
+                    <!-- As notificações serão carregadas aqui via AJAX -->
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
                     </div>
-                {% else %}
-                    <p>Você não tem notificações.</p>
-                {% endif %}
-            {% endwith %}
-        {% else %}
-            <p>Você precisa estar logado para ver notificações.</p>
-        {% endif %}
+                </div>
+                
+                <!-- Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-3" id="pagination-container" style="display: none !important;">
+                    <button class="btn btn-sm btn-outline-secondary" id="prev-page" disabled>
+                        <i class="fas fa-chevron-left me-1"></i> Anterior
+                    </button>
+                    <span id="page-info">Página <span id="current-page">1</span> de <span id="total-pages">1</span></span>
+                    <button class="btn btn-sm btn-outline-secondary" id="next-page" disabled>
+                        Próxima <i class="fas fa-chevron-right ms-1"></i>
+                    </button>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
+                    <p>Você precisa estar logado para ver notificações.</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary mt-2">Fazer Login</a>
+                </div>
+            {% endif %}
+        </div>
     </div>
-</div>
 
 </header>
 
@@ -268,4 +306,140 @@
         });
       });
     });
-    </script>
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos do DOM
+        const notificationsContainer = document.getElementById('notifications-container');
+        const paginationContainer = document.getElementById('pagination-container');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const currentPageSpan = document.getElementById('current-page');
+        const totalPagesSpan = document.getElementById('total-pages');
+        const offcanvasNotifications = document.getElementById('offcanvasNotifications');
+        
+        let currentPage = 1;
+        
+        // Função para carregar notificações
+        function loadNotifications(page = 1) {
+            // Mostrar spinner
+            notificationsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+            `;
+            
+            // Fazer requisição AJAX com URL completa
+            fetch(`/notifications/get_notifications/?page=${page}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na resposta do servidor: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Dados recebidos:', data); // Debug
+                    
+                    // Atualizar o container de notificações
+                    notificationsContainer.innerHTML = data.html;
+                    
+                    // Atualizar informações de paginação
+                    currentPage = data.current_page;
+                    currentPageSpan.textContent = currentPage;
+                    totalPagesSpan.textContent = data.total_pages;
+                    
+                    // Habilitar/desabilitar botões de paginação
+                    prevPageBtn.disabled = !data.has_previous;
+                    nextPageBtn.disabled = !data.has_next;
+                    
+                    // Mostrar ou esconder a paginação
+                    if (data.total_pages > 1) {
+                        paginationContainer.style.display = 'flex';
+                    } else {
+                        paginationContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar notificações:', error);
+                    notificationsContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            Erro ao carregar notificações: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+        
+        // Carregar notificações quando o offcanvas é aberto
+        if (offcanvasNotifications) {
+            offcanvasNotifications.addEventListener('shown.bs.offcanvas', function() {
+                console.log('Offcanvas aberto, carregando notificações...'); // Debug
+                loadNotifications(currentPage);
+            });
+            
+            // Eventos de paginação
+            if (prevPageBtn) {
+                prevPageBtn.addEventListener('click', function() {
+                    if (currentPage > 1) {
+                        loadNotifications(currentPage - 1);
+                    }
+                });
+            }
+            
+            if (nextPageBtn) {
+                nextPageBtn.addEventListener('click', function() {
+                    loadNotifications(currentPage + 1);
+                });
+            }
+            
+            // Delegação de eventos para os botões de marcar como lido
+            if (notificationsContainer) {
+                notificationsContainer.addEventListener('click', function(e) {
+                    // Verificar se o clique foi em um botão de marcar como lido
+                    const link = e.target.closest('a[href*="/notifications/mark_read/"]');
+                    if (link) {
+                        e.preventDefault();
+                        
+                        // Fazer requisição AJAX para marcar como lido
+                        fetch(link.href)
+                            .then(response => {
+                                if (response.ok) {
+                                    // Recarregar notificações
+                                    loadNotifications(currentPage);
+                                    // Atualizar contador no header
+                                    updateNotificationCount();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erro ao marcar notificação como lida:', error);
+                            });
+                    }
+                });
+            }
+        } else {
+            console.error('Elemento offcanvasNotifications não encontrado');
+        }
+        
+        // Função para atualizar o contador de notificações
+        function updateNotificationCount() {
+            fetch('/notifications/get_notifications/?count_only=true')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.querySelector('.nav-item .badge');
+                    if (badge) {
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar contador:', error);
+                });
+        }
+    });
+</script>

@@ -23,73 +23,93 @@ from categories.models import Categoria
 from .models import Necessidade
 
 class HomeView(TemplateView):
-    template_name = 'home.html'  # Diretamente o nome do arquivo
+    template_name = "home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1) Categorias populares
-        categorias_populares = Categoria.objects.order_by('-id')[:24]  # Limita a 24 categorias (2 slides de 12)
-        context['categorias_populares'] = [list(islice(categorias_populares, i, i + 12)) for i in range(0, len(categorias_populares), 12)]
+        # ──────────────────────────────────────────────
+        # 1) Categorias populares (24 → 2 slides de 12)
+        # ──────────────────────────────────────────────
+        categorias_populares = (
+            Categoria.objects.order_by("-id")[:24]
+        )
+        context["categorias_populares"] = [
+            list(islice(categorias_populares, i, i + 12))
+            for i in range(0, len(categorias_populares), 12)
+        ]
 
-        # 2) Anúncios populares (já existente)
-        anuncios_populares = Necessidade.objects.exclude(
-            status__in=['finalizado', 'cancelado']
-        ).order_by('-id')[:8]  # Limita a 8 anúncios para exemplo
+        # ──────────────────────────────────────────────
+        # 2) Anúncios populares (8 → 2 slides de 4)
+        # ──────────────────────────────────────────────
+        anuncios_populares = (
+            Necessidade.objects.exclude(status__in=["finalizado", "cancelado"])
+            .order_by("-id")[:8]
+        )
+        context["anuncios_populares"] = [
+            list(islice(anuncios_populares, i, i + 4))
+            for i in range(0, len(anuncios_populares), 4)
+        ]
 
-        # Divide os anúncios em grupos de 4
-        anuncios_grouped = [list(islice(anuncios_populares, i, i + 4)) for i in range(0, len(anuncios_populares), 4)]
-        context['anuncios_populares'] = anuncios_grouped
-
-        # 3) Lógica para anúncios com base nas categorias preferidas
+        # ──────────────────────────────────────────────
+        # 3) Anúncios "baseados nas suas categorias"
+        #    → agora NUNCA fica vazio
+        # ──────────────────────────────────────────────
         user = self.request.user
+        qs_preferidos = Necessidade.objects.none()
+
         if user.is_authenticated:
-            # Verifica se o usuário possui categorias preferidas
             preferred_cats = user.preferred_categories.all()
             if preferred_cats.exists():
-                # Se tiver categorias, filtra anúncios ativos nessas categorias, em ordem crescente
-                anuncios_preferidos = Necessidade.objects.filter(
+                qs_preferidos = Necessidade.objects.filter(
                     categoria__in=preferred_cats,
-                    status='ativo'
-                ).order_by('data_criacao')[:8]  # ou .order_by('titulo'), .order_by('data_criacao'), etc.
-            else:
-                # Não há categorias preferidas: pega anúncios ativos de forma aleatória
-                anuncios_preferidos = Necessidade.objects.filter(
-                    status='ativo'
-                ).order_by('data_criacao')[:8]  # limite de 4, por exemplo
-        else:
-            # Usuário não autenticado: exibe também anúncios ativos aleatórios
-            anuncios_preferidos = Necessidade.objects.filter(
-                status='ativo'
-            ).order_by('data_criacao')[:8]
+                    status="ativo",
+                ).order_by("-data_criacao")[:8]
 
-        # Divide os anúncios em grupos de 4
-        anuncios_preferidos_grouped = [list(islice(anuncios_preferidos, i, i + 4)) for i in range(0, len(anuncios_preferidos), 4)]
-        context['anuncios_preferidos'] = anuncios_preferidos_grouped
-        
-        # 4) Anúncios próximos (cidade do usuário)
+        # ⚠️ Fallback: se não logado, não tem prefs ou
+        #    não encontrou anúncios nessas categorias
+        if not qs_preferidos.exists():
+            qs_preferidos = (
+                Necessidade.objects.filter(status="ativo")
+                .order_by("data_criacao")[:8]
+            )
+
+        context["anuncios_preferidos"] = [
+            list(islice(qs_preferidos, i, i + 4))
+            for i in range(0, len(qs_preferidos), 4)
+        ]
+
+        # ──────────────────────────────────────────────
+        # 4) Anúncios próximos (cidade ou estado)
+        # ──────────────────────────────────────────────
         anuncios_proximos = Necessidade.objects.none()
         anuncios_estado = Necessidade.objects.none()
 
-        if user.is_authenticated and hasattr(user, 'cidade') and user.cidade:
+        if user.is_authenticated and getattr(user, "cidade", None):
             anuncios_proximos = Necessidade.objects.filter(
-                status__in=['ativo', 'em_andamento'],
-                cliente__cidade=user.cidade
-            ).order_by('-data_criacao')[:5]  # Limite de 5 anúncios
+                status__in=["ativo", "em_andamento"],
+                cliente__cidade=user.cidade,
+            ).order_by("-data_criacao")[:5]
 
-            # Se não houver anúncios na cidade, buscar no estado
-            if not anuncios_proximos.exists() and hasattr(user, 'estado') and user.estado:
+            if (
+                not anuncios_proximos.exists()
+                and getattr(user, "estado", None)
+            ):
                 anuncios_estado = Necessidade.objects.filter(
-                    status__in=['ativo', 'em_andamento'],
-                    cliente__estado=user.estado
-                ).order_by('-data_criacao')[:5]
+                    status__in=["ativo", "em_andamento"],
+                    cliente__estado=user.estado,
+                ).order_by("-data_criacao")[:5]
 
-        # Divide os anúncios em grupos de 4
-        anuncios_proximos_final = anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
-        anuncios_proximos_grouped = [list(islice(anuncios_proximos_final, i, i + 4)) for i in range(0, len(anuncios_proximos_final), 4)]
-        context['anuncios_proximos'] = anuncios_proximos_grouped
+        anuncios_final = (
+            anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
+        )
+        context["anuncios_proximos"] = [
+            list(islice(anuncios_final, i, i + 4))
+            for i in range(0, len(anuncios_final), 4)
+        ]
 
         return context
+
 
 class NecessidadeListView(ListView):
     model = Necessidade

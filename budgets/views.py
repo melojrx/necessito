@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views import View
@@ -173,3 +174,47 @@ class budgetDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Orçamento excluído com sucesso!")
         return super().delete(request, *args, **kwargs)
+
+# budgets/views.py
+from django.http import HttpResponse
+from django.template.loader import get_template
+from django.contrib.auth.decorators import login_required
+from xhtml2pdf import pisa
+from io import BytesIO
+from django.conf import settings
+import os
+from .models import Orcamento
+
+@login_required
+def export_orcamento_pdf(request, pk):
+    """
+    Exporta os detalhes do orçamento como PDF (versão simplificada sem logo)
+    """
+    orcamento = Orcamento.objects.get(pk=pk)
+
+    # Verificar permissão (apenas o dono do orçamento ou o cliente do anúncio pode exportar)
+    if request.user != orcamento.fornecedor and request.user != orcamento.anuncio.cliente:
+        return HttpResponse("Acesso negado", status=403)
+
+    # Preparar o contexto para o template
+    context = {
+        'orcamento': orcamento,
+        'now': timezone.now(),  # Data e hora atual
+    }
+
+    # Renderizar o template HTML
+    template = get_template('orcamento_pdf.html')
+    html = template.render(context)
+
+    # Criar o arquivo PDF
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        # Se a geração do PDF for bem-sucedida, retornar o PDF como resposta
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        filename = f"orcamento_{orcamento.id}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    return HttpResponse("Erro ao gerar PDF", status=500)

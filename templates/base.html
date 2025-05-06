@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,14 +27,25 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
+    <style>
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        main {
+            flex: 1 0 auto; /* Isso faz com que o conteúdo principal ocupe todo o espaço disponível */
+        }
+        
+        footer {
+            flex-shrink: 0; /* Impede que o footer encolha */
+        }
+    </style>
+</head>
 
-  </head>
-
-<style>
-    body {
-        font-family: 'Nunito Sans', sans-serif;
-    }
-</style>
 <body>
     {% include 'components/_header.html' %}
    
@@ -50,17 +61,15 @@
         {% endif %}
     </div>
 
-    <div class="col py-3">
+    <main>
         <div class="container mt-4">
-          <main>
             {% block content %}
             {% endblock %}
-          </main>
         </div>
-    </div>
+    </main>
     
+    {% include 'components/_footer.html' %}
 
-    
     <!-- (1) jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -94,5 +103,4 @@
       });
     </script>
 </body>
-{% include 'components/_footer.html' %}
 </html>

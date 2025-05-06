@@ -1,9 +1,10 @@
 {% load static %}
 <style>
-    .stick-footer {
+    footer {
         background-color: #f8f9fa;
         padding: 20px 0;
         border-top: 1px solid #e9ecef;
+        margin-top: auto; /* Isso ajuda a empurrar o footer para baixo */
     }
     .footer-links a {
         color: #6c757d;
@@ -24,42 +25,42 @@
         color: #6c757d;
         margin-top: 10px;
     }
-  </style>
-  
-  <footer class="stick-footer">
-    <div class="container-fluid">
-      <div class="row align-items-center text-center">
-  
-        <!-- Coluna adicionada para logo à esquerda -->
-        <div class="col-md-2 col-12 mb-3 mb-md-0">
-          <img src="{% static 'img/logo1.png' %}" alt="Logo Necessito.br" height="100">
-        </div>
-  
-        <!-- Conteúdo original centralizado -->
-        <div class="col-md-10 col-12">
-          <div class="footer-links">
-            <a href="#">Sobre</a>
-            <a href="#">Comprar</a>
-            <a href="#">Plano profissional</a>
-            <a href="#">Ajuda</a>
-            <a href="#">Dicas de segurança</a>
-            <a href="#">Termos de uso</a>
-            <a href="#">Política de privacidade</a>
-            <a href="#">Propriedade intelectual</a>
-            <a href="#">Mapa do site</a>
-            <a href="#">Grupo Necessito BR</a>
-          </div>
-          <div class="footer-icons mt-3">
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-          </div>
-          <div class="footer-copyright">
-            © 2025 | Necessito.br - Todos os direitos reservados
-          </div>
-        </div>
-  
+</style>
+
+<footer>
+  <div class="container-fluid">
+    <div class="row align-items-center text-center">
+
+      <!-- Coluna adicionada para logo à esquerda -->
+      <div class="col-md-2 col-12 mb-3 mb-md-0">
+        <img src="{% static 'img/logo1.png' %}" alt="Logo Necessito.br" height="100">
       </div>
+
+      <!-- Conteúdo original centralizado -->
+      <div class="col-md-10 col-12">
+        <div class="footer-links">
+          <a href="#">Sobre</a>
+          <a href="#">Comprar</a>
+          <a href="#">Plano profissional</a>
+          <a href="#">Ajuda</a>
+          <a href="#">Dicas de segurança</a>
+          <a href="#">Termos de uso</a>
+          <a href="#">Política de privacidade</a>
+          <a href="#">Propriedade intelectual</a>
+          <a href="#">Mapa do site</a>
+          <a href="#">Grupo Necessito BR</a>
+        </div>
+        <div class="footer-icons mt-3">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+        <div class="footer-copyright">
+          © 2025 | Necessito.br - Todos os direitos reservados
+        </div>
+      </div>
+
     </div>
-  </footer>
+  </div>
+</footer>

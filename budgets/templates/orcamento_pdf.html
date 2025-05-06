@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Orçamento #{{ orcamento.id }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .orcamento-info {
+            margin-bottom: 20px;
+        }
+        .orcamento-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0B5ED7;
+        }
+        .orcamento-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .orcamento-meta-item {
+            margin-bottom: 5px;
+        }
+        .orcamento-meta-label {
+            font-weight: bold;
+        }
+        .orcamento-description {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .orcamento-details {
+            margin-bottom: 20px;
+        }
+        .orcamento-details-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .orcamento-details-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .orcamento-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .status-pendente {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .status-aceito {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-recusado {
+            background-color: #dc3545;
+            color: white;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Orçamento #{{ orcamento.id }}</h1>
+    </div>
+    
+    <div class="orcamento-info">
+        <div class="orcamento-title">
+            {{ orcamento.anuncio.titulo }}
+        </div>
+        
+        <div class="orcamento-meta">
+            <div>
+                <div class="orcamento-meta-item">
+                    <span class="orcamento-meta-label">Fornecedor:</span> 
+                    {{ orcamento.fornecedor.get_full_name }}
+                </div>
+                <div class="orcamento-meta-item">
+                    <span class="orcamento-meta-label">Cliente:</span> 
+                    {{ orcamento.anuncio.cliente.get_full_name }}
+                </div>
+                <div class="orcamento-meta-item">
+                    <span class="orcamento-meta-label">Data:</span> 
+                    {{ orcamento.data_criacao|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+            <div>
+                <div class="orcamento-meta-item">
+                    <span class="orcamento-meta-label">Status:</span> 
+                    <span class="orcamento-status status-{{ orcamento.status }}">{{ orcamento.get_status_display }}</span>
+                </div>
+                <div class="orcamento-meta-item">
+                    <span class="orcamento-meta-label">Valor:</span> 
+                    <span class="price">R$ {{ orcamento.valor|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="orcamento-description">
+            <h3>Descrição do Orçamento</h3>
+            <p>{{ orcamento.descricao|linebreaks }}</p>
+        </div>
+        
+        <div class="orcamento-details">
+            <h3>Detalhes do Anúncio</h3>
+            <div class="orcamento-details-item">
+                <div class="orcamento-details-label">Categoria:</div>
+                {{ orcamento.anuncio.categoria.nome }}
+            </div>
+            <div class="orcamento-details-item">
+                <div class="orcamento-details-label">Localização:</div>
+                {{ orcamento.anuncio.cidade }}, {{ orcamento.anuncio.estado }}
+            </div>
+            <div class="orcamento-details-item">
+                <div class="orcamento-details-label">Descrição do Anúncio:</div>
+                {{ orcamento.anuncio.descricao|linebreaks }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Este documento foi gerado automaticamente pelo sistema Necessito.br em {{ now|date:"d/m/Y H:i" }}</p>
+        <p>© 2025 | Necessito.br - Todos os direitos reservados</p>
+    </div>
+</body>
+</html>

@@ -37,7 +37,7 @@ def mark_all_read(request):
         return HttpResponseRedirect(referer)
     return redirect('home')
 
-@login_required
+login_required
 def get_notifications(request):
     """Retorna as notificações paginadas do usuário"""
     # Se apenas a contagem for solicitada
@@ -46,10 +46,10 @@ def get_notifications(request):
         return JsonResponse({'unread_count': unread_count})
 
     page = request.GET.get('page', 1)
-    notifications = request.user.notifications.all()
+    notifications = request.user.notifications.all().order_by('-created_at')  # Ordenar por data de criação (mais recentes primeiro)
 
-    # Configurar paginação - 10 notificações por página
-    paginator = Paginator(notifications, 10)
+    # Configurar paginação - 5 notificações por página (alterado de 10 para 5)
+    paginator = Paginator(notifications, 5)  # Alterado para 5
     page_obj = paginator.get_page(page)
 
     # Renderizar apenas o HTML das notificações

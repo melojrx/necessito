@@ -1,0 +1,41 @@
+{% load static %}
+
+<div id="bannerCarousel"
+     class="carousel slide carousel-fade mb-4 shadow-sm rounded"
+     data-bs-ride="carousel">
+
+  {# ▸ Indicadores (bolinhas) #}
+  <div class="carousel-indicators">
+    {% for n in "123456"|make_list %}
+      <button type="button"
+              data-bs-target="#bannerCarousel"
+              data-bs-slide-to="{{ forloop.counter0 }}"
+              class="{% if forloop.first %}active{% endif %}"
+              aria-label="Slide {{ n }}"></button>
+    {% endfor %}
+  </div>
+
+  {# ▸ Slides #}
+  <div class="carousel-inner">
+    {% for n in "123456"|make_list %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <img src="{% static 'img/Banner-' %}{{ n }}.png"
+             class="d-block w-100"
+             alt="Banner {{ n }}">
+      </div>
+    {% endfor %}
+  </div>
+
+  {# ▸ Controles #}
+  <button class="carousel-control-prev" type="button"
+          data-bs-target="#bannerCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+
+  <button class="carousel-control-next" type="button"
+          data-bs-target="#bannerCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Próximo</span>
+  </button>
+</div>

@@ -2,7 +2,6 @@
 {% load custom_filters %}
 {% load static %}
 
-
 {% block title %}Detalhes da Necessidade{% endblock %}
 
 {% block content %}
@@ -181,6 +180,7 @@
                                     {# --- Rejeitar orçamento --- #}
                                     {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
                                       {% if orcamento.status == "pendente" %}
+                                  
                                         <button class="btn btn-danger btn-rejeitar"
                                                 data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
                                                 data-bs-toggle="modal"
@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       if (data.success) {
         bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
-        alert(data.message || 'Anúncio finalizado.');
+        //alert(data.message || 'Anúncio finalizado.');
         location.reload();
       } else {
         alert(data.error || 'Erro ao finalizar.');

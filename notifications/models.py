@@ -6,6 +6,8 @@ class NotificationType(models.TextChoices):
     NEW_AD = 'NEW_AD', 'Novo Anúncio'
     NEW_END_AD = 'NEW_END_AD', 'Anúncio Finalizado'
     NEW_BUDGET = 'NEW_BUDGET', 'Novo Orçamento'
+    BUDGET_REJECTED = 'BUDGET_REJECTED', 'Orçamento Rejeitado'
+    NEW_AVALIACAO = 'NEW_AVALIACAO', 'Nova Avaliação'
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')

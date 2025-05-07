@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from ads.models import Necessidade
 from .models import Orcamento
@@ -106,8 +106,9 @@ class OrcamentoRejeitarView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Você não tem permissão para rejeitar este orçamento!'}, status=403)
 
         # Verifica se o anúncio está em andamento
-        if orcamento.anuncio.status == 'em_andamento' or 'Em andamento':
+        if orcamento.anuncio.status != 'em_andamento':
             return JsonResponse({'error': 'Você só pode rejeitar orçamentos enquanto o anúncio está em andamento!'}, status=400)
+
 
         # Atualiza o status do orçamento para "rejeitado"
         orcamento.status = 'rejeitado'
@@ -168,12 +169,19 @@ class budgetDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         # Filtra os orçamentos pelo fornecedor logado
-        queryset = Orcamento.objects.filter(fornecedor=self.request.user)
-        return queryset
+        return Orcamento.objects.filter(fornecedor=self.request.user)
 
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Orçamento excluído com sucesso!")
+        orcamento = self.get_object()
+
+        # Checa a regra de negócio
+        if orcamento.status == 'aguardando_aceite_fornecedor':
+            messages.error(request, "Não é permitido excluir um orçamento aprovado pelo cliente e aguardando seu aceite.")
+            return redirect('budget_list')
+
+        messages.success(request, "Orçamento excluído com sucesso!")
         return super().delete(request, *args, **kwargs)
+
 
 # budgets/views.py
 from django.http import HttpResponse

@@ -21,6 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar o projeto
 COPY . .
 
+# Criar diretórios necessários
+RUN mkdir -p /app/logs /app/staticfiles /app/media
+
 # Criar usuário não-root
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser

@@ -1,3 +1,11 @@
+novo user jrmeloafrf@gmail.com
+python manage.py createsuperuser
+E-mail: jrmeloafrf@gmail.com 
+Nome: junior
+Sobrenome: melo
+Password: iL17504678@
+
+
 User1
 Email: necessitobr@gmail.com    
 First name: admin

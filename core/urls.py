@@ -14,6 +14,7 @@ urlpatterns = [
     path('rankings/', include('rankings.urls')),
     path('notifications/', include('notifications.urls')),
     path('buscar/', include('search.urls')),
+    path('api/', include('api.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

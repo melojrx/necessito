@@ -119,14 +119,6 @@
         animation: bellShake 2s infinite;
         transform-origin: top center;
     }
-
-    /* Ajustes responsivos para o logo */
-    @media (max-width: 767.98px) { /* Telas menores que md (Bootstrap 5: xs, sm) */
-        .logo-img-responsive-sm {
-            height: 55px !important; /* Logo levemente maior em telas pequenas */
-        }
-    }
-
     /* Estilos para o off-canvas de notificações */
 #offcanvasNotifications .list-group-item {
     transition: background-color 0.3s ease;
@@ -152,73 +144,12 @@
 }
 </style>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-md navbar-light bg-light py-3">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                <img src="{% static 'img/logo2.png' %}" alt="Necessito.br" height="50" class="d-inline-block align-top me-2 logo-img-responsive-sm">
-                <span class="fs-3 fw-semibold d-none d-md-inline-block" style="color: #545b62;">Necessito.br</span>
+                <img src="{% static 'img/logo2.png' %}" alt="Necessito.br" height="50" class="d-inline-block align-top me-2">
+                <span class="fs-3 fw-semibold" style="color: #545b62;">Necessito.br</span>
             </a>
-
-            <!-- Barra de pesquisa movida para fora do collapse e wrapper adicionado -->
-            <div class="flex-grow-1 mx-md-3 mt-2 mt-md-0">
-                <form method="get"
-                      action="{% url 'search:necessidade_search_all' %}"
-                      class="w-100">
-              
-                  <!-- sigla escolhida (enviada no submit) -->
-                  <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
-              
-                  <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
-              
-                    <!-- campo de busca -->
-                    <input type="text"
-                           name="q"
-                           class="form-control flex-grow-1 border-0 shadow-none px-0"
-                           placeholder='Buscar "Apartamento"'
-                           value="{{ request.GET.q|default:'' }}"
-                           autocomplete="off">
-              
-                    <!-- divisor -->
-                    <div class="vr mx-3"></div>
-              
-                    <!-- seletor de estados -->
-                    <div class="dropdown d-flex align-items-center me-2">
-                      <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
-              
-                      <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1"
-                              type="button"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                              id="stateButton">
-                        {{ selected_state }}
-                      </button>
-              
-                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
-                        <li>
-                          <a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
-                            Todos os estados
-                          </a>
-                        </li>
-                        {% for st in states %}
-                          <li>
-                            <a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
-                               href="#"
-                               data-state="{{ st.abbreviation }}">
-                              {{ st.abbreviation }}
-                            </a>
-                          </li>
-                        {% endfor %}
-                      </ul>
-                      
-                    </div>
-              
-                    <!-- lupa -->
-                    <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
-                      <i class="fas fa-search fs-5"></i>
-                    </button>
-                  </div>
-                </form>
-            </div>
 
             <!-- Botão do menu mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -226,9 +157,71 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Menu principal (agora apenas com os links restantes) -->
+            <!-- Menu principal -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto align-items-start">
+                    <!-- Barra de pesquisa (base_header.html, por ex.) -->
+                    <li class="nav-item flex-grow-1 mt-2 mt-lg-0 me-auto">
+                        <form method="get"
+                              action="{% url 'search:necessidade_search_all' %}"
+                              class="w-100">
+                      
+                          <!-- sigla escolhida (enviada no submit) -->
+                          <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
+                      
+                          <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
+                      
+                            <!-- campo de busca -->
+                            <input type="text"
+                                   name="q"
+                                   class="form-control flex-grow-1 border-0 shadow-none px-0"
+                                   placeholder='Buscar "Apartamento"'
+                                   value="{{ request.GET.q|default:'' }}"
+                                   autocomplete="off">
+                      
+                            <!-- divisor -->
+                            <div class="vr mx-3"></div>
+                      
+                            <!-- seletor de estados -->
+                            <div class="dropdown d-flex align-items-center me-2">
+                              <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
+                      
+                              <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1"
+                                      type="button"
+                                      data-bs-toggle="dropdown"
+                                      aria-expanded="false"
+                                      id="stateButton">
+                                {{ selected_state }}
+                              </button>
+                      
+                              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
+                                <li>
+                                  <a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
+                                    Todos os estados
+                                  </a>
+                                </li>
+                                {% for st in states %}
+                                  <li>
+                                    <a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
+                                       href="#"
+                                       data-state="{{ st.abbreviation }}">
+                                      {{ st.abbreviation }}
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                              
+                            </div>
+                      
+                            <!-- lupa -->
+                            <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
+                              <i class="fas fa-search fs-5"></i>
+                            </button>
+                          </div>
+                        </form>
+                      </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-start justify-content-end">
                     <!-- Ícone de Notificações -->
                     <li class="nav-item position-relative">
                         <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
@@ -284,7 +277,7 @@
                             <i class="fas fa-sign-in-alt me-2"></i> Login
                         </a>
                     </li>
-                    <li class="nav-item ms-md-3">
+                    <li class="nav-item ms-lg-3">
                         <a class="nav-link d-flex align-items-center" href="{% url 'register' %}"
                             style="font-size: 14px; white-space: nowrap;">
                             <i class="fas fa-user-plus me-2"></i> Registrar
@@ -293,7 +286,7 @@
                     {% endif %}
 
                     <!-- Botão "Anunciar grátis" -->
-                    <li class="nav-item ms-md-3">
+                    <li class="nav-item ms-lg-3">
                         <a href="{% url 'necessidade_create' %}"
                             class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center"
                             style="font-size: 14px; height: 45px; min-width: 180px; white-space: nowrap;">

@@ -24,6 +24,8 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - .env
+    ports:                
+      - "5433:5432"  # porta 5433 para o postgres
     networks:
       - app_network
 

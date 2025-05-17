@@ -31,13 +31,14 @@ class HomeView(TemplateView):
         # ──────────────────────────────────────────────
         # 1) Categorias populares (24 → 2 slides de 12)
         # ──────────────────────────────────────────────
-        categorias_populares = (
-            Categoria.objects.order_by("-id")[:24]
-        )
+        categorias_populares = Categoria.objects.order_by("-id")[:24]
         context["categorias_populares"] = [
             list(islice(categorias_populares, i, i + 12))
             for i in range(0, len(categorias_populares), 12)
         ]
+
+        # 👇 Adicionado: lista simples para versão mobile adaptada
+        context["categorias"] = categorias_populares
 
         # ──────────────────────────────────────────────
         # 2) Anúncios populares (8 → 2 slides de 4)
@@ -66,8 +67,6 @@ class HomeView(TemplateView):
                     status="ativo",
                 ).order_by("-data_criacao")[:8]
 
-        # ⚠️ Fallback: se não logado, não tem prefs ou
-        #    não encontrou anúncios nessas categorias
         if not qs_preferidos.exists():
             qs_preferidos = (
                 Necessidade.objects.filter(status="ativo")
@@ -91,10 +90,7 @@ class HomeView(TemplateView):
                 cliente__cidade=user.cidade,
             ).order_by("-data_criacao")[:5]
 
-            if (
-                not anuncios_proximos.exists()
-                and getattr(user, "estado", None)
-            ):
+            if not anuncios_proximos.exists() and getattr(user, "estado", None):
                 anuncios_estado = Necessidade.objects.filter(
                     status__in=["ativo", "em_andamento"],
                     cliente__estado=user.estado,

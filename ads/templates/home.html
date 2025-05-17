@@ -35,42 +35,68 @@
         height: 30px;
         filter: invert(1); /* Ícones brancos */
     }
+    .category-card {
+    border-radius: 24px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+  }
+  .category-card i {
+    font-size: 1.6rem;
+    margin-right: 14px;
+    color: #0d6efd;
+  }
+  
 </style>
 
 {% include "components/_banner_carousel.html" %}
 
-<!-- Categorias Populares -->
-<h2 class="mb-4 mt-5">Categorias Populares</h2>
-<div id="categoriasCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
+<!-- CATEGORIAS: versão desktop (carrossel) -->
+<div class="d-none d-md-block">
+    <h2 class="mb-4 mt-5">Categorias Populares</h2>
+    <div id="categoriasCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
         {% for categoria_group in categorias_populares %}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-            <div class="row d-flex align-items-stretch">
-                {% for categoria in categoria_group %}
-                <div class="col-lg-2 col-md-3 col-sm-4 d-flex mb-4">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <a href="{% if categoria.id %}{% url 'category_detail' categoria.id %}{% else %}#{% endif %}" class="text-decoration-none text-dark">
-                                <h5 class="card-title fw-medium">{{ categoria.nome }}</h5>
-                            </a>
-                        </div>
-                    </div>
+          <div class="row d-flex align-items-stretch">
+            {% for categoria in categoria_group %}
+            <div class="col-lg-2 col-md-3 col-sm-4 d-flex mb-4">
+              <div class="card flex-fill text-center">
+                <div class="card-body">
+                  <i class="{{ categoria.icone|default:'fas fa-tag' }} mb-2" style="font-size: 1.5rem; color: #0d6efd;"></i>
+                  <h6 class="card-title mt-2">{{ categoria.nome }}</h6>
                 </div>
-                {% endfor %}
+              </div>
             </div>
+            {% endfor %}
+          </div>
         </div>
         {% endfor %}
-    </div>
-    <!-- Controles do Carousel -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="prev">
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="next">
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="next">
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Próximo</span>
-    </button>
+      </button>
+    </div>
 </div>
+<!-- CATEGORIAS: versão mobile (cards simples e aleatórios) -->
+<div class="d-block d-md-none">
+    <h5 class="fw-semibold mb-3">Categorias Populares</h5>
+    {% for categoria in categorias|dictsort:"nome"|slice:":5" %}
+    <div class="category-card">
+      <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+      <span>{{ categoria.nome }}</span>
+    </div>
+    {% endfor %}
+  </div>
 
 <style>
     /* Estilos personalizados para os cards */

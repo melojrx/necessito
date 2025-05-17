@@ -8,7 +8,6 @@
         align-items: center;
         height: 200px;
     }
-    
     .loading-spinner .spinner {
         width: 40px;
         height: 40px;
@@ -17,91 +16,35 @@
         border-top: 4px solid #007bff;
         animation: spin 1s linear infinite;
     }
-    
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-#notifications-container .list-group-item {
-    animation: fadeIn 0.3s ease;
-    transition: all 0.3s ease;
-}
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Efeito de hover nas notificações */
-#notifications-container .list-group-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-/* Estilo para o container de paginação */
-#pagination-container {
-    border-top: 1px solid #e9ecef;
-    padding-top: 1rem;
-    margin-top: 1rem;
-    transition: all 0.3s ease;
-}
-
-/* Efeito de hover nos botões de paginação */
-#pagination-container button:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Transição suave para os botões */
-#pagination-container button {
-    transition: all 0.2s ease;
-}
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #e9ecef;
-        padding: 1rem;
-    }
-    
-    .list-group-item.bg-light {
-        background-color: #f8f9fa !important;
-    }
-    
-    .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
-    }
-    .search-bar{
-        border:1px solid #dadce0;          /* cor bem suave */
+    .search-bar {
+        border:1px solid #dadce0;
         background:#fff;
         transition:border-color .2s;
     }
-    .search-bar:focus-within{
-        border-color:#0d6efd;              /* azul Bootstrap quando focado */
+    .search-bar:focus-within {
+        border-color:#0d6efd;
     }
-    
-    /* remove bordas/resets */
-    .search-bar input:focus{
+    .search-bar input:focus {
         outline:none;
         box-shadow:none;
     }
-    .search-bar .dropdown-toggle::after{
-        display:none;                      /* usamos o ícone chevron manualmente se quiser */
+    .search-bar .dropdown-toggle::after {
+        display:none;
     }
-    /* divisor fino */
-    .search-bar .vr{
+    .search-bar .vr {
         width:1px;
         min-height:24px;
         background:#dadce0;
     }
-    /* hover states sutis */
-    .search-bar button:hover,
-    .search-bar .dropdown-toggle:hover{
-        color:#0d6efd;
+
+    .bell-animation {
+        animation: bellShake 2s infinite;
+        transform-origin: top center;
     }
     @keyframes bellShake {
         0% { transform: rotate(0); }
@@ -114,190 +57,103 @@
         92% { transform: rotate(1deg); }
         100% { transform: rotate(0); }
     }
-    
-    .bell-animation {
-        animation: bellShake 2s infinite;
-        transform-origin: top center;
-    }
-    /* Estilos para o off-canvas de notificações */
-#offcanvasNotifications .list-group-item {
-    transition: background-color 0.3s ease;
-}
-
-#offcanvasNotifications .list-group-item:hover {
-    background-color: #f8f9fa;
-}
-
-#pagination-container {
-    border-top: 1px solid #e9ecef;
-    padding-top: 1rem;
-}
-
-/* Animação de fade para as notificações */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-#notifications-container .list-group-item {
-    animation: fadeIn 0.3s ease;
-}
 </style>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                <img src="{% static 'img/logo2.png' %}" alt="Necessito.br" height="50" class="d-inline-block align-top me-2">
-                <span class="fs-3 fw-semibold" style="color: #545b62;">Necessito.br</span>
-            </a>
 
-            <!-- Botão do menu mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+<nav class="navbar navbar-expand-lg navbar-light bg-light py-2 py-lg-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+        <img src="{% static 'img/logo2.png' %}" alt="Necessito.br" height="50" class="d-inline-block align-top me-2">
+  
+        <!-- MOBILE: Logo mais próximo do design -->
+        <span class="d-block d-lg-none"
+            style="font-size: 2rem; font-weight: 700; color: #2c3e50; font-family: 'Segoe UI', 'Roboto', sans-serif; margin-top: 0.2rem;">
+        Necessito.br
+        </span>
+
+  
+        <!-- Nome no DESKTOP -->
+        <span class="fs-3 fw-semibold d-none d-lg-block" style="color: #545b62;">Necessito.br</span>
+      </a>
+  
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+  
+      <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
+        <ul class="navbar-nav me-auto align-items-start">
+          <li class="nav-item flex-grow-1 me-auto">
+            <form method="get" action="{% url 'search:necessidade_search_all' %}" class="w-100">
+              <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
+              <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
+                <input type="text" name="q" class="form-control flex-grow-1 border-0 shadow-none px-0"
+                  placeholder='Buscar "Apartamento"' value="{{ request.GET.q|default:'' }}" autocomplete="off">
+                <div class="vr mx-3"></div>
+                <div class="dropdown d-flex align-items-center me-2">
+                  <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
+                  <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false" id="stateButton">
+                    {{ selected_state }}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
+                    <li><a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">Todos os estados</a></li>
+                    {% for st in states %}
+                    <li><a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
+                        href="#" data-state="{{ st.abbreviation }}">{{ st.abbreviation }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
+                  <i class="fas fa-search fs-5"></i>
+                </button>
+              </div>
+            </form>
+          </li>
+        </ul>
+  
+        <ul class="navbar-nav ms-auto align-items-start justify-content-end mt-2 mt-lg-0">
+          <li class="nav-item position-relative">
+            <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNotifications">
+              <i class="fas fa-bell me-2 {% if unread_notifications_count > 0 %}bell-animation{% endif %}"></i>
+              <span>Notificações</span>
+              {% if unread_notifications_count > 0 %}
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ unread_notifications_count }}
+              </span>
+              {% endif %}
             </button>
-
-            <!-- Menu principal -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto align-items-start">
-                    <!-- Barra de pesquisa (base_header.html, por ex.) -->
-                    <li class="nav-item flex-grow-1 mt-2 mt-lg-0 me-auto">
-                        <form method="get"
-                              action="{% url 'search:necessidade_search_all' %}"
-                              class="w-100">
-                      
-                          <!-- sigla escolhida (enviada no submit) -->
-                          <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
-                      
-                          <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
-                      
-                            <!-- campo de busca -->
-                            <input type="text"
-                                   name="q"
-                                   class="form-control flex-grow-1 border-0 shadow-none px-0"
-                                   placeholder='Buscar "Apartamento"'
-                                   value="{{ request.GET.q|default:'' }}"
-                                   autocomplete="off">
-                      
-                            <!-- divisor -->
-                            <div class="vr mx-3"></div>
-                      
-                            <!-- seletor de estados -->
-                            <div class="dropdown d-flex align-items-center me-2">
-                              <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
-                      
-                              <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1"
-                                      type="button"
-                                      data-bs-toggle="dropdown"
-                                      aria-expanded="false"
-                                      id="stateButton">
-                                {{ selected_state }}
-                              </button>
-                      
-                              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
-                                <li>
-                                  <a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
-                                    Todos os estados
-                                  </a>
-                                </li>
-                                {% for st in states %}
-                                  <li>
-                                    <a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
-                                       href="#"
-                                       data-state="{{ st.abbreviation }}">
-                                      {{ st.abbreviation }}
-                                    </a>
-                                  </li>
-                                {% endfor %}
-                              </ul>
-                              
-                            </div>
-                      
-                            <!-- lupa -->
-                            <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
-                              <i class="fas fa-search fs-5"></i>
-                            </button>
-                          </div>
-                        </form>
-                      </li>
-                </ul>
-                <ul class="navbar-nav ms-auto align-items-start justify-content-end">
-                    <!-- Ícone de Notificações -->
-                    <li class="nav-item position-relative">
-                        <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasNotifications" aria-controls="offcanvasNotifications">
-                            <i class="fas fa-bell me-2 {% if unread_notifications_count > 0 %}bell-animation{% endif %}"></i>
-                            <span>Notificações</span>
-                    
-                            <!-- Badge se houver notificações não lidas -->
-                            {% if unread_notifications_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ unread_notifications_count }}
-                            </span>
-                            {% endif %}
-                        </button>
-                    </li>
-                    {% if user.is_authenticated %}
-                    <!-- Dropdown do Usuário -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Olá, {{ user.first_name|capfirst }}!
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}">
-                                    <i class="fas fa-user"></i> Minha Conta
-                                </a></li>
-                            <li><a class="dropdown-item" href="{% url 'necessidade_list' %}">
-                                    <i class="fas fa-bullhorn"></i> Meus Anúncios
-                                </a></li>
-                            <li><a class="dropdown-item" href="{% url 'budget_list' %}">
-                                    <i class="far fa-list-alt"></i> Meus Orçamentos
-                                </a></li>
-                            <li>
-                            <!-- Mostrar link da dashboard apenas para administradores -->
-                            {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">
-                                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                                </a></li>
-                            {% endif %}
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                    <i class="fas fa-sign-out-alt"></i> Sair
-                                </a></li>
-                        </ul>
-                    </li>
-
-                    {% else %}
-                    <!-- Links de Login e Registro -->
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'login' %}"
-                            style="font-size: 14px; white-space: nowrap;">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login
-                        </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'register' %}"
-                            style="font-size: 14px; white-space: nowrap;">
-                            <i class="fas fa-user-plus me-2"></i> Registrar
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    <!-- Botão "Anunciar grátis" -->
-                    <li class="nav-item ms-lg-3">
-                        <a href="{% url 'necessidade_create' %}"
-                            class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center"
-                            style="font-size: 14px; height: 45px; min-width: 180px; white-space: nowrap;">
-                            <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
-                        </a>
-                    </li>
-
-                </ul>
-            </div>
-        </div>
-    </nav>
+          </li>
+  
+          {% if user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Olá, {{ user.first_name|capfirst }}!</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}"><i class="fas fa-user"></i> Minha Conta</a></li>
+              <li><a class="dropdown-item" href="{% url 'necessidade_list' %}"><i class="fas fa-bullhorn"></i> Meus Anúncios</a></li>
+              <li><a class="dropdown-item" href="{% url 'budget_list' %}"><i class="far fa-list-alt"></i> Meus Orçamentos</a></li>
+              {% if user.is_staff %}
+              <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+              {% endif %}
+              <hr class="dropdown-divider">
+              <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item"><a class="nav-link d-flex align-items-center" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2"></i> Login</a></li>
+          <li class="nav-item ms-lg-3"><a class="nav-link d-flex align-items-center" href="{% url 'register' %}"><i class="fas fa-user-plus me-2"></i> Registrar</a></li>
+          {% endif %}
+  
+          <li class="nav-item ms-lg-3">
+            <a href="{% url 'necessidade_create' %}" class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center" style="font-size: 14px; height: 45px; min-width: 180px;">
+              <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
     <!-- Off Canvas Notificações -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications" aria-labelledby="offcanvasNotificationsLabel">
         <div class="offcanvas-header">

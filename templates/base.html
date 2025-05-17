@@ -34,7 +34,13 @@
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
+            
         }
+        @media (max-width: 767.98px) {
+        .app-body {
+        padding-bottom: 60px; /* espaço pro footer fixo mobile */
+        }
+}
         
         main {
             flex: 1 0 auto; /* Isso faz com que o conteúdo principal ocupe todo o espaço disponível */
@@ -46,7 +52,7 @@
     </style>
 </head>
 
-<body>
+<body class="app-body">
     {% include 'components/_header.html' %}
    
     <!-- Mensagens de Feedback -->

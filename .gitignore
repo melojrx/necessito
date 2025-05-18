@@ -22,7 +22,7 @@ models/
 
 # Docker local config
 docker-compose.override.yml
-
+docker-compose.yml
 # Credenciais e chaves de API
 *.pem
 *.key

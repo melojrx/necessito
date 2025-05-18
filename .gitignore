@@ -19,6 +19,7 @@ models/
 .env.local
 .env.development
 .env.production
+.env_prod
 
 # Docker local config
 docker-compose.override.yml

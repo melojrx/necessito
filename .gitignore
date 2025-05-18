@@ -19,6 +19,10 @@ models/
 .env.local
 .env.development
 .env.production
+
+# Docker local config
+docker-compose.override.yml
+
 # Credenciais e chaves de API
 *.pem
 *.key

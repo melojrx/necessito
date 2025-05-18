@@ -13,7 +13,7 @@ services:
       --bind 0.0.0.0:8000
       --log-file /app/logs/gunicorn.log
     env_file:
-      - ./env/.env_prod        # ← env producao
+      - ./env/.env_prod        # ← env producao 
     volumes:
       - .:/app
       - static_volume_prod:/app/staticfiles   # coletados via collectstatic

@@ -1,13 +1,38 @@
 version: "3.9"
 
+
 # docker-compose.yml (base) — apenas vazio/local para evitar sobrescrever produção
 # As configurações de verdade estão no docker-compose.override.yml
 services: {}
 
-
+# ----------------------------------
+# COMPOSE – NECESSITO (PRODUÇÃO)
+# ----------------------------------
+services:
+  web_prod:
+    build: .
+    #container_name: necessito_web_prod
+    command: >
+      gunicorn core.wsgi:application
+      --workers 4
+      --bind 0.0.0.0:8000
+      --log-file /app/logs/gunicorn.log
+    env_file:
+      - ./env/.env_prod        # ← env producao 
+    volumes:
+      - .:/app
+      - static_volume_prod:/app/staticfiles   # coletados via collectstatic
+      - media_volume_prod:/app/media
+      - logs_volume_prod:/app/logs
+    expose:
+      - "8000"
+    depends_on:
+      - db_prod
+    restart: always
+    networks:
+      - app_network_prod
 
 # version: "3.9"
-
 # # ----------------------------------
 # # COMPOSE – NECESSITO (PRODUÇÃO)
 # # ----------------------------------
@@ -74,3 +99,8 @@ services: {}
 # networks:
 #   app_network_prod:
 #     driver: bridge
+# ---------------- Rede dedicada ----------------------
+networks:
+  app_network_prod:
+    driver: bridge
+

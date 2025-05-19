@@ -12,11 +12,9 @@ def regex_replace(value, pattern):
     return re.sub(pattern, '', value)
 
 @register.filter
-def moeda_brasileira(value):
-    """Formata um valor como moeda brasileira (R$ 1.234,56)."""
+def moeda_brasileira(valor):
     try:
-        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')  # Define localidade para Brasil
-    except locale.Error:
-        locale.setlocale(locale.LC_ALL, '')  # Usa configuração padrão se não suportado
-    
-    return locale.currency(value, grouping=True, symbol="R$ ") if value else "R$ 0,00"
+        valor = float(valor)
+        return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except (ValueError, TypeError):
+        return valor

@@ -17,13 +17,19 @@ models/
 # Variáveis de ambiente e configurações
 .env
 .env.local
-.env.development
-.env.production
+.env_dev
+.env_hlm
 .env_prod
-
+env/
 # Docker local config
 docker-compose.override.yml
 docker-compose.yml
+docker-compose_prod.yml
+# ----------------------------------
+# Arquivos exclusivos do servidor
+# ----------------------------------
+docker-compose_prod.yml
+nginx/prod.conf.backup*
 # Credenciais e chaves de API
 *.pem
 *.key
@@ -184,3 +190,10 @@ $RECYCLE.BIN/
 # *.csv
 # *.zip
 # *.gzdocker-compose.yml
+__init__.py
+base.py
+prod.py
+core/settings/prod.py
+core/settings/__init__.py
+core/settings/__init__.py
+core/settings/prod.py

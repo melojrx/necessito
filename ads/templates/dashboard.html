@@ -22,7 +22,7 @@ Eixo X → Tipo de usuário (Cliente ou Fornecedor).
 Gráfico 4: Anúncios Criados vs Finalizados
 Eixo X → Meses (últimos 12 meses).
 
-Gráfico 4: Mapa de Anúncios por Localidade”
+Gráfico 4: Mapa de Anúncios por Localidade"
 1. Estrutura recomendada:
 ✅ O mapa vai substituir um dos gráficos ou entrar abaixo dos 4 gráficos (como sugerimos antes).
 ✅ Exibe bolhas (circleMarkers) com:
@@ -52,9 +52,9 @@ Tooltip ao passar o mouse
 {% include "components/_metrics_anuncios.html" %}
 {% include "components/_metrics_valores.html" %}
 
-<div class="row mt-4">
-    <div class="col-md-6 mb-4">
-      <div class="card">
+<div class="row g-4 mt-4">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">Valores Movimentados por Mês</h5>
           <canvas id="graficoValoresPorMes"></canvas>
@@ -63,8 +63,8 @@ Tooltip ao passar o mouse
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">Anúncios Finalizados por Categoria</h5>
           <canvas id="graficoCategorias"></canvas>
@@ -73,10 +73,10 @@ Tooltip ao passar o mouse
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
-          <h5 class="card-title">Perfil de usuarios do Sistema</h5>
+          <h5 class="card-title">Perfil de usuários do Sistema</h5>
           <div style="height: 300px;">
             <canvas id="graficoUsuarios"></canvas>
           </div>
@@ -85,8 +85,8 @@ Tooltip ao passar o mouse
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">Anúncios Criados vs Finalizados</h5>
           <canvas id="graficoAnuncios"></canvas>
@@ -113,9 +113,11 @@ Tooltip ao passar o mouse
 </div>
   
 <!-- Botão para abrir o modal -->
-<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#modalMapa">
+<div class="mb-4 mt-4">
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMapa">
   <i class="fas fa-map-marked-alt"></i> Ver Mapa de Anúncios
 </button>
+</div>
   
 
 <!-- IMPORTA O jsPDF -->

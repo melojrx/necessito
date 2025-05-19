@@ -13,9 +13,9 @@ Por quê? Mede eficiência da plataforma em gerar negócios.
 -->
 <div class="card mt-4">
     <div class="card-body">
-      <div class="row">
-        <div class="col-md-3">
-          <div class="card bg-success text-white">
+      <div class="row g-3">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card bg-success text-white h-100">
             <div class="card-body">
               <h5 class="card-title">Valor Transações Concluídas</h5>
               <p class="card-text display-6">R$ {{ valores_metrics.valor_total_transacoes_concluidas }}</p>
@@ -23,8 +23,8 @@ Por quê? Mede eficiência da plataforma em gerar negócios.
           </div>
         </div>
   
-        <div class="col-md-3">
-          <div class="card bg-primary text-white">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card bg-primary text-white h-100">
             <div class="card-body">
               <h5 class="card-title">Valor Orçamentos Enviados</h5>
               <p class="card-text display-6">R$ {{ valores_metrics.valor_total_orcamentos_enviados }}
@@ -33,8 +33,8 @@ Por quê? Mede eficiência da plataforma em gerar negócios.
           </div>
         </div>
   
-        <div class="col-md-3">
-          <div class="card bg-warning text-dark">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card bg-warning text-dark h-100">
             <div class="card-body">
               <h5 class="card-title">Transações em Andamento</h5>
               <p class="card-text display-6">R$ {{ valores_metrics.valor_total_transacoes_andamento }}</p>
@@ -42,8 +42,8 @@ Por quê? Mede eficiência da plataforma em gerar negócios.
           </div>
         </div>
   
-        <div class="col-md-3">
-          <div class="card bg-info text-white">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card bg-info text-white h-100">
             <div class="card-body">
               <h5 class="card-title">Taxa de Conversão (%)</h5>
               <p class="card-text display-6">{{ valores_metrics.taxa_conversao }}%</p>

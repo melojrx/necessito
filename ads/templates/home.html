@@ -65,12 +65,14 @@
           <div class="row d-flex align-items-stretch">
             {% for categoria in categoria_group %}
             <div class="col-lg-2 col-md-3 col-sm-4 d-flex mb-4">
-              <div class="card flex-fill text-center">
-                <div class="card-body">
-                  <i class="{{ categoria.icone|default:'fas fa-tag' }} mb-2" style="font-size: 1.5rem; color: #0d6efd;"></i>
-                  <h6 class="card-title mt-2">{{ categoria.nome }}</h6>
+              <a href="{% url 'category_detail' categoria.id %}" class="text-decoration-none w-100">
+                <div class="card flex-fill text-center h-100">
+                  <div class="card-body">
+                    <i class="{{ categoria.icone|default:'fas fa-tag' }} mb-2" style="font-size: 1.5rem; color: #0d6efd;"></i>
+                    <h6 class="card-title mt-2 fw-semibold">{{ categoria.nome }}</h6>
+                  </div>
                 </div>
-              </div>
+              </a>
             </div>
             {% endfor %}
           </div>
@@ -91,10 +93,12 @@
 <div class="d-block d-md-none">
     <h5 class="fw-semibold mb-3">Categorias Populares</h5>
     {% for categoria in categorias|dictsort:"nome"|slice:":5" %}
-    <div class="category-card">
-      <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
-      <span>{{ categoria.nome }}</span>
-    </div>
+    <a href="{% url 'category_detail' categoria.id %}" class="text-decoration-none">
+      <div class="category-card">
+        <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+        <span>{{ categoria.nome }}</span>
+      </div>
+    </a>
     {% endfor %}
   </div>
 
@@ -134,6 +138,7 @@
 </style>
 
 <!-- Anúncios Populares -->
+{% if anuncios_populares %}
 <h2 class="mb-4 mt-5">Anúncios Populares</h2>
 <div id="anunciosPopularesCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
@@ -181,7 +186,7 @@
         <span class="visually-hidden">Próximo</span>
     </button>
 </div>
-
+{% endif %}
 <!-- Anúncios Preferidos -->
 {% if anuncios_preferidos %}
 <h2 class="mb-4 mt-5">Baseado nas suas Categorias Preferidas</h2>
@@ -230,7 +235,6 @@
     </button>
 </div>
 {% endif %}
-
 <!-- Anúncios Próximos -->
 {% if anuncios_proximos %}
 <h2 class="mb-4 mt-5">Anúncios nas Proximidades</h2>
@@ -279,6 +283,7 @@
     </button>
 </div>
 {% endif %}
+
 
 {% include "components/_session_categories.html" %}
 

@@ -221,8 +221,15 @@
                     </h5>
 
                     <div class="d-flex justify-content-around mt-3">
-                      <a href="#" class="btn btn-primary{% if user == necessidade.cliente %} disabled{% endif %}" data-bs-toggle="tooltip" data-bs-target="#contatoAnuncianteModal" {% if user == necessidade.cliente %}tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."{% else %}data-bs-toggle="modal" title="Enviar Mensagem ao Anunciante"{% endif %}>
-                        <i class="fas fa-comments"></i>
+                      <a href="#"
+                         class="btn btn-primary{% if user == necessidade.cliente %} disabled{% endif %}"
+                         {% if user == necessidade.cliente %}
+                            tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
+                         {% else %}
+                            data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante"
+                         {% endif %}
+                      >
+                         <i class="fas fa-comments"></i>
                       </a>
 
                         {# Botão Submeter Orçamento (desabilita se não puder) #}
@@ -273,12 +280,15 @@
 </div>
 
 <!-- Modal: Contato com o Anunciante -->
-<div class="modal fade" id="contatoAnuncianteModal" tabindex="-1" aria-labelledby="contatoAnuncianteLabel" aria-hidden="true">
+<div class="modal fade" id="contatoAnuncianteModal" tabindex="-1" aria-labelledby="contatoAnuncianteLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
 
-      <!-- Botão Fechar no canto superior direito -->
-      <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      <!-- Cabeçalho do modal com botão Fechar -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="contatoAnuncianteLabel">Entrar em Contato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
 
       <div class="modal-body d-flex p-0">
 
@@ -307,7 +317,6 @@
 
         <!-- LADO DIREITO: FORMULÁRIO -->
         <div class="col-md-8 p-4">
-          <h4>Entrar em Contato</h4>
           <form method="post" action="{% url 'enviar_mensagem' necessidade.pk %}">
             {% csrf_token %}
 
@@ -607,18 +616,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 </script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const closeBtn = document.querySelector('#contatoAnuncianteModal .btn-close');
-    const modalEl = document.getElementById('contatoAnuncianteModal');
-    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-    closeBtn.addEventListener('click', function () {
-      modalInstance.hide();
-    });
-  });
-</script>
-
 {% if show_modal %}
   <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -628,5 +625,8 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
   {% endif %}
   
+
+<!-- Bootstrap JS Bundle (garante funcionamento dos modais) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

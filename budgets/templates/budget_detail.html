@@ -23,17 +23,17 @@
 </style>
 <div id="orcamento-details-container" class="card shadow-sm" class="container">
   <div class="card shadow-sm">
-    <div class="card-header bg-light d-flex ">
+    <div class="card-header bg-light d-flex align-items-center">
       <div class="col-6">
         <h3 class="mb-0">Detalhes do Orçamento</h3>
       </div>
-      <div class="col-6 d-flex justify-content-end gap-2">
-        <a href="{% url 'export_orcamento_pdf' orcamento.pk %}" class="btn btn-outline-primary me-2">
+      <div class="col-6 d-flex flex-column flex-md-row gap-2 align-items-stretch mb-3">
+        <a href="{% url 'export_orcamento_pdf' orcamento.pk %}" class="btn btn-outline-primary w-100">
           <i class="fas fa-file-pdf me-2"></i> Exportar PDF
         </a>
-        <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning btn-sm">
+        <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning w-100">
           <i class="fas fa-edit"></i> Editar Orçamento</a>
-        <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger btn-sm">
+        <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger w-100">
           <i class="fas fa-trash-alt"></i> Excluir Orçamento
         </a>
       </div>

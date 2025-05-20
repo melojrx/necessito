@@ -195,5 +195,4 @@ base.py
 prod.py
 core/settings/prod.py
 core/settings/__init__.py
-core/settings/__init__.py
-core/settings/prod.py
+

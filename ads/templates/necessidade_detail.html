@@ -221,7 +221,7 @@
                     </h5>
 
                     <div class="d-flex justify-content-around mt-3">
-                      <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante">
+                      <a href="#" class="btn btn-primary{% if user == necessidade.cliente %} disabled{% endif %}" data-bs-toggle="tooltip" data-bs-target="#contatoAnuncianteModal" {% if user == necessidade.cliente %}tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."{% else %}data-bs-toggle="modal" title="Enviar Mensagem ao Anunciante"{% endif %}>
                         <i class="fas fa-comments"></i>
                       </a>
 

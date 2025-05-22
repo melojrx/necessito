@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from users.models import User
 from categories.models import Categoria, SubCategoria
+from decimal import Decimal
 
 class Necessidade(models.Model):
     cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="necessidades")
@@ -47,9 +48,9 @@ class Necessidade(models.Model):
     )
     marca = models.CharField(max_length=100, blank=True)
     tipo = models.CharField(max_length=100, blank=True)
-    bitola = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Milímetros")
-    compr = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Metros")
-    peso = models.IntegerField(blank=True, default=0.0, help_text="Ex.: Kilogramas")
+    bitola = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.00, help_text="Ex.: Milímetros")
+    compr = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.00, help_text="Ex.: Metros")
+    peso = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.00, help_text="Ex.: Kilogramas")
     altura = models.FloatField(blank=True, default=0.0, help_text="Ex.: Metros")
     # Status e Rastreamento.
     status = models.CharField(max_length=20, choices=[

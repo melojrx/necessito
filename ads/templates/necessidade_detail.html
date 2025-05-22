@@ -117,18 +117,23 @@
             {# ---- Tabela de orçamentos recebidos ---- #}
             <h3>Orçamentos Recebidos</h3>
             <div class="table-responsive">
-                <table class="table table-striped table-hover table-bordered">
+                <table class="table table-striped table-hover table-bordered text-center">
                     <thead>
                         <tr>
-                            <th>Fornecedor</th><th>Valor</th><th>Status</th><th>Data</th><th>Ações</th>
+                            <th class="align-middle">Fornecedor</th>
+                            <th class="align-middle">Valor</th>
+                            <th class="align-middle">Status</th>
+                            <th class="align-middle">Data</th>
+                            <th class="align-middle">Ações</th>
+                            <th class="align-middle">Detalhes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for orcamento in necessidade.orcamentos.all %}
                         <tr>
-                            <td>{{ orcamento.fornecedor.get_full_name }}</td>
-                            <td>{{ orcamento.valor|moeda_brasileira }}</td>
-                            <td>
+                            <td class="align-middle">{{ orcamento.fornecedor.get_full_name }}</td>
+                            <td class="align-middle">{{ orcamento.valor|moeda_brasileira }}</td>
+                            <td class="align-middle">
                                 <span class="badge
                                     {% if orcamento.status == 'pendente' %}text-bg-secondary
                                     {% elif orcamento.status == 'aguardando_aceite_fornecedor' %}text-bg-warning
@@ -137,15 +142,13 @@
                                     Status: {{ orcamento.get_status_display }}
                                 </span>
                             </td>
-                            <td>{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
-                            <td>
-                                {# Ações: baixar anexo, aceitar, rejeitar #}
-                                <div class="d-flex flex-wrap gap-2">
-                                    {# --- Anexo --- #}
+                            <td class="align-middle">{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
+                            <td class="align-middle">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
                                     {% if orcamento.arquivo_anexo %}
                                       {% if user == necessidade.cliente or user == orcamento.fornecedor %}
                                           <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
-                                             class="btn btn-primary" data-bs-toggle="tooltip"
+                                             class="btn btn-primary text-center" data-bs-toggle="tooltip"
                                              title="Baixar Anexo">
                                               <i class="fas fa-file-download"></i>
                                           </a>
@@ -159,7 +162,6 @@
                                       <span class="badge bg-danger">Sem anexo</span>
                                     {% endif %}
 
-                                    {# --- Aceitar orçamento --- #}
                                     {% if user == necessidade.cliente %}
                                       {% if orcamento.status == "pendente" %}
                                         <button class="btn btn-success btn-aceitar"
@@ -177,7 +179,6 @@
                                       {% endif %}
                                     {% endif %}
 
-                                    {# --- Rejeitar orçamento --- #}
                                     {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
                                       {% if orcamento.status == "pendente" %}
                                   
@@ -197,9 +198,18 @@
                                     {% endif %}
                                 </div>
                             </td>
+                            <td class="align-middle text-center">
+                                <a href="{% url 'budget_detail' orcamento.id %}" 
+                                   class="btn btn-outline-primary btn-sm"
+                                   data-bs-toggle="tooltip"
+                                   title="Ver detalhes do orçamento">
+                                    <i class="fas fa-search me-1"></i>
+                                    <span class="d-none d-md-inline">Detalhes</span>
+                                </a>
+                            </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="5" class="text-center">Nenhum orçamento recebido ainda.</td></tr>
+                        <tr><td class="align-middle" colspan="6">Nenhum orçamento recebido ainda.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -524,10 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       if (data.success) {
         bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
-        //alert(data.message || 'Anúncio finalizado.');
         location.reload();
       } else {
-        alert(data.error || 'Erro ao finalizar.');
+        // alert(data.error || 'Erro ao finalizar.'); // Removido para não exibir mensagem
       }
     })
     .catch(err => alert('Erro inesperado: ' + err));

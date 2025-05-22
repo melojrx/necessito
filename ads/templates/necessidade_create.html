@@ -21,6 +21,32 @@
     .btn-danger:hover {
         transform: scale(1.05);
     }
+
+    /* Estilos para campos numéricos */
+    .numeric-input {
+        text-align: right;
+        padding-right: 10px;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+
+    .was-validated .form-control:invalid ~ .invalid-feedback {
+        display: block;
+    }
 </style>
 
 <div class="container mb-4">
@@ -111,15 +137,23 @@
          <div class="row">
           <div class="col-md-6 mb-3">
             <label for="id_bitola" class="form-label">{{ form.bitola.label }}</label>
-            {{ form.bitola }}
+            <div class="input-group">
+              {{ form.bitola }}
+              <span class="input-group-text">mm</span>
+            </div>
             <small class="form-text text-muted">{{ form.bitola.help_text }}</small>
+            <div class="invalid-feedback">Por favor, insira um valor válido (ex: 0,25)</div>
           </div>
 
         <!-- COMPRIMENTO -->
           <div class="col-md-6 mb-3">
             <label for="id_compr" class="form-label">{{ form.compr.label }}</label>
-            {{ form.compr }}
+            <div class="input-group">
+              {{ form.compr }}
+              <span class="input-group-text">m</span>
+            </div>
             <small class="form-text text-muted">{{ form.compr.help_text }}</small>
+            <div class="invalid-feedback">Por favor, insira um valor válido (ex: 2,50)</div>
           </div>
         </div>
 
@@ -127,15 +161,23 @@
          <div class="row">
           <div class="col-md-6 mb-3">
             <label for="id_peso" class="form-label">{{ form.peso.label }}</label>
-            {{ form.peso }}
+            <div class="input-group">
+              {{ form.peso }}
+              <span class="input-group-text">kg</span>
+            </div>
             <small class="form-text text-muted">{{ form.peso.help_text }}</small>
+            <div class="invalid-feedback">Por favor, insira um valor válido (ex: 0,50)</div>
           </div>
 
         <!-- ALTURA -->
           <div class="col-md-6 mb-3">
             <label for="id_altura" class="form-label">{{ form.altura.label }}</label>
-            {{ form.altura }}
+            <div class="input-group">
+              {{ form.altura }}
+              <span class="input-group-text">m</span>
+            </div>
             <small class="form-text text-muted">{{ form.altura.help_text }}</small>
+            <div class="invalid-feedback">Por favor, insira um valor válido (ex: 1,75)</div>
           </div>
         </div>
         <!-- DURAÇÃO -->
@@ -293,4 +335,54 @@
   });
   </script>
   
+{% block extra_js %}
+<!-- jQuery Mask Plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    // Máscara para campos numéricos com 2 casas decimais
+    $('#id_bitola, #id_compr, #id_peso, #id_altura').mask('#.##0,00', {
+        reverse: true,
+        placeholder: "0,00"
+    });
+
+    // Validação dos campos numéricos
+    function validateNumericInput(input) {
+        const value = input.value.replace(',', '.');
+        const numValue = parseFloat(value);
+        
+        if (isNaN(numValue) || numValue < 0) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        
+        input.classList.remove('is-invalid');
+        return true;
+    }
+
+    // Adiciona validação em tempo real
+    $('#id_bitola, #id_compr, #id_peso, #id_altura').on('input', function() {
+        validateNumericInput(this);
+    });
+
+    // Validação do formulário antes do envio
+    $('#ad-form').on('submit', function(e) {
+        let isValid = true;
+        
+        $('#id_bitola, #id_compr, #id_peso, #id_altura').each(function() {
+            if (!validateNumericInput(this)) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor, corrija os campos numéricos antes de enviar.');
+        }
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

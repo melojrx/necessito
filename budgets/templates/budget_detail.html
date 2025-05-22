@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <style>
@@ -52,7 +53,7 @@
       {% endif %}
       
       {% if object.valor %}
-      <p class="card-text">Valor: R$ {{ object.valor }}</p>
+      <p class="card-text">Valor: {{ object.valor|moeda_brasileira }}</p>
       {% endif %}
       
       {% if object.unidade %}

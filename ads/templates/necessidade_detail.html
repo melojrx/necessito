@@ -4,6 +4,35 @@
 
 {% block title %}Detalhes da Necessidade{% endblock %}
 
+{# Consertar o dropdown da navbar que não funciona nessa página #}
+{% block extra_head %}
+<style>
+    /* CSS para consertar o dropdown do usuário */
+    .navbar .dropdown-menu {
+        display: none;
+    }
+    
+    .navbar .nav-item.dropdown:hover .dropdown-menu,
+    .navbar .nav-item.dropdown:focus-within .dropdown-menu {
+        display: block !important;
+        margin-top: 0;
+        z-index: 9999 !important;
+    }
+    
+    /* Garante que o mapa não sobreponha elementos da navbar */
+    .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
+        z-index: 900 !important;
+    }
+    
+    /* Garante visibilidade do dropdown */
+    .dropdown-toggle::after {
+        display: inline-block !important;
+    }
+</style>
+{% endblock %}
+
+{% block head_extra_content %}{% endblock %}
+
 {% block content %}
 
 <style>
@@ -148,7 +177,7 @@
                                     {% if orcamento.arquivo_anexo %}
                                       {% if user == necessidade.cliente or user == orcamento.fornecedor %}
                                           <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
-                                             class="btn btn-primary text-center" data-bs-toggle="tooltip"
+                                             class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
                                              title="Baixar Anexo">
                                               <i class="fas fa-file-download"></i>
                                           </a>
@@ -159,7 +188,7 @@
                                           </span>
                                       {% endif %}
                                     {% else %}
-                                      <span class="badge bg-danger">Sem anexo</span>
+                                      <span class="badge bg-danger d-flex align-items-center justify-content-center" style="height: 38px;">Sem anexo</span>
                                     {% endif %}
 
                                     {% if user == necessidade.cliente %}
@@ -462,6 +491,7 @@
 </div>
 
 
+<!-- Comentado temporariamente para diagnóstico
 <script>
 /* ------------------------------------------------------------------
    ACEITAR ORÇAMENTO (AJAX)
@@ -633,9 +663,102 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   </script>
   {% endif %}
+-->
   
 
 <!-- Bootstrap JS Bundle (garante funcionamento dos modais) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script do mapa Leaflet -->
+<script>
+/* ------------------------------------------------------------------
+   MAPA (Leaflet + Nominatim)
+------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Converte CEP em coordenada
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length) {
+        const { lat, lon } = data[0];
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup('Localização aproximada do anunciante.')
+          .openPopup();
+        map.setView([lat, lon], 13);
+      }
+    })
+    .catch(console.error);
+});
+</script>
+
+<!-- Script para garantir funcionamento do dropdown na navbar - Versão Robusta -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Encontrar o link do dropdown e o menu
+  const dropdownToggle = document.querySelector('.navbar .dropdown-toggle');
+  const dropdownMenu = document.querySelector('.navbar .dropdown-menu');
+  
+  if (dropdownToggle && dropdownMenu) {
+    // Remover quaisquer listeners existentes e classes Bootstrap
+    dropdownToggle.setAttribute('data-bs-toggle', '');
+    
+    // Desativar o comportamento padrão do Bootstrap
+    const oldInstance = bootstrap.Dropdown.getInstance(dropdownToggle);
+    if (oldInstance) {
+      oldInstance.dispose();
+    }
+    
+    // Implementação JavaScript pura para abrir/fechar o dropdown
+    let isOpen = false;
+    
+    // Função para abrir/fechar o dropdown
+    function toggleDropdown(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      isOpen = !isOpen;
+      
+      if (isOpen) {
+        // Mostrar o menu
+        dropdownMenu.classList.add('show');
+        dropdownMenu.style.position = 'absolute';
+        dropdownMenu.style.inset = '0px auto auto 0px';
+        dropdownMenu.style.margin = '0px';
+        dropdownMenu.style.transform = 'translate3d(0px, 40px, 0px)';
+        dropdownMenu.style.display = 'block';
+        dropdownMenu.setAttribute('data-popper-placement', 'bottom-start');
+      } else {
+        // Esconder o menu
+        dropdownMenu.classList.remove('show');
+        dropdownMenu.style.display = '';
+      }
+    }
+    
+    // Adicionar listener de clique personalizado
+    dropdownToggle.addEventListener('click', toggleDropdown);
+    
+    // Fechar o dropdown ao clicar fora
+    document.addEventListener('click', function(event) {
+      if (isOpen && !dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+        isOpen = false;
+        dropdownMenu.classList.remove('show');
+        dropdownMenu.style.display = '';
+      }
+    });
+    
+    // Garantir que o z-index seja suficientemente alto
+    dropdownMenu.style.zIndex = '9999';
+    
+    console.log('Script de dropdown personalizado ativado.');
+  } else {
+    console.error('Elementos do dropdown não encontrados:', {toggle: dropdownToggle, menu: dropdownMenu});
+  }
+});
+</script>
 
 {% endblock %}

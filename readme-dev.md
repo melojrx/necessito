@@ -1,4 +1,4 @@
-# Necessito.br - Documentação Técnica
+# Necessito - Documentação Técnica
 
 ## 🛠️ Stack Tecnológica
 - Python 3.8+

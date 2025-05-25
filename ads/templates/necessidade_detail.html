@@ -4,29 +4,28 @@
 
 {% block title %}Detalhes da Necessidade{% endblock %}
 
-{# Consertar o dropdown da navbar que não funciona nessa página #}
+{# Apenas estilos essenciais - sem interferências #}
 {% block extra_head %}
 <style>
-    /* CSS para consertar o dropdown do usuário */
-    .navbar .dropdown-menu {
-        display: none;
-    }
-    
-    .navbar .nav-item.dropdown:hover .dropdown-menu,
-    .navbar .nav-item.dropdown:focus-within .dropdown-menu {
-        display: block !important;
-        margin-top: 0;
-        z-index: 9999 !important;
-    }
-    
-    /* Garante que o mapa não sobreponha elementos da navbar */
+    /* Garantir que o mapa não sobreponha os dropdowns */
     .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
-        z-index: 900 !important;
+        z-index: 1 !important;
     }
     
-    /* Garante visibilidade do dropdown */
-    .dropdown-toggle::after {
-        display: inline-block !important;
+    /* Garantir que os dropdowns do Bootstrap fiquem acima de outros elementos */
+    .dropdown-menu {
+        z-index: 1050 !important;
+    }
+    
+    /* Correção para dropdown do navbar */
+    .navbar .dropdown-menu {
+        z-index: 1051 !important;
+    }
+    
+    /* Galeria de imagens */
+    .carousel-item img {
+        max-height: 400px;
+        object-fit: cover;
     }
 </style>
 {% endblock %}
@@ -34,17 +33,7 @@
 {% block head_extra_content %}{% endblock %}
 
 {% block content %}
-
-<style>
-    /* ---------- Galeria ---------- */
-    .carousel-item img {
-        max-height: 400px;      /* limita a altura da imagem */
-        object-fit: cover;      /* mantém a proporção */
-    }
-
-</style>   
-    
- <div class="container mb-4">
+<div class="container mb-4">
     <div class="row">
         {# ========================= COLUNA ESQUERDA ======================== #}
         <div class="col-md-8 mb-2">
@@ -60,50 +49,53 @@
 
             {# ---- Botões de ação (editar, excluir, finalizar, avaliar) ---- #}
             <div class="d-flex align-items-center mb-3">
-
-                {# Editar / Excluir – apenas para o cliente dono #}
-                {% if user == necessidade.cliente %}
-                  <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">
-                      <i class="fa-solid fa-pen-to-square"></i> Editar
-                  </a>
-                  <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">
-                      <i class="fa-solid fa-trash-can"></i> Excluir
-                  </a>
-                {% endif %}
-
-                {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
-                {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
-                  {% for orcamento in necessidade.orcamentos.all %}
-                    {% if orcamento.status == 'aceito' %}
-                      <button class="btn btn-primary btn-finalizar"
-                              data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
-                              data-bs-toggle="modal"
-                              data-bs-target="#confirmarFinalizacaoModal"
-                              title="Finalizar Anúncio">
-                        <i class="fas fa-check-circle"></i> Finalizar Anúncio
-                      </button>
+                {% if user.is_authenticated %}
+                    {# Editar / Excluir – apenas para o cliente dono #}
+                    {% if user == necessidade.cliente %}
+                      <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">
+                          <i class="fa-solid fa-pen-to-square"></i> Editar
+                      </a>
+                      <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">
+                          <i class="fa-solid fa-trash-can"></i> Excluir
+                      </a>
                     {% endif %}
-                  {% endfor %}
+
+                    {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
+                    {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
+                      {% for orcamento in necessidade.orcamentos.all %}
+                        {% if orcamento.status == 'aceito' %}
+                          <button class="btn btn-primary btn-finalizar"
+                                  data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#confirmarFinalizacaoModal"
+                                  title="Finalizar Anúncio">
+                            <i class="fas fa-check-circle"></i> Finalizar Anúncio
+                          </button>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+
+                    {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
+                    {% if necessidade.status == 'finalizado' %}
+                    {% if user == necessidade.cliente and not avaliacao_cliente %}
+                    <!-- Cliente ainda não avaliou -->
+                    <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                      data-bs-target="#avaliacaoModal">
+                      <i class="fas fa-star me-1"></i> Avaliar Negociação
+                    </a>
+                    {% elif user == fornecedor and not avaliacao_fornecedor %}
+                    <!-- Fornecedor ainda não avaliou -->
+                    <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                      data-bs-target="#avaliacaoModal">
+                      <i class="fas fa-star me-1"></i> Avaliar Negociação
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+                        Faça login para interagir
+                    </a>
                 {% endif %}
-
-              {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
-              {% if necessidade.status == 'finalizado' %}
-              {% if user == necessidade.cliente and not avaliacao_cliente %}
-              <!-- Cliente ainda não avaliou -->
-              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-                data-bs-target="#avaliacaoModal">
-                <i class="fas fa-star me-1"></i> Avaliar Negociação
-              </a>
-              {% elif user == fornecedor and not avaliacao_fornecedor %}
-              <!-- Fornecedor ainda não avaliou -->
-              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-                data-bs-target="#avaliacaoModal">
-                <i class="fas fa-star me-1"></i> Avaliar Negociação
-              </a>
-              {% endif %}
-              {% endif %}
-
-
             </div>
 
             <hr>
@@ -168,73 +160,76 @@
                                     {% elif orcamento.status == 'aguardando_aceite_fornecedor' %}text-bg-warning
                                     {% elif orcamento.status == 'aceito' %}text-bg-success
                                     {% elif orcamento.status == 'rejeitado' %}text-bg-danger{% endif %}">
-                                    Status: {{ orcamento.get_status_display }}
+                                    {% if orcamento.status == 'aguardando_aceite_fornecedor' %}
+                                        Aguardando aceite
+                                    {% else %}
+                                        {{ orcamento.get_status_display }}
+                                    {% endif %}
                                 </span>
                             </td>
                             <td class="align-middle">{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
                             <td class="align-middle">
                                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                    {% if orcamento.arquivo_anexo %}
-                                      {% if user == necessidade.cliente or user == orcamento.fornecedor %}
-                                          <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
-                                             class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
-                                             title="Baixar Anexo">
-                                              <i class="fas fa-file-download"></i>
-                                          </a>
-                                      {% else %}
-                                          <span class="badge bg-secondary" data-bs-toggle="tooltip"
-                                                title="Você não tem permissão para baixar este anexo">
-                                              <i class="fas fa-lock"></i> Restrito
-                                          </span>
-                                      {% endif %}
+                                    {% if user.is_authenticated %}
+                                        {% if orcamento.arquivo_anexo %}
+                                          {% if user == necessidade.cliente or user == orcamento.fornecedor %}
+                                              <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
+                                                 class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
+                                                 title="Baixar Anexo">
+                                                  <i class="fas fa-file-download"></i>
+                                              </a>
+                                          {% else %}
+                                              <span class="badge bg-secondary" data-bs-toggle="tooltip"
+                                                    title="Você não tem permissão para baixar este anexo">
+                                                  <i class="fas fa-lock"></i> Restrito
+                                              </span>
+                                          {% endif %}
+                                        {% else %}
+                                          <span class="badge bg-danger d-flex align-items-center justify-content-center" style="height: 38px;">Sem anexo</span>
+                                        {% endif %}
+
+                                        {% if user == necessidade.cliente %}
+                                          {% if orcamento.status == "pendente" %}
+                                            <button class="btn btn-success btn-aceitar"
+                                                    data-url="{% url 'aceitar_orcamento' orcamento.id %}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#confirmarAceiteModal"
+                                                    title="Aceitar Orçamento">
+                                                <i class="fas fa-thumbs-up"></i>
+                                            </button>
+                                          {% else %}
+                                            <button class="btn btn-success" disabled
+                                                    title="Orçamento já processado">
+                                                <i class="fas fa-thumbs-up"></i>
+                                            </button>
+                                          {% endif %}
+                                        {% endif %}
+
+                                        {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
+                                          {% if orcamento.status == "pendente" %}
+                                               <button class="btn btn-danger btn-rejeitar"
+                                                     data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
+                                                     data-bs-toggle="modal"
+                                                     data-bs-target="#confirmarRejeicaoModal"
+                                                     title="Rejeitar Orçamento">
+                                                 <i class="fas fa-thumbs-down"></i>
+                                               </button>
+                                          {% else %}
+                                               <button class="btn btn-danger" disabled
+                                                     title="Orçamento já processado">
+                                                 <i class="fas fa-thumbs-down"></i>
+                                               </button>
+                                          {% endif %}
+                                        {% endif %}
                                     {% else %}
-                                      <span class="badge bg-danger d-flex align-items-center justify-content-center" style="height: 38px;">Sem anexo</span>
-                                    {% endif %}
-
-                                    {% if user == necessidade.cliente %}
-                                      {% if orcamento.status == "pendente" %}
-                                        <button class="btn btn-success btn-aceitar"
-                                                data-url="{% url 'aceitar_orcamento' orcamento.id %}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#confirmarAceiteModal"
-                                                title="Aceitar Orçamento">
-                                            <i class="fas fa-thumbs-up"></i>
-                                        </button>
-                                      {% else %}
-                                        <button class="btn btn-success" disabled
-                                                title="Orçamento já processado">
-                                            <i class="fas fa-thumbs-up"></i>
-                                        </button>
-                                      {% endif %}
-                                    {% endif %}
-
-                                    {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
-                                      {% if orcamento.status == "pendente" %}
-                                  
-                                        <button class="btn btn-danger btn-rejeitar"
-                                                data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#confirmarRejeicaoModal"
-                                                title="Rejeitar Orçamento">
-                                            <i class="fas fa-thumbs-down"></i>
-                                        </button>
-                                      {% else %}
-                                        <button class="btn btn-danger" disabled
-                                                title="Orçamento já processado">
-                                            <i class="fas fa-thumbs-down"></i>
-                                        </button>
-                                      {% endif %}
+                                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary">
+                                            Faça login para interagir
+                                        </a>
                                     {% endif %}
                                 </div>
                             </td>
-                            <td class="align-middle text-center">
-                                <a href="{% url 'budget_detail' orcamento.id %}" 
-                                   class="btn btn-outline-primary btn-sm"
-                                   data-bs-toggle="tooltip"
-                                   title="Ver detalhes do orçamento">
-                                    <i class="fas fa-search me-1"></i>
-                                    <span class="d-none d-md-inline">Detalhes</span>
-                                </a>
+                            <td class="align-middle">
+                                <a href="{% url 'budget_detail' orcamento.id %}" class="btn btn-info btn-sm">Detalhes</a>
                             </td>
                         </tr>
                         {% empty %}
@@ -255,28 +250,26 @@
                     <p class="card-text">{{ necessidade.categoria.nome }}</p>
                     <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst }}</span>
                     <hr>
-                    <h5 class="card-title">
-                        <i class="fas fa-phone-alt me-2"></i>{{ necessidade.cliente.telefone }}
-                    </h5>
-
-                    <div class="d-flex justify-content-around mt-3">
-                      <a href="#"
-                         class="btn btn-primary{% if user == necessidade.cliente %} disabled{% endif %}"
-                         {% if user == necessidade.cliente %}
-                            tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
-                         {% else %}
-                            data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante"
-                         {% endif %}
-                      >
-                         <i class="fas fa-comments"></i>
-                      </a>
-
-                        {# Botão Submeter Orçamento (desabilita se não puder) #}
+                    <div class="row g-2 mt-2">
+                      <div class="col-12 col-md-6">
+                        <a href="#"
+                           class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2{% if user == necessidade.cliente %} disabled{% endif %}"
+                           {% if user == necessidade.cliente %}
+                              tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
+                           {% else %}
+                              data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante"
+                           {% endif %}
+                        >
+                           <i class="fas fa-comments"></i>
+                           <span>Contato</span>
+                        </a>
+                      </div>
+                      <div class="col-12 col-md-6">
                         <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
                                      {% url 'submeter_orcamento' necessidade.pk %}
                                  {% else %}#{% endif %}"
-                           class="btn btn-warning
-                                  {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
+                           class="btn btn-warning d-flex align-items-center justify-content-center gap-2 py-2
+                                    {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
                            data-bs-toggle="tooltip"
                            title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
                                      Você não pode submeter orçamento neste anúncio.
@@ -284,7 +277,9 @@
                                      Enviar orçamento para este anúncio
                                   {% endif %}">
                             <i class="fas fa-folder-plus"></i>
+                            <span>Enviar orçamento</span>
                         </a>
+                      </div>
                     </div>
                 </div>
             </div>
@@ -490,133 +485,120 @@
   </div>
 </div>
 
+{% endblock %}
 
-<!-- Comentado temporariamente para diagnóstico
+{% block extra_scripts %}
 <script>
-/* ------------------------------------------------------------------
-   ACEITAR ORÇAMENTO (AJAX)
------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  let aceitarUrl = null;
+// Consolida todos os scripts em um único DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  
+  // ==================== MAPA LEAFLET ====================
+  try {
+    const mapElement = document.getElementById('map');
+    if (mapElement) {
+      const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
 
-  // Armazena a URL quando clica no botão aceitar
-  document.querySelectorAll('.btn-aceitar').forEach(btn => {
-    btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
-  });
-
-  // Confirma a operação via modal
-  document.getElementById('confirmarAceiteBtn').addEventListener('click', () => {
-    if (!aceitarUrl) return;
-    fetch(aceitarUrl, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-    })
-    .then(res => res.json())
-    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
-    .catch(err => alert('Erro inesperado: ' + err));
-  });
-});
-</script>
-
-<script>
-/* ------------------------------------------------------------------
-   REJEITAR ORÇAMENTO (AJAX)
------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  let rejeitarUrl = null;
-
-  document.querySelectorAll('.btn-rejeitar').forEach(btn => {
-    btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
-  });
-
-  document.getElementById('confirmarRejeicaoBtn').addEventListener('click', () => {
-    if (!rejeitarUrl) return;
-    fetch(rejeitarUrl, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-    })
-    .then(res => res.json())
-    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
-    .catch(err => alert('Erro inesperado: ' + err));
-  });
-});
-</script>
-
-<script>
-/* ------------------------------------------------------------------
-   FINALIZAR ANÚNCIO (AJAX)
------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  let finalizarUrl = null;
-
-  const finalizarBtn = document.querySelector('.btn-finalizar');
-  if (finalizarBtn) {
-    finalizarBtn.addEventListener('click', () => finalizarUrl = finalizarBtn.getAttribute('data-url'));
+      // Converte CEP em coordenada
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length) {
+            const { lat, lon } = data[0];
+            L.marker([lat, lon]).addTo(map)
+              .bindPopup('Localização aproximada do anunciante.')
+              .openPopup();
+            map.setView([lat, lon], 13);
+          }
+        })
+        .catch(console.error);
+    }
+  } catch (error) {
+    console.error('Erro ao inicializar mapa:', error);
   }
 
-  document.getElementById('confirmarFinalizacaoBtn').addEventListener('click', () => {
-    if (!finalizarUrl) return;
-    fetch(finalizarUrl, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
-        location.reload();
-      } else {
-        // alert(data.error || 'Erro ao finalizar.'); // Removido para não exibir mensagem
-      }
-    })
-    .catch(err => alert('Erro inesperado: ' + err));
-  });
-});
-</script>
-
-<script>
-/* ------------------------------------------------------------------
-   MAPA (Leaflet + Nominatim)
------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  // Converte CEP em coordenada
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length) {
-        const { lat, lon } = data[0];
-        L.marker([lat, lon]).addTo(map)
-          .bindPopup('Localização aproximada do anunciante.')
-          .openPopup();
-        map.setView([lat, lon], 13);
-      }
-    })
-    .catch(console.error);
-});
-</script>
-<script>
-  /* -----------------------------------------------------------------------
-     Carregamento dinâmico do formulário de avaliação
-     - Dispara ao abrir o modal #avaliacaoModal
-     - Busca o HTML via AJAX (X-Requested-With) e injeta em
-       #avaliacao-form-container
-  ------------------------------------------------------------------------ */
-  document.addEventListener('DOMContentLoaded', () => {
-    const modalEl = document.getElementById('avaliacaoModal');
-    const formContainer = document.getElementById('avaliacao-form-container');
+  // ==================== ACEITAR ORÇAMENTO ====================
+  let aceitarUrl = null;
+  const btnAceitar = document.querySelectorAll('.btn-aceitar');
+  const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
   
+  if (btnAceitar.length > 0 && confirmarAceiteBtn) {
+    btnAceitar.forEach(btn => {
+      btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
+    });
+
+    confirmarAceiteBtn.addEventListener('click', () => {
+      if (!aceitarUrl) return;
+      fetch(aceitarUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+      .then(res => res.json())
+      .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
+      .catch(err => alert('Erro inesperado: ' + err));
+    });
+  }
+
+  // ==================== REJEITAR ORÇAMENTO ====================
+  let rejeitarUrl = null;
+  const btnRejeitar = document.querySelectorAll('.btn-rejeitar');
+  const confirmarRejeicaoBtn = document.getElementById('confirmarRejeicaoBtn');
+  
+  if (btnRejeitar.length > 0 && confirmarRejeicaoBtn) {
+    btnRejeitar.forEach(btn => {
+      btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
+    });
+
+    confirmarRejeicaoBtn.addEventListener('click', () => {
+      if (!rejeitarUrl) return;
+      fetch(rejeitarUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+      .then(res => res.json())
+      .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
+      .catch(err => alert('Erro inesperado: ' + err));
+    });
+  }
+
+  // ==================== FINALIZAR ANÚNCIO ====================
+  let finalizarUrl = null;
+  const finalizarBtn = document.querySelector('.btn-finalizar');
+  const confirmarFinalizacaoBtn = document.getElementById('confirmarFinalizacaoBtn');
+  
+  if (finalizarBtn && confirmarFinalizacaoBtn) {
+    finalizarBtn.addEventListener('click', () => finalizarUrl = finalizarBtn.getAttribute('data-url'));
+    
+    confirmarFinalizacaoBtn.addEventListener('click', () => {
+      if (!finalizarUrl) return;
+      fetch(finalizarUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
+          location.reload();
+        }
+      })
+      .catch(err => alert('Erro inesperado: ' + err));
+    });
+  }
+
+  // ==================== FORMULÁRIO DE AVALIAÇÃO ====================
+  const modalEl = document.getElementById('avaliacaoModal');
+  const formContainer = document.getElementById('avaliacao-form-container');
+
+  if (modalEl && formContainer) {
     modalEl.addEventListener('show.bs.modal', () => {
-      /* Mostra spinner enquanto busca o conteúdo */
       formContainer.innerHTML =
         '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
-  
+
       fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }  // indica requisição AJAX
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
         .then(response => {
           if (!response.ok) {
@@ -625,7 +607,13 @@ document.addEventListener('DOMContentLoaded', () => {
           return response.text();
         })
         .then(html => {
-          formContainer.innerHTML = html;  // injeta o HTML retornado
+          formContainer.innerHTML = html;
+          
+          // Inicializar o sistema de estrelas após carregar o formulário
+          initializeStarRating();
+          
+          // Configurar submissão via AJAX do formulário
+          setupFormSubmission();
         })
         .catch(error => {
           console.error('Erro:', error);
@@ -633,15 +621,153 @@ document.addEventListener('DOMContentLoaded', () => {
             '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
         });
     });
-  });
-</script>
+  }
   
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const toggleBtn = document.getElementById('toggleTelefoneBtn');
-    const toggleText = document.getElementById('toggleTelefoneText');
-    const telefoneInfo = document.getElementById('telefoneInfo');
+  // ==================== SUBMISSÃO DO FORMULÁRIO ====================
+  function setupFormSubmission() {
+    const formAvaliacao = document.getElementById('form-avaliacao');
+    if (formAvaliacao) {
+      formAvaliacao.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Verificar se todos os critérios foram avaliados
+        const allRatings = formAvaliacao.querySelectorAll('.star-rating');
+        let todosAvaliados = true;
+        
+        allRatings.forEach(rating => {
+          const checked = rating.querySelector('input:checked');
+          if (!checked) {
+            todosAvaliados = false;
+            // Adicionar indicação visual de erro
+            const container = rating.closest('.mb-4');
+            container.classList.add('border', 'border-danger', 'rounded', 'p-2');
+            // Adicionar mensagem de erro se não existir
+            if (!container.querySelector('.text-danger')) {
+              const errorMsg = document.createElement('small');
+              errorMsg.className = 'text-danger d-block mt-1';
+              errorMsg.textContent = 'Por favor, selecione uma avaliação';
+              container.appendChild(errorMsg);
+            }
+          } else {
+            const container = rating.closest('.mb-4');
+            container.classList.remove('border', 'border-danger', 'rounded', 'p-2');
+            const errorMsg = container.querySelector('.text-danger');
+            if (errorMsg) errorMsg.remove();
+          }
+        });
+        
+        if (!todosAvaliados) {
+          alert('Por favor, avalie todos os critérios antes de enviar.');
+          return false;
+        }
+        
+        // Se tudo estiver OK, enviar o formulário
+        const formData = new FormData(formAvaliacao);
+        const submitBtn = formAvaliacao.querySelector('#btn-enviar-avaliacao');
+        
+        // Desabilitar botão e mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        
+        fetch(formAvaliacao.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+          }
+        })
+        .then(response => {
+          if (response.redirected) {
+            // Se houve redirecionamento, seguir para a nova página
+            window.location.href = response.url;
+          } else {
+            return response.text();
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao enviar avaliação:', error);
+          alert('Erro ao enviar avaliação. Por favor, tente novamente.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Enviar Avaliação';
+        });
+      });
+    }
+  }
 
+  // ==================== SISTEMA DE ESTRELAS ====================
+  function initializeStarRating() {
+    const starRatings = document.querySelectorAll('.star-rating');
+    
+    starRatings.forEach(rating => {
+        const labels = rating.querySelectorAll('label');
+        const inputs = rating.querySelectorAll('input');
+        
+        // Função para atualizar visualmente as estrelas
+        function updateStars(value) {
+            rating.setAttribute('data-rating', value);
+            
+            // Atualizar visualmente todas as estrelas
+            labels.forEach((label, index) => {
+                if (index < value) {
+                    label.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                } else {
+                    label.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                }
+            });
+        }
+        
+        // Evento de clique nas estrelas
+        labels.forEach((label, index) => {
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                const value = this.getAttribute('data-value');
+                const input = rating.querySelector(`input[value="${value}"]`);
+                if (input) {
+                    input.checked = true;
+                    updateStars(value);
+                }
+            });
+            
+            // Efeito hover
+            label.addEventListener('mouseenter', function() {
+                const value = this.getAttribute('data-value');
+                // Preenche temporariamente até a estrela atual
+                labels.forEach((l, i) => {
+                    if (i < value) {
+                        l.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                    } else {
+                        l.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                    }
+                });
+            });
+        });
+        
+        // Restaura o estado quando o mouse sai
+        rating.addEventListener('mouseleave', function() {
+            const currentRating = rating.getAttribute('data-rating') || '0';
+            labels.forEach((l, i) => {
+                if (i < parseInt(currentRating)) {
+                    l.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                } else {
+                    l.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                }
+            });
+        });
+        
+        // Inicializa com o valor atual (se houver)
+        const checkedInput = rating.querySelector('input:checked');
+        if (checkedInput) {
+            updateStars(checkedInput.value);
+        }
+    });
+  }
+
+  // ==================== TOGGLE TELEFONE ====================
+  const toggleBtn = document.getElementById('toggleTelefoneBtn');
+  const toggleText = document.getElementById('toggleTelefoneText');
+  const telefoneInfo = document.getElementById('telefoneInfo');
+
+  if (toggleBtn && toggleText && telefoneInfo) {
     toggleBtn.addEventListener('click', function (e) {
       e.preventDefault();
       if (telefoneInfo.style.display === 'none') {
@@ -652,113 +778,22 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleText.textContent = 'Ver telefone';
       }
     });
-  });
-</script>
-
-{% if show_modal %}
-  <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
-    modalAgradecimento.show();
-  });
-  </script>
-  {% endif %}
--->
-  
-
-<!-- Bootstrap JS Bundle (garante funcionamento dos modais) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Script do mapa Leaflet -->
-<script>
-/* ------------------------------------------------------------------
-   MAPA (Leaflet + Nominatim)
------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
-  // Converte CEP em coordenada
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length) {
-        const { lat, lon } = data[0];
-        L.marker([lat, lon]).addTo(map)
-          .bindPopup('Localização aproximada do anunciante.')
-          .openPopup();
-        map.setView([lat, lon], 13);
-      }
-    })
-    .catch(console.error);
-});
-</script>
-
-<!-- Script para garantir funcionamento do dropdown na navbar - Versão Robusta -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Encontrar o link do dropdown e o menu
-  const dropdownToggle = document.querySelector('.navbar .dropdown-toggle');
-  const dropdownMenu = document.querySelector('.navbar .dropdown-menu');
-  
-  if (dropdownToggle && dropdownMenu) {
-    // Remover quaisquer listeners existentes e classes Bootstrap
-    dropdownToggle.setAttribute('data-bs-toggle', '');
-    
-    // Desativar o comportamento padrão do Bootstrap
-    const oldInstance = bootstrap.Dropdown.getInstance(dropdownToggle);
-    if (oldInstance) {
-      oldInstance.dispose();
-    }
-    
-    // Implementação JavaScript pura para abrir/fechar o dropdown
-    let isOpen = false;
-    
-    // Função para abrir/fechar o dropdown
-    function toggleDropdown(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      
-      isOpen = !isOpen;
-      
-      if (isOpen) {
-        // Mostrar o menu
-        dropdownMenu.classList.add('show');
-        dropdownMenu.style.position = 'absolute';
-        dropdownMenu.style.inset = '0px auto auto 0px';
-        dropdownMenu.style.margin = '0px';
-        dropdownMenu.style.transform = 'translate3d(0px, 40px, 0px)';
-        dropdownMenu.style.display = 'block';
-        dropdownMenu.setAttribute('data-popper-placement', 'bottom-start');
-      } else {
-        // Esconder o menu
-        dropdownMenu.classList.remove('show');
-        dropdownMenu.style.display = '';
-      }
-    }
-    
-    // Adicionar listener de clique personalizado
-    dropdownToggle.addEventListener('click', toggleDropdown);
-    
-    // Fechar o dropdown ao clicar fora
-    document.addEventListener('click', function(event) {
-      if (isOpen && !dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
-        isOpen = false;
-        dropdownMenu.classList.remove('show');
-        dropdownMenu.style.display = '';
-      }
-    });
-    
-    // Garantir que o z-index seja suficientemente alto
-    dropdownMenu.style.zIndex = '9999';
-    
-    console.log('Script de dropdown personalizado ativado.');
-  } else {
-    console.error('Elementos do dropdown não encontrados:', {toggle: dropdownToggle, menu: dropdownMenu});
   }
+
+  // ==================== MODAL DE AGRADECIMENTO ====================
+  {% if show_modal %}
+  const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
+  modalAgradecimento.show();
+  {% endif %}
+
+  // ==================== INICIALIZAÇÃO DE TOOLTIPS ====================
+  // Re-inicializa tooltips específicos desta página
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
 });
 </script>
-
 {% endblock %}
+

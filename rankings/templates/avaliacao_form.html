@@ -1,30 +1,42 @@
 <!-- rankings/templates/rankings/avaliacao_form.html -->
 {% load static %}
 <style>
-  .star-rating {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: center;
-      direction: rtl;
+  .star-rating-container {
+      text-align: center;
   }
   
-  .star-rating input {
+  .star-rating {
+      display: inline-flex;
+      gap: 5px;
+  }
+  
+  .star-rating input[type="radio"] {
       display: none;
   }
   
   .star-rating label {
       width: 30px;
       height: 30px;
+      cursor: pointer;
       background: url('/static/img/star-empty.svg') no-repeat center center;
       background-size: contain;
+      transition: all 0.2s ease;
   }
   
-  .star-rating input:checked ~ label,
-  .star-rating label:hover,
-  .star-rating label:hover ~ label {
+  /* Estrelas preenchidas baseado no valor selecionado */
+  .star-rating[data-rating="1"] label:nth-child(-n+2),
+  .star-rating[data-rating="2"] label:nth-child(-n+4),
+  .star-rating[data-rating="3"] label:nth-child(-n+6),
+  .star-rating[data-rating="4"] label:nth-child(-n+8),
+  .star-rating[data-rating="5"] label:nth-child(-n+10) {
       background-image: url('/static/img/star-filled.svg');
   }
-  </style>
+  
+  /* Hover effect */
+  .star-rating label:hover {
+      background-image: url('/static/img/star-filled.svg');
+  }
+</style>
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <!-- Cabeçalho do modal -->
@@ -51,13 +63,24 @@
           <div class="rating-criteria">
             {% for field in form %}
               {% if field.name|slice:":9" == "criterio_" %}
-                <div class="mb-3">
-                  <label class="form-label">{{ field.label }}</label>
+                <div class="mb-4">
+                  <label class="form-label fw-bold">{{ field.label }}</label>
                   <div class="star-rating-container">
-                    {{ field }}
-                    <div class="rating-labels d-flex justify-content-between">
-                      <small>Nada satisfeito</small>
-                      <small>Muito satisfeito</small>
+                    <div class="star-rating" data-field-name="{{ field.name }}" data-rating="{{ field.value|default:0 }}">
+                      {% for i in "12345"|make_list %}
+                        <input type="radio" 
+                               id="{{ field.name }}_star{{ i }}" 
+                               name="{{ field.name }}" 
+                               value="{{ i }}"
+                               {% if field.value == i %}checked{% endif %}>
+                        <label for="{{ field.name }}_star{{ i }}" 
+                               title="{{ i }} estrela{{ i|pluralize }}"
+                               data-value="{{ i }}"></label>
+                      {% endfor %}
+                    </div>
+                    <div class="rating-labels d-flex justify-content-between mt-1" style="max-width: 170px; margin: 0 auto;">
+                      <small class="text-muted">Nada satisfeito</small>
+                      <small class="text-muted">Muito satisfeito</small>
                     </div>
                   </div>
                 </div>
@@ -74,4 +97,60 @@
       </div>
     </div>
   </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sistema de estrelas interativo
+    const starRatings = document.querySelectorAll('.star-rating');
+    
+    starRatings.forEach(rating => {
+        const labels = rating.querySelectorAll('label');
+        const inputs = rating.querySelectorAll('input');
+        
+        // Função para atualizar visualmente as estrelas
+        function updateStars(value) {
+            rating.setAttribute('data-rating', value);
+        }
+        
+        // Evento de clique nas estrelas
+        labels.forEach((label, index) => {
+            label.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                updateStars(value);
+            });
+            
+            // Efeito hover
+            label.addEventListener('mouseenter', function() {
+                const value = this.getAttribute('data-value');
+                // Preenche temporariamente até a estrela atual
+                labels.forEach((l, i) => {
+                    if (i < value) {
+                        l.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                    } else {
+                        l.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                    }
+                });
+            });
+        });
+        
+        // Restaura o estado quando o mouse sai
+        rating.addEventListener('mouseleave', function() {
+            const currentRating = rating.getAttribute('data-rating');
+            labels.forEach((l, i) => {
+                if (i < currentRating) {
+                    l.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                } else {
+                    l.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                }
+            });
+        });
+        
+        // Inicializa com o valor atual (se houver)
+        const checkedInput = rating.querySelector('input:checked');
+        if (checkedInput) {
+            updateStars(checkedInput.value);
+        }
+    });
+});
+</script>
   

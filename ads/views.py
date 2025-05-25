@@ -114,6 +114,8 @@ class NecessidadeListView(ListView):
 
     def get_queryset(self):
         # Filtra as necessidades pelo cliente logado
+        if not self.request.user.is_authenticated:
+            return Necessidade.objects.none()
         queryset = Necessidade.objects.filter(
             cliente=self.request.user).order_by('-data_criacao')
 
@@ -153,7 +155,7 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
         time_diff = timezone.now() - self.object.data_criacao
         # days_diff = time_diff.days  # Quantos dias inteiros passaram
 
-        # Formata “Há 0 dias” ou “Há 1 dia” ou “Há 2 dias” etc.
+        # Formata "Há 0 dias" ou "Há 1 dia" ou "Há 2 dias" etc.
         # if days_diff == 0:
         #     dias_str = "Hoje"  # ou "Há menos de 1 dia"
         # elif days_diff == 1:
@@ -194,7 +196,6 @@ class NecessidadeDetailView(DetailView):
         necessidade = self.get_object()
         context['show_modal'] = self.request.GET.get('show_modal') == 'True'
 
-
         # Buscar o orçamento aceito relacionado ao anúncio
         orcamento_aceito = Orcamento.objects.filter(
             anuncio=necessidade, status='aceito').first()
@@ -214,18 +215,23 @@ class NecessidadeDetailView(DetailView):
             usuario=fornecedor
         ).exists() if fornecedor else False
 
-        # Verificar se o usuário atual já avaliou
-        ja_avaliou_usuario_atual = Avaliacao.objects.filter(
-            anuncio=necessidade,
-            usuario=self.request.user
-        ).exists()
+        # Verificar se o usuário atual já avaliou (só se estiver autenticado)
+        if self.request.user.is_authenticated:
+            ja_avaliou_usuario_atual = Avaliacao.objects.filter(
+                anuncio=necessidade,
+                usuario=self.request.user
+            ).exists()
+            avaliacao_form = AvaliacaoForm(user=self.request.user, anuncio=necessidade)
+        else:
+            ja_avaliou_usuario_atual = False
+            avaliacao_form = None
 
         # Passar flags no contexto
         context.update({
             'avaliacao_cliente': avaliacao_cliente,
             'avaliacao_fornecedor': avaliacao_fornecedor,
             'ja_avaliou_usuario_atual': ja_avaliou_usuario_atual,
-            'avaliacao_form': AvaliacaoForm(user=self.request.user, anuncio=necessidade),
+            'avaliacao_form': avaliacao_form,
             'orcamento_aceito': orcamento_aceito
         })
 

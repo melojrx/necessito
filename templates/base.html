@@ -42,17 +42,15 @@
         footer {
             flex-shrink: 0; /* Impede que o footer encolha */
         }
-        /* Garante que o dropdown do usuário fique acima de outros elementos */
-        .dropdown-menu {
-            /* Removido z-index forçado */
-        }
-        /* Garante que o mapa do Leaflet não sobreponha o dropdown */
-        .leaflet-container {
-            z-index: 0 !important;
+        /* Apenas ajuste no mapa do Leaflet - sem !important que força demais */
+        .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
+            z-index: 1;
         }
     </style>
     
     {% block extra_head %}{% endblock %}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4753781804493115"
+     crossorigin="anonymous"></script>
 </head>
 
 <body class="app-body">

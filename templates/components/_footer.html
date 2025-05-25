@@ -28,18 +28,100 @@
 
   /* Estilo do rodapé fixo mobile tipo app */
   .mobile-footer {
-    border-top: 1px solid #dee2e6;
-    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
-    font-size: 13px;
-    z-index: 1050;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    height: 60px;
+    z-index: 1030;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
   }
-  .mobile-footer i {
-    font-size: 1.2rem;
-    display: block;
-  }
-  .mobile-footer a {
+  
+  .mobile-footer-item {
     flex: 1;
-    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    position: relative;
+    text-decoration: none;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    height: 100%;
+  }
+  
+  .mobile-footer-item:active {
+    background-color: rgba(0, 123, 255, 0.1);
+    transform: scale(0.95);
+  }
+  
+  .mobile-footer-item.active {
+    color: #007bff;
+  }
+  
+  .mobile-footer-item i {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+  
+  .mobile-footer-item small {
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+  
+  /* Botão de anunciar com destaque (agora discreto) */
+  .mobile-footer-announce {
+    background-color: #f4f8ff;
+    color: #0d6efd !important;
+    border: 1.5px solid #b6d4fe;
+    border-radius: 15px;
+    margin: 0 5px;
+    box-shadow: none;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .mobile-footer-announce i {
+    color: #0d6efd;
+  }
+  .mobile-footer-announce small {
+    color: #0d6efd;
+  }
+  .mobile-footer-announce:active,
+  .mobile-footer-announce:hover {
+    background-color: #e7f1ff;
+    color: #0a58ca !important;
+    border-color: #90c2f8;
+  }
+  
+  /* Badge de notificações */
+  .mobile-notification-badge {
+    position: absolute;
+    top: 8px;
+    right: calc(50% - 15px);
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  /* Ajuste do body para o footer mobile */
+  @media (max-width: 767.98px) {
+    body {
+      padding-bottom: 60px !important;
+    }
   }
 </style>
 
@@ -69,7 +151,7 @@
           <a href="#"><i class="fab fa-linkedin-in"></i></a>
         </div>
         <div class="footer-copyright">
-          © 2025 | Necessito.br - Todos os direitos reservados
+          © 2025 | Necessito.com - Todos os direitos reservados
         </div>
       </div>
     </div>
@@ -77,25 +159,64 @@
 </footer>
 
 <!-- Rodapé fixo mobile tipo app -->
-<div class="d-flex d-md-none justify-content-around py-2 bg-white fixed-bottom mobile-footer">
+<nav class="d-flex d-md-none mobile-footer">
   <!-- Início -->
-  <a href="{% url 'home' %}" class="text-center text-decoration-none text-dark">
-    <i class="fas fa-home"></i><small>Início</small>
+  <a href="{% url 'home' %}" class="mobile-footer-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+    <i class="fas fa-home"></i>
+    <small>Início</small>
   </a>
 
   <!-- Buscar -->
-  <a href="{% url 'search:necessidade_search_all' %}" class="text-center text-decoration-none text-dark">
-    <i class="fas fa-search"></i><small>Buscar</small>
+  <a href="{% url 'search:necessidade_search_all' %}" class="mobile-footer-item {% if 'search' in request.resolver_match.url_name %}active{% endif %}">
+    <i class="fas fa-search"></i>
+    <small>Buscar</small>
+  </a>
+
+  <!-- Anunciar (Botão destacado) -->
+  <a href="{% url 'necessidade_create' %}" class="mobile-footer-item mobile-footer-announce">
+    <i class="fas fa-plus-circle"></i>
+    <small>Anunciar</small>
+  </a>
+
+  <!-- Notificações -->
+  <a href="#" class="mobile-footer-item" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifications">
+    <i class="fas fa-bell"></i>
+    <small>Avisos</small>
+    {% if unread_notifications_count > 0 %}
+      <span class="mobile-notification-badge">{{ unread_notifications_count }}</span>
+    {% endif %}
   </a>
 
   <!-- Perfil ou Login -->
   {% if user.is_authenticated %}
-  <a href="{% url 'user_profile' user.pk %}" class="text-center text-decoration-none text-dark">
-    <i class="fas fa-user"></i><small>Perfil</small>
+  <a href="{% url 'minha_conta_detail' user.pk %}" class="mobile-footer-item {% if 'conta' in request.resolver_match.url_name or 'profile' in request.resolver_match.url_name %}active{% endif %}">
+    <i class="fas fa-user-circle"></i>
+    <small>Conta</small>
   </a>
   {% else %}
-  <a href="{% url 'login' %}" class="text-center text-decoration-none text-dark">
-    <i class="fas fa-sign-in-alt"></i><small>Entrar</small>
+  <a href="{% url 'login' %}" class="mobile-footer-item">
+    <i class="fas fa-sign-in-alt"></i>
+    <small>Entrar</small>
   </a>
   {% endif %}
-</div>
+</nav>
+
+<script>
+// Adiciona feedback visual ao tocar nos itens do menu mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileFooterItems = document.querySelectorAll('.mobile-footer-item');
+    
+    mobileFooterItems.forEach(item => {
+        // Adiciona efeito de ripple ao tocar
+        item.addEventListener('touchstart', function(e) {
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        item.addEventListener('touchend', function(e) {
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 100);
+        });
+    });
+});
+</script>

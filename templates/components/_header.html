@@ -59,7 +59,7 @@
     }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light py-2 py-lg-3">
+<nav class="navbar navbar-expand-lg bg-body-tertiary py-2 py-lg-3">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
         <img src="{% static 'img/logo2.png' %}" alt="Necessito.br" height="50" class="d-inline-block align-top me-2">
@@ -67,12 +67,12 @@
         <!-- MOBILE: Logo mais próximo do design -->
         <span class="d-block d-lg-none"
             style="font-size: 2rem; font-weight: 700; color: #2c3e50; font-family: 'Segoe UI', 'Roboto', sans-serif; margin-top: 0.2rem;">
-        Necessito.br
+        Necessito
         </span>
 
   
         <!-- Nome no DESKTOP -->
-        <span class="fs-3 fw-semibold d-none d-lg-block" style="color: #545b62;">Necessito.br</span>
+        <span class="fs-3 fw-semibold d-none d-lg-block" style="color: #545b62;">Necessito</span>
       </a>
   
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -127,7 +127,7 @@
   
           {% if user.is_authenticated %}
           <li class="nav-item dropdown mb-2">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Olá, {{ user.first_name|capfirst }}!</a>
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Olá, {{ user.first_name|capfirst }}!</a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}"><i class="fas fa-user"></i> Minha Conta</a></li>
               <li><a class="dropdown-item" href="{% url 'necessidade_list' %}"><i class="fas fa-bullhorn"></i> Meus Anúncios</a></li>
@@ -135,7 +135,7 @@
               {% if user.is_staff %}
               <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
               {% endif %}
-              <hr class="dropdown-divider">
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
             </ul>
           </li>

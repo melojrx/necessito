@@ -1,4 +1,4 @@
-# Necessito.br - Marketplace de Necessidades
+# Necessito - Marketplace de Necessidades
 
 ## 📋 Sobre o Projeto
 O Necessito.br é uma plataforma inovadora que revoluciona a forma como pessoas e empresas encontram soluções para suas necessidades. Nossa plataforma conecta anunciantes e fornecedores de forma inteligente e eficiente, facilitando negociações e parcerias comerciais.

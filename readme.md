@@ -36,11 +36,11 @@ Transformar a maneira como as necessidades são atendidas, criando um ecossistem
 Estamos sempre abertos a novas parcerias e integrações que possam agregar valor à nossa plataforma.
 
 ## 📧 Contato
-- Email: contato@necessito.br
-- Website: [www.necessito.br](https://www.necessito.br)
+- Email: necessitobr@gmail.com
+- Website: [www.necessito.br](https://www.necessito.online)
 
 ## ⚖️ Direitos Autorais
-© 2024 Necessito.br - Todos os direitos reservados.
+© 2025 Necessito - Todos os direitos reservados.
 Este é um software proprietário e seu uso, modificação ou distribuição não autorizada é estritamente proibida.
 
 ## 🚀 Tecnologias Utilizadas

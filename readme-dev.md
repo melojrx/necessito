@@ -5,14 +5,12 @@
 - Django 4.2+
 - Django REST Framework
 - PostgreSQL 14+
-- Redis (Cache e Filas)
-- Celery (Tarefas Assíncronas)
 - Docker & Docker Compose
 - Nginx
 - Gunicorn
 - Bootstrap 5
 - JavaScript/TypeScript
-- Vue.js 3
+  
 
 ## ⚙️ Requisitos do Sistema
 - Docker 20.10+

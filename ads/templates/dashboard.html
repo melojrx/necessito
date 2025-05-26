@@ -65,23 +65,30 @@ Tooltip ao passar o mouse
     </div>
     <div class="col-12 col-md-6">
       <div class="card h-100">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
           <h5 class="card-title">Anúncios Finalizados por Categoria</h5>
-          <canvas id="graficoCategorias"></canvas>
-          <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoCategorias')">Exportar PNG</button>
-          <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoCategorias')">Exportar PDF</button>
+          <div class="flex-grow-1" style="position: relative; height: 350px;">
+            <canvas id="graficoCategorias"></canvas>
+          </div>
+          <div class="mt-auto text-center">
+            <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoCategorias')">Exportar PNG</button>
+            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoCategorias')">Exportar PDF</button>
+          </div>
         </div>
       </div>
     </div>
     <div class="col-12 col-md-6">
       <div class="card h-100">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
           <h5 class="card-title">Perfil de usuários do Sistema</h5>
-          <div style="height: 300px;">
+          <div id="resumoUsuarios" class="mb-3"></div>
+          <div class="flex-grow-1" style="position: relative; height: 300px;">
             <canvas id="graficoUsuarios"></canvas>
           </div>
-          <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoUsuarios')">Exportar PNG</button>
-          <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoUsuarios')">Exportar PDF</button>
+          <div class="mt-auto text-center">
+            <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoUsuarios')">Exportar PNG</button>
+            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoUsuarios')">Exportar PDF</button>
+          </div>
         </div>
       </div>
     </div>
@@ -128,10 +135,17 @@ Tooltip ao passar o mouse
 
 <!-- IMPORTA O jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- IMPORTA O Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> <!-- Garante que Chart.js seja carregado primeiro -->
+<!-- IMPORTA O plugin de datalabels para Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <!-- Leaflet CSS já está importado no base.html -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // O plugin datalabels deve se auto-registrar com Chart.js v4 se carregado corretamente após o Chart.js
+  // Remover o Chart.register(ChartDataLabels) explícito pode resolver conflitos em alguns casos.
+
   console.log('Dashboard - Iniciando carregamento dos gráficos e mapa...');
 
   // Recuperar dados do Django de forma segura
@@ -174,46 +188,89 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   try {
-    // Gráfico 2 - Categorias
+    // Gráfico 2 - Categorias (Barras horizontais)
     const ctxCategorias = document.getElementById('graficoCategorias');
-    if (ctxCategorias && categoriasData.labels && categoriasData.labels.length > 0) {
-      const graficoCategorias = new Chart(ctxCategorias.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: categoriasData.labels,
-          datasets: [{
-            label: 'Anúncios Finalizados por Categoria',
-            data: categoriasData.valores,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(255, 159, 64, 0.6)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          scales: {
-            y: {
-              beginAtZero: true
+    console.log('Dados para Gráfico Categorias:', categoriasData); // Log para depuração
+
+    if (ctxCategorias) { // Verifica se o canvas existe
+      if (categoriasData && categoriasData.labels && categoriasData.labels.length > 0 && categoriasData.valores && categoriasData.valores.length > 0) {
+        // Cálculo dos percentuais
+        const total = categoriasData.valores.reduce((a, b) => a + b, 0);
+        const percentuais = categoriasData.valores.map(v => total > 0 ? (v / total * 100) : 0);
+
+        // Paleta de cores acessível
+        const cores = [
+          '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
+          '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'
+        ];
+
+        const graficoCategorias = new Chart(ctxCategorias.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: categoriasData.labels,
+            datasets: [{
+              label: 'Anúncios Finalizados',
+              data: categoriasData.valores,
+              backgroundColor: cores,
+              borderColor: cores,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y', // Barras horizontais
+            responsive: true,
+            maintainAspectRatio: false, // Importante para controlar a altura via div container
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const value = context.parsed.x;
+                    const percent = percentuais[context.dataIndex];
+                    return `${context.label}: ${value} (${percent.toFixed(1)}%)`;
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: 'Anúncios Finalizados por Categoria'
+              },
+              datalabels: { // Configuração do plugin datalabels
+                anchor: 'end',
+                align: 'end',
+                color: '#333',
+                font: { 
+                  weight: 'bold',
+                  size: 10
+                },
+                formatter: function(value, context) {
+                  return `${value} (${percentuais[context.dataIndex].toFixed(1)}%)`;
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                title: { display: true, text: 'Quantidade' }
+              },
+              y: {
+                title: { display: false }
+              }
             }
           }
-        }
-      });
-      console.log('Gráfico 2 carregado com sucesso');
+        });
+        console.log('Gráfico 2 carregado com sucesso');
+      } else {
+        // Exibir mensagem de "sem dados"
+        const context = ctxCategorias.getContext('2d');
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.font = "16px Arial";
+        context.fillText('Nenhum dado para exibir neste gráfico.', ctxCategorias.width / 2, ctxCategorias.height / 2);
+        console.log('Gráfico 2: Nenhum dado para exibir.');
+      }
+    } else {
+      console.error('Elemento canvas #graficoCategorias não encontrado.');
     }
   } catch (error) {
     console.error('Erro ao carregar Gráfico 2:', error);
@@ -223,6 +280,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Gráfico 3 - Usuários (Pizza)
     const ctxUsuarios = document.getElementById('graficoUsuarios');
     if (ctxUsuarios && usuariosData.labels && usuariosData.labels.length > 0) {
+      // Cálculo dos percentuais
+      const totalUsuarios = usuariosData.total || usuariosData.valores.reduce((a, b) => a + b, 0);
+      const percentuais = usuariosData.valores.map(v => totalUsuarios > 0 ? (v / totalUsuarios * 100) : 0);
+      // Resumo visual acima do gráfico
+      let resumoHTML = `<div class='d-flex flex-wrap gap-3 align-items-center justify-content-center'>`;
+      resumoHTML += `<span class='badge bg-primary fs-6'>Total: <strong>${totalUsuarios}</strong> usuários</span>`;
+      usuariosData.labels.forEach((label, idx) => {
+        const cor = [
+          'bg-info',
+          'bg-danger',
+          'bg-success',
+          'bg-secondary'
+        ][idx] || 'bg-secondary';
+        resumoHTML += `<span class='badge ${cor} fs-6'>${label}: <strong>${usuariosData.valores[idx]}</strong> (${percentuais[idx].toFixed(1)}%)</span>`;
+      });
+      resumoHTML += `</div>`;
+      document.getElementById('resumoUsuarios').innerHTML = resumoHTML;
+
+      // Cores acessíveis e distintas
+      const cores = [
+        'rgba(54, 162, 235, 0.7)', // Só Clientes
+        'rgba(255, 99, 132, 0.7)', // Só Fornecedores
+        'rgba(75, 192, 192, 0.7)', // Ambos
+        'rgba(201, 203, 207, 0.7)' // Nenhum
+      ];
+      const bordas = [
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(201, 203, 207, 1)'
+      ];
       const graficoUsuarios = new Chart(ctxUsuarios.getContext('2d'), {
         type: 'pie',
         data: {
@@ -230,14 +318,8 @@ document.addEventListener('DOMContentLoaded', function () {
           datasets: [{
             label: 'Usuários por Tipo',
             data: usuariosData.valores,
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(255, 99, 132, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 99, 132, 1)'
-            ],
+            backgroundColor: cores,
+            borderColor: bordas,
             borderWidth: 1
           }]
         },
@@ -246,7 +328,37 @@ document.addEventListener('DOMContentLoaded', function () {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'bottom'
+              position: 'bottom',
+              labels: {
+                font: { size: 14 },
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  return data.labels.map((label, i) => {
+                    const value = data.datasets[0].data[i];
+                    const percent = total > 0 ? (value / total * 100) : 0;
+                    return {
+                      text: `${label} (${percent.toFixed(1)}%)`,
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      strokeStyle: data.datasets[0].borderColor[i],
+                      lineWidth: 1,
+                      hidden: isNaN(data.datasets[0].data[i]) || chart.getDataVisibility(i) === false,
+                      index: i
+                    };
+                  });
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed;
+                  const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = total > 0 ? (value / total * 100) : 0;
+                  return `${label}: ${value} (${percent.toFixed(1)}%)`;
+                }
+              }
             }
           }
         }

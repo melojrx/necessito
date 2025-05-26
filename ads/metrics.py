@@ -111,12 +111,21 @@ def get_quantidade_anuncios_finalizados_por_categoria():
     }
 
 def get_quantidade_usuarios_por_tipo():
-    total_clientes = User.objects.filter(is_client=True).count()
-    total_fornecedores = User.objects.filter(is_supplier=True).count()
+    # Usuários que são só clientes
+    so_clientes = User.objects.filter(is_client=True, is_supplier=False).count()
+    # Usuários que são só fornecedores
+    so_fornecedores = User.objects.filter(is_client=False, is_supplier=True).count()
+    # Usuários que são ambos
+    ambos = User.objects.filter(is_client=True, is_supplier=True).count()
+    # Usuários que não são nem clientes nem fornecedores
+    nenhum = User.objects.filter(is_client=False, is_supplier=False).count()
+    # Total geral
+    total = so_clientes + so_fornecedores + ambos + nenhum
 
     return {
-        'labels': ['Clientes', 'Fornecedores'],
-        'valores': [total_clientes, total_fornecedores]
+        'labels': ['Só Clientes', 'Só Fornecedores', 'Clientes e Fornecedores', 'Nenhum dos dois'],
+        'valores': [so_clientes, so_fornecedores, ambos, nenhum],
+        'total': total
     }
 
 def get_anuncios_criados_vs_finalizados():

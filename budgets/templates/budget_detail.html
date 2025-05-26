@@ -32,11 +32,13 @@
         <a href="{% url 'export_orcamento_pdf' orcamento.pk %}" class="btn btn-outline-primary w-100">
           <i class="fas fa-file-pdf me-2"></i> Exportar PDF
         </a>
+        {% if user == orcamento.fornecedor %}
         <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning w-100">
           <i class="fas fa-edit"></i> Editar Orçamento</a>
         <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger w-100">
           <i class="fas fa-trash-alt"></i> Excluir Orçamento
         </a>
+        {% endif %}
       </div>
     </div>
     <div class="card-body">

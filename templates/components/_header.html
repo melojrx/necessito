@@ -112,6 +112,12 @@
         </ul>
   
         <ul class="navbar-nav ms-auto align-items-start justify-content-end mt-2 mt-lg-0">
+          <li class="nav-item">
+            <a href="{% url 'help' %}" class="nav-link">
+              <i class="fas fa-question-circle me-2"></i>
+              Ajuda
+            </a>
+          </li>
           <li class="nav-item position-relative">
             <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasNotifications">
@@ -124,7 +130,7 @@
               {% endif %}
             </button>
           </li>
-  
+
           {% if user.is_authenticated %}
           <li class="nav-item dropdown mb-2">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Olá, {{ user.first_name|capfirst }}!</a>

@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from core import settings
+from core.views import HelpView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -15,6 +16,9 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('buscar/', include('search.urls')),
     path('api/', include('api.urls')),
+    
+    # Páginas institucionais
+    path('ajuda/', HelpView.as_view(), name='help'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

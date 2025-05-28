@@ -117,13 +117,12 @@ necessito/
 - Sistema de avaliações. 
 - API para integrações. 
 
-
-
 ## 📝 Licença
-Todos os direitos reservados para necessito.br. 
 
-## 🙏 Agradecimentos
+Todos os direitos reservados para necessito.br.
+
+ 🙏 Agradecimentos
+
 - Equipe de desenvolvimento
 - Contribuidores
 - Comunidade Django
-

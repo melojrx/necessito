@@ -37,6 +37,16 @@ credentials.json
 secrets.yaml
 
 # ----------------------------------------------------------------
+# Configurações específicas de ambiente (IMPORTANTE!)
+# ----------------------------------------------------------------
+# Configurações Django sensíveis
+core/settings/.py
+core/settings/production.py
+core/settings/.env*
+# Backups de configuração (manter apenas no repositório local)
+backups/config/
+
+# ----------------------------------------------------------------
 # Arquivos e pastas comuns do Python
 # ----------------------------------------------------------------
 # Cache do Python
@@ -189,10 +199,4 @@ $RECYCLE.BIN/
 # *.xlsx
 # *.csv
 # *.zip
-# *.gzdocker-compose.yml
-__init__.py
-base.py
-prod.py
-core/settings/prod.py
-core/settings/__init__.py
-
+# *.gz

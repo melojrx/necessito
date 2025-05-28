@@ -11,29 +11,29 @@
     .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
         z-index: 1 !important;
     }
-    
+
     /* Garantir que os dropdowns do Bootstrap fiquem acima de outros elementos */
     .dropdown-menu {
         z-index: 1050 !important;
     }
-    
+
     /* Correção para dropdown do navbar */
     .navbar .dropdown-menu {
         z-index: 1051 !important;
     }
-    
+
     /* Galeria de imagens */
     .carousel-item img {
         max-height: 400px;
         object-fit: cover;
     }
-</style>
+</style>   
 {% endblock %}
 
 {% block head_extra_content %}{% endblock %}
-
+    
 {% block content %}
-<div class="container mb-4">
+ <div class="container mb-4">
     <div class="row">
         {# ========================= COLUNA ESQUERDA ======================== #}
         <div class="col-md-8 mb-2">
@@ -50,47 +50,47 @@
             {# ---- Botões de ação (editar, excluir, finalizar, avaliar) ---- #}
             <div class="d-flex align-items-center mb-3">
                 {% if user.is_authenticated %}
-                    {# Editar / Excluir – apenas para o cliente dono #}
-                    {% if user == necessidade.cliente %}
-                      <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">
-                          <i class="fa-solid fa-pen-to-square"></i> Editar
-                      </a>
-                      <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">
-                          <i class="fa-solid fa-trash-can"></i> Excluir
-                      </a>
-                    {% endif %}
+                {# Editar / Excluir – apenas para o cliente dono #}
+                {% if user == necessidade.cliente %}
+                  <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning me-2">
+                      <i class="fa-solid fa-pen-to-square"></i> Editar
+                  </a>
+                  <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger me-2">
+                      <i class="fa-solid fa-trash-can"></i> Excluir
+                  </a>
+                {% endif %}
 
-                    {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
-                    {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
-                      {% for orcamento in necessidade.orcamentos.all %}
-                        {% if orcamento.status == 'aceito' %}
-                          <button class="btn btn-primary btn-finalizar"
-                                  data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#confirmarFinalizacaoModal"
-                                  title="Finalizar Anúncio">
-                            <i class="fas fa-check-circle"></i> Finalizar Anúncio
-                          </button>
-                        {% endif %}
-                      {% endfor %}
+                {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
+                {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
+                  {% for orcamento in necessidade.orcamentos.all %}
+                    {% if orcamento.status == 'aceito' %}
+                      <button class="btn btn-primary btn-finalizar"
+                              data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#confirmarFinalizacaoModal"
+                              title="Finalizar Anúncio">
+                        <i class="fas fa-check-circle"></i> Finalizar Anúncio
+                      </button>
                     {% endif %}
+                  {% endfor %}
+                {% endif %}
 
-                    {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
-                    {% if necessidade.status == 'finalizado' %}
-                    {% if user == necessidade.cliente and not avaliacao_cliente %}
-                    <!-- Cliente ainda não avaliou -->
-                    <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-                      data-bs-target="#avaliacaoModal">
-                      <i class="fas fa-star me-1"></i> Avaliar Negociação
-                    </a>
-                    {% elif user == fornecedor and not avaliacao_fornecedor %}
-                    <!-- Fornecedor ainda não avaliou -->
-                    <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-                      data-bs-target="#avaliacaoModal">
-                      <i class="fas fa-star me-1"></i> Avaliar Negociação
-                    </a>
-                    {% endif %}
-                    {% endif %}
+              {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
+              {% if necessidade.status == 'finalizado' %}
+              {% if user == necessidade.cliente and not avaliacao_cliente %}
+              <!-- Cliente ainda não avaliou -->
+              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#avaliacaoModal">
+                <i class="fas fa-star me-1"></i> Avaliar Negociação
+              </a>
+              {% elif user == fornecedor and not avaliacao_fornecedor %}
+              <!-- Fornecedor ainda não avaliou -->
+              <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#avaliacaoModal">
+                <i class="fas fa-star me-1"></i> Avaliar Negociação
+              </a>
+              {% endif %}
+              {% endif %}
                 {% else %}
                     <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
                         Faça login para interagir
@@ -171,55 +171,55 @@
                             <td class="align-middle">
                                 <div class="d-flex flex-wrap gap-2 justify-content-center">
                                     {% if user.is_authenticated %}
-                                        {% if orcamento.arquivo_anexo %}
-                                          {% if user == necessidade.cliente or user == orcamento.fornecedor %}
-                                              <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
-                                                 class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
-                                                 title="Baixar Anexo">
-                                                  <i class="fas fa-file-download"></i>
-                                              </a>
-                                          {% else %}
-                                              <span class="badge bg-secondary" data-bs-toggle="tooltip"
-                                                    title="Você não tem permissão para baixar este anexo">
-                                                  <i class="fas fa-lock"></i> Restrito
-                                              </span>
-                                          {% endif %}
-                                        {% else %}
-                                          <span class="badge bg-danger d-flex align-items-center justify-content-center" style="height: 38px;">Sem anexo</span>
-                                        {% endif %}
+                                    {% if orcamento.arquivo_anexo %}
+                                      {% if user == necessidade.cliente or user == orcamento.fornecedor %}
+                                          <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
+                                             class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
+                                             title="Baixar Anexo">
+                                              <i class="fas fa-file-download"></i>
+                                          </a>
+                                      {% else %}
+                                          <span class="badge bg-secondary" data-bs-toggle="tooltip"
+                                                title="Você não tem permissão para baixar este anexo">
+                                              <i class="fas fa-lock"></i> Restrito
+                                          </span>
+                                      {% endif %}
+                                    {% else %}
+                                      <span class="badge bg-danger d-flex align-items-center justify-content-center" style="height: 38px;">Sem anexo</span>
+                                    {% endif %}
 
-                                        {% if user == necessidade.cliente %}
-                                          {% if orcamento.status == "pendente" %}
-                                            <button class="btn btn-success btn-aceitar"
-                                                    data-url="{% url 'aceitar_orcamento' orcamento.id %}"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#confirmarAceiteModal"
-                                                    title="Aceitar Orçamento">
-                                                <i class="fas fa-thumbs-up"></i>
-                                            </button>
-                                          {% else %}
-                                            <button class="btn btn-success" disabled
-                                                    title="Orçamento já processado">
-                                                <i class="fas fa-thumbs-up"></i>
-                                            </button>
-                                          {% endif %}
-                                        {% endif %}
+                                    {% if user == necessidade.cliente %}
+                                      {% if orcamento.status == "pendente" %}
+                                        <button class="btn btn-success btn-aceitar"
+                                                data-url="{% url 'aceitar_orcamento' orcamento.id %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmarAceiteModal"
+                                                title="Aceitar Orçamento">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                      {% else %}
+                                        <button class="btn btn-success" disabled
+                                                title="Orçamento já processado">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                      {% endif %}
+                                    {% endif %}
 
-                                        {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
-                                          {% if orcamento.status == "pendente" %}
-                                               <button class="btn btn-danger btn-rejeitar"
-                                                     data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
-                                                     data-bs-toggle="modal"
-                                                     data-bs-target="#confirmarRejeicaoModal"
-                                                     title="Rejeitar Orçamento">
-                                                 <i class="fas fa-thumbs-down"></i>
-                                               </button>
-                                          {% else %}
-                                               <button class="btn btn-danger" disabled
-                                                     title="Orçamento já processado">
-                                                 <i class="fas fa-thumbs-down"></i>
-                                               </button>
-                                          {% endif %}
+                                    {% if user == necessidade.cliente and necessidade.status == "em_andamento" %}
+                                      {% if orcamento.status == "pendente" %}
+                                        <button class="btn btn-danger btn-rejeitar"
+                                                data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmarRejeicaoModal"
+                                                title="Rejeitar Orçamento">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                      {% else %}
+                                        <button class="btn btn-danger" disabled
+                                                title="Orçamento já processado">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                      {% endif %}
                                         {% endif %}
                                     {% else %}
                                         <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary">
@@ -252,24 +252,24 @@
                     <hr>
                     <div class="row g-2 mt-2">
                       <div class="col-12 col-md-6">
-                        <a href="#"
+                      <a href="#"
                            class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2{% if user == necessidade.cliente %} disabled{% endif %}"
-                           {% if user == necessidade.cliente %}
-                              tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
-                           {% else %}
-                              data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante"
-                           {% endif %}
-                        >
-                           <i class="fas fa-comments"></i>
+                         {% if user == necessidade.cliente %}
+                            tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
+                         {% else %}
+                            data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal" title="Enviar Mensagem ao Anunciante"
+                         {% endif %}
+                      >
+                         <i class="fas fa-comments"></i>
                            <span>Contato</span>
-                        </a>
+                      </a>
                       </div>
                       <div class="col-12 col-md-6">
                         <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
                                      {% url 'submeter_orcamento' necessidade.pk %}
                                  {% else %}#{% endif %}"
                            class="btn btn-warning d-flex align-items-center justify-content-center gap-2 py-2
-                                    {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
+                                  {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
                            data-bs-toggle="tooltip"
                            title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
                                      Você não pode submeter orçamento neste anúncio.
@@ -496,24 +496,24 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     const mapElement = document.getElementById('map');
     if (mapElement) {
-      const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+  const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-      // Converte CEP em coordenada
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.length) {
-            const { lat, lon } = data[0];
-            L.marker([lat, lon]).addTo(map)
-              .bindPopup('Localização aproximada do anunciante.')
-              .openPopup();
-            map.setView([lat, lon], 13);
-          }
-        })
-        .catch(console.error);
+  // Converte CEP em coordenada
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length) {
+        const { lat, lon } = data[0];
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup('Localização aproximada do anunciante.')
+          .openPopup();
+        map.setView([lat, lon], 13);
+      }
+    })
+    .catch(console.error);
     }
   } catch (error) {
     console.error('Erro ao inicializar mapa:', error);
@@ -523,44 +523,44 @@ document.addEventListener('DOMContentLoaded', function() {
   let aceitarUrl = null;
   const btnAceitar = document.querySelectorAll('.btn-aceitar');
   const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
-  
+
   if (btnAceitar.length > 0 && confirmarAceiteBtn) {
     btnAceitar.forEach(btn => {
-      btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
-    });
+    btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
+  });
 
     confirmarAceiteBtn.addEventListener('click', () => {
-      if (!aceitarUrl) return;
-      fetch(aceitarUrl, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-      })
-      .then(res => res.json())
-      .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
-      .catch(err => alert('Erro inesperado: ' + err));
-    });
+    if (!aceitarUrl) return;
+    fetch(aceitarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
   }
 
   // ==================== REJEITAR ORÇAMENTO ====================
   let rejeitarUrl = null;
   const btnRejeitar = document.querySelectorAll('.btn-rejeitar');
   const confirmarRejeicaoBtn = document.getElementById('confirmarRejeicaoBtn');
-  
+
   if (btnRejeitar.length > 0 && confirmarRejeicaoBtn) {
     btnRejeitar.forEach(btn => {
-      btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
-    });
+    btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
+  });
 
     confirmarRejeicaoBtn.addEventListener('click', () => {
-      if (!rejeitarUrl) return;
-      fetch(rejeitarUrl, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-      })
-      .then(res => res.json())
-      .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
-      .catch(err => alert('Erro inesperado: ' + err));
-    });
+    if (!rejeitarUrl) return;
+    fetch(rejeitarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
   }
 
   // ==================== FINALIZAR ANÚNCIO ====================
@@ -570,22 +570,22 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (finalizarBtn && confirmarFinalizacaoBtn) {
     finalizarBtn.addEventListener('click', () => finalizarUrl = finalizarBtn.getAttribute('data-url'));
-    
+
     confirmarFinalizacaoBtn.addEventListener('click', () => {
-      if (!finalizarUrl) return;
-      fetch(finalizarUrl, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
-          location.reload();
-        }
-      })
-      .catch(err => alert('Erro inesperado: ' + err));
-    });
+    if (!finalizarUrl) return;
+    fetch(finalizarUrl, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
+        location.reload();
+      }
+    })
+    .catch(err => alert('Erro inesperado: ' + err));
+  });
   }
 
   // ==================== FORMULÁRIO DE AVALIAÇÃO ====================
@@ -593,20 +593,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const formContainer = document.getElementById('avaliacao-form-container');
 
   if (modalEl && formContainer) {
-    modalEl.addEventListener('show.bs.modal', () => {
-      formContainer.innerHTML =
-        '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
+  modalEl.addEventListener('show.bs.modal', () => {
+    formContainer.innerHTML =
+      '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
 
-      fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
+    fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Falha ao carregar o formulário');
+        }
+        return response.text();
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Falha ao carregar o formulário');
-          }
-          return response.text();
-        })
-        .then(html => {
+      .then(html => {
           formContainer.innerHTML = html;
           
           // Inicializar o sistema de estrelas após carregar o formulário
@@ -614,12 +614,12 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Configurar submissão via AJAX do formulário
           setupFormSubmission();
-        })
-        .catch(error => {
-          console.error('Erro:', error);
-          formContainer.innerHTML =
-            '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
-        });
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        formContainer.innerHTML =
+          '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
+      });
     });
   }
   
@@ -751,8 +751,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     l.style.backgroundImage = "url('/static/img/star-empty.svg')";
                 }
-            });
-        });
+  });
+});
         
         // Inicializa com o valor atual (se houver)
         const checkedInput = rating.querySelector('input:checked');
@@ -768,22 +768,22 @@ document.addEventListener('DOMContentLoaded', function() {
   const telefoneInfo = document.getElementById('telefoneInfo');
 
   if (toggleBtn && toggleText && telefoneInfo) {
-    toggleBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      if (telefoneInfo.style.display === 'none') {
-        telefoneInfo.style.display = 'block';
-        toggleText.textContent = 'Ocultar telefone';
-      } else {
-        telefoneInfo.style.display = 'none';
-        toggleText.textContent = 'Ver telefone';
-      }
-    });
+  toggleBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (telefoneInfo.style.display === 'none') {
+      telefoneInfo.style.display = 'block';
+      toggleText.textContent = 'Ocultar telefone';
+    } else {
+      telefoneInfo.style.display = 'none';
+      toggleText.textContent = 'Ver telefone';
+    }
+  });
   }
 
   // ==================== MODAL DE AGRADECIMENTO ====================
-  {% if show_modal %}
-  const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
-  modalAgradecimento.show();
+{% if show_modal %}
+    const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
+    modalAgradecimento.show();
   {% endif %}
 
   // ==================== INICIALIZAÇÃO DE TOOLTIPS ====================

@@ -1,0 +1,173 @@
+{% load static %}
+
+<style>
+    .step-card{
+      background:#fff; border:1px solid #e5e5e5; border-radius:12px;
+      position:relative; min-height:260px;
+      transition:box-shadow .25s;
+    }
+    .step-card:hover{box-shadow:0 0 0.75rem rgba(0,0,0,.08);}
+    .step-number{
+      position:absolute; top:-10px; left:-10px;
+      background:#0d6efd; color:#fff; width:32px; height:32px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:600; border-radius:50%;
+    }
+    .step-icon{font-size:2.4rem; color:#0d6efd;}
+    /* toggle btn ativo */
+    .btn-outline-primary.active,
+    .btn-outline-primary.active:hover{
+      color:#fff; background:#0d6efd; border-color:#0d6efd;
+    }
+</style>
+  
+
+<section class="process-section py-5">
+    <div class="container">
+  
+      <!-- Toggle tabs ---------------------------------------------------->
+      <div class="d-flex justify-content-center mb-4 gap-2">
+        <button class="btn btn-outline-primary active" data-target="flow-cliente">
+          Para quem Precisa
+        </button>
+        <button class="btn btn-outline-primary" data-target="flow-fornecedor">
+          Para Fornecedores
+        </button>
+      </div>
+  
+      <!-- -----------------------  Fluxo CLIENTE  ----------------------- -->
+      <div id="flow-cliente" class="flow-wrapper">
+        <div class="row g-4 justify-content-center">
+  
+          <!-- 1 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">1</span>
+                <i class="fa-solid fa-bullseye step-icon"></i>
+                <h5 class="fw-bold mt-3">Anuncie</h5>
+                <p class="mb-0">Descreva sua necessidade com clareza de escopo, prazo e orçamento estimado.</p>
+            </div>
+          </div>
+  
+          <!-- 2 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">2</span>
+                <i class="fa-solid fa-magnifying-glass step-icon"></i>
+                <h5 class="fw-bold mt-3">Compare</h5>
+                <p class="mb-0">Receba orçamentos personalizados de fornecedores qualificados.</p>
+            </div>
+          </div>
+  
+          <!-- 3 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">3</span>
+                <i class="fa-solid fa-comments step-icon"></i>
+                <h5 class="fw-bold mt-3">Negocie</h5>
+                <p class="mb-0">Converse diretamente no chat integrado para ajustar detalhes.</p>
+            </div>
+          </div>
+  
+          <!-- 4 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">4</span>
+                <i class="fa-solid fa-circle-check step-icon"></i>
+                <h5 class="fw-bold mt-3">Feche</h5>
+                <p class="mb-0">Escolha a melhor proposta com total transparência e segurança.</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- CTA -->
+        <div class="text-center mt-5">
+          <h4 class="fw-semibold mb-3">
+            Pronto para encontrar os melhores fornecedores?
+          </h4>
+          <p class="mb-4">Publique sua primeira necessidade gratuitamente e receba propostas competitivas.</p>
+          <a href="{% url 'necessidade_create' %}" class="btn btn-primary me-2">Anunciar Gratuitamente</a>
+          <a href="#!" class="btn btn-outline-secondary">Ver Exemplo</a>
+        </div>
+      </div>
+  
+      <!-- -----------------------  Fluxo FORNECEDOR  -------------------- -->
+      <div id="flow-fornecedor" class="flow-wrapper d-none">
+        <div class="row g-4 justify-content-center">
+  
+          <!-- 1 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">1</span>
+                <i class="fa-solid fa-magnifying-glass step-icon"></i>
+                <h5 class="fw-bold mt-3">Encontre</h5>
+                <p class="mb-0">Busque oportunidades na sua área com filtros avançados.</p>
+            </div>
+          </div>
+  
+          <!-- 2 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">2</span>
+                <i class="fa-solid fa-bullseye step-icon"></i>
+                <h5 class="fw-bold mt-3">Orce</h5>
+                <p class="mb-0">Envie propostas personalizadas com preços competitivos.</p>
+            </div>
+          </div>
+  
+          <!-- 3 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">3</span>
+                <i class="fa-solid fa-comments step-icon"></i>
+                <h5 class="fw-bold mt-3">Negocie</h5>
+                <p class="mb-0">Ajuste detalhes com o cliente no chat integrado.</p>
+            </div>
+          </div>
+  
+          <!-- 4 -->
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="step-card h-100 text-center px-4 py-5">
+                <span class="step-number">4</span>
+                <i class="fa-solid fa-circle-check step-icon"></i>
+                <h5 class="fw-bold mt-3">Conquiste</h5>
+                <p class="mb-0">Ganhe novos contratos e aumente seu faturamento.</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- CTA -->
+        <div class="text-center mt-5">
+          <h4 class="fw-semibold mb-3">
+            Pronto para conquistar novos clientes?
+          </h4>
+          <p class="mb-4">Cadastre-se como fornecedor e participe de oportunidades relevantes.</p>
+          <a href="{% url 'register' %}" class="btn btn-primary me-2">Cadastrar como Fornecedor</a>
+          <a href="{% url 'search:necessidade_search_all' %}" class="btn btn-outline-secondary">Explorar Oportunidades</a>
+        </div>
+      </div>
+  
+    </div>
+  </section>
+  
+  <script>
+    (()=>{
+  
+      const toggleBtns = document.querySelectorAll('[data-target]');
+      const flows      = document.querySelectorAll('.flow-wrapper');
+  
+      toggleBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          // Ativa botão
+          toggleBtns.forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+  
+          // Mostra fluxo correspondente
+          flows.forEach(flow=>{
+            flow.classList.toggle('d-none', flow.id !== btn.dataset.target);
+          });
+        });
+      });
+  
+    })();
+  </script>

@@ -237,7 +237,7 @@
     <div class="col-md-4">
 
       {# ----- Card Categoria + contatos ----- #}
-      <div class="card mb-4 shadow">
+      <div class="card mb-2 shadow">
         <div class="card-body">
           <h5 class="card-title"><i class="fa-solid fa-icons"></i> Categoria</h5>
           <p class="card-text">{{ necessidade.categoria.nome }}</p>
@@ -320,7 +320,7 @@
           </div>
           {% else %}
           <!-- Usuário não é fornecedor -->
-          <div class="card mb-3">
+          <div class="card mb-">
             <div class="card-body text-center">
               <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
               <h6 class="text-muted mb-2">Você precisa ser um fornecedor para enviar orçamentos</h6>
@@ -335,8 +335,6 @@
           {% endif %}
           {% endif %}
           {% endif %}
-
-         
           <div class="card mb-2">
             <div class="card-header">
               <h6><i class="fas fa-info-circle"></i> Informações</h6>
@@ -377,7 +375,7 @@
   </div>
 </div>
 {# ----- Card Localização (mapa OpenStreetMap via Leaflet) ----- #}
-<div class="card shadow">
+<div class="card mb-2 shadow">
   <div class="card-body">
     <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Localização</h5>
     <p><strong>Cidade:</strong> {{ necessidade.cliente.cidade }}</p>

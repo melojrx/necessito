@@ -1,6 +1,6 @@
-# API Necessito
+# API Indicaai
 
-API RESTful para integração com o sistema Necessito, desenvolvida com Django Rest Framework.
+API RESTful para integração com o sistema Indicaai, desenvolvida com Django Rest Framework.
 
 ## Estrutura da API
 

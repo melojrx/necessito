@@ -47,7 +47,7 @@ def notificar_finalizacao_anuncio(sender, instance, **kwargs):
             # Envia email para fornecedor
             send_mail(
                 subject="Anúncio Finalizado",
-                message=f"Olá {orcamento_aceito.fornecedor.first_name},\n\nO anúncio '{instance.titulo}' que você atendeu foi finalizado pelo cliente.\n\nAtenciosamente,\nNecessito",
+                message=f"Olá {orcamento_aceito.fornecedor.first_name},\n\nO anúncio '{instance.titulo}' que você atendeu foi finalizado pelo cliente.\n\nAtenciosamente,\Indicaai",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[orcamento_aceito.fornecedor.email],
                 fail_silently=False
@@ -56,7 +56,7 @@ def notificar_finalizacao_anuncio(sender, instance, **kwargs):
         # Envia email para cliente
         send_mail(
             subject="Anúncio Finalizado",
-            message=f"Olá {instance.cliente.first_name},\n\nSeu anúncio '{instance.titulo}' foi finalizado com sucesso.\n\nObrigado por usar nossa plataforma.\n\nAtenciosamente,\nNecessito",
+            message=f"Olá {instance.cliente.first_name},\n\nSeu anúncio '{instance.titulo}' foi finalizado com sucesso.\n\nObrigado por usar nossa plataforma.\n\nAtenciosamente,\Indicaai",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[instance.cliente.email],
             fail_silently=False
@@ -123,7 +123,7 @@ def notificar_orcamento_rejeitado(sender, instance, **kwargs):
             f"Olá, {fornecedor.first_name}!\n\n"
             f"O cliente rejeitou seu orçamento enviado para o anúncio '{anuncio.titulo}'.\n"
             "Acesse a plataforma para mais detalhes.\n\n"
-            "Atenciosamente,\nNecessito"
+            "Atenciosamente,\Indicaai"
         )
         send_mail(
             subject=assunto,
@@ -160,7 +160,7 @@ def notificar_nova_avaliacao(sender, instance, created, **kwargs):
             f"Olá, {avaliado.first_name}!\n\n"
             f"Você recebeu uma nova avaliação no anúncio '{anuncio.titulo}'.\n"
             "Acesse a plataforma para visualizar os detalhes.\n\n"
-            "Atenciosamente,\nNecessito"
+            "Atenciosamente,\Indicaai"
         )
         send_mail(
             subject=assunto,

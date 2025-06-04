@@ -1,7 +1,7 @@
-# Necessito - Marketplace de Necessidades
+# Indicaai - Marketplace de Necessidades
 
 ## 📋 Sobre o Projeto
-O Necessito.br é uma plataforma inovadora que revoluciona a forma como pessoas e empresas encontram soluções para suas necessidades. Nossa plataforma conecta anunciantes e fornecedores de forma inteligente e eficiente, facilitando negociações e parcerias comerciais.
+O Indicaai.com é uma plataforma inovadora que revoluciona a forma como pessoas e empresas encontram soluções para suas necessidades. Nossa plataforma conecta anunciantes e fornecedores de forma inteligente e eficiente, facilitando negociações e parcerias comerciais.
 
 ## 🎯 Nossa Missão
 Transformar a maneira como as necessidades são atendidas, criando um ecossistema digital confiável e eficiente que beneficia tanto quem precisa quanto quem oferece soluções.
@@ -40,7 +40,7 @@ Estamos sempre abertos a novas parcerias e integrações que possam agregar valo
 - Website: [www.necessito.br](https://www.necessito.online)
 
 ## ⚖️ Direitos Autorais
-© 2025 Necessito - Todos os direitos reservados.
+© 2025 Indicaai - Todos os direitos reservados.
 Este é um software proprietário e seu uso, modificação ou distribuição não autorizada é estritamente proibida.
 
 ## 🚀 Tecnologias Utilizadas

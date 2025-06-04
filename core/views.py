@@ -16,9 +16,9 @@ class HelpView(TemplateView):
         
         # Dados para SEO
         context.update({
-            'page_title': 'Central de Ajuda - Necessito.com',
-            'page_description': 'Central de ajuda da Necessito.com. Aprenda como usar nossa plataforma de oportunidades de negócios, conectar-se com fornecedores e fazer negócios online.',
-            'page_keywords': 'ajuda, suporte, como usar, tutorial, necessito, plataforma, negócios, fornecedores',
+            'page_title': 'Central de Ajuda - Indicaai.com',
+            'page_description': 'Central de ajuda da Indicaai.com. Aprenda como usar nossa plataforma de oportunidades de negócios, conectar-se com fornecedores e fazer negócios online.',
+            'page_keywords': 'ajuda, suporte, como usar, tutorial, indicaai, plataforma, negócios, fornecedores',
             'canonical_url': self.request.build_absolute_uri(),
         })
         
@@ -31,9 +31,9 @@ def help_view(request):
     Alternativa mais simples à class-based view.
     """
     context = {
-        'page_title': 'Central de Ajuda - Necessito.com',
-        'page_description': 'Central de ajuda da Necessito.com. Aprenda como usar nossa plataforma de oportunidades de negócios.',
-        'page_keywords': 'ajuda, suporte, como usar, tutorial, necessito',
+        'page_title': 'Central de Ajuda - Indicaai.com',
+        'page_description': 'Central de ajuda da Indicaai.com. Aprenda como usar nossa plataforma de oportunidades de negócios.',
+        'page_keywords': 'ajuda, suporte, como usar, tutorial, indicaai',
     }
     
     return render(request, 'help/help.html', context) 

@@ -19,7 +19,7 @@ def enviar_email_criacao_anuncio(sender, instance, created, **kwargs):
             "Seu novo anúncio foi criado com sucesso. "
             f"Título do anúncio: {instance.titulo}\n"
             "Muito obrigado por usar nossa plataforma.\n\n"
-            "Atenciosamente,\nNecessito"
+            "Atenciosamente,\Indicaai"
         )
         destinatario = [user.email]
 

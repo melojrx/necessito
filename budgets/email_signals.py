@@ -20,7 +20,7 @@ def enviar_email_novo_orcamento(sender, instance, created, **kwargs):
             f"Olá, {cliente.first_name}!\n\n"
             f"Você recebeu um novo orçamento para seu anúncio '{anuncio.titulo}'.\n"
             "Acesse a plataforma para visualizar os detalhes e responder.\n\n"
-            "Atenciosamente,\nNecessito"
+            "Atenciosamente,\Indicaai"
         )
         send_mail(
             subject=assunto,
@@ -46,7 +46,7 @@ def enviar_email_orcamento_aceito(sender, instance, **kwargs):
             f"Olá, {fornecedor.first_name}!\n\n"
             f"Seu orçamento para o anúncio '{anuncio.titulo}' foi aceito pelo cliente.\n"
             "Acesse a plataforma para mais detalhes e iniciar o atendimento.\n\n"
-            "Atenciosamente,\nNecessito"
+            "Atenciosamente,\Indicaai"
         )
         send_mail(
             subject=assunto,

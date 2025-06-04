@@ -1,4 +1,4 @@
-# Necessito - Documentação Técnica
+# Indicaai - Documentação Técnica
 
 ## 🛠️ Stack Tecnológica
 - Python 3.8+

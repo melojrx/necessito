@@ -25,6 +25,14 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
+# Configurações CSRF para resolver problemas com origens confiáveis
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 AUTH_USER_MODEL = 'users.User'
 
 # Application definition
@@ -45,6 +53,7 @@ INSTALLED_APPS = [
     "rankings",
     "notifications",
     "search",
+    "chat",
     
     # API e documentação
     "rest_framework",
@@ -78,6 +87,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.media",
                 "core.context_processors.unread_notifications",
+                "core.context_processors.unread_messages",
             ],
         },
     },

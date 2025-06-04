@@ -15,6 +15,7 @@ urlpatterns = [
     path('rankings/', include('rankings.urls')),
     path('notifications/', include('notifications.urls')),
     path('buscar/', include('search.urls')),
+    path('chat/', include('chat.urls')),
     path('api/', include('api.urls')),
     
     # Páginas institucionais

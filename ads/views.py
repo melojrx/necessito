@@ -203,6 +203,16 @@ class NecessidadeDetailView(DetailView):
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
         context['fornecedor'] = fornecedor
 
+        # Verificar se o usuário autenticado tem orçamento para esta necessidade
+        if self.request.user.is_authenticated:
+            usuario_tem_orcamento = Orcamento.objects.filter(
+                anuncio=necessidade,
+                fornecedor=self.request.user
+            ).exists()
+            context['usuario_tem_orcamento'] = usuario_tem_orcamento
+        else:
+            context['usuario_tem_orcamento'] = False
+
         # Verificar se cliente já avaliou
         avaliacao_cliente = Avaliacao.objects.filter(
             anuncio=necessidade,

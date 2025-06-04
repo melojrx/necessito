@@ -1,4 +1,5 @@
 {% load static %}
+{% load chat_tags %}
 
 <header>
 <style>
@@ -72,7 +73,7 @@
 
   
         <!-- Nome no DESKTOP -->
-        <span class="fs-3 fw-semibold d-none d-lg-block" style="color: #545b62;">Necessito</span>
+        <span class="fs-3 fw-semibold d-none d-lg-block" style="color: #545b62;">Indicaai</span>
       </a>
   
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -138,6 +139,18 @@
               <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}"><i class="fas fa-user"></i> Minha Conta</a></li>
               <li><a class="dropdown-item" href="{% url 'necessidade_list' %}"><i class="fas fa-bullhorn"></i> Meus Anúncios</a></li>
               <li><a class="dropdown-item" href="{% url 'budget_list' %}"><i class="far fa-list-alt"></i> Meus Orçamentos</a></li>
+              <li> <!-- LINK DO CHAT COM CONTADOR -->
+                <a class="dropdown-item d-flex align-items-center justify-content-between" href="{% url 'chat:lista_chats' %}">
+                    <span>
+                        <i class="fas fa-comments me-2"></i> Chats
+                    </span>
+                    {% if unread_messages_count > 0 %}
+                        <span class="badge rounded-pill bg-danger ms-2">
+                            {{ unread_messages_count }}
+                            <span class="visually-hidden">mensagens não lidas</span>
+                        </span>
+                    {% endif %}
+                </a></li>
               {% if user.is_staff %}
               <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
               {% endif %}

@@ -189,6 +189,8 @@ $RECYCLE.BIN/
 *.sqlite3
 *.db-shm
 *.db-wal
+backups/
+backup_postgres.sh
 
 # ----------------------------------------------------------------
 # Arquivos grandes (LFS)

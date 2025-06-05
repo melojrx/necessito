@@ -139,6 +139,42 @@
   .row.g-2 .btn-success {
     background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
   }
+
+  .botao-acao-group .btn {
+    min-width: 0;
+    flex: 1 1 0;
+    height: 50px;
+    font-size: 15px;
+    border-radius: 6px;
+    margin: 0;
+    /* já tem box-shadow e transições no seu CSS */
+  }
+
+  .botao-acao-group .btn i {
+    font-size: 16px !important;
+    margin-right: 8px !important; /* Espaço entre ícone e texto */
+  }
+
+  @media (max-width: 991px) {
+    .botao-acao-group {
+      flex-direction: column !important;
+    }
+    .botao-acao-group .btn {
+      height: 48px;
+      font-size: 14px;
+    }
+    .botao-acao-group .btn i {
+      font-size: 15px !important;
+      margin-right: 6px !important; /* Espaço menor em mobile */
+    }
+  }
+
+  @media (max-width: 575px) {
+    .botao-acao-group .btn i {
+      font-size: 14px !important;
+      margin-right: 6px !important; /* Espaço menor em mobile */
+    }
+  }
 </style>
 {% endblock %}
 
@@ -350,39 +386,33 @@
           <p class="card-text">{{ necessidade.categoria.nome }}</p>
           <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst }}</span>
           <hr>
-          <div class="row g-2">
-            <div class="col-12 col-lg-4">
-              <a href="#"
-                class="btn btn-primary d-flex align-items-center justify-content-center {% if user == necessidade.cliente %} disabled{% endif %}"
-                {% if user == necessidade.cliente %} tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
-                {% else %} data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal"
-                title="Enviar Mensagem ao Anunciante" {% endif %}>
-                <i class="fas fa-comments"></i>
+          <div class="d-flex flex-column flex-lg-row gap-2 w-100 align-items-stretch botao-acao-group">
+            <a href="#"
+              class="btn btn-primary d-flex align-items-center justify-content-center flex-fill {% if user == necessidade.cliente %} disabled{% endif %}"
+              {% if user == necessidade.cliente %} tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
+              {% else %} data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal"
+              title="Enviar Mensagem ao Anunciante" {% endif %}>
+                              <i class="fas fa-comments"></i>
                 <span>Contato</span>
-              </a>
-            </div>
-            <div class="col-12 col-lg-4">
-              <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
-                                     {% url 'submeter_orcamento' necessidade.id %}
-                                 {% else %}#{% endif %}"
-                class="btn btn-warning d-flex align-items-center justify-content-center
-                                  {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
-                data-bs-toggle="tooltip" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
-                                     Você não pode submeter orçamento neste anúncio.
-                                  {% else %}
-                                     Enviar orçamento para este anúncio
-                                  {% endif %}">
-                <i class="fas fa-folder-plus"></i>
-                <span>Orçamento</span>
-              </a> 
-            </div>
-            <div class="col-12 col-lg-4">
-              <button type="button" class="btn btn-success d-flex align-items-center justify-content-center" 
-                      id="btnCompartilhar" title="Compartilhar anúncio">
-                <i class="fa-solid fa-share-nodes"></i>
-                <span>Compartilhar</span>
-              </button>
-            </div>
+            </a>
+            <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
+                                 {% url 'submeter_orcamento' necessidade.id %}
+                             {% else %}#{% endif %}"
+              class="btn btn-warning d-flex align-items-center justify-content-center
+                                {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
+              data-bs-toggle="tooltip" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
+                                   Você não pode submeter orçamento neste anúncio.
+                                {% else %}
+                                   Enviar orçamento para este anúncio
+                                {% endif %}">
+              <i class="fas fa-folder-plus"></i>
+              <span>Orçamento</span>
+            </a> 
+            <button type="button" class="btn btn-success d-flex align-items-center justify-content-center flex-fill" 
+                    id="btnCompartilhar" title="Compartilhar anúncio">
+              <i class="fa-solid fa-share-nodes"></i>
+              <span>Compartilhar</span>
+            </button>
           </div>
           <hr>
           <!-- Ações para fornecedores -->

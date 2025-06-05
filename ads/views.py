@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import requests
 from ads.forms import AdsForms
@@ -410,3 +410,51 @@ def enviar_mensagem(request, pk):
         
         messages.success(request, 'Mensagem enviada com sucesso!')
         return redirect('necessidade_detail', pk=pk)
+
+
+def dados_compartilhamento(request, pk):
+    """
+    View para fornecer dados estruturados de compartilhamento do anúncio.
+    Pode ser usada para APIs ou para gerar links personalizados.
+    """
+    necessidade = get_object_or_404(Necessidade, pk=pk)
+    
+    # Construir URL completa
+    url_completa = request.build_absolute_uri(
+        reverse('necessidade_detail', kwargs={'pk': pk})
+    )
+    
+    # Texto estruturado para compartilhamento
+    texto_compartilhamento = f"""🔍 Procuro: {necessidade.titulo}
+
+📋 {necessidade.descricao[:150]}{'...' if len(necessidade.descricao) > 150 else ''}
+📍 {necessidade.cliente.cidade}, {necessidade.cliente.estado}
+💰 Categoria: {necessidade.categoria.nome}
+📦 Quantidade: {necessidade.quantidade} {necessidade.unidade}
+
+👆 Acesse o anúncio completo no link:
+{url_completa}
+
+#Indicaai #{necessidade.categoria.nome.replace(' ', '')}"""
+
+    dados = {
+        'id': necessidade.id,
+        'titulo': necessidade.titulo,
+        'descricao': necessidade.descricao,
+        'categoria': necessidade.categoria.nome,
+        'quantidade': necessidade.quantidade,
+        'unidade': necessidade.unidade,
+        'cidade': necessidade.cliente.cidade,
+        'estado': necessidade.cliente.estado,
+        'url': url_completa,
+        'texto_formatado': texto_compartilhamento,
+        'imagem_principal': necessidade.imagens.first().imagem.url if necessidade.imagens.exists() else None,
+        'data_criacao': necessidade.data_criacao.strftime('%d/%m/%Y'),
+        'status': necessidade.get_status_display()
+    }
+    
+    if request.headers.get('Accept') == 'application/json':
+        return JsonResponse(dados)
+    
+    # Para requisições normais, retorna contexto para template
+    return render(request, 'compartilhamento_preview.html', {'dados': dados})

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dados.titulo }} - Indicaai.com</title>
+    
+    <!-- Meta tags Open Graph -->
+    <meta property="og:title" content="Procuro: {{ dados.titulo }} - Indicaai.com" />
+    <meta property="og:description" content="{{ dados.descricao|truncatechars:160 }}" />
+    <meta property="og:url" content="{{ dados.url }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Indicaai.com" />
+    {% if dados.imagem_principal %}
+    <meta property="og:image" content="{{ request.build_absolute_uri }}{{ dados.imagem_principal }}" />
+    {% endif %}
+    
+    <!-- Meta tags Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Procuro: {{ dados.titulo }}" />
+    <meta name="twitter:description" content="{{ dados.descricao|truncatechars:160 }}" />
+    
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f8f9fa;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .preview { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            border-radius: 5px; 
+            background: #f9f9f9; 
+            white-space: pre-line;
+        }
+        .button {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prévia de Compartilhamento</h1>
+        <h2>{{ dados.titulo }}</h2>
+        
+        <div class="preview">{{ dados.texto_formatado }}</div>
+        
+        <a href="{{ dados.url }}" class="button">Ver Anúncio Completo</a>
+        
+        <hr>
+        <small>
+            <strong>Categoria:</strong> {{ dados.categoria }}<br>
+            <strong>Local:</strong> {{ dados.cidade }}, {{ dados.estado }}<br>
+            <strong>Data:</strong> {{ dados.data_criacao }}<br>
+            <strong>Status:</strong> {{ dados.status }}
+        </small>
+    </div>
+</body>
+</html> 

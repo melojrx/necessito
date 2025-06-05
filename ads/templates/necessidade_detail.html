@@ -5,8 +5,36 @@
 
 {% block title %}Detalhes do Anúncio{% endblock %}
 
-{# Apenas estilos essenciais - sem interferências #}
+{# Meta tags Open Graph para compartilhamento #}
 {% block extra_head %}
+<!-- Meta tags Open Graph para melhor compartilhamento -->
+<meta property="og:title" content="Procuro: {{ necessidade.titulo }} - Indicaai.com" />
+<meta property="og:description" content="{{ necessidade.descricao|truncatechars:160 }}" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Indicaai.com" />
+{% if necessidade.imagens.first %}
+<meta property="og:image" content="{{ request.build_absolute_uri }}{{ necessidade.imagens.first.imagem.url }}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+{% else %}
+<meta property="og:image" content="{{ request.build_absolute_uri }}{% static 'img/logo2.png' %}" />
+{% endif %}
+
+<!-- Meta tags Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Procuro: {{ necessidade.titulo }}" />
+<meta name="twitter:description" content="{{ necessidade.descricao|truncatechars:160 }}" />
+{% if necessidade.imagens.first %}
+<meta name="twitter:image" content="{{ request.build_absolute_uri }}{{ necessidade.imagens.first.imagem.url }}" />
+{% else %}
+<meta name="twitter:image" content="{{ request.build_absolute_uri }}{% static 'img/logo2.png' %}" />
+{% endif %}
+
+<!-- Meta tags adicionais -->
+<meta name="description" content="Procuro: {{ necessidade.titulo }} em {{ necessidade.cliente.cidade }}, {{ necessidade.cliente.estado }}. {{ necessidade.descricao|truncatechars:120 }}" />
+<meta name="keywords" content="{{ necessidade.categoria.nome }}, {{ necessidade.titulo }}, {{ necessidade.cliente.cidade }}, indicaai, anúncio, procuro" />
+
 <style>
   /* Garantir que o mapa não sobreponha os dropdowns */
   .leaflet-container,
@@ -32,13 +60,92 @@
     max-height: 400px;
     object-fit: cover;
   }
+
+  /* Links na prévia de compartilhamento */
+  #previaCompartilhamento a {
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  
+  #previaCompartilhamento a:hover {
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* ========== UNIFORMIZAÇÃO DOS BOTÕES DE AÇÃO ========== */
+  .row.g-2 .btn {
+    height: 50px !important; /* Altura fixa para todos os botões */
+    min-width: 100% !important; /* Largura completa */
+    font-size: 14px !important; /* Tamanho da fonte uniforme */
+    font-weight: 500 !important; /* Peso da fonte */
+    border-radius: 6px !important; /* Bordas arredondadas uniformes */
+    text-align: center !important; /* Centralizar texto */
+    line-height: 1.2 !important; /* Altura da linha */
+    padding: 8px 12px !important; /* Padding uniforme */
+    transition: all 0.3s ease !important; /* Transição suave */
+    border: none !important; /* Remover bordas */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; /* Sombra sutil */
+  }
+
+  /* Efeitos hover para todos os botões */
+  .row.g-2 .btn:hover:not(.disabled) {
+    transform: translateY(-1px) !important; /* Efeito de elevação */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important; /* Sombra mais intensa */
+  }
+
+  /* Garantir que os ícones e textos estejam alinhados */
+  .row.g-2 .btn i {
+    font-size: 16px !important; /* Tamanho uniforme dos ícones */
+    margin-right: 6px !important; /* Espaçamento do ícone */
+  }
+
+  /* Responsividade para tablets e mobile */
+  @media (max-width: 991px) {
+    .row.g-2 .btn {
+      height: 48px !important; /* Altura menor em tablets */
+      font-size: 13px !important; /* Fonte menor */
+      margin-bottom: 10px !important; /* Espaçamento entre botões */
+    }
+    
+    .row.g-2 .btn i {
+      font-size: 15px !important; /* Ícones menores */
+      margin-right: 5px !important; /* Espaçamento menor */
+    }
+  }
+
+  /* Mobile específico */
+  @media (max-width: 575px) {
+    .row.g-2 .btn {
+      height: 46px !important; /* Altura ainda menor no mobile */
+      font-size: 12px !important; /* Fonte ainda menor */
+      padding: 6px 10px !important; /* Padding menor */
+    }
+    
+    .row.g-2 .btn i {
+      font-size: 14px !important; /* Ícones ainda menores */
+    }
+  }
+
+  /* Cores específicas mantidas */
+  .row.g-2 .btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  }
+  
+  .row.g-2 .btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    color: #000 !important;
+  }
+  
+  .row.g-2 .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+  }
 </style>
 {% endblock %}
 
 {% block head_extra_content %}{% endblock %}
 
 {% block content %}
-<div class="container mb-4">
+<div class="container mb-2">
   <div class="row">
     {# ========================= COLUNA ESQUERDA ======================== #}
     <div class="col-md-8 mb-2">
@@ -243,10 +350,10 @@
           <p class="card-text">{{ necessidade.categoria.nome }}</p>
           <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst }}</span>
           <hr>
-          <div class="row g-2 mt-2">
-            <div class="col-12 col-md-6">
+          <div class="row g-2">
+            <div class="col-12 col-lg-4">
               <a href="#"
-                class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2{% if user == necessidade.cliente %} disabled{% endif %}"
+                class="btn btn-primary d-flex align-items-center justify-content-center {% if user == necessidade.cliente %} disabled{% endif %}"
                 {% if user == necessidade.cliente %} tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
                 {% else %} data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal"
                 title="Enviar Mensagem ao Anunciante" {% endif %}>
@@ -254,11 +361,11 @@
                 <span>Contato</span>
               </a>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-lg-4">
               <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
                                      {% url 'submeter_orcamento' necessidade.id %}
                                  {% else %}#{% endif %}"
-                class="btn btn-warning d-flex align-items-center justify-content-center gap-2 py-2
+                class="btn btn-warning d-flex align-items-center justify-content-center
                                   {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
                 data-bs-toggle="tooltip" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
                                      Você não pode submeter orçamento neste anúncio.
@@ -266,8 +373,15 @@
                                      Enviar orçamento para este anúncio
                                   {% endif %}">
                 <i class="fas fa-folder-plus"></i>
-                <span>Enviar orçamento</span>
-              </a>
+                <span>Orçamento</span>
+              </a> 
+            </div>
+            <div class="col-12 col-lg-4">
+              <button type="button" class="btn btn-success d-flex align-items-center justify-content-center" 
+                      id="btnCompartilhar" title="Compartilhar anúncio">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>Compartilhar</span>
+              </button>
             </div>
           </div>
           <hr>
@@ -320,7 +434,7 @@
           </div>
           {% else %}
           <!-- Usuário não é fornecedor -->
-          <div class="card mb-">
+          <div class="card mb-2">
             <div class="card-body text-center">
               <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
               <h6 class="text-muted mb-2">Você precisa ser um fornecedor para enviar orçamentos</h6>
@@ -568,6 +682,94 @@
         <!-- apenas este container vazio -->
         <div id="avaliacao-form-container" class="text-center py-4">
           <i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Compartilhar Anúncio -->
+<div class="modal fade" id="compartilharModal" tabindex="-1" aria-labelledby="compartilharModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="compartilharModalLabel">
+          <i class="fas fa-share-nodes me-2"></i>Compartilhar Anúncio
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="text-center mb-4">
+          <h6 class="fw-bold">{{ necessidade.titulo }}</h6>
+          <p class="text-muted small mb-0">Compartilhe este anúncio e ajude a encontrar o que você precisa!</p>
+        </div>
+
+        <div class="row g-3">
+          <!-- WhatsApp -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-success w-100 py-3 btn-compartilhar" 
+                    data-platform="whatsapp" title="Compartilhar no WhatsApp">
+              <i class="fab fa-whatsapp fa-2x mb-2 text-success"></i>
+              <div class="small fw-bold">WhatsApp</div>
+            </button>
+          </div>
+
+          <!-- Facebook -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-primary w-100 py-3 btn-compartilhar" 
+                    data-platform="facebook" title="Compartilhar no Facebook">
+              <i class="fab fa-facebook fa-2x mb-2 text-primary"></i>
+              <div class="small fw-bold">Facebook</div>
+            </button>
+          </div>
+
+          <!-- Twitter -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-info w-100 py-3 btn-compartilhar" 
+                    data-platform="twitter" title="Compartilhar no Twitter">
+              <i class="fab fa-twitter fa-2x mb-2 text-info"></i>
+              <div class="small fw-bold">Twitter</div>
+            </button>
+          </div>
+
+          <!-- LinkedIn -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-secondary w-100 py-3 btn-compartilhar" 
+                    data-platform="linkedin" title="Compartilhar no LinkedIn">
+              <i class="fab fa-linkedin fa-2x mb-2" style="color: #0077b5;"></i>
+              <div class="small fw-bold">LinkedIn</div>
+            </button>
+          </div>
+
+          <!-- Telegram -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-info w-100 py-3 btn-compartilhar" 
+                    data-platform="telegram" title="Compartilhar no Telegram">
+              <i class="fab fa-telegram fa-2x mb-2" style="color: #0088cc;"></i>
+              <div class="small fw-bold">Telegram</div>
+            </button>
+          </div>
+
+          <!-- Copiar Link -->
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-dark w-100 py-3" 
+                    id="btnCopiarLink" title="Copiar link do anúncio">
+              <i class="fas fa-link fa-2x mb-2 text-dark"></i>
+              <div class="small fw-bold">Copiar Link</div>
+            </button>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- Prévia do texto de compartilhamento -->
+        <div class="bg-light p-3 rounded">
+          <h6 class="fw-bold mb-2">
+            <i class="fas fa-eye me-2"></i>Prévia da mensagem:
+          </h6>
+          <div class="text-muted small" id="previaCompartilhamento" style="line-height: 1.5;">
+            <!-- Será preenchido dinamicamente pelo JavaScript -->
+          </div>
         </div>
       </div>
     </div>
@@ -869,11 +1071,170 @@
       });
     }
 
-    // ==================== MODAL DE AGRADECIMENTO ====================
-    {% if show_modal %}
-    const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
-    modalAgradecimento.show();
-    {% endif %}
+    // ==================== FUNCIONALIDADE DE COMPARTILHAMENTO ====================
+    
+    // Dados do anúncio para compartilhamento
+    const dadosAnuncio = {
+      titulo: `{{ necessidade.titulo|escapejs }}`,
+      descricao: `{{ necessidade.descricao|truncatechars:150|escapejs }}`,
+      categoria: `{{ necessidade.categoria.nome|escapejs }}`,
+      cidade: `{{ necessidade.cliente.cidade|escapejs }}`,
+      estado: `{{ necessidade.cliente.estado|escapejs }}`,
+      url: window.location.href
+    };
+
+
+
+    // Texto formatado para compartilhamento
+    const textoCompartilhamento = `🔍 Procuro: ${dadosAnuncio.titulo}
+
+📋 ${dadosAnuncio.descricao}
+📍 ${dadosAnuncio.cidade}, ${dadosAnuncio.estado}
+💰 Categoria: ${dadosAnuncio.categoria}
+
+👆 Acesse o anúncio completo no link:
+${dadosAnuncio.url}
+
+#Indicaai #${dadosAnuncio.categoria.replace(/\s+/g, '')}`;
+
+    // Preencher a prévia no modal com links clicáveis
+    const previaElement = document.getElementById('previaCompartilhamento');
+    if (previaElement) {
+      // Substituir quebras de linha por <br> e tornar links clicáveis
+      let textoFormatado = textoCompartilhamento.replace(/\n/g, '<br>');
+      
+      // Tornar o link clicável na prévia
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      textoFormatado = textoFormatado.replace(urlRegex, '<a href="$1" target="_blank" class="text-primary">$1</a>');
+      
+      previaElement.innerHTML = textoFormatado;
+    }
+
+    // Botão principal de compartilhar
+    const btnCompartilhar = document.getElementById('btnCompartilhar');
+    
+    if (btnCompartilhar) {
+      btnCompartilhar.addEventListener('click', function(e) {
+        // Evitar que o evento seja interceptado
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Verificar se o navegador suporta Web Share API
+        if (navigator.share) {
+          navigator.share({
+            title: `Procuro: ${dadosAnuncio.titulo}`,
+            text: textoCompartilhamento
+          }).then(() => {
+            // Compartilhamento realizado com sucesso via API nativa
+            return;
+          }).catch((error) => {
+            // Se falhar ou usuário cancelar, abrir modal personalizado
+            const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
+            modalCompartilhar.show();
+          });
+                  } else {
+          // Fallback: abrir modal personalizado
+          const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
+          modalCompartilhar.show();
+        }
+      });
+    }
+
+    // Botões de compartilhamento específicos do modal
+    const botoesCompartilhar = document.querySelectorAll('.btn-compartilhar');
+    
+    botoesCompartilhar.forEach(botao => {
+      botao.addEventListener('click', function() {
+        const plataforma = this.getAttribute('data-platform');
+        compartilharEm(plataforma);
+      });
+    });
+
+    // Função para compartilhar em plataformas específicas (fallback para quando Web Share API não funcionar)
+    function compartilharEm(plataforma) {
+      const textoEncoded = encodeURIComponent(textoCompartilhamento);
+      const urlEncoded = encodeURIComponent(dadosAnuncio.url);
+      const tituloEncoded = encodeURIComponent(`Procuro: ${dadosAnuncio.titulo}`);
+      
+      let shareUrl = '';
+
+      switch(plataforma) {
+        case 'whatsapp':
+          shareUrl = `https://wa.me/?text=${textoEncoded}`;
+          break;
+          
+        case 'facebook':
+          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${urlEncoded}&quote=${textoEncoded}`;
+          break;
+          
+        case 'twitter':
+          const textoTwitter = encodeURIComponent(`🔍 Procuro: ${dadosAnuncio.titulo}\n\n📍 ${dadosAnuncio.cidade}, ${dadosAnuncio.estado}\n💰 ${dadosAnuncio.categoria}\n\n👆 Acesse:`);
+          shareUrl = `https://twitter.com/intent/tweet?text=${textoTwitter}&url=${urlEncoded}&hashtags=Indicaai,${dadosAnuncio.categoria.replace(/\s+/g, '')}`;
+          break;
+          
+        case 'linkedin':
+          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEncoded}`;
+          break;
+          
+        case 'telegram':
+          shareUrl = `https://t.me/share/url?url=${urlEncoded}&text=${textoEncoded}`;
+          break;
+      }
+
+      if (shareUrl) {
+        // Abrir em nova janela
+        window.open(shareUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+        
+        // Fechar modal após compartilhar
+        const modal = bootstrap.Modal.getInstance(document.getElementById('compartilharModal'));
+        if (modal) {
+          setTimeout(() => modal.hide(), 500);
+        }
+      }
+    }
+
+    // Botão copiar link
+    const btnCopiarLink = document.getElementById('btnCopiarLink');
+    if (btnCopiarLink) {
+      btnCopiarLink.addEventListener('click', async function() {
+        try {
+          await navigator.clipboard.writeText(dadosAnuncio.url);
+          
+          // Feedback visual
+          const textoOriginal = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
+          this.classList.remove('btn-outline-dark');
+          this.classList.add('btn-outline-success');
+          
+          setTimeout(() => {
+            this.innerHTML = textoOriginal;
+            this.classList.remove('btn-outline-success');
+            this.classList.add('btn-outline-dark');
+          }, 2000);
+          
+        } catch (error) {
+          // Fallback para navegadores que não suportam clipboard API
+          const textArea = document.createElement('textarea');
+          textArea.value = dadosAnuncio.url;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          // Feedback visual
+          const textoOriginal = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
+          this.classList.remove('btn-outline-dark');
+          this.classList.add('btn-outline-success');
+          
+          setTimeout(() => {
+            this.innerHTML = textoOriginal;
+            this.classList.remove('btn-outline-success');
+            this.classList.add('btn-outline-dark');
+          }, 2000);
+        }
+      });
+    }
 
     // ==================== INICIALIZAÇÃO DE TOOLTIPS ====================
     // Re-inicializa tooltips específicos desta página
@@ -884,4 +1245,13 @@
 
   });
 </script>
+
+{% if show_modal %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const modalAgradecimento = new bootstrap.Modal(document.getElementById('avaliacaoAgradecimentoModal'));
+  modalAgradecimento.show();
+});
+</script>
+{% endif %}
 {% endblock %}

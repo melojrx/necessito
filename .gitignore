@@ -21,6 +21,9 @@ models/
 .env_hlm
 .env_prod
 env/
+core/settings/__init__.py
+nginx/prod.conf
+
 # Docker local config
 docker-compose.override.yml
 docker-compose.yml

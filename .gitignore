@@ -205,3 +205,4 @@ backup_postgres.sh
 # *.csv
 # *.zip
 # *.gz
+core/settings/__init__.py

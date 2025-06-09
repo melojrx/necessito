@@ -31,6 +31,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'budgets.views': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 

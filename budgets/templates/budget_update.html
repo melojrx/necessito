@@ -1,31 +1,609 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Editar Orçamento{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-  <h3 class="display-7">Editar Orçamento</h3>
+<div class="container-fluid px-2 px-md-4 mt-3 mt-md-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">Editar Orçamento #{{ object.id }}</h2>
+                    <p class="text-muted mb-0">Anúncio: {{ object.anuncio.titulo }}</p>
+                </div>
+                <span class="badge bg-{{ object.status|yesno:'success,warning,secondary' }} fs-6">
+                    {{ object.get_status_display }}
+                </span>
+            </div>
 
-  <div class="card">
-    <div class="card-body">
-      <form method="post" class="form" enctype="multipart/form-data"> 
-        {% csrf_token %}
-        
-        <!-- Exibe mensagens de erro ou sucesso -->
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
-        
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-      </form>
+            <form method="post" enctype="multipart/form-data" id="orcamento-form">
+                {% csrf_token %}
+                
+                <!-- Dados do Orçamento -->
+                <div class="card mb-3 mb-md-4 shadow-sm">
+                    <div class="card-header py-2 py-md-3">
+                        <h5 class="mb-0 fs-6 fs-md-5">
+                            <i class="fas fa-clipboard-list me-1"></i>Dados do Orçamento
+                        </h5>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="row g-2 g-md-3">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.prazo_validade.id_for_label }}" class="form-label">
+                                    {{ form.prazo_validade.label }}
+                                </label>
+                                {{ form.prazo_validade }}
+                                {% if form.prazo_validade.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_validade.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.prazo_entrega.id_for_label }}" class="form-label">
+                                    {{ form.prazo_entrega.label }}
+                                </label>
+                                {{ form.prazo_entrega }}
+                                {% if form.prazo_entrega.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_entrega.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row g-2 g-md-3 mt-2">
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.arquivo_anexo.id_for_label }}" class="form-label">
+                                    {{ form.arquivo_anexo.label }}
+                                </label>
+                                {{ form.arquivo_anexo }}
+                                {% if form.arquivo_anexo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.arquivo_anexo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX</small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="{{ form.observacao.id_for_label }}" class="form-label">
+                                    {{ form.observacao.label }}
+                                </label>
+                                {{ form.observacao }}
+                                {% if form.observacao.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.observacao.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-      <!-- Botão de Cancelar/Voltar -->
-      <a href="{% url 'budget_detail' object.pk %}" class="btn btn-secondary mt-3">
-        Cancelar e Voltar para o Detalhe do Orçamento
-      </a>
+                <!-- Itens do Orçamento -->
+                <div class="card mb-3 mb-md-4 shadow-sm">
+                    <div class="card-header py-2 py-md-3">
+                        <h5 class="mb-0 fs-6 fs-md-5">
+                            <i class="fas fa-list-ul me-1"></i>Itens do Orçamento
+                        </h5>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        {{ formset.management_form }}
+                        
+                        {% if formset.non_form_errors %}
+                            <div class="alert alert-danger">
+                                {{ formset.non_form_errors }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Versão Desktop - Tabela -->
+                        <div class="d-none d-lg-block">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th width="15%">Tipo</th>
+                                            <th width="30%">Descrição</th>
+                                            <th width="10%">Qtd.</th>
+                                            <th width="10%">Unid.</th>
+                                            <th width="15%">Vlr. Unit.</th>
+                                            <th width="15%">Subtotal</th>
+                                            <th width="5%">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itens-tbody">
+                                        {% for form in formset %}
+                                            <tr class="formset-row" data-form-index="{{ forloop.counter0 }}">
+                                                <td>
+                                                    {{ form.tipo }}
+                                                    {% if form.tipo.errors %}
+                                                        <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {{ form.descricao }}
+                                                    {% if form.descricao.errors %}
+                                                        <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {{ form.quantidade }}
+                                                    {% if form.quantidade.errors %}
+                                                        <div class="text-danger small">{{ form.quantidade.errors.0 }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {{ form.unidade }}
+                                                    {% if form.unidade.errors %}
+                                                        <div class="text-danger small">{{ form.unidade.errors.0 }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {{ form.valor_unitario }}
+                                                    {% if form.valor_unitario.errors %}
+                                                        <div class="text-danger small">{{ form.valor_unitario.errors.0 }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="subtotal text-end">R$ 0,00</td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger remove-item">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    {% if form.DELETE %}
+                                                        {{ form.DELETE }}
+                                                    {% endif %}
+                                                    {% if form.id %}
+                                                        {{ form.id }}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Campos específicos em linha separada -->
+                                            <tr class="campos-especificos-row" data-form-index="{{ forloop.counter0 }}">
+                                                <td colspan="7" class="bg-light p-3">
+                                                    <!-- Campos de Material -->
+                                                    <div class="campos-material" style="display: none;">
+                                                        <h6 class="text-info mb-3">Informações do Material</h6>
+                                                        <div class="row g-2">
+                                                            <div class="col-md-3">
+                                                                <label class="form-label small">NCM</label>
+                                                                {{ form.ncm }}
+                                                                {% if form.ncm.errors %}
+                                                                    <div class="text-danger small">{{ form.ncm.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label class="form-label small">ICMS (%)</label>
+                                                                {{ form.icms_percentual }}
+                                                                {% if form.icms_percentual.errors %}
+                                                                    <div class="text-danger small">{{ form.icms_percentual.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label class="form-label small">IPI (%)</label>
+                                                                {{ form.ipi_percentual }}
+                                                                {% if form.ipi_percentual.errors %}
+                                                                    <div class="text-danger small">{{ form.ipi_percentual.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <label class="form-label small">ST (%)</label>
+                                                                {{ form.st_percentual }}
+                                                                {% if form.st_percentual.errors %}
+                                                                    <div class="text-danger small">{{ form.st_percentual.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mt-2">
+                                                            <div class="col-md-3">
+                                                                <label class="form-label small">DIFAL (%)</label>
+                                                                {{ form.difal_percentual }}
+                                                                {% if form.difal_percentual.errors %}
+                                                                    <div class="text-danger small">{{ form.difal_percentual.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Campos de Serviço -->
+                                                    <div class="campos-servico" style="display: none;">
+                                                        <h6 class="text-warning mb-3">Informações do Serviço</h6>
+                                                        <div class="row g-2">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small">CNAE</label>
+                                                                {{ form.cnae }}
+                                                                {% if form.cnae.errors %}
+                                                                    <div class="text-danger small">{{ form.cnae.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small">ISS (%)</label>
+                                                                {{ form.aliquota_iss }}
+                                                                {% if form.aliquota_iss.errors %}
+                                                                    <div class="text-danger small">{{ form.aliquota_iss.errors.0 }}</div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5" class="text-end"><strong>Total Geral:</strong></td>
+                                            <td class="text-end"><strong id="total-geral">R$ 0,00</strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Versão Mobile/Tablet - Cards -->
+                        <div class="d-lg-none" id="mobile-items">
+                            {% for form in formset %}
+                                <div class="card mb-3 formset-card" data-form-index="{{ forloop.counter0 }}">
+                                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-info">Item {{ forloop.counter }}</span>
+                                        <button type="button" class="btn btn-sm btn-danger remove-item">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <!-- Tipo -->
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Tipo</label>
+                                            {{ form.tipo }}
+                                            {% if form.tipo.errors %}
+                                                <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Descrição -->
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Descrição</label>
+                                            {{ form.descricao }}
+                                            {% if form.descricao.errors %}
+                                                <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Quantidade, Unidade e Valor -->
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-4">
+                                                <label class="form-label small fw-bold">Qtd.</label>
+                                                {{ form.quantidade }}
+                                                {% if form.quantidade.errors %}
+                                                    <div class="text-danger small">{{ form.quantidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label small fw-bold">Unid.</label>
+                                                {{ form.unidade }}
+                                                {% if form.unidade.errors %}
+                                                    <div class="text-danger small">{{ form.unidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label small fw-bold">Vlr. Unit.</label>
+                                                {{ form.valor_unitario }}
+                                                {% if form.valor_unitario.errors %}
+                                                    <div class="text-danger small">{{ form.valor_unitario.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Subtotal -->
+                                        <div class="text-center border rounded py-2 mb-2">
+                                            <div class="text-muted small">Subtotal</div>
+                                            <div class="fw-bold text-primary subtotal">R$ 0,00</div>
+                                        </div>
+                                        
+                                        <!-- Campos específicos -->
+                                        <div class="campos-especificos-mobile">
+                                            <!-- Campos de Material -->
+                                            <div class="campos-material" style="display: none;">
+                                                <hr class="my-2">
+                                                <h6 class="text-info mb-2 small">Informações do Material</h6>
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <label class="form-label small">NCM</label>
+                                                        {{ form.ncm }}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label small">ICMS (%)</label>
+                                                        {{ form.icms_percentual }}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label small">IPI (%)</label>
+                                                        {{ form.ipi_percentual }}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label small">ST (%)</label>
+                                                        {{ form.st_percentual }}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label small">DIFAL (%)</label>
+                                                        {{ form.difal_percentual }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Campos de Serviço -->
+                                            <div class="campos-servico" style="display: none;">
+                                                <hr class="my-2">
+                                                <h6 class="text-warning mb-2 small">Informações do Serviço</h6>
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <label class="form-label small">CNAE</label>
+                                                        {{ form.cnae }}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label small">ISS (%)</label>
+                                                        {{ form.aliquota_iss }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Campos ocultos -->
+                                        {% if form.DELETE %}
+                                            {{ form.DELETE }}
+                                        {% endif %}
+                                        {% if form.id %}
+                                            {{ form.id }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            
+                            <!-- Total Geral Mobile -->
+                            <div class="card bg-light">
+                                <div class="card-body p-3 text-center">
+                                    <div class="row align-items-center">
+                                        <div class="col-6">
+                                            <h5 class="mb-0 text-primary">TOTAL GERAL</h5>
+                                        </div>
+                                        <div class="col-6">
+                                            <h4 class="mb-0 text-success fw-bold" id="total-geral-mobile">R$ 0,00</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button type="button" id="add-item" class="btn btn-secondary">
+                                <i class="fas fa-plus"></i> Adicionar Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <div>
+                        <a href="{% url 'budget_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                        <a href="{% url 'budget_detail' object.pk %}" class="btn btn-info">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
+
+<script src="{% static 'js/orcamento-formset.js' %}"></script>
+
+<script>
+// Inicialização específica para edição de orçamento
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIALIZAÇÃO EDIÇÃO ORÇAMENTO ===');
+    
+    // Função para sincronizar total entre desktop e mobile
+    function syncTotals() {
+        const totalDesktop = document.getElementById('total-geral');
+        const totalMobile = document.getElementById('total-geral-mobile');
+        
+        if (totalDesktop && totalMobile) {
+            totalMobile.textContent = totalDesktop.textContent;
+        }
+    }
+    
+    // Função para recalcular subtotais
+    function recalcularSubtotais() {
+        let totalGeral = 0;
+        
+        // Desktop
+        const formsetRows = document.querySelectorAll('.formset-row');
+        formsetRows.forEach(row => {
+            const deleteInput = row.querySelector('input[name*="DELETE"]');
+            if (deleteInput && deleteInput.checked) return;
+            
+            const quantidade = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
+            const valorUnitario = parseFloat(row.querySelector('input[name*="valor_unitario"]')?.value) || 0;
+            const subtotal = quantidade * valorUnitario;
+            
+            const subtotalCell = row.querySelector('.subtotal');
+            if (subtotalCell) {
+                subtotalCell.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`;
+            }
+            
+            totalGeral += subtotal;
+        });
+        
+        // Mobile
+        const formsetCards = document.querySelectorAll('.formset-card');
+        formsetCards.forEach(card => {
+            const deleteInput = card.querySelector('input[name*="DELETE"]');
+            if (deleteInput && deleteInput.checked) return;
+            
+            const quantidade = parseFloat(card.querySelector('input[name*="quantidade"]')?.value) || 0;
+            const valorUnitario = parseFloat(card.querySelector('input[name*="valor_unitario"]')?.value) || 0;
+            const subtotal = quantidade * valorUnitario;
+            
+            const subtotalElement = card.querySelector('.subtotal');
+            if (subtotalElement) {
+                subtotalElement.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`;
+            }
+        });
+        
+        // Atualizar total geral
+        const totalElement = document.getElementById('total-geral');
+        if (totalElement) {
+            totalElement.textContent = `R$ ${totalGeral.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+        
+        syncTotals();
+    }
+    
+    // Função para mostrar/esconder campos específicos
+    function toggleCamposEspecificos(tipoSelect, formIndex) {
+        const tipo = tipoSelect.value;
+        
+        // Desktop
+        const camposRow = document.querySelector(`.campos-especificos-row[data-form-index="${formIndex}"]`);
+        if (camposRow) {
+            const camposMaterial = camposRow.querySelector('.campos-material');
+            const camposServico = camposRow.querySelector('.campos-servico');
+            
+            if (tipo === 'MAT') {
+                camposRow.style.display = 'table-row';
+                camposMaterial.style.display = 'block';
+                camposServico.style.display = 'none';
+            } else if (tipo === 'SRV') {
+                camposRow.style.display = 'table-row';
+                camposMaterial.style.display = 'none';
+                camposServico.style.display = 'block';
+            } else {
+                camposRow.style.display = 'none';
+            }
+        }
+        
+        // Mobile
+        const card = document.querySelector(`.formset-card[data-form-index="${formIndex}"]`);
+        if (card) {
+            const camposMaterial = card.querySelector('.campos-material');
+            const camposServico = card.querySelector('.campos-servico');
+            
+            if (tipo === 'MAT') {
+                camposMaterial.style.display = 'block';
+                camposServico.style.display = 'none';
+            } else if (tipo === 'SRV') {
+                camposMaterial.style.display = 'none';
+                camposServico.style.display = 'block';
+            } else {
+                camposMaterial.style.display = 'none';
+                camposServico.style.display = 'none';
+            }
+        }
+    }
+    
+    // Inicializar campos existentes
+    const tipoSelects = document.querySelectorAll('select[name*="tipo"]');
+    tipoSelects.forEach((select, index) => {
+        // Mostrar campos específicos baseado no valor atual
+        if (select.value) {
+            toggleCamposEspecificos(select, index);
+        }
+        
+        // Adicionar listener para mudanças
+        select.addEventListener('change', function() {
+            toggleCamposEspecificos(this, index);
+        });
+    });
+    
+    // Adicionar listeners para recálculo
+    const quantidadeInputs = document.querySelectorAll('input[name*="quantidade"]');
+    const valorInputs = document.querySelectorAll('input[name*="valor_unitario"]');
+    
+    [...quantidadeInputs, ...valorInputs].forEach(input => {
+        input.addEventListener('input', recalcularSubtotais);
+    });
+    
+    // Recalcular totais inicialmente
+    setTimeout(() => {
+        recalcularSubtotais();
+        console.log('Orçamento de edição inicializado com sucesso!');
+    }, 100);
+});
+</script>
+
+<!-- CSS personalizado -->
+<style>
+/* Melhorias gerais para mobile */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+/* Campos de formulário mais compactos */
+.form-control, .form-select {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.form-label {
+    margin-bottom: 0.25rem;
+}
+
+/* Cards dos itens móveis */
+.formset-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.formset-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Subtotal destacado */
+.subtotal {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+/* Responsividade dos inputs */
+@media (max-width: 576px) {
+    .form-control, .form-select {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+</style>
 {% endblock %}

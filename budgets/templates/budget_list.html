@@ -16,7 +16,7 @@
             <select class="form-select" name="status">
               <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
               <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
-              <option value="aguardando_aceite_fornecedor" {% if request.GET.status == 'aguardando_aceite_fornecedor' %}selected{% endif %}>Aguardando aceite do fornecedor</option>
+              <option value="aguardando" {% if request.GET.status == 'aguardando' %}selected{% endif %}>Aguardando aceite do fornecedor</option>
               <option value="aceito" {% if request.GET.status == 'aceito' %}selected{% endif %}>Aceito</option>
               <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
             </select>
@@ -35,11 +35,15 @@
   <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
     <div class="card h-100 shadow">
         <div class="card-body">
-            <h5 class="card-title">{{ orcamento.anuncio }}</h5>
-            <p class="card-text">{{ orcamento.descricao|truncatechars:100 }}</p>
+            <h5 class="card-title">{{ orcamento.anuncio.titulo }}</h5>
+            <p class="card-text">
+                <small class="text-muted">Cliente: {{ orcamento.anuncio.cliente.get_full_name }}</small><br>
+                <strong>Valor Total: R$ {{ orcamento.valor_total_com_impostos|floatformat:2 }}</strong><br>
+                <small>{{ orcamento.itens.count }} item(ns)</small>
+            </p>
             <span class="badge 
               {% if orcamento.status == 'pendente' %} text-bg-secondary
-              {% elif orcamento.status == 'aguardando_aceite_fornecedor' %} text-bg-warning
+              {% elif orcamento.status == 'aguardando' %} text-bg-warning
               {% elif orcamento.status == 'aceito' %} text-bg-success
               {% elif orcamento.status == 'rejeitado' %} text-bg-danger
               {% endif %}">
@@ -50,7 +54,7 @@
             <a href="{% url 'budget_detail' orcamento.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
             <div>
               {% if user == orcamento.fornecedor %}
-                {% if orcamento.status == 'aguardando_aceite_fornecedor' %}
+                {% if orcamento.status == 'aguardando' %}
                     <button class="btn btn-success btn-sm btn-aceitar-fornecedor"
                         data-url="{% url 'aceitar_orcamento_fornecedor' orcamento.id %}"
                         data-bs-toggle="modal"
@@ -59,7 +63,7 @@
                     </button>
                 {% endif %}
                 <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                {% if orcamento.status != 'aguardando_aceite_fornecedor' %}
+                {% if orcamento.status != 'aguardando' %}
                     <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
                 {% endif %}
               {% endif %}

@@ -1,160 +1,282 @@
 {% load static %}
+{% load budget_filters %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Orçamento #{{ orcamento.id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento {{ orcamento.id }}</title>
     <style>
-        @page {
-            size: a4 portrait;
-            margin: 1cm;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.4;
             color: #333;
         }
+        
         .header {
+            background-color: #1a365d;
+            color: white;
+            padding: 20px;
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
         }
-        .orcamento-info {
-            margin-bottom: 20px;
-        }
-        .orcamento-title {
+        
+        .header h1 {
             font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #0B5ED7;
-        }
-        .orcamento-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .orcamento-meta-item {
             margin-bottom: 5px;
         }
-        .orcamento-meta-label {
-            font-weight: bold;
+        
+        .header p {
+            font-size: 14px;
         }
-        .orcamento-description {
+        
+        .info-grid {
+            width: 100%;
             margin-bottom: 20px;
+        }
+        
+        .info-card {
+            border: 1px solid #ddd;
             padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .orcamento-details {
-            margin-bottom: 20px;
-        }
-        .orcamento-details-item {
             margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
         }
-        .orcamento-details-label {
+        
+        .info-card h3 {
+            color: #1a365d;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .projeto-section {
+            border: 2px solid #1a365d;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .projeto-section h3 {
+            color: #1a365d;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f5f5f5;
             font-weight: bold;
-            color: #555;
         }
-        .orcamento-status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 3px;
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .total-row {
+            background-color: #f0f8ff;
             font-weight: bold;
-            text-transform: uppercase;
-            font-size: 12px;
         }
-        .status-pendente {
-            background-color: #ffc107;
-            color: #212529;
+        
+        .termos-grid {
+            width: 100%;
+            margin: 20px 0;
         }
-        .status-aceito {
-            background-color: #28a745;
-            color: white;
+        
+        .termo-item {
+            margin-bottom: 10px;
         }
-        .status-recusado {
-            background-color: #dc3545;
-            color: white;
+        
+        .termo-label {
+            font-weight: bold;
+            color: #1a365d;
         }
-        .footer {
-            margin-top: 30px;
+        
+        .observacoes {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .assinaturas {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .assinatura-linha {
+            border-top: 1px solid #333;
+            margin-top: 60px;
+            padding-top: 5px;
             text-align: center;
-            font-size: 12px;
-            color: #777;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-        }
-        .price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #28a745;
+            width: 300px;
+            display: inline-block;
+            margin-right: 50px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Orçamento #{{ orcamento.id }}</h1>
+        <h1>INDICAAI</h1>
+        <p>Orçamento </p>
     </div>
-    
-    <div class="orcamento-info">
-        <div class="orcamento-title">
-            {{ orcamento.anuncio.titulo }}
+
+    <div class="info-grid">
+        <!-- Informações do Cliente -->
+        <div class="info-card">
+            <h3>Cliente</h3>
+            <p><strong>Nome:</strong> {{ orcamento.anuncio.cliente.get_full_name|default:orcamento.anuncio.cliente.username }}</p>
+            <p><strong>Email:</strong> {{ orcamento.anuncio.cliente.email }}</p>
         </div>
-        
-        <div class="orcamento-meta">
-            <div>
-                <div class="orcamento-meta-item">
-                    <span class="orcamento-meta-label">Fornecedor:</span> 
-                    {{ orcamento.fornecedor.get_full_name }}
-                </div>
-                <div class="orcamento-meta-item">
-                    <span class="orcamento-meta-label">Cliente:</span> 
-                    {{ orcamento.anuncio.cliente.get_full_name }}
-                </div>
-                <div class="orcamento-meta-item">
-                    <span class="orcamento-meta-label">Data:</span> 
-                    {{ orcamento.data_criacao|date:"d/m/Y H:i" }}
-                </div>
-            </div>
-            <div>
-                <div class="orcamento-meta-item">
-                    <span class="orcamento-meta-label">Status:</span> 
-                    <span class="orcamento-status status-{{ orcamento.status }}">{{ orcamento.get_status_display }}</span>
-                </div>
-                <div class="orcamento-meta-item">
-                    <span class="orcamento-meta-label">Valor:</span> 
-                    <span class="price">R$ {{ orcamento.valor|floatformat:2 }}</span>
-                </div>
-            </div>
+
+        <!-- Informações do Fornecedor -->
+        <div class="info-card">
+            <h3>Fornecedor</h3>
+            <p><strong>Nome:</strong> {{ orcamento.fornecedor.get_full_name|default:orcamento.fornecedor.username }}</p>
+            <p><strong>Email:</strong> {{ orcamento.fornecedor.email }}</p>
         </div>
-        
-        <div class="orcamento-description">
-            <h3>Descrição do Orçamento</h3>
-            <p>{{ orcamento.descricao|linebreaks }}</p>
-        </div>
-        
-        <div class="orcamento-details">
-            <h3>Detalhes do Anúncio</h3>
-            <div class="orcamento-details-item">
-                <div class="orcamento-details-label">Categoria:</div>
-                {{ orcamento.anuncio.categoria.nome }}
-            </div>
-            <div class="orcamento-details-item">
-                <div class="orcamento-details-label">Localização:</div>
-                {{ orcamento.anuncio.cidade }}, {{ orcamento.anuncio.estado }}
-            </div>
-            <div class="orcamento-details-item">
-                <div class="orcamento-details-label">Descrição do Anúncio:</div>
-                {{ orcamento.anuncio.descricao|linebreaks }}
-            </div>
+
+        <!-- Informações do Orçamento -->
+        <div class="info-card">
+            <h3>Orçamento</h3>
+            <p><strong>Número:</strong> {{ orcamento.id }}</p>
+            <p><strong>Data:</strong> {{ orcamento.data_criacao|date:"d/m/Y" }}</p>
+            <p><strong>Validade:</strong> {{ orcamento.prazo_validade|date:"d/m/Y" }}</p>
+            <p><strong>Entrega:</strong> {{ orcamento.prazo_entrega|date:"d/m/Y" }}</p>
         </div>
     </div>
-    
-    <div class="footer">
-        <p>Este documento foi gerado automaticamente pelo sistema Necessito.br em {{ now|date:"d/m/Y H:i" }}</p>
-        <p>© 2025 | Necessito.br - Todos os direitos reservados</p>
+
+    <!-- Projeto/Necessidade -->
+    <div class="projeto-section">
+        <h3>Anúncio:</h3>
+        <p><strong>Título:</strong> {{ orcamento.anuncio.titulo }}</p>
+        <p><strong>Descrição:</strong> {{ orcamento.anuncio.descricao }}</p>
+        {% if orcamento.anuncio.categoria %}
+        <p><strong>Categoria:</strong> {{ orcamento.anuncio.categoria }}</p>
+        {% endif %}
+        {% if orcamento.anuncio.localizacao %}
+        <p><strong>Localização:</strong> {{ orcamento.anuncio.localizacao }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Itens do Orçamento -->
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Descrição</th>
+                <th>Qtd</th>
+                <th>Valor Unit.</th>
+                <th>ICMS</th>
+                <th>IPI</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in orcamento.itens.all %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.descricao }}</td>
+                <td class="text-right">{{ item.quantidade }}</td>
+                <td class="text-right">R$ {{ item.preco_unitario|floatformat:2 }}</td>
+                <td class="text-right">R$ {{ item.valor_icms|floatformat:2 }}</td>
+                <td class="text-right">R$ {{ item.valor_ipi|floatformat:2 }}</td>
+                <td class="text-right">R$ {{ item.get_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            
+            <!-- Subtotal -->
+            <tr>
+                <td colspan="6" class="text-right"><strong>Subtotal:</strong></td>
+                <td class="text-right"><strong>R$ {{ orcamento.get_subtotal|floatformat:2 }}</strong></td>
+            </tr>
+            
+            <!-- Frete -->
+            {% if orcamento.valor_frete %}
+            <tr>
+                <td colspan="6" class="text-right">Frete ({{ orcamento.get_tipo_frete_display }}):</td>
+                <td class="text-right">R$ {{ orcamento.valor_frete|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            
+            <!-- Total Geral -->
+            <tr class="total-row">
+                <td colspan="6" class="text-right"><strong>TOTAL GERAL:</strong></td>
+                <td class="text-right"><strong>R$ {{ orcamento.get_total_geral|floatformat:2 }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Termos Comerciais -->
+    <h3 style="color: #1a365d; margin-bottom: 15px;">Termos Comerciais</h3>
+    <div class="termos-grid">
+        {% if orcamento.forma_pagamento %}
+        <div class="termo-item">
+            <span class="termo-label">Forma de Pagamento:</span> {{ orcamento.get_forma_pagamento_display }}
+        </div>
+        {% endif %}
+        
+        {% if orcamento.condicao_pagamento %}
+        <div class="termo-item">
+            <span class="termo-label">Condição de Pagamento:</span> 
+            {% if orcamento.condicao_pagamento == 'personalizada' %}
+                {{ orcamento.condicao_pagamento_personalizada }}
+            {% else %}
+                {{ orcamento.get_condicao_pagamento_display }}
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if orcamento.tipo_venda %}
+        <div class="termo-item">
+            <span class="termo-label">Tipo de Venda:</span> {{ orcamento.get_tipo_venda_display }}
+        </div>
+        {% endif %}
+        
+        {% if orcamento.tipo_frete %}
+        <div class="termo-item">
+            <span class="termo-label">Tipo de Frete:</span> {{ orcamento.get_tipo_frete_display }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Observações -->
+    {% if orcamento.observacoes %}
+    <div class="observacoes">
+        <h4 style="color: #1a365d; margin-bottom: 10px;">Observações</h4>
+        <p>{{ orcamento.observacoes|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Assinaturas -->
+    <div class="assinaturas">
+        <h4 style="color: #1a365d; margin-bottom: 30px;">Assinaturas</h4>
+        <div class="assinatura-linha">
+            Fornecedor<br>
+            {{ orcamento.fornecedor.get_full_name|default:orcamento.fornecedor.username }}
+        </div>
+        
+        <div class="assinatura-linha">
+            Cliente<br>
+            {{ orcamento.anuncio.cliente.get_full_name|default:orcamento.anuncio.cliente.username }}
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #666;">
+        <p>Documento gerado em {{ now|date:"d/m/Y às H:i" }}</p>
     </div>
 </body>
 </html>

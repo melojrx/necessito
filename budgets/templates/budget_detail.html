@@ -1,102 +1,476 @@
 {% extends 'base.html' %}
+
 {% load static %}
-{% load custom_filters %}
+
+{% block title %}Orçamento #{{ orcamento.id }}{% endblock %}
 
 {% block content %}
-<style>
-  /* Estilos para melhorar a aparência na exportação */
-  @media print {
-      body {
-          padding: 20px;
-      }
-      
-      .no-print {
-          display: none !important;
-      }
-  }
-  
-  /* Estilos para o container de detalhes do orçamento */
-  #orcamento-details-container {
-      padding: 20px;
-      border-radius: 8px;
-      background-color: white;
-  }
-</style>
-<div id="orcamento-details-container" class="card shadow-sm" class="container">
-  <div class="card shadow-sm">
-    <div class="card-header bg-light d-flex align-items-center">
-      <div class="col-6">
-        <h3 class="mb-0">Detalhes do Orçamento</h3>
-      </div>
-      <div class="col-6 d-flex flex-column flex-md-row gap-2 align-items-stretch mb-3">
-        <a href="{% url 'export_orcamento_pdf' orcamento.pk %}" class="btn btn-outline-primary w-100">
-          <i class="fas fa-file-pdf me-2"></i> Exportar PDF
-        </a>
-        {% if user == orcamento.fornecedor %}
-        <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning w-100">
-          <i class="fas fa-edit"></i> Editar Orçamento</a>
-        <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger w-100">
-          <i class="fas fa-trash-alt"></i> Excluir Orçamento
-        </a>
-        {% endif %}
-      </div>
+<div class="container-fluid px-2 px-md-4 mt-3 mt-md-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Cabeçalho do Orçamento -->
+            <div class="card mb-3 mb-md-4 shadow-sm">
+                <div class="card-header bg-primary text-white py-2 py-md-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <h4 class="mb-0 fs-5 fs-md-4">ORÇAMENTO #{{ orcamento.id }}</h4>
+                        <div class="d-flex gap-1 mt-1 mt-md-0">
+                            <span class="badge bg-light text-dark fs-6">{{ orcamento.data_criacao|date:"d/m/Y" }}</span>
+                            <span class="badge fs-6
+                                {% if orcamento.status == 'pendente' %}bg-secondary
+                                {% elif orcamento.status == 'aguardando' %}bg-warning
+                                {% elif orcamento.status == 'aceito' %}bg-success
+                                {% elif orcamento.status == 'rejeitado' %}bg-danger{% endif %}">
+                                {{ orcamento.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-2 p-md-3">
+                    <!-- Dados do Cliente e Fornecedor -->
+                    <div class="row mb-3 mb-md-4 g-2 g-md-3">
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded p-2 p-md-3 h-100 bg-light bg-opacity-50">
+                                <h6 class="text-primary mb-2 mb-md-3 fw-bold fs-6">
+                                    <i class="fas fa-user me-1"></i>DADOS DO CLIENTE
+                                </h6>
+                                <div class="small">
+                                    <p class="mb-1"><strong>Nome:</strong> {{ orcamento.anuncio.cliente.get_full_name }}</p>
+                                    <p class="mb-1"><strong>CPF/CNPJ:</strong> {{ orcamento.anuncio.cliente.cpf|default:"Não informado" }}</p>
+                                    <p class="mb-1"><strong>Endereço:</strong><br class="d-md-none">
+                                        {% if orcamento.anuncio.cliente.endereco %}
+                                            {{ orcamento.anuncio.cliente.endereco }}, {{ orcamento.anuncio.cliente.bairro }}<br>
+                                            {{ orcamento.anuncio.cliente.cidade }}, {{ orcamento.anuncio.cliente.estado }} - CEP: {{ orcamento.anuncio.cliente.cep }}
+                                        {% else %}
+                                            {{ orcamento.anuncio.cidade }}, {{ orcamento.anuncio.estado }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded p-2 p-md-3 h-100 bg-light bg-opacity-50">
+                                <h6 class="text-primary mb-2 mb-md-3 fw-bold fs-6">
+                                    <i class="fas fa-store me-1"></i>DADOS DO FORNECEDOR
+                                </h6>
+                                <div class="small">
+                                    <p class="mb-1"><strong>Nome:</strong> {{ orcamento.fornecedor.get_full_name }}</p>
+                                    <p class="mb-1"><strong>E-mail:</strong> 
+                                        <a href="mailto:{{ orcamento.fornecedor.email }}" class="text-decoration-none">
+                                            {{ orcamento.fornecedor.email }}
+                                        </a>
+                                    </p>
+                                    <p class="mb-1"><strong>Telefone:</strong> 
+                                        {% if orcamento.fornecedor.telefone %}
+                                            <a href="tel:{{ orcamento.fornecedor.telefone }}" class="text-decoration-none">
+                                                {{ orcamento.fornecedor.telefone }}
+                                            </a>
+                                        {% else %}
+                                            Não informado
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações do Anúncio -->
+                    <div class="border rounded p-2 p-md-3 mb-3 mb-md-4 bg-light bg-opacity-50">
+                        <h6 class="text-primary mb-2 mb-md-3 fw-bold fs-6">
+                            <i class="fas fa-bullhorn me-1"></i>ANÚNCIO
+                        </h6>
+                        <div class="small">
+                            <p class="mb-1"><strong>Título:</strong> {{ orcamento.anuncio.titulo }}</p>
+                            <p class="mb-1"><strong>Descrição:</strong> {{ orcamento.anuncio.descricao }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Prazos -->
+                    <div class="row mb-3 mb-md-4 g-2">
+                        <div class="col-6">
+                            <div class="border rounded p-2 p-md-3 text-center bg-light bg-opacity-50">
+                                <div class="text-primary small fw-bold">VALIDADE</div>
+                                <div class="fw-bold">{{ orcamento.prazo_validade|date:"d/m/Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2 p-md-3 text-center bg-light bg-opacity-50">
+                                <div class="text-primary small fw-bold">ENTREGA</div>
+                                <div class="fw-bold">{{ orcamento.prazo_entrega|date:"d/m/Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itens do Orçamento -->
+            <div class="card mb-3 mb-md-4 shadow-sm">
+                <div class="card-header py-2 py-md-3">
+                    <h5 class="mb-0 fs-6 fs-md-5">
+                        <i class="fas fa-list-ul me-1"></i>ITENS DO ORÇAMENTO
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Versão Desktop - Tabela -->
+                    <div class="d-none d-lg-block">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr class="text-center">
+                                        <th rowspan="2">Produto/Serviço</th>
+                                        <th rowspan="2">NCM/CNAE</th>
+                                        <th rowspan="2">Qtd</th>
+                                        <th rowspan="2">Unid.</th>
+                                        <th rowspan="2">Preço Unit.<br>R$</th>
+                                        <th colspan="5">Impostos (%)</th>
+                                        <th rowspan="2">Preço c/<br>Impostos R$</th>
+                                        <th rowspan="2">Total R$</th>
+                                    </tr>
+                                    <tr class="text-center">
+                                        <th>ICMS</th>
+                                        <th>IPI</th>
+                                        <th>ST</th>
+                                        <th>DIFAL</th>
+                                        <th>ISS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in orcamento.itens.all %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge {% if item.tipo == 'MAT' %}bg-info{% else %}bg-warning{% endif %} me-2">
+                                                {{ item.get_tipo_display }}
+                                            </span>
+                                            {{ item.descricao }}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.tipo == 'MAT' %}
+                                                {{ item.ncm|default:"-" }}
+                                            {% else %}
+                                                {{ item.cnae|default:"-" }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">{{ item.quantidade|floatformat:3 }}</td>
+                                        <td class="text-center">{{ item.unidade }}</td>
+                                        <td class="text-end">{{ item.valor_unitario|floatformat:2 }}</td>
+                                        
+                                        <!-- Impostos -->
+                                        <td class="text-center">
+                                            {% if item.tipo == 'MAT' %}{{ item.icms_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.tipo == 'MAT' %}{{ item.ipi_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.tipo == 'MAT' %}{{ item.st_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.tipo == 'MAT' %}{{ item.difal_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if item.tipo == 'SRV' %}{{ item.aliquota_iss|floatformat:2 }}{% else %}-{% endif %}
+                                        </td>
+                                        
+                                        <td class="text-end">{{ item.preco_com_impostos|floatformat:2 }}</td>
+                                        <td class="text-end"><strong>{{ item.total|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <th colspan="11" class="text-end">TOTAL GERAL:</th>
+                                        <th class="text-end">R$ {{ orcamento.valor_total_com_impostos|floatformat:2 }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Versão Mobile/Tablet - Cards -->
+                    <div class="d-lg-none">
+                        {% for item in orcamento.itens.all %}
+                        <div class="border-bottom p-2 p-md-3 {% if forloop.last %}border-bottom-0{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="flex-grow-1">
+                                    <span class="badge {% if item.tipo == 'MAT' %}bg-info{% else %}bg-warning{% endif %} mb-1">
+                                        {{ item.get_tipo_display }}
+                                    </span>
+                                    <h6 class="mb-1 fs-6">{{ item.descricao }}</h6>
+                                    <small class="text-muted">
+                                        {% if item.tipo == 'MAT' %}
+                                            NCM: {{ item.ncm|default:"-" }}
+                                        {% else %}
+                                            CNAE: {{ item.cnae|default:"-" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary fs-5">R$ {{ item.total|floatformat:2 }}</div>
+                                    <small class="text-muted">Total</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2 small">
+                                <div class="col-3">
+                                    <div class="text-center border rounded py-1">
+                                        <div class="fw-bold">{{ item.quantidade|floatformat:0 }}</div>
+                                        <small class="text-muted">{{ item.unidade }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-center border rounded py-1">
+                                        <div class="fw-bold">R$ {{ item.valor_unitario|floatformat:2 }}</div>
+                                        <small class="text-muted">Unit.</small>
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <div class="text-center border rounded py-1">
+                                        <div class="fw-bold">R$ {{ item.preco_com_impostos|floatformat:2 }}</div>
+                                        <small class="text-muted">C/ Impostos</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Impostos (apenas se existirem) -->
+                            {% if item.tipo == 'MAT' and item.icms_percentual or item.ipi_percentual or item.st_percentual or item.difal_percentual %}
+                            <div class="mt-2">
+                                <small class="text-muted d-block mb-1">Impostos:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% if item.icms_percentual %}
+                                        <span class="badge bg-secondary">ICMS: {{ item.icms_percentual|floatformat:2 }}%</span>
+                                    {% endif %}
+                                    {% if item.ipi_percentual %}
+                                        <span class="badge bg-secondary">IPI: {{ item.ipi_percentual|floatformat:2 }}%</span>
+                                    {% endif %}
+                                    {% if item.st_percentual %}
+                                        <span class="badge bg-secondary">ST: {{ item.st_percentual|floatformat:2 }}%</span>
+                                    {% endif %}
+                                    {% if item.difal_percentual %}
+                                        <span class="badge bg-secondary">DIFAL: {{ item.difal_percentual|floatformat:2 }}%</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if item.tipo == 'SRV' and item.aliquota_iss %}
+                            <div class="mt-2">
+                                <small class="text-muted d-block mb-1">Impostos:</small>
+                                <span class="badge bg-secondary">ISS: {{ item.aliquota_iss|floatformat:2 }}%</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Total Geral -->
+                        <div class="bg-light p-3 text-center">
+                            <div class="row align-items-center">
+                                <div class="col-6">
+                                    <h5 class="mb-0 text-primary">TOTAL GERAL</h5>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="mb-0 text-success fw-bold">R$ {{ orcamento.valor_total_com_impostos|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações Complementares -->
+            {% if orcamento.observacao or orcamento.arquivo_anexo %}
+            <div class="card mb-3 mb-md-4 shadow-sm">
+                <div class="card-header py-2 py-md-3">
+                    <h5 class="mb-0 fs-6 fs-md-5">
+                        <i class="fas fa-info-circle me-1"></i>INFORMAÇÕES COMPLEMENTARES
+                    </h5>
+                </div>
+                <div class="card-body p-2 p-md-3">
+                    <div class="row g-2 g-md-3 small">
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded p-2 bg-light bg-opacity-50">
+                                <p class="mb-1"><strong>FRETE:</strong> CIF</p>
+                                <p class="mb-1"><strong>FORMA DE PAGAMENTO:</strong> Boleto/PIX</p>
+                                <p class="mb-0"><strong>CONDIÇÃO DE PAGAMENTO:</strong> À vista</p>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="border rounded p-2 bg-light bg-opacity-50">
+                                <p class="mb-1"><strong>VENDEDOR:</strong> {{ orcamento.fornecedor.get_full_name }}</p>
+                                <p class="mb-1"><strong>TELEFONE:</strong> 
+                                    {% if orcamento.fornecedor.telefone %}
+                                        <a href="tel:{{ orcamento.fornecedor.telefone }}" class="text-decoration-none">
+                                            {{ orcamento.fornecedor.telefone }}
+                                        </a>
+                                    {% else %}
+                                        Não informado
+                                    {% endif %}
+                                </p>
+                                <p class="mb-0"><strong>E-MAIL:</strong> 
+                                    <a href="mailto:{{ orcamento.fornecedor.email }}" class="text-decoration-none">
+                                        {{ orcamento.fornecedor.email }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if orcamento.observacao %}
+                    <hr class="my-2 my-md-3">
+                    <div class="border rounded p-2 bg-light bg-opacity-50">
+                        <h6 class="text-primary mb-2 fs-6">
+                            <i class="fas fa-comment me-1"></i>OBSERVAÇÕES:
+                        </h6>
+                        <p class="mb-0 small">{{ orcamento.observacao|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if orcamento.arquivo_anexo %}
+                    <hr class="my-2 my-md-3">
+                    <div class="border rounded p-2 bg-light bg-opacity-50">
+                        <h6 class="text-primary mb-2 fs-6">
+                            <i class="fas fa-paperclip me-1"></i>ARQUIVO ANEXO:
+                        </h6>
+                        <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-download"></i> Download do Anexo
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ações -->
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                <div>
+                    <a href="{% url 'budget_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if user == orcamento.fornecedor %}
+                        <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'export_orcamento_pdf' orcamento.pk %}" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </a>
+                    <button onclick="window.print()" class="btn btn-info">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-      {% if object.anuncio %}
-      <h4 class="card-title">Descrição: {{ object.anuncio }}</h4>
-      {% endif %}
-      
-      {% if object.status %}
-      <p class="card-text">Status: {{ object.status|capfirst }}</p>
-      {% endif %}
-      
-      {% if object.quantidade %}
-      <p class="card-text">Quantidade: {{ object.quantidade }}</p>
-      {% endif %}
-      
-      {% if object.valor %}
-      <p class="card-text">Valor: {{ object.valor|moeda_brasileira }}</p>
-      {% endif %}
-      
-      {% if object.unidade %}
-      <p class="card-text">Unidade: {{ object.unidade }}</p>
-      {% endif %}
-      
-      {% if object.marca %}
-      <p class="card-text">Marca: {{ object.marca }}</p>
-      {% endif %}
-      
-      {% if object.prazo_validade %}
-      <p class="card-text">Prazo de Validade: {{ object.prazo_validade }}</p>
-      {% endif %}
-      
-      {% if object.prazo_entrega %}
-      <p class="card-text">Prazo de Entrega: {{ object.prazo_entrega }}</p>
-      {% endif %}
-      
-      {% if object.data_criacao %}
-      <p class="card-text">Data de submissão: {{ object.data_criacao }}</p>
-      {% endif %}
-      
-      {% if object.observacao %}
-      <p class="card-text">Observações: {{ object.observacao }}</p>
-      {% endif %}
-      
-      {% if object.arquivo_anexo %}
-      <p class="card-text">
-        Arquivo Anexo: 
-        <a href="{{ object.arquivo_anexo.url }}" target="_blank" class="btn btn-link">
-          Download
-        </a>
-      </p>
-      {% endif %}
-      {% if object.anuncio %}
-      <a href="{% url 'necessidade_detail' object.anuncio.pk %}" class="btn btn-primary">
-         Ver Detalhes do Anúncio
-      </a>
-    {% endif %}
-    </div>
-  </div>
-  <a href="{% url 'budget_list' %}" class="btn btn-secondary mt-3">Voltar para a Lista de Orçamentos</a>
 </div>
+
+<!-- CSS personalizado -->
+<style>
+/* Melhorias gerais para mobile */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    
+    .card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+    }
+}
+
+/* Estilos para impressão */
+@media print {
+    .navbar, 
+    .btn, 
+    .d-flex:last-child,
+    .fixed-bottom,
+    .mobile-actions { 
+        display: none !important; 
+    }
+    
+    .container-fluid {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .card { 
+        border: 1px solid #000 !important;
+        break-inside: avoid;
+        margin-bottom: 1rem !important;
+    }
+    
+    .card-header { 
+        background: #f8f9fa !important; 
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .text-primary {
+        color: #0d6efd !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    /* Mostrar apenas a versão desktop na impressão */
+    .d-lg-none {
+        display: none !important;
+    }
+    
+    .d-none.d-lg-block {
+        display: block !important;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .badge {
+        border: 1px solid #000;
+    }
+}
+
+/* Melhorias na responsividade */
+@media (max-width: 576px) {
+    .fs-5 {
+        font-size: 1rem !important;
+    }
+    
+    .py-2 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+}
+
+/* Cards dos itens com melhor visual */
+.border-bottom:not(:last-child) {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Hover effects para melhor interatividade */
+@media (hover: hover) {
+    .border.rounded:hover {
+        background-color: #e9ecef !important;
+        transition: background-color 0.2s ease;
+    }
+}
+</style>
 {% endblock %}

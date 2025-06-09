@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar Orçamento - {{ anuncio.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Criar Orçamento</h2>
+            
+            <!-- Informações do Anúncio -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Anúncio: {{ anuncio.titulo }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Cliente:</strong> {{ anuncio.cliente.get_full_name }}</p>
+                    <p class="mb-2"><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
+                    <p class="mb-0"><strong>Descrição:</strong> {{ anuncio.descricao }}</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" novalidate id="orcamento-form">
+                {% csrf_token %}
+                
+                <!-- Dados do Orçamento -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Dados do Orçamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.prazo_validade.id_for_label }}" class="form-label">
+                                    {{ form.prazo_validade.label }}
+                                </label>
+                                {{ form.prazo_validade }}
+                                {% if form.prazo_validade.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_validade.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.prazo_entrega.id_for_label }}" class="form-label">
+                                    {{ form.prazo_entrega.label }}
+                                </label>
+                                {{ form.prazo_entrega }}
+                                {% if form.prazo_entrega.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_entrega.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.arquivo_anexo.id_for_label }}" class="form-label">
+                                    {{ form.arquivo_anexo.label }}
+                                </label>
+                                {{ form.arquivo_anexo }}
+                                {% if form.arquivo_anexo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.arquivo_anexo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.observacao.id_for_label }}" class="form-label">
+                                    {{ form.observacao.label }}
+                                </label>
+                                {{ form.observacao }}
+                                {% if form.observacao.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.observacao.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Termos Comerciais -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Termos Comerciais</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Tipo de Frete -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.tipo_frete.id_for_label }}" class="form-label">
+                                    {{ form.tipo_frete.label }}
+                                </label>
+                                {{ form.tipo_frete }}
+                                {% if form.tipo_frete.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tipo_frete.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Valor do Frete -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.valor_frete.id_for_label }}" class="form-label">
+                                    {{ form.valor_frete.label }}
+                                </label>
+                                {{ form.valor_frete }}
+                                {% if form.valor_frete.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.valor_frete.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Tipo de Venda -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.tipo_venda.id_for_label }}" class="form-label">
+                                    {{ form.tipo_venda.label }}
+                                </label>
+                                {{ form.tipo_venda }}
+                                {% if form.tipo_venda.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tipo_venda.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Forma de Pagamento -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.forma_pagamento.id_for_label }}" class="form-label">
+                                    {{ form.forma_pagamento.label }}
+                                </label>
+                                {{ form.forma_pagamento }}
+                                {% if form.forma_pagamento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.forma_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Condição de Pagamento -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.condicao_pagamento.id_for_label }}" class="form-label">
+                                    {{ form.condicao_pagamento.label }}
+                                </label>
+                                {{ form.condicao_pagamento }}
+                                {% if form.condicao_pagamento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.condicao_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Condição Personalizada -->
+                            <div class="col-md-12 mb-3" id="condicao-personalizada-div" style="display: none;">
+                                <label for="{{ form.condicao_pagamento_personalizada.id_for_label }}" class="form-label">
+                                    {{ form.condicao_pagamento_personalizada.label }}
+                                </label>
+                                {{ form.condicao_pagamento_personalizada }}
+                                {% if form.condicao_pagamento_personalizada.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.condicao_pagamento_personalizada.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Itens do Orçamento -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Itens do Orçamento</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ formset.management_form }}
+                        
+                        {% if formset.non_form_errors %}
+                            <div class="alert alert-danger">
+                                {{ formset.non_form_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="15%">Tipo</th>
+                                        <th width="30%">Descrição</th>
+                                        <th width="10%">Qtd.</th>
+                                        <th width="10%">Unid.</th>
+                                        <th width="15%">Vlr. Unit.</th>
+                                        <th width="15%">Subtotal</th>
+                                        <th width="5%">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itens-tbody">
+                                    {% for form in formset %}
+                                        <tr class="formset-row">
+                                            <td>
+                                                {{ form.tipo }}
+                                                {% if form.tipo.errors %}
+                                                    <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.descricao }}
+                                                {% if form.descricao.errors %}
+                                                    <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.quantidade }}
+                                                {% if form.quantidade.errors %}
+                                                    <div class="text-danger small">{{ form.quantidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.unidade }}
+                                                {% if form.unidade.errors %}
+                                                    <div class="text-danger small">{{ form.unidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.valor_unitario }}
+                                                {% if form.valor_unitario.errors %}
+                                                    <div class="text-danger small">{{ form.valor_unitario.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="subtotal text-end">R$ 0,00</td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger remove-item" 
+                                                        {% if forloop.first and forloop.last %}style="display:none;"{% endif %}>
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                {% if form.DELETE %}
+                                                    {{ form.DELETE }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Campos específicos em linha separada -->
+                                        <tr class="campos-especificos" style="display: none;">
+                                            <td colspan="7" class="bg-light p-3">
+                                                <!-- Campos de Material -->
+                                                <div class="campos-material" style="display: none;">
+                                                    <h6 class="text-info mb-3">Informações do Material</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">NCM</label>
+                                                            {{ form.ncm }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">ICMS (%)</label>
+                                                            {{ form.icms_percentual }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">IPI (%)</label>
+                                                            {{ form.ipi_percentual }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">ST (%)</label>
+                                                            {{ form.st_percentual }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mt-2">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">DIFAL (%)</label>
+                                                            {{ form.difal_percentual }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Campos de Serviço -->
+                                                <div class="campos-servico" style="display: none;">
+                                                    <h6 class="text-warning mb-3">Informações do Serviço</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small">CNAE</label>
+                                                            {{ form.cnae }}
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small">ISS (%)</label>
+                                                            {{ form.aliquota_iss }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end"><strong>Total Geral:</strong></td>
+                                        <td class="text-end"><strong id="total-geral">R$ 0,00</strong></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <button type="button" id="add-item" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Adicionar Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ anuncio.get_absolute_url }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Orçamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript do Formset -->
+<script src="{% static 'js/orcamento-formset.js' %}"></script>
+
+<script>
+// Debug simplificado do formulário
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('orcamento-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    console.log('=== DEBUG ORÇAMENTO ===');
+    console.log('Form encontrado:', !!form);
+    console.log('Submit button encontrado:', !!submitBtn);
+    
+    if (form) {
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
+        
+        // Verifica CSRF token
+        const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]');
+        console.log('CSRF token encontrado:', !!csrfToken);
+        
+        // Event listener para submit
+        form.addEventListener('submit', function(e) {
+            console.log('=== SUBMIT DISPARADO ===');
+            
+            // Conta quantos itens válidos existem
+            const rows = document.querySelectorAll('.formset-row');
+            let validItems = 0;
+            
+            rows.forEach((row, index) => {
+                const deleteInput = row.querySelector('input[name*="DELETE"]');
+                const isDeleted = deleteInput && deleteInput.checked;
+                const descricao = row.querySelector('input[name*="descricao"]')?.value;
+                
+                if (!isDeleted && descricao && descricao.trim()) {
+                    validItems++;
+                }
+            });
+            
+            console.log('Itens válidos encontrados:', validItems);
+            
+            if (validItems === 0) {
+                e.preventDefault();
+                alert('Adicione pelo menos um item ao orçamento antes de enviar.');
+                return false;
+            }
+            
+            console.log('Enviando formulário...');
+        });
+    }
+    
+    // Controle do campo de condição personalizada
+    const condicaoPagamento = document.getElementById('id_condicao_pagamento');
+    const condicaoPersonalizadaDiv = document.getElementById('condicao-personalizada-div');
+    
+    if (condicaoPagamento && condicaoPersonalizadaDiv) {
+        function toggleCondicaoPersonalizada() {
+            if (condicaoPagamento.value === 'personalizado') {
+                condicaoPersonalizadaDiv.style.display = 'block';
+            } else {
+                condicaoPersonalizadaDiv.style.display = 'none';
+            }
+        }
+        
+        condicaoPagamento.addEventListener('change', toggleCondicaoPersonalizada);
+        toggleCondicaoPersonalizada(); // Verificar estado inicial
+    }
+});
+</script>
+{% endblock %} 

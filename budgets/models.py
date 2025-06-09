@@ -23,7 +23,7 @@ class Orcamento(models.Model):
         ('fob', 'FOB (Por conta do cliente)'),
         ('sem_frete', 'Sem frete'),
     ]
-    tipo_frete = models.CharField(max_length=10, choices=TIPO_FRETE_CHOICES, default='fob')
+    tipo_frete = models.CharField(max_length=30, choices=TIPO_FRETE_CHOICES, default='fob')
     valor_frete = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True,
         help_text="Valor do frete (se aplicável)"
@@ -37,7 +37,7 @@ class Orcamento(models.Model):
         ('boleto', 'Boleto'),
         ('transferencia', 'Transferência Bancária'),
     ]
-    forma_pagamento = models.CharField(max_length=20, choices=FORMA_PAGAMENTO_CHOICES, default='pix')
+    forma_pagamento = models.CharField(max_length=50, choices=FORMA_PAGAMENTO_CHOICES, default='pix')
     
     CONDICAO_PAGAMENTO_CHOICES = [
         ('a_vista', 'À vista'),
@@ -48,7 +48,7 @@ class Orcamento(models.Model):
         ('30_dias', '30 dias'),
         ('personalizado', 'Personalizado'),
     ]
-    condicao_pagamento = models.CharField(max_length=20, choices=CONDICAO_PAGAMENTO_CHOICES, default='a_vista')
+    condicao_pagamento = models.CharField(max_length=50, choices=CONDICAO_PAGAMENTO_CHOICES, default='a_vista')
     condicao_pagamento_personalizada = models.TextField(blank=True, help_text="Descreva a condição personalizada")
     
     TIPO_VENDA_CHOICES = [
@@ -57,7 +57,7 @@ class Orcamento(models.Model):
         ('ativo_imobilizado', 'Ativo Imobilizado'),
         ('servico', 'Serviço'),
     ]
-    tipo_venda = models.CharField(max_length=20, choices=TIPO_VENDA_CHOICES, default='uso_consumo')
+    tipo_venda = models.CharField(max_length=50, choices=TIPO_VENDA_CHOICES, default='uso_consumo')
 
     STATUS = [
         ('pendente', 'Pendente'),
@@ -65,7 +65,7 @@ class Orcamento(models.Model):
         ('aceito', 'Aceito'),
         ('rejeitado', 'Rejeitado'),
     ]
-    status = models.CharField(max_length=20, choices=STATUS, default='pendente')
+    status = models.CharField(max_length=50, choices=STATUS, default='pendente')
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(auto_now=True)
 

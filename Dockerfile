@@ -12,6 +12,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    netcat-traditional \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar dependências Python
@@ -24,8 +25,9 @@ COPY . .
 # Criar diretórios necessários
 RUN mkdir -p /app/logs /app/staticfiles /app/media
 
-# Coletar arquivos estáticos
-RUN python manage.py collectstatic --noinput
+# Copiar e dar permissão ao script de entrada
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Criar usuário não-root
 RUN useradd -m appuser && chown -R appuser:appuser /app
@@ -35,4 +37,5 @@ USER appuser
 EXPOSE 8000
 
 # Comando para iniciar a aplicação
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"] 

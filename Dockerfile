@@ -24,6 +24,9 @@ COPY . .
 # Criar diretórios necessários
 RUN mkdir -p /app/logs /app/staticfiles /app/media
 
+# Coletar arquivos estáticos
+RUN python manage.py collectstatic --noinput
+
 # Criar usuário não-root
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser

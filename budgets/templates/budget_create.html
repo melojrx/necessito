@@ -323,17 +323,23 @@
 </div>
 
 <!-- JavaScript do Formset -->
-<script src="{% static 'js/orcamento-formset.js' %}"></script>
+<script src="{% static 'js/orcamento-formset.js' %}?v={{ request.META.HTTP_HOST }}{{ request.path }}"></script>
 
 <script>
 // Debug simplificado do formulário
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== SCRIPT ORÇAMENTO CARREGADO ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('URL atual:', window.location.href);
+    
     const form = document.getElementById('orcamento-form');
     const submitBtn = document.getElementById('submit-btn');
+    const addItemBtn = document.getElementById('add-item');
     
     console.log('=== DEBUG ORÇAMENTO ===');
     console.log('Form encontrado:', !!form);
     console.log('Submit button encontrado:', !!submitBtn);
+    console.log('Add item button encontrado:', !!addItemBtn);
     
     if (form) {
         console.log('Form action:', form.action);

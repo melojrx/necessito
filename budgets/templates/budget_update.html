@@ -159,7 +159,7 @@
                                             </tr>
                                             
                                             <!-- Campos específicos em linha separada -->
-                                            <tr class="campos-especificos-row" data-form-index="{{ forloop.counter0 }}">
+                                            <tr class="campos-especificos-row campos-especificos" data-form-index="{{ forloop.counter0 }}">
                                                 <td colspan="7" class="bg-light p-3">
                                                     <!-- Campos de Material -->
                                                     <div class="campos-material" style="display: none;">
@@ -402,148 +402,256 @@
     </div>
 </div>
 
-<script src="{% static 'js/orcamento-formset.js' %}"></script>
-
+<!-- JavaScript do Formset (inline) -->
 <script>
-// Inicialização específica para edição de orçamento
+// ============================================================
+//  Código do formset de orçamento – incorporado inline
+//  (Conteúdo original de static/js/orcamento-formset.js)
+// ============================================================
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== INICIALIZAÇÃO EDIÇÃO ORÇAMENTO ===');
-    
-    // Função para sincronizar total entre desktop e mobile
-    function syncTotals() {
-        const totalDesktop = document.getElementById('total-geral');
-        const totalMobile = document.getElementById('total-geral-mobile');
-        
-        if (totalDesktop && totalMobile) {
-            totalMobile.textContent = totalDesktop.textContent;
-        }
+    'use strict';
+
+    // Elementos principais
+    const addButton = document.getElementById('add-item');
+    const tbody = document.getElementById('itens-tbody');
+    const totalFormsInput = document.getElementById('id_itens-TOTAL_FORMS');
+    const maxFormsInput = document.getElementById('id_itens-MAX_NUM_FORMS');
+
+    if (!addButton || !tbody || !totalFormsInput) {
+        console.error('Elementos essenciais do formset não encontrados');
+        return;
     }
-    
-    // Função para recalcular subtotais
-    function recalcularSubtotais() {
-        let totalGeral = 0;
-        
-        // Desktop
-        const formsetRows = document.querySelectorAll('.formset-row');
-        formsetRows.forEach(row => {
+
+    const maxForms = parseInt(maxFormsInput?.value || '1000');
+
+    function updateFormsetIndices() {
+        const rows = tbody.querySelectorAll('.formset-row');
+        let formIndex = 0;
+
+        rows.forEach(row => {
             const deleteInput = row.querySelector('input[name*="DELETE"]');
             if (deleteInput && deleteInput.checked) return;
-            
-            const quantidade = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
-            const valorUnitario = parseFloat(row.querySelector('input[name*="valor_unitario"]')?.value) || 0;
-            const subtotal = quantidade * valorUnitario;
-            
-            const subtotalCell = row.querySelector('.subtotal');
-            if (subtotalCell) {
-                subtotalCell.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                })}`;
+
+            row.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.name) el.name = el.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
+                if (el.id)   el.id   = el.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+            });
+
+            row.querySelectorAll('label').forEach(lb => {
+                if (lb.htmlFor) lb.htmlFor = lb.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+            });
+
+            const next = row.nextElementSibling;
+            if (next && (next.classList.contains('campos-especificos') || next.classList.contains('campos-especificos-row'))) {
+                next.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (el.name) el.name = el.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
+                    if (el.id)   el.id   = el.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                });
+                next.querySelectorAll('label').forEach(lb => {
+                    if (lb.htmlFor) lb.htmlFor = lb.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                });
             }
-            
-            totalGeral += subtotal;
+
+            formIndex++;
         });
-        
-        // Mobile
-        const formsetCards = document.querySelectorAll('.formset-card');
-        formsetCards.forEach(card => {
-            const deleteInput = card.querySelector('input[name*="DELETE"]');
-            if (deleteInput && deleteInput.checked) return;
-            
-            const quantidade = parseFloat(card.querySelector('input[name*="quantidade"]')?.value) || 0;
-            const valorUnitario = parseFloat(card.querySelector('input[name*="valor_unitario"]')?.value) || 0;
-            const subtotal = quantidade * valorUnitario;
-            
-            const subtotalElement = card.querySelector('.subtotal');
-            if (subtotalElement) {
-                subtotalElement.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                })}`;
+
+        // Atualiza o atributo data-form-index para linhas e cartões mobile
+        tbody.querySelectorAll('.formset-row').forEach((r, idx) => {
+            r.setAttribute('data-form-index', idx);
+            const camposR = r.nextElementSibling;
+            if (camposR && (camposR.classList.contains('campos-especificos') || camposR.classList.contains('campos-especificos-row'))) {
+                camposR.setAttribute('data-form-index', idx);
             }
         });
-        
-        // Atualizar total geral
-        const totalElement = document.getElementById('total-geral');
-        if (totalElement) {
-            totalElement.textContent = `R$ ${totalGeral.toLocaleString('pt-BR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            })}`;
+
+        const mobileContainer = document.getElementById('mobile-items');
+        if (mobileContainer) {
+            mobileContainer.querySelectorAll('.formset-card').forEach((card, idx) => {
+                card.setAttribute('data-form-index', idx);
+            });
         }
-        
-        syncTotals();
+
+        totalFormsInput.value = formIndex;
     }
-    
-    // Função para mostrar/esconder campos específicos
-    function toggleCamposEspecificos(tipoSelect, formIndex) {
+
+    function updateRemoveButtons() {
+        const rows = tbody.querySelectorAll('.formset-row');
+        const show = rows.length > 1;
+        rows.forEach(r => {
+            const btn = r.querySelector('.remove-item');
+            if (btn) btn.style.display = show ? 'inline-block' : 'none';
+        });
+    }
+
+    function toggleSpecificFields(row) {
+        const tipoSelect = row.querySelector('select[name*="tipo"]');
+        if (!tipoSelect) return;
+
         const tipo = tipoSelect.value;
-        
-        // Desktop
-        const camposRow = document.querySelector(`.campos-especificos-row[data-form-index="${formIndex}"]`);
-        if (camposRow) {
-            const camposMaterial = camposRow.querySelector('.campos-material');
-            const camposServico = camposRow.querySelector('.campos-servico');
-            
-            if (tipo === 'MAT') {
-                camposRow.style.display = 'table-row';
-                camposMaterial.style.display = 'block';
-                camposServico.style.display = 'none';
-            } else if (tipo === 'SRV') {
-                camposRow.style.display = 'table-row';
-                camposMaterial.style.display = 'none';
-                camposServico.style.display = 'block';
-            } else {
-                camposRow.style.display = 'none';
+        const camposRow = row.nextElementSibling;
+        if (!camposRow || !(camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) return;
+
+        const idx = row.getAttribute('data-form-index');
+        const camposMaterial = camposRow.querySelector('.campos-material');
+        const camposServico = camposRow.querySelector('.campos-servico');
+
+        if (idx !== null) {
+            const card = document.querySelector(`.formset-card[data-form-index="${idx}"]`);
+            if (card) {
+                const cMat = card.querySelector('.campos-material');
+                const cSrv = card.querySelector('.campos-servico');
+                if (tipo === 'MAT') {
+                    camposRow.style.display = 'table-row';
+                    if (cMat) cMat.style.display = 'block';
+                    if (cSrv) cSrv.style.display = 'none';
+                } else if (tipo === 'SRV') {
+                    camposRow.style.display = 'table-row';
+                    if (cMat) cMat.style.display = 'none';
+                    if (cSrv) cSrv.style.display = 'block';
+                } else {
+                    camposRow.style.display = 'none';
+                }
             }
         }
-        
-        // Mobile
-        const card = document.querySelector(`.formset-card[data-form-index="${formIndex}"]`);
-        if (card) {
-            const camposMaterial = card.querySelector('.campos-material');
-            const camposServico = card.querySelector('.campos-servico');
-            
-            if (tipo === 'MAT') {
-                camposMaterial.style.display = 'block';
-                camposServico.style.display = 'none';
-            } else if (tipo === 'SRV') {
-                camposMaterial.style.display = 'none';
-                camposServico.style.display = 'block';
-            } else {
-                camposMaterial.style.display = 'none';
-                camposServico.style.display = 'none';
+
+        updateSubtotal(row);
+    }
+
+    function updateSubtotal(row) {
+        const qtd  = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
+        const vUni = parseFloat(row.querySelector('input[name*="valor_unitario"]')?.value) || 0;
+        const cell = row.querySelector('.subtotal');
+        if (cell) {
+            const subtotal = qtd * vUni;
+            cell.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        }
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let total = 0;
+        tbody.querySelectorAll('.formset-row').forEach(r => {
+            const del = r.querySelector('input[name*="DELETE"]');
+            if (del?.checked) return;
+            const txt = r.querySelector('.subtotal')?.textContent || 'R$ 0,00';
+            const val = parseFloat(txt.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+            total += val;
+        });
+        const el = document.getElementById('total-geral');
+        if (el) el.textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        // Sincroniza total mobile se existir
+        const elMob = document.getElementById('total-geral-mobile');
+        if (elMob) elMob.textContent = el?.textContent;
+    }
+
+    function addItem() {
+        const current = parseInt(totalFormsInput.value);
+        if (current >= maxForms) { alert('Número máximo de itens atingido.'); return; }
+
+        const templateRow = tbody.querySelector('.formset-row');
+        if (!templateRow) { console.error('Nenhuma linha modelo encontrada'); return; }
+
+        const newRow = templateRow.cloneNode(true);
+
+        const templateCamposRow = templateRow.nextElementSibling;
+        let newCamposRow = null;
+        if (templateCamposRow && (templateCamposRow.classList.contains('campos-especificos') || templateCamposRow.classList.contains('campos-especificos-row'))) {
+            newCamposRow = templateCamposRow.cloneNode(true);
+        }
+
+        newRow.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+            el.classList.remove('is-invalid');
+        });
+
+        if (newCamposRow) {
+            newCamposRow.querySelectorAll('input, select, textarea').forEach(el => {
+                if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+                el.classList.remove('is-invalid');
+            });
+            newCamposRow.style.display = 'none';
+            const cm = newCamposRow.querySelector('.campos-material'); if (cm) cm.style.display = 'none';
+            const cs = newCamposRow.querySelector('.campos-servico');  if (cs) cs.style.display = 'none';
+        }
+
+        newRow.querySelectorAll('.text-danger').forEach(e => e.remove());
+        if (newCamposRow) newCamposRow.querySelectorAll('.text-danger').forEach(e => e.remove());
+
+        const cell = newRow.querySelector('.subtotal');
+        if (cell) cell.textContent = 'R$ 0,00';
+
+        tbody.appendChild(newRow);
+        if (newCamposRow) tbody.appendChild(newCamposRow);
+
+        updateFormsetIndices();
+        updateRemoveButtons();
+
+        const firstInput = newRow.querySelector('input, select');
+        if (firstInput) firstInput.focus();
+
+        // Para mobile: clone também card
+        const mobileContainer = document.getElementById('mobile-items');
+        if (mobileContainer) {
+            const templateCard = mobileContainer.querySelector('.formset-card');
+            if (templateCard) {
+                const newCard = templateCard.cloneNode(true);
+                newCard.querySelectorAll('input, select, textarea').forEach(el => {
+                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+                    el.classList.remove('is-invalid');
+                });
+                newCard.querySelectorAll('.text-danger').forEach(e => e.remove());
+                mobileContainer.insertBefore(newCard, mobileContainer.lastElementChild.previousElementSibling || null);
             }
         }
     }
-    
-    // Inicializar campos existentes
-    const tipoSelects = document.querySelectorAll('select[name*="tipo"]');
-    tipoSelects.forEach((select, index) => {
-        // Mostrar campos específicos baseado no valor atual
-        if (select.value) {
-            toggleCamposEspecificos(select, index);
+
+    function removeItem(button) {
+        const row = button.closest('.formset-row');
+        const del = row.querySelector('input[name*="DELETE"]');
+        const camposRow = row.nextElementSibling;
+        if (del) {
+            del.checked = true;
+            row.style.display = 'none';
+            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) camposRow.style.display = 'none';
+        } else {
+            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) camposRow.remove();
+            row.remove();
         }
-        
-        // Adicionar listener para mudanças
-        select.addEventListener('change', function() {
-            toggleCamposEspecificos(this, index);
-        });
+        updateFormsetIndices();
+        updateRemoveButtons();
+        updateTotal();
+    }
+
+    addButton.addEventListener('click', e => { e.preventDefault(); addItem(); });
+
+    tbody.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
+            e.preventDefault();
+            const btn = e.target.closest('.remove-item');
+            removeItem(btn);
+        }
     });
-    
-    // Adicionar listeners para recálculo
-    const quantidadeInputs = document.querySelectorAll('input[name*="quantidade"]');
-    const valorInputs = document.querySelectorAll('input[name*="valor_unitario"]');
-    
-    [...quantidadeInputs, ...valorInputs].forEach(input => {
-        input.addEventListener('input', recalcularSubtotais);
+
+    tbody.addEventListener('change', e => {
+        const target = e.target; const row = target.closest('.formset-row'); if (!row) return;
+        if (target.name && target.name.includes('tipo')) toggleSpecificFields(row);
+        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) updateSubtotal(row);
     });
-    
-    // Recalcular totais inicialmente
-    setTimeout(() => {
-        recalcularSubtotais();
-        console.log('Orçamento de edição inicializado com sucesso!');
-    }, 100);
+
+    tbody.addEventListener('input', e => {
+        const target = e.target; const row = target.closest('.formset-row'); if (!row) return;
+        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) updateSubtotal(row);
+    });
+
+    tbody.querySelectorAll('.formset-row').forEach(r => { toggleSpecificFields(r); updateSubtotal(r); });
+
+    updateRemoveButtons();
+    updateTotal();
+
+    console.log('Formset de orçamento (update) inicializado com sucesso');
+
+    addButton.setAttribute('data-formset-loaded', 'true');
 });
 </script>
 

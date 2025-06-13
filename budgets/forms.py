@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Orcamento, OrcamentoItem
+from django.utils import timezone
 
 class OrcamentoForm(forms.ModelForm):
     class Meta:
@@ -40,10 +41,30 @@ class OrcamentoForm(forms.ModelForm):
         # Configurar formato de data para HTML5 date inputs
         self.fields['prazo_validade'].input_formats = ['%Y-%m-%d']
         self.fields['prazo_entrega'].input_formats = ['%Y-%m-%d']
+
+        # Definir data mínima (hoje) nos widgets para bloquear datas passadas no front-end
+        today_str = timezone.now().date().isoformat()
+        self.fields['prazo_validade'].widget.attrs['min'] = today_str
+        self.fields['prazo_entrega'].widget.attrs['min'] = today_str
         
         # Tornar campo personalizado não obrigatório por padrão
         self.fields['condicao_pagamento_personalizada'].required = False
         self.fields['valor_frete'].required = False
+
+    # =====================
+    # Validações de data
+    # =====================
+    def clean_prazo_validade(self):
+        prazo_validade = self.cleaned_data.get('prazo_validade')
+        if prazo_validade and prazo_validade < timezone.now().date():
+            raise forms.ValidationError('O prazo de validade não pode ser anterior à data atual.')
+        return prazo_validade
+
+    def clean_prazo_entrega(self):
+        prazo_entrega = self.cleaned_data.get('prazo_entrega')
+        if prazo_entrega and prazo_entrega < timezone.now().date():
+            raise forms.ValidationError('O prazo de entrega não pode ser anterior à data atual.')
+        return prazo_entrega
 
 class OrcamentoItemForm(forms.ModelForm):
     class Meta:

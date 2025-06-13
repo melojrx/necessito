@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
                 "ALTER TABLE budgets_orcamento DROP COLUMN IF EXISTS quantidade;",
                 "ALTER TABLE budgets_orcamento DROP COLUMN IF EXISTS unidade;",
                 "ALTER TABLE budgets_orcamento DROP COLUMN IF EXISTS marca;",
+                
             ],
             reverse_sql=migrations.RunSQL.noop,
         ),

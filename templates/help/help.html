@@ -6,343 +6,492 @@
 {% block meta_description %}{{ page_description }}{% endblock %}
 {% block meta_keywords %}{{ page_keywords }}{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* --- Estilo da página de ajuda ---------------------------------- */
-    .help-page {
-        background: #f9fafc;
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    .help-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-    
-    .help-title {
-        font-weight: 700;
-        font-size: 1.75rem;
-        color: #2c3e50;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-    
-    .help-title i {
-        color: #0d6efd;
-    }
-    
-    /* Accordion customizado */
-    .help-accordion .accordion-button {
-        font-weight: 600;
-        font-size: 1.1rem;
-        background: #fff;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-radius: 0.5rem !important;
-        padding: 1rem 1.5rem;
-        color: #2c3e50;
-        transition: all 0.3s ease;
-    }
-    
-    .help-accordion .accordion-button:not(.collapsed) {
-        background: #e3f2fd;
-        color: #1976d2;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    
-    .help-accordion .accordion-button::after {
-        display: none; /* esconde ícone padrão do Bootstrap */
-    }
-    
-    .help-accordion .accordion-button .fa {
-        transition: transform 0.25s ease;
-        color: #0d6efd;
-    }
-    
-    .help-accordion .accordion-button.collapsed .fa {
-        transform: rotate(-90deg);
-    }
-    
-    .help-accordion .accordion-item {
-        border: 0;
-        border-left: 4px solid #c89c38;
-        border-radius: 0.5rem;
-        margin-bottom: 1.5rem;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-    
-    .help-accordion .accordion-body {
-        font-size: 0.95rem;
-        line-height: 1.6;
-        padding: 1.5rem;
-        background: #fafbfc;
-        color: #495057;
-    }
-    
-    .step-number {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0d6efd, #0056b3);
-        color: #fff;
-        font-weight: 700;
-        margin-right: 0.75rem;
-        font-size: 0.9rem;
-        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
-        flex-shrink: 0;
-    }
-    
-    .help-list {
-        padding-left: 0;
-        list-style: none;
-    }
-    
-    .help-list li {
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    .help-list li:last-child {
-        margin-bottom: 0;
-    }
-    
-    .help-content {
-        flex: 1;
-    }
-    
-    .help-content strong {
-        color: #2c3e50;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-    
-    .help-content code {
-        background: #e9ecef;
-        color: #495057;
-        padding: 0.2rem 0.4rem;
-        border-radius: 0.25rem;
-        font-size: 0.9rem;
-    }
-    
-    .help-content a {
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    
-    .help-content a:hover {
-        text-decoration: underline;
-    }
-    
-    /* Responsividade */
-    @media (max-width: 768px) {
-        .help-container {
-            padding: 1rem;
-        }
-        
-        .help-title {
-            font-size: 1.5rem;
-        }
-        
-        .help-accordion .accordion-button {
-            font-size: 1rem;
-            padding: 0.875rem 1rem;
-        }
-        
-        .step-number {
-            width: 28px;
-            height: 28px;
-            font-size: 0.8rem;
-            margin-right: 0.5rem;
-        }
-    }
-    
-    /* Animações */
-    .help-accordion .accordion-item {
-        animation: fadeInUp 0.5s ease forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    
-    .help-accordion .accordion-item:nth-child(1) { animation-delay: 0.1s; }
-    .help-accordion .accordion-item:nth-child(2) { animation-delay: 0.2s; }
-    .help-accordion .accordion-item:nth-child(3) { animation-delay: 0.3s; }
-    .help-accordion .accordion-item:nth-child(4) { animation-delay: 0.4s; }
-    
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
+<!-- CSS Inline Direto no HTML -->
+<style>
+/* CENTRAL DE AJUDA - CSS INLINE FORÇADO */
+.help-page {
+    margin-top: -2rem !important;
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%) !important;
+    min-height: 100vh !important;
+}
+
+.help-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
+    color: white !important;
+    padding: 4rem 0 3rem !important;
+    margin-bottom: 0 !important;
+}
+
+.help-search-input {
+    border-radius: 50px !important;
+    padding: 1rem 1.5rem 1rem 3.5rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    background: white !important;
+}
+
+.help-search-icon {
+    position: absolute !important;
+    left: 1.25rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #6c757d !important;
+    z-index: 10 !important;
+}
+
+.help-category-card {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 2rem !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+    border: 2px solid transparent !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    height: 100% !important;
+}
+
+.help-category-card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+}
+
+.help-category-icon {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 1.5rem !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.help-action-btn {
+    background: white !important;
+    border: 2px solid #0d6efd !important;
+    color: #0d6efd !important;
+    padding: 0.875rem 1.75rem !important;
+    border-radius: 50px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    margin: 0.5rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.help-action-btn:hover {
+    background: #0d6efd !important;
+    color: white !important;
+    transform: translateY(-3px) !important;
+    text-decoration: none !important;
+}
+
+/* Cores dos Cards */
+.card-start .help-category-icon { background: #28a745 !important; }
+.card-announce .help-category-icon { background: #0d6efd !important; }
+.card-budget .help-category-icon { background: #ffc107 !important; }
+.card-chat .help-category-icon { background: #17a2b8 !important; }
+.card-rating .help-category-icon { background: #fd7e14 !important; }
+.card-support .help-category-icon { background: #6f42c1 !important; }
+
+.card-start::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #28a745 !important; }
+.card-announce::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #0d6efd !important; }
+.card-budget::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ffc107 !important; }
+.card-chat::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #17a2b8 !important; }
+.card-rating::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #fd7e14 !important; }
+.card-support::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #6f42c1 !important; }
+
+.card-start:hover { border-color: #28a745 !important; }
+.card-announce:hover { border-color: #0d6efd !important; }
+.card-budget:hover { border-color: #ffc107 !important; }
+.card-chat:hover { border-color: #17a2b8 !important; }
+.card-rating:hover { border-color: #fd7e14 !important; }
+.card-support:hover { border-color: #6f42c1 !important; }
+
+@media (max-width: 768px) {
+    .help-hero { padding: 3rem 0 2rem !important; }
+    .help-category-card { padding: 1.5rem !important; }
+    .help-category-icon { width: 56px !important; height: 56px !important; }
+    .help-action-btn { display: block !important; width: 100% !important; max-width: 280px !important; margin: 0.5rem auto !important; }
+}
+</style>
+
 <div class="help-page">
-    <div class="help-container mt-3">
-        
-        <h1 class="help-title mb-3">
-            <i class="fa-solid fa-circle-question me-2"></i>
-            Central de Ajuda
-        </h1>
-
-        <div class="accordion help-accordion mt-2" id="helpAccordion">
-
-            <!-- 1. O que é? -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWhat" aria-expanded="false" aria-controls="collapseWhat">
-                        <i class="fa-solid fa-circle-info me-3"></i> O que é?
-                    </button>
-                </h2>
-                <div id="collapseWhat" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
-                    <div class="accordion-body">
-                        <p>A <strong>Indicaai.com</strong> é a sua <em>Plataforma de Oportunidades de Negócios</em>.  
-                        Conectamos, de forma simples e ágil, pessoas e empresas que desejam contratar produtos ou serviços
-                        a uma rede de fornecedores qualificados em todo o Brasil.  
-                        Você cria uma licitação privada, recebe propostas, negocia em ambiente seguro
-                        e fecha com o melhor custo-benefício — tudo 100% on-line e com total transparência.</p>
-                    </div>
+    <!-- Hero Section -->
+    <div class="help-hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-life-ring me-3"></i>
+                    Central de Ajuda
+                </h1>
+                <p class="lead mb-4 opacity-75">
+                    Encontre respostas rápidas e aprenda a aproveitar ao máximo a plataforma Indicaai
+                </p>
+                
+                <!-- Barra de Busca -->
+                <div class="position-relative mx-auto" style="max-width: 500px;">
+                    <i class="fas fa-search help-search-icon"></i>
+                    <input type="text" class="form-control help-search-input" 
+                           placeholder="Busque por tutoriais, dúvidas frequentes..." 
+                           id="helpSearchInput">
+                    <div class="search-results" id="searchResults" style="display: none;"></div>
                 </div>
             </div>
-
-            <!-- 2. Quem pode utilizar -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWho" aria-expanded="false" aria-controls="collapseWho">
-                        <i class="fa-solid fa-user-check me-3"></i> Quem pode utilizar este serviço?
-                    </button>
-                </h2>
-                <div id="collapseWho" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
-                    <div class="accordion-body">
-                        <p><strong>Todas as pessoas e empresas que desejam fazer negócios:</strong></p>
-                        <ul>
-                            <li><strong>Clientes / Compradores:</strong> contratantes de materiais ou serviços, de qualquer porte.</li>
-                            <li><strong>Fornecedores:</strong> profissionais autônomos, MEIs, PMEs ou grandes empresas dispostos a enviar orçamentos competitivos.</li>
-                            <li>Você também pode atuar nos <em>dois papéis</em>, contratando e oferecendo serviços conforme a necessidade.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Etapas para a realização deste serviço -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSteps" aria-expanded="false" aria-controls="collapseSteps">
-                        <i class="fa-solid fa-list-ol me-3"></i> Etapas para a realização deste serviço
-                    </button>
-                </h2>
-                <div id="collapseSteps" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
-                    <div class="accordion-body">
-                        <ol class="help-list">
-                            <li>
-                                <span class="step-number">1</span>
-                                <div class="help-content">
-                                    <strong>Inscrever-se na plataforma</strong>
-                                    Clique em <code>Registro</code>, informe <em>nome</em>, <em>e-mail</em> e defina uma senha forte.
-                                </div>
-                            </li>
-                            <li>
-                                <span class="step-number">2</span>
-                                <div class="help-content">
-                                    <strong>Acessar <a href="{% url 'home' %}" target="_blank" rel="noopener">necessito.online</a></strong>
-                                    Após confirmar o e-mail, faça login para explorar o painel.
-                                </div>
-                            </li>
-                            <li>
-                                <span class="step-number">3</span>
-                                <div class="help-content">
-                                    <strong>Publicar ou encontrar oportunidades</strong>
-                                    • Como <em>Cliente</em>, clique em <code>Anunciar Gratuitamente</code> para descrever sua necessidade.<br>
-                                    • Como <em>Fornecedor</em>, use filtros avançados para buscar anúncios relevantes e enviar propostas.
-                                </div>
-                            </li>
-                            <li>
-                                <span class="step-number">4</span>
-                                <div class="help-content">
-                                    <strong>Negociar &amp; Fechar</strong>
-                                    Negocie no chat integrado, ajuste detalhes, contrate com segurança e avalie a experiência.
-                                </div>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Outras informações -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOther" aria-expanded="false" aria-controls="collapseOther">
-                        <i class="fa-solid fa-circle-plus me-3"></i> Outras Informações
-                    </button>
-                </h2>
-                <div id="collapseOther" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
-                    <div class="accordion-body">
-                        <h6 class="fw-semibold mb-3">Personalize sua experiência</h6>
-                        <p>Acesse <strong>Menu › Minha Conta</strong> e complete seu cadastro.  
-                           Você poderá:</p>
-                        <ul>
-                            <li>Selecionar o perfil <em>Cliente</em>, <em>Fornecedor</em> ou ambos;</li>
-                            <li>Cadastrar dados pessoais e da empresa;</li>
-                            <li>Ativar notificações de anúncios na sua região ou categoria;</li>
-                            <li>Acompanhar métricas de orçamentos, contratos e avaliações.</li>
-                        </ul>
-                        <p>Quanto mais completo o seu perfil, melhores as recomendações e a credibilidade nas negociações.</p>
-
-                        <h6 class="fw-semibold mt-4 mb-3">Dúvidas adicionais?</h6>
-                        <p>Entre em contato pelo chat on-line da plataforma ou envie e-mail para
-                           <a href="mailto:suporte@necessito.com">suporte@necessito.com</a>.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- /.accordion -->
-        
-        <!-- Botão de retorno -->
-        <div class="d-flex justify-content-start mt-4 mb-4">
-            <a href="{% url 'home' %}" class="btn btn-primary">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Voltar ao Início
-            </a>
         </div>
-        
-    </div><!-- /.help-container -->
-</div><!-- /.help-page -->
-{% endblock %}
+    </div>
 
-{% block extra_js %}
+    <div class="container py-5">
+        <!-- Cards de Categorias -->
+        <div class="row g-4 mb-5">
+            <!-- Card 1: Começar -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-start h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-rocket text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">🚀 Começar</h3>
+                    <p class="text-muted mb-3">
+                        Primeiros passos na plataforma e configuração inicial da conta
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-success me-2">▸</span>Como criar sua conta</li>
+                        <li class="mb-2"><span class="text-success me-2">▸</span>Completando seu perfil</li>
+                        <li class="mb-2"><span class="text-success me-2">▸</span>Navegação básica</li>
+                        <li class="mb-2"><span class="text-success me-2">▸</span>Configurações iniciais</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 2: Anunciar -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-announce h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-bullhorn text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">💼 Anunciar</h3>
+                    <p class="text-muted mb-3">
+                        Aprenda a criar anúncios eficazes e atrair fornecedores qualificados
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-primary me-2">▸</span>Criando anúncios eficazes</li>
+                        <li class="mb-2"><span class="text-primary me-2">▸</span>Melhores práticas para fotos</li>
+                        <li class="mb-2"><span class="text-primary me-2">▸</span>Escolhendo categorias</li>
+                        <li class="mb-2"><span class="text-primary me-2">▸</span>Gerenciando anúncios</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 3: Orçamentos -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-budget h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-calculator text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">💰 Orçamentos</h3>
+                    <p class="text-muted mb-3">
+                        Solicite, envie e gerencie orçamentos de forma profissional
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Solicitando orçamentos</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Enviando propostas</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Negociação de valores</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de aprovação</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 4: Comunicação -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-chat h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-comments text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">💬 Comunicação</h3>
+                    <p class="text-muted mb-3">
+                        Use o chat integrado para negociar e esclarecer dúvidas
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-info me-2">▸</span>Iniciando conversas</li>
+                        <li class="mb-2"><span class="text-info me-2">▸</span>Compartilhando arquivos</li>
+                        <li class="mb-2"><span class="text-info me-2">▸</span>Etiqueta de comunicação</li>
+                        <li class="mb-2"><span class="text-info me-2">▸</span>Denúncias e bloqueios</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 5: Avaliações -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-rating h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-star text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">⭐ Avaliações</h3>
+                    <p class="text-muted mb-3">
+                        Sistema de reputação e como avaliar experiências
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Como avaliar fornecedores</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Recebendo avaliações</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de reputação</li>
+                        <li class="mb-2"><span class="text-warning me-2">▸</span>Construindo credibilidade</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 6: Suporte -->
+            <div class="col-lg-4 col-md-6">
+                <div class="help-category-card card-support h-100">
+                    <div class="help-category-icon">
+                        <i class="fas fa-headset text-white" style="font-size: 1.75rem;"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark mb-3">🔧 Suporte</h3>
+                    <p class="text-muted mb-3">
+                        Problemas técnicos, políticas e contato direto
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="text-dark me-2">▸</span>Problemas técnicos</li>
+                        <li class="mb-2"><span class="text-dark me-2">▸</span>Políticas da plataforma</li>
+                        <li class="mb-2"><span class="text-dark me-2">▸</span>Segurança e privacidade</li>
+                        <li class="mb-2"><span class="text-dark me-2">▸</span>Contato direto</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="bg-white rounded-4 p-4 shadow-sm mb-5">
+            <h2 class="text-center fw-bold mb-4">Perguntas Frequentes</h2>
+            
+            <div class="accordion" id="helpAccordion">
+                <!-- FAQ 1 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq1">
+                            <i class="fas fa-info-circle text-primary me-3"></i>
+                            O que é a plataforma Indicaai?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <p>A <strong>Indicaai</strong> é uma plataforma digital que conecta pessoas e empresas que precisam de produtos ou serviços com fornecedores qualificados em todo o Brasil.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary"><i class="fas fa-bullseye me-2"></i>Clientes</h6>
+                                    <p class="small">Publicam necessidades e recebem orçamentos</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success"><i class="fas fa-tools me-2"></i>Fornecedores</h6>
+                                    <p class="small">Encontram oportunidades e enviam propostas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq2">
+                            <i class="fas fa-play-circle text-success me-3"></i>
+                            Como começar a usar a plataforma?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">1</span>
+                                        <strong>Criar sua conta</strong>
+                                    </div>
+                                    <p class="small ms-5">Clique em "Registrar" e preencha seus dados básicos</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">2</span>
+                                        <strong>Completar perfil</strong>
+                                    </div>
+                                    <p class="small ms-5">Adicione informações e defina seu tipo de usuário</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">3</span>
+                                        <strong>Explorar oportunidades</strong>
+                                    </div>
+                                    <p class="small ms-5">Publique anúncios ou busque necessidades</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">4</span>
+                                        <strong>Negociar e fechar</strong>
+                                    </div>
+                                    <p class="small ms-5">Use o chat para negociar e finalizar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq3">
+                            <i class="fas fa-shield-alt text-success me-3"></i>
+                            A plataforma é segura?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-shield-check me-2"></i>Sim! Múltiplas camadas de segurança</h6>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Criptografia SSL</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>LGPD compliance</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Validação de e-mail</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Sistema de avaliações</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Denúncias e moderação</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Dados protegidos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq4">
+                            <i class="fas fa-gift text-warning me-3"></i>
+                            Quanto custa usar a plataforma?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="alert alert-success text-center">
+                                <h5><i class="fas fa-gift me-2"></i>100% Gratuito!</h5>
+                                <p class="mb-0">Não cobramos nenhuma taxa para usar a plataforma</p>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <i class="fas fa-user-plus fa-2x text-success mb-2"></i>
+                                    <h6 class="small">Criar conta grátis</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-bullhorn fa-2x text-primary mb-2"></i>
+                                    <h6 class="small">Anúncios ilimitados</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-comments fa-2x text-info mb-2"></i>
+                                    <h6 class="small">Chat integrado</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="bg-light rounded-4 p-4 text-center">
+            <h3 class="fw-bold mb-3"><i class="fas fa-rocket me-2"></i>Pronto para começar?</h3>
+            <p class="mb-4">Escolha a ação que melhor se adequa ao seu perfil</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{% url 'necessidade_create' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-bullhorn me-2"></i>
+                    Criar Anúncio
+                </a>
+                <a href="{% url 'search:necessidade_search_all' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-search me-2"></i>
+                    Buscar Oportunidades
+                </a>
+                <a href="{% url 'register' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Criar Conta
+                </a>
+                <a href="{% url 'home' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-home me-2"></i>
+                    Voltar ao Início
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll para âncoras
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+    // Busca inteligente
+    const searchInput = document.getElementById('helpSearchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    const searchData = [
+        { title: 'Como criar uma conta', category: 'Começar' },
+        { title: 'Publicar primeiro anúncio', category: 'Anunciar' },
+        { title: 'Enviar orçamento', category: 'Orçamentos' },
+        { title: 'Como usar o chat', category: 'Comunicação' },
+        { title: 'Sistema de avaliações', category: 'Avaliações' },
+        { title: 'Problemas técnicos', category: 'Suporte' }
+    ];
+    
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim().toLowerCase();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            const results = searchData.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.category.toLowerCase().includes(query)
+            ).slice(0, 5);
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="p-3 text-center text-muted">Nenhum resultado encontrado</div>';
+            } else {
+                searchResults.innerHTML = results.map(result => 
+                    `<div class="p-3 border-bottom">
+                        <strong>${result.title}</strong><br>
+                        <small class="text-muted">${result.category}</small>
+                    </div>`
+                ).join('');
             }
-        });
+            
+            searchResults.style.display = 'block';
+            searchResults.style.position = 'absolute';
+            searchResults.style.top = '100%';
+            searchResults.style.left = '0';
+            searchResults.style.right = '0';
+            searchResults.style.background = 'white';
+            searchResults.style.borderRadius = '12px';
+            searchResults.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+            searchResults.style.zIndex = '1000';
+            searchResults.style.marginTop = '0.5rem';
+        }, 300);
     });
     
-    // Analytics para tracking de uso da ajuda
-    document.querySelectorAll('.accordion-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const section = this.textContent.trim();
-            // Aqui você pode adicionar tracking analytics
-            console.log('Help section accessed:', section);
-        });
+    // Fechar resultados ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.position-relative')) {
+            searchResults.style.display = 'none';
+        }
     });
 });
 </script>

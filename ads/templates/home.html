@@ -59,6 +59,284 @@
         color: #999;
         font-size: 0.75rem;
     }
+
+    /* ===== CATEGORIAS MODERNAS - CSS INTEGRADO ===== */
+    .categorias-section {
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        margin: 2rem 0;
+        border-radius: 20px;
+        position: relative;
+        overflow: visible;
+    }
+
+    .categorias-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #0d6efd 0%, #6f42c1 25%, #20c997 50%, #fd7e14 75%, #dc3545 100%);
+    }
+
+    .categorias-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .categorias-title::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #0d6efd, #6f42c1);
+        border-radius: 2px;
+    }
+
+    /* Container com padding adequado para evitar cortes */
+    .categorias-carousel-container {
+        padding: 0 120px; /* AUMENTO SIGNIFICATIVO: Mais espaço para os controles */
+        position: relative;
+    }
+
+    /* CORREÇÃO: Garantir altura uniforme e alinhamento perfeito */
+    .categorias-carousel .row {
+        align-items: stretch;
+    }
+
+    .categorias-carousel .col-lg-2,
+    .categorias-carousel .col-md-3,
+    .categorias-carousel .col-sm-4 {
+        display: flex;
+        margin-bottom: 0; /* Remove margin bottom inconsistente */
+    }
+
+    .categoria-card-modern {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem 1.5rem;
+        margin-bottom: 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        box-sizing: border-box;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .categoria-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--categoria-color, #0d6efd);
+        transition: height 0.3s ease;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        z-index: 1;
+    }
+
+    .categoria-card-modern:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        border-color: var(--categoria-color, #0d6efd);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .categoria-card-modern:hover::before {
+        height: 6px;
+    }
+
+    .categoria-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--categoria-color, #0d6efd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .categoria-card-modern:hover .categoria-icon-circle {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .categoria-icon-circle i {
+        font-size: 1.75rem;
+        color: white;
+    }
+
+    .categoria-nome {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .categoria-descricao {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-align: center;
+        line-height: 1.5;
+        display: none;
+    }
+
+    .categoria-card-modern:hover .categoria-descricao {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cores específicas para diferentes categorias */
+    .categoria-color-1 { --categoria-color: #0d6efd; }
+    .categoria-color-2 { --categoria-color: #6f42c1; }
+    .categoria-color-3 { --categoria-color: #20c997; }
+    .categoria-color-4 { --categoria-color: #fd7e14; }
+    .categoria-color-5 { --categoria-color: #dc3545; }
+    .categoria-color-6 { --categoria-color: #0dcaf0; }
+    .categoria-color-7 { --categoria-color: #198754; }
+    .categoria-color-8 { --categoria-color: #ffc107; }
+    .categoria-color-9 { --categoria-color: #e91e63; }
+    .categoria-color-10 { --categoria-color: #9c27b0; }
+    .categoria-color-11 { --categoria-color: #ff5722; }
+    .categoria-color-12 { --categoria-color: #607d8b; }
+
+    /* ===== CONTROLES EXTERNOS - SOLUÇÃO ARQUITETURAL ===== */
+    
+    /* Container otimizado com espaço suficiente */
+    .categorias-carousel-container {
+        padding: 0 90px !important;
+        position: relative !important;
+        overflow: visible !important;
+        margin: 0 auto !important;
+    }
+
+    /* NOVOS CONTROLES EXTERNOS - DESIGN PROFISSIONAL */
+    .categoria-control {
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50% !important;
+        background: rgba(13, 110, 253, 0.95) !important;
+        border: 3px solid white !important;
+        z-index: 3000 !important; /* Z-index muito alto */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        outline: none !important;
+    }
+
+    .categoria-control-prev {
+        left: 15px !important; /* Posicionamento seguro */
+    }
+
+    .categoria-control-next {
+        right: 15px !important; /* Posicionamento seguro */
+    }
+
+    .categoria-control:hover {
+        background: rgba(13, 110, 253, 1) !important;
+        transform: translateY(-50%) scale(1.15) !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+    }
+
+    .categoria-control:focus {
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.3) !important;
+    }
+
+    .categoria-control .carousel-control-prev-icon,
+    .categoria-control .carousel-control-next-icon {
+        background-size: 22px !important;
+        filter: none !important;
+        width: 22px !important;
+        height: 22px !important;
+    }
+
+    /* Mobile: Cards em grid compacto */
+    .categoria-card-mobile {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-left: 4px solid var(--categoria-color, #0d6efd);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        align-items: center;
+    }
+
+    .categoria-card-mobile:hover {
+        background: #f8f9ff;
+        border-left-color: var(--categoria-color, #0d6efd);
+        transform: translateX(8px);
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .categoria-icon-mobile {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--categoria-color, #0d6efd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .categoria-icon-mobile i {
+        font-size: 1.3rem;
+        color: white;
+    }
+
+    .categoria-info-mobile {
+        flex: 1;
+    }
+
+    .categoria-nome-mobile {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.3;
+    }
     
     /* Seções mais compactas para mobile */
     @media (max-width: 768px) {
@@ -128,6 +406,63 @@
             border-radius: 12px;
             border: none;
         }
+
+        /* Responsividade categorias */
+        .categorias-section {
+            padding: 1.5rem 1rem;
+            margin: 1rem 0;
+        }
+        
+        .categorias-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .categoria-card-mobile {
+            padding: 0.875rem;
+        }
+        
+        .categoria-icon-mobile {
+            width: 44px;
+            height: 44px;
+        }
+        
+        .categoria-nome-mobile {
+            font-size: 0.95rem;
+        }
+
+        /* Ocultar controles externos em mobile */
+        .categoria-control {
+            display: none !important;
+        }
+
+        /* Container mobile otimizado */
+        .categorias-carousel-container {
+            padding: 0 20px !important;
+        }
+    }
+    
+    /* Ajuste responsivo para tablets */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .categorias-carousel-container {
+            padding: 0 60px !important; /* Menos padding em tablets */
+        }
+        
+        .categoria-control {
+            display: none !important; /* Ocultar controles em tablets */
+        }
+    }
+    
+    /* Desktop - mostrar controles externos */
+    @media (min-width: 992px) {
+        .categoria-control {
+            display: flex !important; /* Mostrar controles externos */
+        }
+        
+        /* Container com espaço adequado para controles */
+        .categorias-carousel-container {
+            padding: 0 90px !important; /* Espaço otimizado para controles */
+        }
     }
     
     /* Placeholder de imagem mais moderno */
@@ -167,56 +502,105 @@
             font-size: 0.95rem;
         }
     }
+
+    /* Animações de entrada para categorias */
+    .categoria-card-modern {
+        animation: slideInUp 0.6s ease forwards;
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .categoria-card-modern:nth-child(1) { animation-delay: 0.1s; }
+    .categoria-card-modern:nth-child(2) { animation-delay: 0.2s; }
+    .categoria-card-modern:nth-child(3) { animation-delay: 0.3s; }
+    .categoria-card-modern:nth-child(4) { animation-delay: 0.4s; }
+    .categoria-card-modern:nth-child(5) { animation-delay: 0.5s; }
+    .categoria-card-modern:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes slideInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 {% include "components/_banner_carousel.html" %}
 
-<!-- CATEGORIAS: versão desktop (carrossel) -->
-<div class="d-none d-md-block">
-    <h2 class="mb-4 mt-5">Categorias Populares</h2>
-    <div id="categoriasCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        {% for categoria_group in categorias_populares %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <div class="row d-flex align-items-stretch">
-            {% for categoria in categoria_group %}
-            <div class="col-lg-2 col-md-3 col-sm-4 d-flex mb-4">
-              <a href="{% url 'category_detail' categoria.id %}" class="text-decoration-none w-100">
-                <div class="card flex-fill text-center h-100">
-                  <div class="card-body">
-                    <i class="{{ categoria.icone|default:'fas fa-tag' }} mb-2" style="font-size: 1.5rem; color: #0d6efd;"></i>
-                    <h6 class="card-title mt-2 fw-semibold">{{ categoria.nome }}</h6>
-                  </div>
-                </div>
-              </a>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Próximo</span>
-      </button>
-    </div>
-</div>
+<!-- CATEGORIAS MODERNAS INTEGRADAS -->
+<div class="categorias-section">
+    <div class="container">
+        <h2 class="categorias-title d-none d-md-block">
+            <i class="fas fa-th-large me-2"></i>
+            Categorias Populares
+        </h2>
+        <h5 class="categorias-title d-block d-md-none" style="font-size: 1.5rem; margin-bottom: 1.5rem;">
+            <i class="fas fa-th-large me-2"></i>
+            Categorias Populares
+        </h5>
 
-<!-- CATEGORIAS: versão mobile (cards modernos) -->
-<div class="d-block d-md-none">
-    <h5 class="section-title">Categorias Populares</h5>
-    {% for categoria in categorias|dictsort:"nome"|slice:":5" %}
-    <a href="{% url 'category_detail' categoria.id %}" class="text-decoration-none">
-      <div class="category-card">
-        <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
-        <span class="fw-medium">{{ categoria.nome }}</span>
-      </div>
-    </a>
-    {% endfor %}
+        <!-- DESKTOP: Grid moderno com carrossel - ESTRUTURA REESTRUTURADA -->
+        <div class="d-none d-md-block position-relative">
+            <!-- Controles externos ao carrossel -->
+            <button class="categoria-control categoria-control-prev" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="categoria-control categoria-control-next" type="button" data-bs-target="#categoriasCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Próximo</span>
+            </button>
+            
+            <!-- Container dos cards sem controles internos -->
+            <div class="categorias-carousel-container">
+                <div id="categoriasCarousel" class="carousel slide categorias-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+                    <div class="carousel-inner">
+                        {% for categoria_group in categorias_populares %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="row g-2 justify-content-center">
+                                {% for categoria in categoria_group %}
+                                <div class="col-lg-2 col-md-3 col-sm-4 d-flex">
+                                    <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-modern categoria-color-{{ forloop.counter }} w-100">
+                                        <div class="categoria-icon-circle">
+                                            <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+                                        </div>
+                                        <h6 class="categoria-nome">{{ categoria.nome }}</h6>
+                                        {% if categoria.descricao %}
+                                        <p class="categoria-descricao">{{ categoria.descricao|truncatewords:8 }}</p>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOBILE: Cards otimizados -->
+        <div class="d-block d-md-none">
+            {% for categoria in categorias|slice:":8" %}
+            <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-mobile categoria-color-{{ forloop.counter }}">
+                <div class="categoria-icon-mobile">
+                    <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+                </div>
+                <div class="categoria-info-mobile">
+                    <h6 class="categoria-nome-mobile">{{ categoria.nome }}</h6>
+                </div>
+            </a>
+            {% endfor %}
+            
+            <!-- Botão Ver Todas no Mobile -->
+            <div class="text-center mt-3">
+                <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                    <i class="fas fa-th me-2"></i>
+                    Ver Todas as Categorias
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Anúncios Populares -->
@@ -486,3 +870,37 @@
 {% include "components/_how_it_works.html" %}
 
 {% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialização do carrossel de categorias com configurações otimizadas
+    const categoriasCarousel = document.querySelector('#categoriasCarousel');
+    if (categoriasCarousel) {
+        const carousel = new bootstrap.Carousel(categoriasCarousel, {
+            interval: 6000, // 6 segundos
+            ride: 'carousel',
+            pause: 'hover'
+        });
+        
+        // Pausar carrossel quando hover nos cards
+        document.querySelectorAll('.categoria-card-modern').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                carousel.pause();
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                carousel.cycle();
+            });
+        });
+    }
+    
+    // Analytics para tracking de cliques nas categorias
+    document.querySelectorAll('.categoria-card-modern, .categoria-card-mobile').forEach(card => {
+        card.addEventListener('click', function() {
+            const categoriaNome = this.querySelector('.categoria-nome, .categoria-nome-mobile').textContent.trim();
+            console.log('Categoria clicada:', categoriaNome);
+            // Integração com Google Analytics se necessário
+        });
+    });
+});
+</script>

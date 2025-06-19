@@ -56,6 +56,67 @@
         .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
             z-index: 1;
         }
+        /* ===== FLOATING ACTION BUTTON MOBILE ===== */
+        .fab-mobile {
+            position: fixed;
+            bottom: 80px; /* Acima da bottom navigation */
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .fab-mobile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+        
+        .fab-mobile:active {
+            transform: scale(0.95);
+        }
+        
+        /* Mostrar apenas em mobile */
+        @media (min-width: 768px) {
+            .fab-mobile {
+                display: none;
+            }
+        }
+        
+        /* Efeito de pulsação */
+        .fab-pulse {
+            animation: fabPulse 2s infinite;
+        }
+        
+        @keyframes fabPulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* Ajustar padding do body para bottom navigation */
+        @media (max-width: 767px) {
+            body {
+                padding-bottom: 70px; /* Espaço para bottom nav */
+            }
+        }
     </style>
     
     
@@ -132,5 +193,10 @@
 
     <!-- Scripts Específicos das Páginas -->
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Floating Action Button (apenas mobile) -->
+    <a href="{% url 'necessidade_create' %}" class="fab-mobile fab-pulse d-md-none" title="Anunciar grátis">
+        <i class="fas fa-plus"></i>
+    </a>
 </body>
 </html>

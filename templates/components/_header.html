@@ -3,6 +3,8 @@
 
 <header>
 <style>
+    /* ===== MOBILE-FIRST HEADER OPTIMIZATION ===== */
+    
     .loading-spinner {
         display: flex;
         justify-content: center;
@@ -22,25 +24,177 @@
         100% { transform: rotate(360deg); }
     }
 
+    /* ===== BARRA DE BUSCA MODERNA (DESKTOP + MOBILE) ===== */
     .search-bar {
-        border:1px solid #dadce0;
-        background:#fff;
-        transition:border-color .2s;
+        border: 2px solid #e9ecef;
+        background: #fff;
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        min-height: 48px;
     }
+    
     .search-bar:focus-within {
-        border-color:#0d6efd;
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+        transform: translateY(-1px);
     }
-    .search-bar input:focus {
-        outline:none;
-        box-shadow:none;
+    
+    .search-bar input {
+        border: none;
+        outline: none;
+        box-shadow: none;
+        background: transparent;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        flex: 1;
     }
-    .search-bar .dropdown-toggle::after {
-        display:none;
+    
+    .search-bar input::placeholder {
+        color: #6c757d;
+        font-weight: 400;
     }
-    .search-bar .vr {
-        width:1px;
-        min-height:24px;
-        background:#dadce0;
+    
+    .search-divider {
+        width: 1px;
+        height: 24px;
+        background: #dee2e6;
+        margin: 0 8px;
+    }
+    
+    .search-location-dropdown {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 25px;
+        transition: background 0.2s ease;
+        border: none;
+        background: transparent;
+        min-width: 120px;
+    }
+    
+    .search-location-dropdown:hover {
+        background: rgba(13, 110, 253, 0.05);
+    }
+    
+    .search-location-dropdown i {
+        color: #0d6efd;
+        margin-right: 6px;
+    }
+    
+    .search-submit-btn {
+        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        transition: all 0.3s ease;
+        margin-right: 4px;
+    }
+    
+    .search-submit-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+    
+    .search-submit-btn i {
+        font-size: 1rem;
+    }
+
+    /* Header mais compacto para mobile */
+    @media (max-width: 767px) {
+        .navbar {
+            padding: 8px 0 !important;
+            min-height: 60px;
+        }
+        
+        .navbar-brand img {
+            height: 45px !important;
+        }
+        
+        .navbar-brand span {
+            font-size: 1.4rem !important;
+            margin-top: 0 !important;
+        }
+        
+        /* Texto compacto para mobile */
+        .mobile-text-small {
+            font-size: 0.75rem !important;
+            margin-left: 4px;
+        }
+        
+        /* Barra de busca expandida quando menu aberto */
+        .navbar-collapse.show .search-container {
+            width: 100% !important;
+            margin: 12px 0;
+        }
+        
+        .navbar-collapse.show .search-bar {
+            width: 100% !important;
+        }
+        
+        /* Simplificar barra de busca no mobile */
+        .search-bar {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 25px;
+            padding: 8px 16px;
+            margin: 8px 0;
+            min-height: 44px;
+        }
+        
+        .search-bar input {
+            font-size: 0.9rem;
+            padding: 8px 0;
+        }
+        
+        /* Ocultar elementos complexos no mobile */
+        .search-divider,
+        .search-location-dropdown {
+            display: none !important;
+        }
+        
+        .search-submit-btn {
+            width: 32px;
+            height: 32px;
+            margin-right: 0;
+        }
+        
+        /* Dropdown do menu mais compacto */
+        .navbar-nav .nav-link {
+            padding: 8px 16px !important;
+            font-size: 0.9rem;
+        }
+        
+        /* Ícones menores no mobile */
+        .navbar-nav .nav-link i {
+            font-size: 1rem;
+        }
+        
+        /* Ajustar alinhamento dos itens de menu */
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    /* Layout desktop otimizado */
+    @media (min-width: 768px) {
+        .search-container {
+            max-width: 500px;
+            flex: 1;
+        }
+        
+        .search-bar {
+            width: 100%;
+        }
     }
 
     .bell-animation {
@@ -83,29 +237,36 @@
   
       <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
         <ul class="navbar-nav me-auto align-items-start">
-          <li class="nav-item flex-grow-1 me-auto">
+          <li class="nav-item flex-grow-1 me-auto search-container">
             <form method="get" action="{% url 'search:necessidade_search_all' %}" class="w-100">
               <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
-              <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
-                <input type="text" name="q" class="form-control flex-grow-1 border-0 shadow-none px-0"
-                  placeholder='Buscar "Apartamento"' value="{{ request.GET.q|default:'' }}" autocomplete="off">
-                <div class="vr mx-3"></div>
-                <div class="dropdown d-flex align-items-center me-2">
-                  <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
-                  <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1" type="button"
+              <div class="search-bar">
+                <input type="text" name="q" class="flex-grow-1"
+                  placeholder='Buscar por produtos, serviços...' value="{{ request.GET.q|default:'' }}" autocomplete="off">
+                
+                <!-- Divisor e dropdown de estado (apenas desktop) -->
+                <div class="search-divider d-none d-md-block"></div>
+                <div class="dropdown d-none d-md-block">
+                  <button class="search-location-dropdown dropdown-toggle" type="button"
                     data-bs-toggle="dropdown" aria-expanded="false" id="stateButton">
-                    {{ selected_state }}
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ selected_state|default:'Todos os estados' }}</span>
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
-                    <li><a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">Todos os estados</a></li>
+                  <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="stateButton" style="border-radius: 12px;">
+                    <li><a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
+                      <i class="fas fa-globe me-2 text-primary"></i> Todos os estados
+                    </a></li>
                     {% for st in states %}
                     <li><a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
-                        href="#" data-state="{{ st.abbreviation }}">{{ st.abbreviation }}</a></li>
+                        href="#" data-state="{{ st.abbreviation }}">
+                        <i class="fas fa-map-marker-alt me-2 text-secondary"></i> {{ st.abbreviation }}
+                    </a></li>
                     {% endfor %}
                   </ul>
                 </div>
-                <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
-                  <i class="fas fa-search fs-5"></i>
+                
+                <button class="search-submit-btn" type="submit" aria-label="Pesquisar">
+                  <i class="fas fa-search"></i>
                 </button>
               </div>
             </form>
@@ -114,16 +275,18 @@
   
         <ul class="navbar-nav ms-auto align-items-start justify-content-end mt-2 mt-lg-0">
           <li class="nav-item">
-            <a href="{% url 'help' %}" class="nav-link">
+            <a href="{% url 'help' %}" class="nav-link d-flex align-items-center">
               <i class="fas fa-question-circle me-2"></i>
-              Ajuda
+              <span class="d-none d-md-inline d-lg-inline">Ajuda</span>
+              <span class="d-block d-md-none mobile-text-small">Ajuda</span>
             </a>
           </li>
           <li class="nav-item position-relative">
-            <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
+            <button class="btn btn-link nav-link d-flex align-items-center" type="button" data-bs-toggle="offcanvas"
               data-bs-target="#offcanvasNotifications">
               <i class="fas fa-bell me-2 {% if unread_notifications_count > 0 %}bell-animation{% endif %}"></i>
-              <span>Notificações</span>
+              <span class="d-none d-md-inline d-lg-inline">Notificações</span>
+              <span class="d-block d-md-none mobile-text-small">Notificações</span>
               {% if unread_notifications_count > 0 %}
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ unread_notifications_count }}
@@ -134,7 +297,11 @@
 
           {% if user.is_authenticated %}
           <li class="nav-item dropdown mb-2">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Olá, {{ user.first_name|capfirst }}!</a>
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user me-2 d-lg-none"></i>
+                <span class="d-none d-md-inline d-lg-inline">Olá, {{ user.first_name|capfirst }}!</span>
+                <span class="d-block d-md-none mobile-text-small">{{ user.first_name|capfirst|truncatechars:8 }}</span>
+            </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}"><i class="fas fa-user"></i> Minha Conta</a></li>
               <li><a class="dropdown-item" href="{% url 'necessidade_list' %}"><i class="fas fa-bullhorn"></i> Meus Anúncios</a></li>
@@ -159,11 +326,24 @@
             </ul>
           </li>
           {% else %}
-          <li class="nav-item"><a class="nav-link d-flex align-items-center" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2"></i> Login</a></li>
-          <li class="nav-item ms-lg-3"><a class="nav-link d-flex align-items-center" href="{% url 'register' %}"><i class="fas fa-user-plus me-2"></i> Registrar</a></li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center" href="{% url 'login' %}">
+              <i class="fas fa-sign-in-alt me-2"></i> 
+              <span class="d-none d-md-inline d-lg-inline">Login</span>
+              <span class="d-block d-md-none mobile-text-small">Login</span>
+            </a>
+          </li>
+          <li class="nav-item ms-lg-3">
+            <a class="nav-link d-flex align-items-center" href="{% url 'register' %}">
+              <i class="fas fa-user-plus me-2"></i> 
+              <span class="d-none d-md-inline d-lg-inline">Registrar</span>
+              <span class="d-block d-md-none mobile-text-small">Cadastrar</span>
+            </a>
+          </li>
           {% endif %}
   
-          <li class="nav-item ms-lg-3">
+          <!-- Botão Anunciar: Oculto no mobile (temos FAB), visível no desktop -->
+          <li class="nav-item ms-lg-3 d-none d-lg-block">
             <a href="{% url 'necessidade_create' %}" class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center" style="font-size: 14px; height: 45px; min-width: 180px;">
               <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
             </a>
@@ -199,25 +379,21 @@
                     </div>
                 </div>
                 
-                <!-- Paginação -->
-            <div class="d-flex justify-content-between align-items-center mt-3" id="pagination-container">
-                <button class="btn btn-sm btn-outline-primary" id="prev-page" disabled>
-                    <i class="fas fa-chevron-left me-1"></i> Anterior
-                </button>
-                <div class="pagination-info">
-                    <span class="badge bg-primary rounded-pill" id="page-info">
-                        <span id="current-page">1</span> / <span id="total-pages">1</span>
-                    </span>
+                <!-- Link para ver todas - removido temporariamente -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Mostrando as 5 notificações mais recentes
+                    </small>
                 </div>
-                <button class="btn btn-sm btn-outline-primary" id="next-page" disabled>
-                    Próxima <i class="fas fa-chevron-right ms-1"></i>
-                </button>
-            </div>
+                
             {% else %}
                 <div class="text-center py-5">
                     <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
-                    <p>Você precisa estar logado para ver notificações.</p>
-                    <a href="{% url 'login' %}" class="btn btn-primary mt-2">Fazer Login</a>
+                    <p class="text-muted">Faça login para ver suas notificações.</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i> Fazer Login
+                    </a>
                 </div>
             {% endif %}
         </div>
@@ -226,152 +402,60 @@
 </header>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const stateInput  = document.getElementById("stateInput");
-      const stateButton = document.getElementById("stateButton");
-      const dropdownItems = document.querySelectorAll('[data-state]');
-    
-      dropdownItems.forEach(item => {
-        item.addEventListener('click', e => {
-          e.preventDefault();
-          const sigla = item.dataset.state;
-          stateInput.value = sigla;       // atualiza o campo oculto
-          stateButton.textContent = sigla; // mostra nova sigla
-          item.closest('form').submit();   // dispara a busca
-        });
-      });
-    });
-</script>
-
-<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Elementos do DOM
-        const notificationsContainer = document.getElementById('notifications-container');
-        const paginationContainer = document.getElementById('pagination-container');
-        const prevPageBtn = document.getElementById('prev-page');
-        const nextPageBtn = document.getElementById('next-page');
-        const currentPageSpan = document.getElementById('current-page');
-        const totalPagesSpan = document.getElementById('total-pages');
-        const offcanvasNotifications = document.getElementById('offcanvasNotifications');
-        
-        let currentPage = 1;
-        
-        // Função para carregar notificações
-        function loadNotifications(page = 1) {
-            // Mostrar spinner
-            notificationsContainer.innerHTML = `
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-            </div>
-            `;
-            
-            // Fazer requisição AJAX com URL completa
-            fetch(`/notifications/get_notifications/?page=${page}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro na resposta do servidor: ' + response.status);
-                    }
-                    return response.json();
-                })
+        const searchInput = document.querySelector('.search-bar input[name="q"]');
+        const stateInput = document.getElementById('stateInput');
+        const stateButton = document.getElementById('stateButton');
+        const stateDropdown = document.querySelectorAll('.dropdown-item[data-state]');
+
+        // Atualizar estado selecionado
+        stateDropdown.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedState = this.getAttribute('data-state');
+                const stateName = selectedState === 'todos' ? 'Todos os estados' : selectedState;
+                
+                stateInput.value = selectedState;
+                
+                // Atualizar o texto do botão
+                const buttonText = stateButton.querySelector('span');
+                if (buttonText) {
+                    buttonText.textContent = stateName;
+                }
+                
+                // Remover classe active de todos
+                stateDropdown.forEach(dropdown => dropdown.classList.remove('active'));
+                // Adicionar classe active ao selecionado
+                this.classList.add('active');
+            });
+        });
+
+        // Carregar notificações quando o offcanvas for aberto
+        const notificationsOffcanvas = document.getElementById('offcanvasNotifications');
+        if (notificationsOffcanvas) {
+            notificationsOffcanvas.addEventListener('shown.bs.offcanvas', function () {
+                loadNotifications();
+            });
+        }
+
+        function loadNotifications() {
+            const container = document.getElementById('notifications-container');
+            if (!container) return;
+
+            fetch('{% url "get_notifications" %}')
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Dados recebidos:', data); // Debug
-                    
-                    // Atualizar o container de notificações
-                    notificationsContainer.innerHTML = data.html;
-                    
-                    // Atualizar informações de paginação
-                    currentPage = data.current_page;
-                    currentPageSpan.textContent = currentPage;
-                    totalPagesSpan.textContent = data.total_pages;
-                    
-                    // Habilitar/desabilitar botões de paginação
-                    prevPageBtn.disabled = !data.has_previous;
-                    nextPageBtn.disabled = !data.has_next;
-                    
-                    // Mostrar ou esconder a paginação
-                    if (data.total_pages > 1) {
-                        paginationContainer.style.display = 'flex';
-                    } else {
-                        paginationContainer.style.display = 'none';
-                    }
+                    // A view retorna HTML renderizado
+                    container.innerHTML = data.html;
                 })
                 .catch(error => {
                     console.error('Erro ao carregar notificações:', error);
-                    notificationsContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            Erro ao carregar notificações: ${error.message}
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <p class="text-muted">Erro ao carregar notificações.</p>
                         </div>
                     `;
-                });
-        }
-        
-        // Carregar notificações quando o offcanvas é aberto
-        if (offcanvasNotifications) {
-            offcanvasNotifications.addEventListener('shown.bs.offcanvas', function() {
-                console.log('Offcanvas aberto, carregando notificações...'); // Debug
-                loadNotifications(currentPage);
-            });
-            
-            // Eventos de paginação
-            if (prevPageBtn) {
-                prevPageBtn.addEventListener('click', function() {
-                    if (currentPage > 1) {
-                        loadNotifications(currentPage - 1);
-                    }
-                });
-            }
-            
-            if (nextPageBtn) {
-                nextPageBtn.addEventListener('click', function() {
-                    loadNotifications(currentPage + 1);
-                });
-            }
-            
-            // Delegação de eventos para os botões de marcar como lido
-            if (notificationsContainer) {
-                notificationsContainer.addEventListener('click', function(e) {
-                    // Verificar se o clique foi em um botão de marcar como lido
-                    const link = e.target.closest('a[href*="/notifications/mark_read/"]');
-                    if (link) {
-                        e.preventDefault();
-                        
-                        // Fazer requisição AJAX para marcar como lido
-                        fetch(link.href)
-                            .then(response => {
-                                if (response.ok) {
-                                    // Recarregar notificações
-                                    loadNotifications(currentPage);
-                                    // Atualizar contador no header
-                                    updateNotificationCount();
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Erro ao marcar notificação como lida:', error);
-                            });
-                    }
-                });
-            }
-        } else {
-            console.error('Elemento offcanvasNotifications não encontrado');
-        }
-        
-        // Função para atualizar o contador de notificações
-        function updateNotificationCount() {
-            fetch('/notifications/get_notifications/?count_only=true')
-                .then(response => response.json())
-                .then(data => {
-                    const badge = document.querySelector('.nav-item .badge');
-                    if (badge) {
-                        if (data.unread_count > 0) {
-                            badge.textContent = data.unread_count;
-                            badge.style.display = 'inline-block';
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao atualizar contador:', error);
                 });
         }
     });

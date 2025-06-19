@@ -12,7 +12,7 @@ class UserLoginForm(forms.Form):
         label="E-mail",
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'exemplo@necessito.br'
+            'placeholder': 'exemplo@indicaai.com'
         })
     )
     password = forms.CharField(

@@ -1,173 +1,600 @@
 {% load static %}
 
+<!-- CSS INLINE MODERNO - HOW IT WORKS GAMIFICADA -->
 <style>
-    .step-card{
-      background:#fff; border:1px solid #e5e5e5; border-radius:12px;
-      position:relative; min-height:260px;
-      transition:box-shadow .25s;
-    }
-    .step-card:hover{box-shadow:0 0 0.75rem rgba(0,0,0,.08);}
-    .step-number{
-      position:absolute; top:-10px; left:-10px;
-      background:#0d6efd; color:#fff; width:32px; height:32px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight:600; border-radius:50%;
-    }
-    .step-icon{font-size:2.4rem; color:#0d6efd;}
-    /* toggle btn ativo */
-    .btn-outline-primary.active,
-    .btn-outline-primary.active:hover{
-      color:#fff; background:#0d6efd; border-color:#0d6efd;
-    }
-</style>
-  
+/* ===== HOW IT WORKS - DESIGN PROFISSIONAL MODERNO ===== */
 
-<section class="process-section py-5">
+.process-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 0 !important;
+}
+
+.process-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0d6efd 0%, #6f42c1 25%, #20c997 50%, #fd7e14 75%, #dc3545 100%);
+}
+
+/* ===== TOGGLE BUTTONS MODERNOS ===== */
+.toggle-container {
+    background: white;
+    border-radius: 50px;
+    padding: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: inline-flex;
+    gap: 4px;
+    border: 2px solid #f8f9ff;
+}
+
+.toggle-btn {
+    padding: 12px 28px !important;
+    border-radius: 40px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    color: #6c757d !important;
+}
+
+.toggle-btn.active {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+.toggle-btn:hover:not(.active) {
+    background: #f8f9ff !important;
+    color: #0d6efd !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ===== PROGRESS BAR GAMIFICADA ===== */
+.progress-timeline {
+    position: relative;
+    margin: 3rem 0 4rem; /* AUMENTAR MARGEM INFERIOR SIGNIFICATIVAMENTE */
+    display: none; /* Mostrar apenas em desktop */
+    z-index: 1000; /* Z-INDEX MUITO ALTO */
+}
+
+.progress-line {
+    position: absolute;
+    top: 50%;
+    left: 12.5%;
+    right: 12.5%;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    z-index: 1000; /* Z-INDEX MUITO ALTO PARA PROGRESS BAR */
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0d6efd 0%, #20c997 50%, #28a745 100%);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 2s ease;
+    animation: progressFill 3s ease 0.5s forwards;
+    z-index: 1001; /* AINDA MAIOR QUE A LINE */
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0d6efd 0%, #20c997 50%, #28a745 100%);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 2s ease;
+    animation: progressFill 3s ease 0.5s forwards;
+}
+
+@keyframes progressFill {
+    to { width: 100%; }
+}
+
+@media (min-width: 992px) {
+    .progress-timeline { display: block; }
+}
+
+/* ===== STEP CARDS MODERNOS ===== */
+.step-card {
+    background: white !important;
+    border: 2px solid transparent !important;
+    border-radius: 20px !important;
+    position: relative !important;
+    min-height: 280px !important;
+    padding: 3rem 1.5rem 2rem !important; /* PADDING SUPERIOR AUMENTADO PARA OS NÚMEROS */
+    margin-top: 20px !important; /* MARGEM SUPERIOR PARA ESPAÇAR DOS NÚMEROS */
+    transition: all 0.4s ease !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+    overflow: visible !important; /* OVERFLOW VISÍVEL PARA OS NÚMEROS */
+    cursor: pointer !important;
+    transform: translateY(0) !important;
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: var(--step-color, #0d6efd);
+    transition: height 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-5px) !important; /* REDUZIDO AINDA MAIS PARA -5px */
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+    border-color: var(--step-color, #0d6efd) !important;
+    z-index: 10 !important; /* Z-INDEX BAIXO PARA NÃO SOBREPOR PROGRESS BAR */
+}
+
+.step-card:hover::before {
+    height: 8px;
+}
+
+/* Cores sequenciais para cada step */
+.step-card:nth-child(1) { --step-color: #0d6efd; }
+.step-card:nth-child(2) { --step-color: #6f42c1; }
+.step-card:nth-child(3) { --step-color: #20c997; }
+.step-card:nth-child(4) { --step-color: #28a745; }
+
+/* ===== STEP NUMBERS GAMIFICADOS ===== */
+.step-number {
+    position: absolute !important;
+    top: -24px !important; /* POSIÇÃO MAIS ALTA PARA NÃO SER CORTADO */
+    left: -24px !important; /* POSIÇÃO MAIS À ESQUERDA */
+    background: var(--step-color, #0d6efd) !important;
+    color: white !important;
+    width: 48px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    border: 4px solid white !important;
+    z-index: 100 !important; /* Z-INDEX ALTO PARA FICAR ACIMA DOS CARDS */
+    transition: all 0.3s ease !important;
+}
+
+.step-card:hover .step-number {
+    transform: scale(1.15) rotate(5deg) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+}
+
+/* ===== ÍCONES MODERNOS ===== */
+.step-icon {
+    font-size: 3rem !important;
+    color: var(--step-color, #0d6efd) !important;
+    margin: 1rem 0 !important;
+    transition: all 0.3s ease !important;
+    display: block !important;
+}
+
+.step-card:hover .step-icon {
+    transform: scale(1.1) !important;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)) !important;
+}
+
+/* ===== TÍTULOS E TEXTOS ===== */
+.step-title {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    color: #2c3e50 !important;
+    margin: 1.5rem 0 1rem !important;
+    line-height: 1.3 !important;
+}
+
+.step-description {
+    color: #6c757d !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 0 !important;
+}
+
+/* ===== CTA SECTION MODERNIZADA ===== */
+.cta-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0fe 100%);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    margin-top: 6rem; /* AUMENTADO PARA 6rem - ESPAÇAMENTO GENEROSO */
+    text-align: center;
+    border: 1px solid #e8eaed;
+}
+
+.cta-title {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 1rem !important;
+}
+
+.cta-subtitle {
+    font-size: 1.1rem !important;
+    color: #6c757d !important;
+    margin-bottom: 2rem !important;
+    line-height: 1.6 !important;
+}
+
+.cta-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%) !important;
+    border: none !important;
+    padding: 14px 32px !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    border-radius: 50px !important;
+    color: white !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    transition: all 0.3s ease !important;
+    margin-right: 1rem !important;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+}
+
+.cta-primary:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.4) !important;
+    color: white !important;
+}
+
+.cta-secondary {
+    background: white !important;
+    border: 2px solid #e9ecef !important;
+    padding: 12px 28px !important;
+    font-weight: 600 !important;
+    border-radius: 50px !important;
+    color: #6c757d !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    transition: all 0.3s ease !important;
+    margin-top: 0.5rem !important;
+}
+
+.cta-secondary:hover {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    text-decoration: none !important;
+}
+
+/* ===== ANIMAÇÕES DE ENTRADA ===== */
+.step-card {
+    opacity: 0;
+    transform: translateY(30px) !important;
+    animation: slideInUp 0.6s ease forwards;
+}
+
+.step-card:nth-child(1) { animation-delay: 0.2s; }
+.step-card:nth-child(2) { animation-delay: 0.4s; }
+.step-card:nth-child(3) { animation-delay: 0.6s; }
+.step-card:nth-child(4) { animation-delay: 0.8s; }
+
+@keyframes slideInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0) !important;
+    }
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .process-section {
+        padding: 2rem 0 !important;
+    }
+    
+    .toggle-container {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .toggle-btn {
+        width: 100% !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .step-card {
+        min-height: 240px !important;
+        margin-bottom: 2rem !important;
+    }
+    
+    .step-icon {
+        font-size: 2.5rem !important;
+    }
+    
+    .step-title {
+        font-size: 1.2rem !important;
+    }
+    
+    .cta-section {
+        padding: 2rem 1.5rem !important;
+        margin-top: 4rem !important; /* AUMENTADO DE 2rem PARA 4rem NO MOBILE */
+    }
+    
+    .cta-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .cta-primary,
+    .cta-secondary {
+        width: 100% !important;
+        margin: 0.5rem 0 !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 991px) {
+    .step-card {
+        min-height: 260px !important;
+    }
+}
+
+/* ===== MICRO-INTERAÇÕES ===== */
+.step-card {
+    position: relative;
+}
+
+.step-card::after {
+    content: '✨';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1.2rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.step-card:hover::after {
+    opacity: 1;
+    transform: scale(1) rotate(15deg);
+}
+</style>
+
+<section class="process-section">
     <div class="container">
-  
-      <!-- Toggle tabs ---------------------------------------------------->
-      <div class="d-flex justify-content-center mb-4 gap-2">
-        <button class="btn btn-outline-primary active" data-target="flow-cliente">
-          Para quem Precisa
-        </button>
-        <button class="btn btn-outline-primary" data-target="flow-fornecedor">
-          Para Fornecedores
-        </button>
-      </div>
-  
-      <!-- -----------------------  Fluxo CLIENTE  ----------------------- -->
-      <div id="flow-cliente" class="flow-wrapper">
-        <div class="row g-4 justify-content-center">
-  
-          <!-- 1 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">1</span>
-                <i class="fa-solid fa-bullseye step-icon"></i>
-                <h5 class="fw-bold mt-3">Anuncie</h5>
-                <p class="mb-0">Descreva sua necessidade com clareza de escopo, prazo e orçamento estimado.</p>
+
+        <!-- Toggle modernizado -->
+        <div class="d-flex justify-content-center mb-5">
+            <div class="toggle-container">
+                <button class="toggle-btn active" data-target="flow-cliente">
+                    <i class="fas fa-user me-2"></i>
+                    Para quem Precisa
+                </button>
+                <button class="toggle-btn" data-target="flow-fornecedor">
+                    <i class="fas fa-handshake me-2"></i>
+                    Para Fornecedores
+                </button>
             </div>
-          </div>
-  
-          <!-- 2 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">2</span>
-                <i class="fa-solid fa-magnifying-glass step-icon"></i>
-                <h5 class="fw-bold mt-3">Compare</h5>
-                <p class="mb-0">Receba orçamentos personalizados de fornecedores qualificados.</p>
-            </div>
-          </div>
-  
-          <!-- 3 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">3</span>
-                <i class="fa-solid fa-comments step-icon"></i>
-                <h5 class="fw-bold mt-3">Negocie</h5>
-                <p class="mb-0">Converse diretamente no chat integrado para ajustar detalhes.</p>
-            </div>
-          </div>
-  
-          <!-- 4 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">4</span>
-                <i class="fa-solid fa-circle-check step-icon"></i>
-                <h5 class="fw-bold mt-3">Feche</h5>
-                <p class="mb-0">Escolha a melhor proposta com total transparência e segurança.</p>
-            </div>
-          </div>
         </div>
-  
-        <!-- CTA -->
-        <div class="text-center mt-5">
-          <h4 class="fw-semibold mb-3">
-            Pronto para encontrar os melhores fornecedores?
-          </h4>
-          <p class="mb-4">Publique sua primeira necessidade gratuitamente e receba propostas competitivas.</p>
-          <a href="{% url 'necessidade_create' %}" class="btn btn-primary me-2">Anunciar Gratuitamente</a>
-          <!-- <a href="#!" class="btn btn-outline-secondary mt-2">Ver Exemplo</a> -->
+
+        <!-- Progress Timeline (Desktop) -->
+        <div class="progress-timeline">
+            <div class="progress-line">
+                <div class="progress-fill"></div>
+            </div>
         </div>
-      </div>
-  
-      <!-- -----------------------  Fluxo FORNECEDOR  -------------------- -->
-      <div id="flow-fornecedor" class="flow-wrapper d-none">
-        <div class="row g-4 justify-content-center">
-  
-          <!-- 1 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">1</span>
-                <i class="fa-solid fa-magnifying-glass step-icon"></i>
-                <h5 class="fw-bold mt-3">Encontre</h5>
-                <p class="mb-0">Busque oportunidades na sua área com filtros avançados.</p>
+
+        <!-- -----------------------  Fluxo CLIENTE  ----------------------- -->
+        <div id="flow-cliente" class="flow-wrapper">
+            <div class="row g-4 justify-content-center">
+
+                <!-- Step 1 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">1</span>
+                        <i class="fas fa-bullseye step-icon"></i>
+                        <h5 class="step-title">Anuncie</h5>
+                        <p class="step-description">Descreva sua necessidade com clareza de escopo, prazo e orçamento estimado.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">2</span>
+                        <i class="fas fa-search-plus step-icon"></i>
+                        <h5 class="step-title">Compare</h5>
+                        <p class="step-description">Receba orçamentos personalizados de fornecedores qualificados.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">3</span>
+                        <i class="fas fa-comments step-icon"></i>
+                        <h5 class="step-title">Negocie</h5>
+                        <p class="step-description">Converse diretamente no chat integrado para ajustar detalhes.</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">4</span>
+                        <i class="fas fa-trophy step-icon"></i>
+                        <h5 class="step-title">Conquiste</h5>
+                        <p class="step-description">Escolha a melhor proposta com total transparência e segurança.</p>
+                    </div>
+                </div>
             </div>
-          </div>
-  
-          <!-- 2 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">2</span>
-                <i class="fa-solid fa-bullseye step-icon"></i>
-                <h5 class="fw-bold mt-3">Orce</h5>
-                <p class="mb-0">Envie propostas personalizadas com preços competitivos.</p>
+
+            <!-- CTA Cliente -->
+            <div class="cta-section">
+                <h4 class="cta-title">
+                    <i class="fas fa-rocket me-2"></i>
+                    Pronto para encontrar os melhores fornecedores?
+                </h4>
+                <p class="cta-subtitle">Publique sua primeira necessidade gratuitamente e receba propostas competitivas.</p>
+                <a href="{% url 'necessidade_create' %}" class="cta-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Anunciar Gratuitamente
+                </a>
             </div>
-          </div>
-  
-          <!-- 3 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">3</span>
-                <i class="fa-solid fa-comments step-icon"></i>
-                <h5 class="fw-bold mt-3">Negocie</h5>
-                <p class="mb-0">Ajuste detalhes com o cliente no chat integrado.</p>
-            </div>
-          </div>
-  
-          <!-- 4 -->
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="step-card h-100 text-center px-4 py-5">
-                <span class="step-number">4</span>
-                <i class="fa-solid fa-circle-check step-icon"></i>
-                <h5 class="fw-bold mt-3">Conquiste</h5>
-                <p class="mb-0">Ganhe novos contratos e aumente seu faturamento.</p>
-            </div>
-          </div>
         </div>
-  
-        <!-- CTA -->
-        <div class="text-center mt-5">
-          <h4 class="fw-semibold mb-3">
-            Pronto para conquistar novos clientes?
-          </h4>
-          <p class="mb-4">Cadastre-se como fornecedor e participe de oportunidades relevantes.</p>
-          <a href="{% url 'register' %}" class="btn btn-primary me-2">Cadastrar como Fornecedor</a>
-          <a href="{% url 'search:necessidade_search_all' %}" class="btn btn-outline-secondary mt-2">Explorar Oportunidades</a>
+
+        <!-- -----------------------  Fluxo FORNECEDOR  -------------------- -->
+        <div id="flow-fornecedor" class="flow-wrapper d-none">
+            <div class="row g-4 justify-content-center">
+
+                <!-- Step 1 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">1</span>
+                        <i class="fas fa-compass step-icon"></i>
+                        <h5 class="step-title">Encontre</h5>
+                        <p class="step-description">Busque oportunidades na sua área com filtros avançados.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">2</span>
+                        <i class="fas fa-calculator step-icon"></i>
+                        <h5 class="step-title">Orce</h5>
+                        <p class="step-description">Envie propostas personalizadas com preços competitivos.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">3</span>
+                        <i class="fas fa-handshake step-icon"></i>
+                        <h5 class="step-title">Negocie</h5>
+                        <p class="step-description">Ajuste detalhes com o cliente no chat integrado.</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="step-card h-100 text-center">
+                        <span class="step-number">4</span>
+                        <i class="fas fa-crown step-icon"></i>
+                        <h5 class="step-title">Conquiste</h5>
+                        <p class="step-description">Ganhe novos contratos e aumente seu faturamento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Fornecedor -->
+            <div class="cta-section">
+                <h4 class="cta-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Pronto para conquistar novos clientes?
+                </h4>
+                <p class="cta-subtitle">Cadastre-se como fornecedor e participe de oportunidades relevantes.</p>
+                <a href="{% url 'register' %}" class="cta-primary">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Cadastrar como Fornecedor
+                </a>
+                <a href="{% url 'search:necessidade_search_all' %}" class="cta-secondary">
+                    <i class="fas fa-search me-2"></i>
+                    Explorar Oportunidades
+                </a>
+            </div>
         </div>
-      </div>
-  
+
     </div>
-  </section>
-  
-  <script>
-    (()=>{
-  
-      const toggleBtns = document.querySelectorAll('[data-target]');
-      const flows      = document.querySelectorAll('.flow-wrapper');
-  
-      toggleBtns.forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          // Ativa botão
-          toggleBtns.forEach(b=>b.classList.remove('active'));
-          btn.classList.add('active');
-  
-          // Mostra fluxo correspondente
-          flows.forEach(flow=>{
-            flow.classList.toggle('d-none', flow.id !== btn.dataset.target);
-          });
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== TOGGLE FUNCTIONALITY APRIMORADA =====
+    const toggleBtns = document.querySelectorAll('[data-target]');
+    const flows = document.querySelectorAll('.flow-wrapper');
+
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remover classe ativa
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            
+            // Adicionar classe ativa
+            this.classList.add('active');
+
+            // Mostrar fluxo correspondente com animação
+            flows.forEach(flow => {
+                if (flow.id === this.dataset.target) {
+                    flow.classList.remove('d-none');
+                    // Reativar animações dos cards
+                    const cards = flow.querySelectorAll('.step-card');
+                    cards.forEach((card, index) => {
+                        card.style.animation = 'none';
+                        card.offsetHeight; // Trigger reflow
+                        card.style.animation = `slideInUp 0.6s ease ${(index + 1) * 0.2}s forwards`;
+                    });
+                } else {
+                    flow.classList.add('d-none');
+                }
+            });
+
+            // Reiniciar animação da progress bar
+            const progressFill = document.querySelector('.progress-fill');
+            if (progressFill) {
+                progressFill.style.animation = 'none';
+                progressFill.offsetHeight; // Trigger reflow
+                progressFill.style.animation = 'progressFill 3s ease 0.5s forwards';
+            }
         });
-      });
-  
-    })();
-  </script>
+    });
+
+    // ===== INTERSECTION OBSERVER PARA ANIMAÇÕES =====
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const cards = entry.target.querySelectorAll('.step-card');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 200);
+                });
+            }
+        });
+    }, observerOptions);
+
+    // Observar fluxos
+    flows.forEach(flow => observer.observe(flow));
+
+    // ===== ANALYTICS TRACKING =====
+    document.querySelectorAll('.step-card').forEach((card, index) => {
+        card.addEventListener('click', function() {
+            console.log(`Step ${index + 1} clicked`);
+            // Integrar com Google Analytics se necessário
+        });
+    });
+
+    // ===== HOVER EFFECTS APRIMORADOS =====
+    document.querySelectorAll('.step-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)'; /* AJUSTADO PARA -5px APENAS */
+            this.style.zIndex = '10'; /* Z-INDEX BAIXO PARA NÃO SOBREPOR */
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.zIndex = '1'; /* Volta ao z-index padrão */
+        });
+    });
+});
+</script>

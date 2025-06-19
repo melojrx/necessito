@@ -1,18 +1,22 @@
-
-<aside class="col-lg-2 d-none d-lg-block pe-0">
-  <ul class="list-group sticky-top" style="top:80px;">
+<aside class="col-lg-2 d-none d-lg-block pe-3">
+  <div class="sidebar-section">
+    <div class="sidebar-header">
+      <h5 class="sidebar-title">
+        <i class="fas fa-th-large me-2"></i>
+        Categorias
+      </h5>
+    </div>
+    
     {% for cat in menu_categorias %}
-    <li class="list-group-item border-0 py-2">
-      <a href="{% url 'category_detail' cat.pk %}" class="d-flex align-items-center text-decoration-none text-dark small">
-        {% if cat.icone %}
-          <i class="{{ cat.icone }} me-2 text-secondary"></i>
-        {% else %}
-          <i class="fas fa-tag me-2 text-secondary"></i>
-        {% endif %}
-        {{ cat.nome }}
-      </a>
-    </li>
+    <a href="{% url 'category_detail' cat.pk %}" class="category-link">
+      {% if cat.icone %}
+        <i class="{{ cat.icone }} category-icon"></i>
+      {% else %}
+        <i class="fas fa-tag category-icon"></i>
+      {% endif %}
+      {{ cat.nome }}
+    </a>
     {% endfor %}
-  </ul>
+  </div>
 </aside>
   

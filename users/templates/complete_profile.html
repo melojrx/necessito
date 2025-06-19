@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete seu Cadastro - Indicaai{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Header da Página -->
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-check text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h2 class="display-6 fw-bold text-primary">Complete seu Cadastro</h2>
+                <p class="lead text-muted">
+                    Olá, <strong>{{ user.first_name }}</strong>! 🎉<br>
+                    Complete suas informações e tenha uma experiência completa na plataforma!
+                </p>
+                
+                <!-- Progress Bar -->
+                <div class="progress mb-4" style="height: 8px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
+                </div>
+                <small class="text-muted">70% completo - Quase lá!</small>
+            </div>
+
+            <!-- Card Principal -->
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Seção 1: Tipo de Usuário -->
+                        <div class="mb-5">
+                            <h4 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-users text-primary me-2"></i>
+                                Como você quer usar a plataforma?
+                            </h4>
+                            <p class="text-muted mb-4">Escolha uma opção para personalizar sua experiência</p>
+                            
+                            <div class="row g-3">
+                                {% for choice in form.user_type %}
+                                    <div class="col-md-4">
+                                        <div class="card h-100 user-type-card" style="cursor: pointer; transition: all 0.3s;">
+                                            <div class="card-body text-center p-4">
+                                                {{ choice.tag }}
+                                                <div class="mt-2">
+                                                    {% if choice.data.value == 'client' %}
+                                                        <i class="fas fa-bullhorn text-info" style="font-size: 2rem;"></i>
+                                                        <h6 class="mt-2 fw-bold">Anunciante</h6>
+                                                        <small class="text-muted">Publico necessidades</small>
+                                                    {% elif choice.data.value == 'supplier' %}
+                                                        <i class="fas fa-tools text-success" style="font-size: 2rem;"></i>
+                                                        <h6 class="mt-2 fw-bold">Fornecedor</h6>
+                                                        <small class="text-muted">Ofereço produtos/serviços</small>
+                                                    {% elif choice.data.value == 'both' %}
+                                                        <i class="fas fa-star text-warning" style="font-size: 2rem;"></i>
+                                                        <h6 class="mt-2 fw-bold">Ambos</h6>
+                                                        <small class="text-muted">Anuncio e forneço</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.user_type.errors %}
+                                <div class="text-danger small mt-2">{{ form.user_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-5">
+
+                        <!-- Seção 2: Informações Pessoais -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                Informações Pessoais <span class="badge bg-secondary ms-2">Opcional</span>
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <!-- Telefone -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">{{ form.telefone.label }}</label>
+                                    {{ form.telefone }}
+                                    {% if form.telefone.errors %}
+                                        <div class="text-danger small">{{ form.telefone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Foto -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">{{ form.foto.label }}</label>
+                                    {{ form.foto }}
+                                    <div class="form-text">Ajuda outros usuários a identificá-lo</div>
+                                    {% if form.foto.errors %}
+                                        <div class="text-danger small">{{ form.foto.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seção 3: Localização -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                Localização <span class="badge bg-secondary ms-2">Opcional</span>
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">{{ form.endereco.label }}</label>
+                                    {{ form.endereco }}
+                                    {% if form.endereco.errors %}
+                                        <div class="text-danger small">{{ form.endereco.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">{{ form.bairro.label }}</label>
+                                    {{ form.bairro }}
+                                    {% if form.bairro.errors %}
+                                        <div class="text-danger small">{{ form.bairro.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">{{ form.cep.label }}</label>
+                                    {{ form.cep }}
+                                    {% if form.cep.errors %}
+                                        <div class="text-danger small">{{ form.cep.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label fw-semibold">{{ form.cidade.label }}</label>
+                                    {{ form.cidade }}
+                                    {% if form.cidade.errors %}
+                                        <div class="text-danger small">{{ form.cidade.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold">{{ form.estado.label }}</label>
+                                    {{ form.estado }}
+                                    {% if form.estado.errors %}
+                                        <div class="text-danger small">{{ form.estado.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seção 4: Categorias de Interesse -->
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-tags text-primary me-2"></i>
+                                {{ form.preferred_categories.label }} <span class="badge bg-secondary ms-2">Opcional</span>
+                            </h5>
+                            {{ form.preferred_categories }}
+                            <div class="form-text">{{ form.preferred_categories.help_text }}</div>
+                            {% if form.preferred_categories.errors %}
+                                <div class="text-danger small">{{ form.preferred_categories.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="window.location.href='{% url 'home' %}'">
+                                <i class="fas fa-times me-2"></i>Pular por Agora
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-check me-2"></i>Finalizar Cadastro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dicas e Benefícios -->
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    💡 <strong>Dica:</strong> Perfis completos têm 3x mais chances de sucesso na plataforma!
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-type-card {
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.user-type-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    border-color: #0d6efd;
+}
+
+.user-type-card input[type="radio"]:checked + div {
+    background-color: #f8f9fa;
+}
+
+.user-type-card input[type="radio"]:checked {
+    display: none;
+}
+
+/* Estilo quando selecionado */
+.user-type-card:has(input[type="radio"]:checked) {
+    border-color: #0d6efd;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+}
+</style>
+
+<script>
+// Interatividade dos cards de tipo de usuário
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.user-type-card');
+    
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Encontrar o radio button dentro do card
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                
+                // Remover seleção de outros cards
+                cards.forEach(c => c.classList.remove('selected'));
+                
+                // Adicionar classe de selecionado
+                this.classList.add('selected');
+            }
+        });
+    });
+    
+    // Marcar card já selecionado
+    const checkedRadio = document.querySelector('input[name="user_type"]:checked');
+    if (checkedRadio) {
+        checkedRadio.closest('.user-type-card').classList.add('selected');
+    }
+});
+</script>
+{% endblock %} 

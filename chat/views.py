@@ -239,7 +239,7 @@ def iniciar_chat(request, necessidade_id):
         ChatMessage.objects.create(
             chat_room=chat_room,
             remetente=request.user,
-            conteudo=f"Olá! Estou interessado em conversar sobre '{necessidade.titulo}'. Enviei um orçamento de R$ {orcamento.valor:,.2f}."
+            conteudo=f"Olá! Estou interessado em conversar sobre '{necessidade.titulo}'. Enviei um orçamento de R$ {orcamento.valor_total():,.2f}."
         )
         messages.success(request, "Chat iniciado com sucesso!")
     else:

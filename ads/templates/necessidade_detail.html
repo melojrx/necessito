@@ -294,7 +294,7 @@
             {% for orcamento in necessidade.orcamentos.all %}
             <tr>
               <td class="align-middle">{{ orcamento.fornecedor.get_full_name }}</td>
-              <td class="align-middle">{{ orcamento.valor|moeda_brasileira }}</td>
+                                          <td class="align-middle">{{ orcamento.valor_total|moeda_brasileira }}</td>
               <td class="align-middle">
                 <span class="badge
                                     {% if orcamento.status == 'pendente' %}text-bg-secondary

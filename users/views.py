@@ -8,12 +8,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, render, redirect
 from ads.models import Necessidade
 from rankings.models import Avaliacao
-from users.forms import CustomUserCreationForm, UserUpdateForm, UserLoginForm
+from users.forms import BasicUserCreationForm, UserUpdateForm, UserLoginForm, UserCompletionForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, UpdateView
 from django.db.models import Avg
+from django.contrib.auth.decorators import login_required
 
 
 @csrf_exempt
@@ -37,22 +38,54 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 def register_view(request):
+    """Cadastro básico (apenas dados essenciais)"""
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
+        form = BasicUserCreationForm(request.POST)
         if form.is_valid():
             usuario = form.save(commit=False)
-            usuario.is_client = form.cleaned_data.get('is_client', False)
-            usuario.is_supplier = form.cleaned_data.get('is_supplier', False)
+            # Não definir is_client/is_supplier ainda
             usuario.save()
-            messages.success(request, "Registrado com sucesso! Faça login para começar.")
-            return redirect('login')
+            
+            # Fazer login automático após cadastro
+            login(request, usuario)
+            
+            messages.success(request, f"Bem-vindo(a), {usuario.first_name}! Complete seu cadastro para ter uma experiência completa.")
+            
+            # Redirecionar para tela de complemento
+            return redirect('complete_profile')
         else:
            # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
             messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
     else:
-        form = CustomUserCreationForm()
+        form = BasicUserCreationForm()
     
     return render(request, "register.html", {"form": form})
+
+@login_required
+def complete_profile_view(request):
+    """Tela para completar o perfil após cadastro básico"""
+    user = request.user
+    
+    # Se o usuário já tem is_client ou is_supplier definido, redirecionar para home
+    if user.is_client or user.is_supplier:
+        messages.info(request, "Seu perfil já está completo!")
+        return redirect('home')
+    
+    if request.method == "POST":
+        form = UserCompletionForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "🎉 Cadastro completo! Agora você pode aproveitar todas as funcionalidades da plataforma.")
+            return redirect('home')
+        else:
+            messages.error(request, "Verifique os dados informados.")
+    else:
+        form = UserCompletionForm(instance=user)
+    
+    return render(request, "complete_profile.html", {
+        "form": form,
+        "user": user
+    })
 
 def logout_view(request):
     logout(request)

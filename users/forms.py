@@ -44,7 +44,183 @@ class UserLoginForm(forms.Form):
             cleaned_data["user"] = user  # Guardar o user para uso na view
         return cleaned_data
 
+class BasicUserCreationForm(UserCreationForm):
+    """Formulário simplificado para cadastro inicial (apenas dados básicos)"""
+    password1 = forms.CharField(
+        label="Senha", 
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Digite sua senha'
+        })
+    )
+    password2 = forms.CharField(
+        label="Confirmação de Senha", 
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirme sua senha'
+        })
+    )
+
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-theme': 'light',
+                'data-size': 'normal'
+            }
+        )
+    )
+    
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'password1', 'password2']
+        labels = {
+            'email': 'E-mail',
+            'first_name': 'Nome',
+            'last_name': 'Sobrenome',
+        }
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite seu nome'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite seu sobrenome'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'exemplo@indicaai.com'
+            }),
+        }
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("As senhas não coincidem!")
+        return password2
+
+class UserCompletionForm(forms.ModelForm):
+    """Formulário para completar o perfil após cadastro básico"""
+    
+    # Campo para escolha do tipo de usuário com design atrativo
+    USER_TYPE_CHOICES = [
+        ('client', 'Anunciante - Publico necessidades'),
+        ('supplier', 'Fornecedor - Ofereço produtos/serviços'),
+        ('both', 'Ambos - Anuncio e forneço')
+    ]
+    
+    user_type = forms.ChoiceField(
+        label="Como você quer usar a plataforma?",
+        choices=USER_TYPE_CHOICES,
+        widget=forms.RadioSelect(attrs={
+            'class': 'form-check-input'
+        }),
+        required=True
+    )
+    
+    # Campo ManyToMany manual, para permitir escolha de múltiplas categorias
+    preferred_categories = forms.ModelMultipleChoiceField(
+        label="Categorias de Interesse (Opcional)",
+        queryset=Categoria.objects.all(),
+        widget=forms.SelectMultiple(
+            attrs={
+                'class': 'form-select',  
+                'size': 5,
+                'placeholder': 'Escolha até 2 categorias'              
+            }
+        ),
+        required=False
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'user_type',  # Campo virtual que não existe no modelo
+            'telefone',
+            'endereco',
+            'bairro',
+            'cep',
+            'cidade',
+            'estado',
+            'preferred_categories',
+            'foto',
+        ]
+        widgets = {
+            'telefone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '(11) 99999-9999'
+            }),
+            'endereco': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Rua, Número, Complemento'
+            }),
+            'bairro': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome do bairro'
+            }),
+            'cep': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '00000-000'
+            }),
+            'cidade': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome da cidade'
+            }),
+            'estado': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'SP, RJ, MG...'
+            }),
+            'foto': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+        labels = {
+            'telefone': 'Telefone (Opcional)',
+            'endereco': 'Endereço (Opcional)',
+            'bairro': 'Bairro (Opcional)',
+            'cep': 'CEP (Opcional)',
+            'cidade': 'Cidade (Opcional)',
+            'estado': 'Estado (Opcional)',
+            'foto': 'Foto de Perfil (Opcional)',
+            'preferred_categories': 'Categorias de Interesse (Opcional)',
+        }
+        help_texts = {
+            'preferred_categories': 'Escolha até 2 categorias do seu interesse',
+            'telefone': 'Para contato direto com clientes/fornecedores',
+        }
+
+    def clean_preferred_categories(self):
+        cats = self.cleaned_data.get('preferred_categories')
+        if cats and len(cats) > 2:
+            raise forms.ValidationError("Você só pode escolher no máximo 2 categorias.")
+        return cats
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        
+        # Definir is_client e is_supplier baseado na escolha do usuário
+        user_type = self.cleaned_data.get('user_type')
+        if user_type == 'client':
+            user.is_client = True
+            user.is_supplier = False
+        elif user_type == 'supplier':
+            user.is_client = False
+            user.is_supplier = True
+        elif user_type == 'both':
+            user.is_client = True
+            user.is_supplier = True
+        
+        if commit:
+            user.save()
+            # Salvar as categorias preferidas (many-to-many)
+            self.save_m2m()
+            
+        return user
+
 class CustomUserCreationForm(UserCreationForm):
+    """Formulário completo de cadastro (mantido para compatibilidade)"""
     password1 = forms.CharField(label="Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label="Confirmação de Senha", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 

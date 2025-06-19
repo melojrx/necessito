@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-{% if term %}"{{ term }}" – {% endif %}Anúncios em {{ state }}
+{% if term %}"{{ term }}" – {% endif %}Anúncios em {{ state_display }}
 {% endblock %}
 
 {% block content %}
@@ -14,7 +14,7 @@
     <main class="col-12 col-lg-10">
 
       <h2 class="h4 fw-semibold mb-1">
-        {% if term %}Resultados para "{{ term }}"{% else %}Todos os anúncios{% endif %} em {{ state }}
+        {% if term %}Resultados para "{{ term }}"{% else %}Todos os anúncios{% endif %} em {{ state_display }}
       </h2>
       <p class="small text-muted mb-3">
         {{ page_obj.start_index }} – {{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados

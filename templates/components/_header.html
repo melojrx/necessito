@@ -56,12 +56,15 @@
     transition: all 0.3s ease !important;
     border-radius: 50px !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-    padding: 6px !important;
+    padding: 8px !important;
     display: flex !important;
     align-items: center !important;
-    min-height: 52px !important;
+    min-height: 50px !important;
+    height: 50px !important;
     position: relative !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    max-width: 600px !important;
+    width: 100% !important;
 }
 
 .search-bar::before {
@@ -74,6 +77,7 @@
     background: linear-gradient(90deg, #0d6efd 0%, #6f42c1 50%, #20c997 100%);
     transform: scaleX(0);
     transition: transform 0.3s ease;
+    z-index: 1;
 }
 
 .search-bar:focus-within {
@@ -86,69 +90,41 @@
     transform: scaleX(1);
 }
 
-.search-bar input {
+.search-input {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
     background: transparent !important;
-    padding: 14px 20px !important;
-    font-size: 1rem !important;
+    padding: 12px 24px !important;
+    font-size: 1.05rem !important;
     flex: 1 !important;
     font-weight: 500 !important;
     color: #2c3e50 !important;
+    height: 100% !important;
 }
 
-.search-bar input::placeholder {
+.search-input::placeholder {
     color: #6c757d !important;
     font-weight: 400 !important;
 }
 
-.search-divider {
-    width: 1px !important;
-    height: 30px !important;
-    background: linear-gradient(180deg, transparent 0%, #dee2e6 50%, transparent 100%) !important;
-    margin: 0 12px !important;
-}
 
-/* Dropdown de localização modernizado */
-.search-location-dropdown {
-    display: flex !important;
-    align-items: center !important;
-    padding: 10px 16px !important;
-    border-radius: 25px !important;
-    transition: all 0.3s ease !important;
-    border: none !important;
-    background: transparent !important;
-    min-width: 140px !important;
-    font-weight: 500 !important;
-    color: #2c3e50 !important;
-}
-
-.search-location-dropdown:hover {
-    background: rgba(13, 110, 253, 0.08) !important;
-    color: #0d6efd !important;
-}
-
-.search-location-dropdown i {
-    color: #0d6efd !important;
-    margin-right: 8px !important;
-    font-size: 1rem !important;
-}
 
 /* Botão de busca com gradiente */
 .search-submit-btn {
     background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%) !important;
     border: none !important;
     border-radius: 50% !important;
-    width: 44px !important;
-    height: 44px !important;
+    width: 42px !important;
+    height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: white !important;
     transition: all 0.3s ease !important;
-    margin-right: 4px !important;
+    margin-right: 6px !important;
     box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+    flex-shrink: 0 !important;
 }
 
 .search-submit-btn:hover {
@@ -441,34 +417,12 @@
       </button>
   
       <div class="collapse navbar-collapse mt-2 mt-lg-0" id="navbarNav">
-        <ul class="navbar-nav me-auto align-items-start">
-          <li class="nav-item flex-grow-1 me-auto search-container">
+        <ul class="navbar-nav me-auto align-items-center">
+          <li class="nav-item flex-grow-1 me-4 search-container" style="max-width: 650px;">
             <form method="get" action="{% url 'search:necessidade_search_all' %}" class="w-100">
-              <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
               <div class="search-bar">
-                <input type="text" name="q" class="flex-grow-1"
-                  placeholder='Buscar por produtos, serviços...' value="{{ request.GET.q|default:'' }}" autocomplete="off">
-                
-                <!-- Divisor e dropdown de estado (apenas desktop) -->
-                <div class="search-divider d-none d-md-block"></div>
-                <div class="dropdown d-none d-md-block">
-                  <button class="search-location-dropdown dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown" aria-expanded="false" id="stateButton">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>{{ selected_state|default:'Todos os estados' }}</span>
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="stateButton" style="border-radius: 12px;">
-                    <li><a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
-                      <i class="fas fa-globe me-2 text-primary"></i> Todos os estados
-                    </a></li>
-                    {% for st in states %}
-                    <li><a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
-                        href="#" data-state="{{ st.abbreviation }}">
-                        <i class="fas fa-map-marker-alt me-2 text-secondary"></i> {{ st.abbreviation }}
-                    </a></li>
-                    {% endfor %}
-                  </ul>
-                </div>
+                <input type="text" name="q" class="search-input"
+                  placeholder='Buscar por produtos, serviços, categorias...' value="{{ request.GET.q|default:'' }}" autocomplete="off">
                 
                 <button class="search-submit-btn" type="submit" aria-label="Pesquisar">
                   <i class="fas fa-search"></i>
@@ -478,7 +432,7 @@
           </li>
         </ul>
   
-        <ul class="navbar-nav ms-auto align-items-start justify-content-end mt-2 mt-lg-0">
+        <ul class="navbar-nav ms-auto align-items-center justify-content-end mt-2 mt-lg-0">
           <li class="nav-item">
             <a href="{% url 'help' %}" class="nav-link d-flex align-items-center">
               <i class="fas fa-question-circle me-2"></i>
@@ -608,33 +562,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.querySelector('.search-bar input[name="q"]');
-        const stateInput = document.getElementById('stateInput');
-        const stateButton = document.getElementById('stateButton');
-        const stateDropdown = document.querySelectorAll('.dropdown-item[data-state]');
-
-        // Atualizar estado selecionado
-        stateDropdown.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const selectedState = this.getAttribute('data-state');
-                const stateName = selectedState === 'todos' ? 'Todos os estados' : selectedState;
-                
-                stateInput.value = selectedState;
-                
-                // Atualizar o texto do botão
-                const buttonText = stateButton.querySelector('span');
-                if (buttonText) {
-                    buttonText.textContent = stateName;
-                }
-                
-                // Remover classe active de todos
-                stateDropdown.forEach(dropdown => dropdown.classList.remove('active'));
-                // Adicionar classe active ao selecionado
-                this.classList.add('active');
-            });
-        });
-
         // Carregar notificações quando o offcanvas for aberto
         const notificationsOffcanvas = document.getElementById('offcanvasNotifications');
         if (notificationsOffcanvas) {

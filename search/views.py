@@ -98,6 +98,8 @@ class NecessidadeSearchAllView(ListView):
         return qs.order_by("-data_criacao")
 
     def get_context_data(self, **kwargs):
+        from search.models import State
+        
         ctx = super().get_context_data(**kwargs)
         ctx["term"] = self.term
         ctx["state"] = self.state_sigla
@@ -110,5 +112,15 @@ class NecessidadeSearchAllView(ListView):
         ctx["menu_categorias"] = Categoria.objects.all()
         ctx["opcoes_campos"] = ["titulo", "descricao", "categoria", "subcategoria"]
         ctx["status"] = self.status
+        
+        # Adicionar nome amigável do estado
+        if self.state_sigla and self.state_sigla != "TODOS":
+            try:
+                state_obj = State.objects.get(abbreviation=self.state_sigla)
+                ctx["state_display"] = f"{state_obj.name} ({self.state_sigla})"
+            except State.DoesNotExist:
+                ctx["state_display"] = self.state_sigla
+        else:
+            ctx["state_display"] = "Todos os estados"
 
         return ctx

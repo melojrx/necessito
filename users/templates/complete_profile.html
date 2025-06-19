@@ -77,7 +77,7 @@
                         <div class="mb-4">
                             <h5 class="fw-bold text-dark mb-3">
                                 <i class="fas fa-user text-primary me-2"></i>
-                                Informações Pessoais <span class="badge bg-secondary ms-2">Opcional</span>
+                                Informações Pessoais
                             </h5>
                             
                             <div class="row g-3">
@@ -106,7 +106,7 @@
                         <div class="mb-4">
                             <h5 class="fw-bold text-dark mb-3">
                                 <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                Localização <span class="badge bg-secondary ms-2">Opcional</span>
+                                Localização
                             </h5>
                             
                             <div class="row g-3">
@@ -152,7 +152,7 @@
                         <div class="mb-5">
                             <h5 class="fw-bold text-dark mb-3">
                                 <i class="fas fa-tags text-primary me-2"></i>
-                                {{ form.preferred_categories.label }} <span class="badge bg-secondary ms-2">Opcional</span>
+                                {{ form.preferred_categories.label }}
                             </h5>
                             {{ form.preferred_categories }}
                             <div class="form-text">{{ form.preferred_categories.help_text }}</div>
@@ -162,13 +162,24 @@
                         </div>
 
                         <!-- Botões de Ação -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="window.location.href='{% url 'home' %}'">
-                                <i class="fas fa-times me-2"></i>Pular por Agora
-                            </button>
-                            <button type="submit" class="btn btn-primary btn-lg px-5">
-                                <i class="fas fa-check me-2"></i>Finalizar Cadastro
-                            </button>
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                            <!-- Link Central de Ajuda -->
+                            <div class="text-center text-md-start">
+                                <a href="{% url 'help' %}" class="text-decoration-none d-inline-flex align-items-center" style="color: #6c757d; transition: color 0.3s ease;" onmouseover="this.style.color='#0d6efd'" onmouseout="this.style.color='#6c757d'">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    <span>Precisa de ajuda? Acesse nossa <strong>Central de Ajuda</strong></span>
+                                </a>
+                            </div>
+                            
+                            <!-- Botões -->
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-light px-4" style="border: 1px solid #dee2e6;" onclick="window.location.href='{% url 'skip_profile' %}'" onmouseover="this.classList.add('btn-secondary'); this.classList.remove('btn-light')" onmouseout="this.classList.add('btn-light'); this.classList.remove('btn-secondary')">
+                                    <i class="fas fa-times me-2"></i>Pular por Agora
+                                </button>
+                                <button type="submit" class="btn btn-success px-4">
+                                    <i class="fas fa-check me-2"></i>Finalizar Cadastro
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -209,6 +220,23 @@
     border-color: #0d6efd;
     background-color: #f8f9fa;
     box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+}
+
+/* Badges Bootstrap padrão sem customização */
+
+/* Link da Central de Ajuda */
+.help-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+}
+
+.help-link i {
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.help-link:hover i {
+    color: #0d6efd;
 }
 </style>
 

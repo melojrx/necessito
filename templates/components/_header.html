@@ -148,6 +148,8 @@
     margin: 0 4px !important;
     position: relative !important;
     text-decoration: none !important;
+    height: 50px !important;
+    min-height: 50px !important;
 }
 
 .navbar-nav .nav-link:hover {
@@ -181,6 +183,57 @@
     justify-content: center !important;
 }
 
+/* ===== ALINHAMENTO PERFEITO DESKTOP ===== */
+@media (min-width: 992px) {
+    .navbar-nav {
+        align-items: center !important;
+    }
+    
+    .navbar-nav .nav-item {
+        display: flex !important;
+        align-items: center !important;
+        height: 50px !important;
+    }
+    
+    .navbar-nav .nav-link,
+    .navbar-nav .btn.nav-link {
+        height: 50px !important;
+        min-height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        margin: 0 4px !important;
+    }
+    
+    /* Ajuste específico para dropdown do usuário */
+    .navbar-nav .dropdown {
+        display: flex !important;
+        align-items: center !important;
+        height: 50px !important;
+    }
+    
+    .navbar-nav .dropdown .dropdown-toggle {
+        height: 50px !important;
+        min-height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        margin: 0 4px !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Garantir que todos os nav-items tenham a mesma baseline */
+    .navbar-nav .nav-item,
+    .navbar-nav .dropdown {
+        vertical-align: middle !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+}
+
 /* ===== BOTÃO ANUNCIAR PREMIUM ===== */
 .btn-primary {
     background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%) !important;
@@ -193,6 +246,9 @@
     box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
     min-width: 180px !important;
     height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .btn-primary:hover {
@@ -321,11 +377,36 @@
     .navbar-collapse.show .search-container {
         width: 100% !important;
         margin: 16px 0 !important;
+        align-self: center !important;
     }
     
     .navbar-collapse.show .search-bar {
         width: 100% !important;
         min-height: 48px !important;
+    }
+    
+    /* Alinhamento dos itens do menu no mobile - à esquerda */
+    .navbar-collapse .navbar-nav {
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+    
+    .navbar-collapse .navbar-nav .nav-item {
+        width: auto !important;
+        margin-right: auto !important;
+    }
+    
+    .navbar-collapse .navbar-nav .nav-link {
+        justify-content: flex-start !important;
+        text-align: left !important;
+        width: auto !important;
+        display: inline-flex !important;
+    }
+    
+    /* Dropdown também alinhado à esquerda */
+    .navbar-collapse .dropdown-menu {
+        left: 0 !important;
+        right: auto !important;
     }
     
     /* Simplificar busca mobile */
@@ -437,7 +518,7 @@
             <a href="{% url 'help' %}" class="nav-link d-flex align-items-center">
               <i class="fas fa-question-circle me-2"></i>
               <span class="d-none d-md-inline d-lg-inline">Ajuda</span>
-              <span class="d-block d-md-none mobile-text-small">Ajuda</span>
+              <span class="d-block d-md-none mobile-text-small">Central de Ajuda</span>
             </a>
           </li>
           <li class="nav-item position-relative">

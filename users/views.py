@@ -87,6 +87,16 @@ def complete_profile_view(request):
         "user": user
     })
 
+@login_required
+def skip_profile_completion(request):
+    """View para quando o usuário clica em 'Pular por Agora'"""
+    # Marcar na sessão que o usuário optou por pular
+    request.session['profile_completion_skipped'] = True
+    request.session['profile_completion_suggested'] = True
+    
+    messages.info(request, "Tudo bem! Você pode completar seu perfil a qualquer momento acessando sua conta.")
+    return redirect('home')
+
 def logout_view(request):
     logout(request)
     return redirect('home')

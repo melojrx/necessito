@@ -4,7 +4,7 @@
 # Banco de dados vetorial
 chroma_db/
 # Documentos para processamento (geralmente grandes)
-docs/
+
 # Arquivos de saída e resultados
 results/
 outputs/

@@ -159,7 +159,7 @@
                                             </tr>
                                             
                                             <!-- Campos específicos em linha separada -->
-                                            <tr class="campos-especificos-row campos-especificos" data-form-index="{{ forloop.counter0 }}">
+                                            <tr class="campos-especificos-row campos-especificos" data-form-index="{{ forloop.counter0 }}" style="display: none;">
                                                 <td colspan="7" class="bg-light p-3">
                                                     <!-- Campos de Material -->
                                                     <div class="campos-material" style="display: none;">
@@ -404,11 +404,6 @@
 
 <!-- JavaScript do Formset (inline) -->
 <script>
-// ============================================================
-//  Código do formset de orçamento – incorporado inline
-//  (Conteúdo original de static/js/orcamento-formset.js)
-// ============================================================
-
 document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
@@ -425,6 +420,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const maxForms = parseInt(maxFormsInput?.value || '1000');
 
+    /**
+     * Atualiza todos os índices do formset após adicionar/remover itens
+     */
     function updateFormsetIndices() {
         const rows = tbody.querySelectorAll('.formset-row');
         let formIndex = 0;
@@ -433,57 +431,94 @@ document.addEventListener('DOMContentLoaded', function() {
             const deleteInput = row.querySelector('input[name*="DELETE"]');
             if (deleteInput && deleteInput.checked) return;
 
+            // Atualiza todos os campos exceto o campo ID
             row.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.name) el.name = el.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
-                if (el.id)   el.id   = el.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                if (el.name) {
+                    const nameMatch = el.name.match(/^(.*-)\d+(-.*)?$/);
+                    if (nameMatch && !el.name.endsWith('-id')) {
+                        el.name = `${nameMatch[1]}${formIndex}${nameMatch[2] || ''}`;
+                    }
+                }
+                if (el.id) {
+                    const idMatch = el.id.match(/^(id_.*-)\d+(-.*)?$/);
+                    if (idMatch && !el.id.endsWith('-id')) {
+                        el.id = `${idMatch[1]}${formIndex}${idMatch[2] || ''}`;
+                    }
+                }
             });
 
-            row.querySelectorAll('label').forEach(lb => {
-                if (lb.htmlFor) lb.htmlFor = lb.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+            // Atualiza labels
+            row.querySelectorAll('label').forEach(label => {
+                if (label.htmlFor) {
+                    const forMatch = label.htmlFor.match(/^(id_.*-)\d+(-.*)?$/);
+                    if (forMatch) {
+                        label.htmlFor = `${forMatch[1]}${formIndex}${forMatch[2] || ''}`;
+                    }
+                }
             });
 
+            // Atualiza a linha de campos específicos
             const next = row.nextElementSibling;
             if (next && (next.classList.contains('campos-especificos') || next.classList.contains('campos-especificos-row'))) {
                 next.querySelectorAll('input, select, textarea').forEach(el => {
-                    if (el.name) el.name = el.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
-                    if (el.id)   el.id   = el.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                    if (el.name) {
+                        const nameMatch = el.name.match(/^(.*-)\d+(-.*)?$/);
+                        if (nameMatch && !el.name.endsWith('-id')) {
+                            el.name = `${nameMatch[1]}${formIndex}${nameMatch[2] || ''}`;
+                        }
+                    }
+                    if (el.id) {
+                        const idMatch = el.id.match(/^(id_.*-)\d+(-.*)?$/);
+                        if (idMatch && !el.id.endsWith('-id')) {
+                            el.id = `${idMatch[1]}${formIndex}${idMatch[2] || ''}`;
+                        }
+                    }
                 });
-                next.querySelectorAll('label').forEach(lb => {
-                    if (lb.htmlFor) lb.htmlFor = lb.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                
+                next.querySelectorAll('label').forEach(label => {
+                    if (label.htmlFor) {
+                        const forMatch = label.htmlFor.match(/^(id_.*-)\d+(-.*)?$/);
+                        if (forMatch) {
+                            label.htmlFor = `${forMatch[1]}${formIndex}${forMatch[2] || ''}`;
+                        }
+                    }
                 });
             }
 
             formIndex++;
         });
 
-        // Atualiza o atributo data-form-index para linhas e cartões mobile
-        tbody.querySelectorAll('.formset-row').forEach((r, idx) => {
-            r.setAttribute('data-form-index', idx);
-            const camposR = r.nextElementSibling;
-            if (camposR && (camposR.classList.contains('campos-especificos') || camposR.classList.contains('campos-especificos-row'))) {
-                camposR.setAttribute('data-form-index', idx);
-            }
-        });
-
-        const mobileContainer = document.getElementById('mobile-items');
-        if (mobileContainer) {
-            mobileContainer.querySelectorAll('.formset-card').forEach((card, idx) => {
-                card.setAttribute('data-form-index', idx);
-            });
-        }
-
         totalFormsInput.value = formIndex;
     }
 
+    /**
+     * Atualiza visibilidade dos botões de remover
+     */
     function updateRemoveButtons() {
         const rows = tbody.querySelectorAll('.formset-row');
-        const show = rows.length > 1;
-        rows.forEach(r => {
-            const btn = r.querySelector('.remove-item');
-            if (btn) btn.style.display = show ? 'inline-block' : 'none';
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const deleteInput = row.querySelector('input[name*="DELETE"]');
+            if (!deleteInput || !deleteInput.checked) {
+                visibleCount++;
+            }
+        });
+        
+        const show = visibleCount > 1;
+        
+        rows.forEach(row => {
+            const deleteInput = row.querySelector('input[name*="DELETE"]');
+            if (!deleteInput || !deleteInput.checked) {
+                const btn = row.querySelector('.remove-item');
+                if (btn) btn.style.display = show ? 'inline-block' : 'none';
+            }
         });
     }
 
+    /**
+     * Mostra/oculta campos específicos baseado no tipo selecionado
+     */
     function toggleSpecificFields(row) {
         const tipoSelect = row.querySelector('select[name*="tipo"]');
         if (!tipoSelect) return;
@@ -492,25 +527,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const camposRow = row.nextElementSibling;
         if (!camposRow || !(camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) return;
 
-        const idx = row.getAttribute('data-form-index');
         const camposMaterial = camposRow.querySelector('.campos-material');
         const camposServico = camposRow.querySelector('.campos-servico');
 
+        // Exibição Desktop
+        if (tipo === 'MAT') {
+            camposRow.style.display = 'table-row';
+            if (camposMaterial) camposMaterial.style.display = 'block';
+            if (camposServico) camposServico.style.display = 'none';
+        } else if (tipo === 'SRV') {
+            camposRow.style.display = 'table-row';
+            if (camposMaterial) camposMaterial.style.display = 'none';
+            if (camposServico) camposServico.style.display = 'block';
+        } else {
+            camposRow.style.display = 'none';
+        }
+
+        // Sincroniza com versão Mobile
+        const idx = row.getAttribute('data-form-index');
         if (idx !== null) {
             const card = document.querySelector(`.formset-card[data-form-index="${idx}"]`);
             if (card) {
                 const cMat = card.querySelector('.campos-material');
                 const cSrv = card.querySelector('.campos-servico');
                 if (tipo === 'MAT') {
-                    camposRow.style.display = 'table-row';
                     if (cMat) cMat.style.display = 'block';
                     if (cSrv) cSrv.style.display = 'none';
                 } else if (tipo === 'SRV') {
-                    camposRow.style.display = 'table-row';
                     if (cMat) cMat.style.display = 'none';
                     if (cSrv) cSrv.style.display = 'block';
                 } else {
-                    camposRow.style.display = 'none';
+                    if (cMat) cMat.style.display = 'none';
+                    if (cSrv) cSrv.style.display = 'none';
                 }
             }
         }
@@ -518,112 +566,220 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSubtotal(row);
     }
 
+    /**
+     * Calcula o subtotal de uma linha
+     */
     function updateSubtotal(row) {
-        const qtd  = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
+        const qtd = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
         const vUni = parseFloat(row.querySelector('input[name*="valor_unitario"]')?.value) || 0;
         const cell = row.querySelector('.subtotal');
+        
         if (cell) {
             const subtotal = qtd * vUni;
             cell.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
         }
+        
         updateTotal();
     }
 
+    /**
+     * Calcula o total geral
+     */
     function updateTotal() {
         let total = 0;
+        
         tbody.querySelectorAll('.formset-row').forEach(r => {
             const del = r.querySelector('input[name*="DELETE"]');
             if (del?.checked) return;
+            
             const txt = r.querySelector('.subtotal')?.textContent || 'R$ 0,00';
             const val = parseFloat(txt.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
             total += val;
         });
+        
         const el = document.getElementById('total-geral');
         if (el) el.textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-        // Sincroniza total mobile se existir
+        
         const elMob = document.getElementById('total-geral-mobile');
         if (elMob) elMob.textContent = el?.textContent;
     }
 
+    /**
+     * Adiciona uma nova linha de item
+     */
     function addItem() {
         const current = parseInt(totalFormsInput.value);
-        if (current >= maxForms) { alert('Número máximo de itens atingido.'); return; }
+        if (current >= maxForms) {
+            alert('Número máximo de itens atingido.');
+            return;
+        }
 
-        const templateRow = tbody.querySelector('.formset-row');
-        if (!templateRow) { console.error('Nenhuma linha modelo encontrada'); return; }
+        // Busca uma linha não deletada como template, ou usa a primeira disponível
+        let templateRow = null;
+        const allRows = tbody.querySelectorAll('.formset-row');
+        
+        for (let row of allRows) {
+            const deleteInput = row.querySelector('input[name*="DELETE"]');
+            if (!deleteInput || !deleteInput.checked) {
+                templateRow = row;
+                break;
+            }
+        }
+        
+        if (!templateRow && allRows.length > 0) {
+            templateRow = allRows[0];
+        }
+        
+        if (!templateRow) {
+            console.error('Nenhuma linha modelo encontrada');
+            return;
+        }
 
+        // Clona as linhas
         const newRow = templateRow.cloneNode(true);
-
         const templateCamposRow = templateRow.nextElementSibling;
         let newCamposRow = null;
+        
         if (templateCamposRow && (templateCamposRow.classList.contains('campos-especificos') || templateCamposRow.classList.contains('campos-especificos-row'))) {
             newCamposRow = templateCamposRow.cloneNode(true);
         }
 
+        // Garante visibilidade e remove campo ID
+        newRow.style.display = '';
+        const idField = newRow.querySelector('input[name*="-id"]');
+        if (idField) idField.remove();
+        
+        // Limpa valores
         newRow.querySelectorAll('input, select, textarea').forEach(el => {
-            if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else {
+                el.value = '';
+            }
             el.classList.remove('is-invalid');
         });
 
         if (newCamposRow) {
+            newCamposRow.style.display = 'none';
+            const idFieldCampos = newCamposRow.querySelector('input[name*="-id"]');
+            if (idFieldCampos) idFieldCampos.remove();
+            
             newCamposRow.querySelectorAll('input, select, textarea').forEach(el => {
-                if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = false;
+                } else {
+                    el.value = '';
+                }
                 el.classList.remove('is-invalid');
             });
-            newCamposRow.style.display = 'none';
-            const cm = newCamposRow.querySelector('.campos-material'); if (cm) cm.style.display = 'none';
-            const cs = newCamposRow.querySelector('.campos-servico');  if (cs) cs.style.display = 'none';
+            
+            const cm = newCamposRow.querySelector('.campos-material');
+            const cs = newCamposRow.querySelector('.campos-servico');
+            if (cm) cm.style.display = 'none';
+            if (cs) cs.style.display = 'none';
         }
 
+        // Remove mensagens de erro
         newRow.querySelectorAll('.text-danger').forEach(e => e.remove());
         if (newCamposRow) newCamposRow.querySelectorAll('.text-danger').forEach(e => e.remove());
 
+        // Reset subtotal
         const cell = newRow.querySelector('.subtotal');
         if (cell) cell.textContent = 'R$ 0,00';
 
+        // Adiciona as linhas
         tbody.appendChild(newRow);
         if (newCamposRow) tbody.appendChild(newCamposRow);
 
+        // Atualiza índices e interface
         updateFormsetIndices();
         updateRemoveButtons();
 
+        // Foca no primeiro campo
         const firstInput = newRow.querySelector('input, select');
         if (firstInput) firstInput.focus();
 
-        // Para mobile: clone também card
+        // Atualiza mobile se existir
         const mobileContainer = document.getElementById('mobile-items');
         if (mobileContainer) {
-            const templateCard = mobileContainer.querySelector('.formset-card');
+            // Similar lógica para mobile cards
+            let templateCard = null;
+            const allCards = mobileContainer.querySelectorAll('.formset-card');
+            
+            for (let card of allCards) {
+                const deleteInput = card.querySelector('input[name*="DELETE"]');
+                if (!deleteInput || !deleteInput.checked) {
+                    templateCard = card;
+                    break;
+                }
+            }
+            
+            if (!templateCard && allCards.length > 0) {
+                templateCard = allCards[0];
+            }
+            
             if (templateCard) {
                 const newCard = templateCard.cloneNode(true);
+                newCard.style.display = '';
+                
+                const idFieldMobile = newCard.querySelector('input[name*="-id"]');
+                if (idFieldMobile) idFieldMobile.remove();
+                
                 newCard.querySelectorAll('input, select, textarea').forEach(el => {
-                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = false; else el.value = '';
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = false;
+                    } else {
+                        el.value = '';
+                    }
                     el.classList.remove('is-invalid');
                 });
+                
                 newCard.querySelectorAll('.text-danger').forEach(e => e.remove());
-                mobileContainer.insertBefore(newCard, mobileContainer.lastElementChild.previousElementSibling || null);
+                
+                const camposMat = newCard.querySelector('.campos-material');
+                const camposSrv = newCard.querySelector('.campos-servico');
+                if (camposMat) camposMat.style.display = 'none';
+                if (camposSrv) camposSrv.style.display = 'none';
+                
+                const subtotalDiv = newCard.querySelector('.subtotal');
+                if (subtotalDiv) subtotalDiv.textContent = 'R$ 0,00';
+                
+                mobileContainer.insertBefore(newCard, mobileContainer.querySelector('.card.bg-light'));
             }
         }
     }
 
+    /**
+     * Remove uma linha de item
+     */
     function removeItem(button) {
         const row = button.closest('.formset-row');
         const del = row.querySelector('input[name*="DELETE"]');
         const camposRow = row.nextElementSibling;
+        
         if (del) {
             del.checked = true;
             row.style.display = 'none';
-            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) camposRow.style.display = 'none';
+            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) {
+                camposRow.style.display = 'none';
+            }
         } else {
-            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) camposRow.remove();
+            if (camposRow && (camposRow.classList.contains('campos-especificos') || camposRow.classList.contains('campos-especificos-row'))) {
+                camposRow.remove();
+            }
             row.remove();
         }
+        
         updateFormsetIndices();
         updateRemoveButtons();
         updateTotal();
     }
 
-    addButton.addEventListener('click', e => { e.preventDefault(); addItem(); });
+    // Event Listeners
+    addButton.addEventListener('click', e => {
+        e.preventDefault();
+        addItem();
+    });
 
     tbody.addEventListener('click', e => {
         if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
@@ -634,23 +790,70 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     tbody.addEventListener('change', e => {
-        const target = e.target; const row = target.closest('.formset-row'); if (!row) return;
-        if (target.name && target.name.includes('tipo')) toggleSpecificFields(row);
-        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) updateSubtotal(row);
+        const target = e.target;
+        const row = target.closest('.formset-row');
+        if (!row) return;
+        
+        if (target.name && target.name.includes('tipo')) {
+            toggleSpecificFields(row);
+        }
+        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) {
+            updateSubtotal(row);
+        }
     });
 
     tbody.addEventListener('input', e => {
-        const target = e.target; const row = target.closest('.formset-row'); if (!row) return;
-        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) updateSubtotal(row);
+        const target = e.target;
+        const row = target.closest('.formset-row');
+        if (!row) return;
+        
+        if (target.name && (target.name.includes('quantidade') || target.name.includes('valor_unitario'))) {
+            updateSubtotal(row);
+        }
     });
 
-    tbody.querySelectorAll('.formset-row').forEach(r => { toggleSpecificFields(r); updateSubtotal(r); });
+    // Mobile events
+    const mobileContainer = document.getElementById('mobile-items');
+    if (mobileContainer) {
+        mobileContainer.addEventListener('click', e => {
+            if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
+                e.preventDefault();
+                const btn = e.target.closest('.remove-item');
+                const card = btn.closest('.formset-card');
+                const idx = card.getAttribute('data-form-index');
+                
+                // Remove a linha correspondente no desktop
+                const desktopRow = tbody.querySelector(`.formset-row[data-form-index="${idx}"]`);
+                if (desktopRow) {
+                    const desktopBtn = desktopRow.querySelector('.remove-item');
+                    if (desktopBtn) removeItem(desktopBtn);
+                }
+            }
+        });
+    }
 
+    // Inicialização
+    tbody.querySelectorAll('.formset-row').forEach((r, idx) => {
+        r.setAttribute('data-form-index', idx);
+        const camposR = r.nextElementSibling;
+        if (camposR && (camposR.classList.contains('campos-especificos') || camposR.classList.contains('campos-especificos-row'))) {
+            camposR.setAttribute('data-form-index', idx);
+        }
+        toggleSpecificFields(r);
+        updateSubtotal(r);
+    });
+
+    // Atualiza índices na inicialização
+    updateFormsetIndices();
     updateRemoveButtons();
     updateTotal();
 
-    console.log('Formset de orçamento (update) inicializado com sucesso');
+    // Log de inicialização
+    console.log('=== Formset de orçamento (update) inicializado ===');
+    console.log('Total forms:', totalFormsInput.value);
+    console.log('Linhas:', tbody.querySelectorAll('.formset-row').length);
 
+    // Marca que o formset foi carregado
     addButton.setAttribute('data-formset-loaded', 'true');
 });
 </script>

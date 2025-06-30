@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+.help-section-header {
+    background: linear-gradient(135deg, #ffc107 0%, #e6a800 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <h1 class="display-5 fw-bold mb-3">💰 {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <div class="list-group">
+            <!-- Solicitando orçamentos -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaSolicitandoOrcamentos"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaSolicitandoOrcamentos">
+                <i class="fas fa-clipboard-list me-2 text-primary"></i>
+                Solicitando orçamentos
+            </a>
+            <div class="collapse mt-4" id="ajudaSolicitandoOrcamentos">
+                <div class="card card-body">
+                    <h3 class="mb-3">📝 Solicitando orçamentos</h3>
+                    <p>Para obter propostas adequadas, descreva claramente sua necessidade, incluindo escopo, quantidade, prazo e especificações técnicas.</p>
+                    
+                    <h5>Detalhe sua solicitação</h5>
+                    <p>Inclua todas as informações relevantes para que os fornecedores possam enviar propostas precisas e personalizadas.</p>
+                    
+                    <h5>Defina prazos realistas</h5>
+                    <p>Estabeleça prazos de entrega que permitam análise e negociação adequadas.</p>
+                    
+                    <h5>Acompanhe as respostas</h5>
+                    <p>Verifique regularmente as propostas recebidas e mantenha contato com os fornecedores para esclarecimentos.</p>
+                    
+                    <img src="{% static 'img/help/orcamentos/criarAnuncio.png' %}" alt="Como criar anúncio para solicitar orçamentos" class="img-fluid rounded shadow-sm mb-4" style="max-width: 800px">
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Quanto mais detalhada a solicitação, melhor será a qualidade dos orçamentos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enviando propostas -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaEnviandoPropostas"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaEnviandoPropostas">
+                <i class="fas fa-paper-plane me-2 text-success"></i>
+                Enviando propostas
+            </a>
+            <div class="collapse mt-4" id="ajudaEnviandoPropostas">
+                <div class="card card-body">
+                    <h3 class="mb-3">📄 Enviando propostas</h3>
+                    <p>Ao enviar sua proposta, seja claro sobre preços, prazos e condições para evitar mal-entendidos.</p>
+                    
+                    <h5>Detalhe os valores</h5>
+                    <p>Especifique todos os custos envolvidos, incluindo possíveis adicionais.</p>
+                    
+                    <h5>Informe prazos e condições</h5>
+                    <p>Seja transparente quanto ao prazo de entrega e condições de pagamento.</p>
+                    
+                    <h5>Anexe documentos se necessário</h5>
+                    <p>Use anexos para enviar catálogos, especificações técnicas ou certificados.</p>
+                    
+                    <img src="{% static 'img/help/orcamentos/CriarOrcamento.png' %}" alt="Como criar orçamento" class="img-fluid rounded shadow-sm mb-4" style="max-width: 800px">
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Propostas bem detalhadas aumentam a confiança do cliente e suas chances de sucesso.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Negociação de valores -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaNegociacaoValores"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaNegociacaoValores">
+                <i class="fas fa-handshake me-2 text-info"></i>
+                Negociação de valores
+            </a>
+            <div class="collapse mt-4" id="ajudaNegociacaoValores">
+                <div class="card card-body">
+                    <h3 class="mb-3">🤝 Negociação de valores</h3>
+                    <p>Negociar de forma profissional é fundamental para fechar negócios que atendam às expectativas de ambos os lados.</p>
+                    
+                    <h5>Comunique-se claramente</h5>
+                    <p>Use o chat ou sistema integrado para discutir ajustes, prazos e condições.</p>
+                    
+                    <img src="{% static 'img/help/orcamentos/Chats.png' %}" alt="Chat para negociação" class="img-fluid rounded shadow-sm mb-4" style="max-width: 300px">
+                    
+                    <h5>Seja flexível, mas realista</h5>
+                    <p>Busque um meio-termo que seja vantajoso para ambas as partes.</p>
+                    
+                    <h5>Documente as alterações</h5>
+                    <p>Confirme por escrito todas as mudanças acordadas para evitar problemas futuros.</p>
+                    
+                    <img src="{% static 'img/help/orcamentos/ChatOrcamento.png' %}" alt="Chat com orçamentos" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Negociações transparentes e rápidas aumentam a satisfação e fortalecem parcerias.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sistema de aprovação -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaSistemaAprovacao"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaSistemaAprovacao">
+                <i class="fas fa-check-circle me-2 text-warning"></i>
+                Sistema de aprovação
+            </a>
+            <div class="collapse mt-4" id="ajudaSistemaAprovacao">
+                <div class="card card-body">
+                    <h3 class="mb-3">✅ Sistema de aprovação</h3>
+                    <p>Utilize o sistema de aprovação para formalizar e registrar os orçamentos aceitos, garantindo segurança e transparência.</p>
+                    
+                    <h5>Revise cuidadosamente</h5>
+                    <p>Confira todos os detalhes antes de aprovar a proposta final.</p>
+                    
+                    <h5>Confirme prazos e valores</h5>
+                    <p>Assegure que os prazos e valores estejam alinhados com o que foi negociado.</p>
+                    
+                    <h5>Registre formalmente</h5>
+                    <p>Use a plataforma para formalizar a aprovação e gerar contratos ou comprovantes.</p>
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> A aprovação formal ajuda a evitar mal-entendidos e facilita o acompanhamento do projeto.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-warning btn-lg text-dark">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

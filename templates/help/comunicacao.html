@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+.help-section-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <h1 class="display-5 fw-bold mb-3">💬 {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <div class="list-group">
+            <!-- Iniciando conversas -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaIniciarConversas"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaIniciarConversas">
+                <i class="fas fa-comments me-2 text-primary"></i>
+                Iniciando conversas
+            </a>
+            <div class="collapse mt-4" id="ajudaIniciarConversas">
+                <div class="card card-body">
+                    <h3 class="mb-3">💬 Iniciando Conversas</h3>
+                    <p>Você pode iniciar uma conversa com o cliente ou fornecedor de duas maneiras principais:</p>
+
+                    <h5>1. Pela área do usuário</h5>
+                    <p>Na parte de cima do site, clique em <strong>"Olá, SeuNome"</strong> para abrir o menu de gerenciamento do usuário. Em seguida, selecione a opção <strong>Chats</strong> para visualizar todas as suas conversas ativas.</p>
+                    <ul>
+                        <li>Olá, SeuNome → <strong>Chats</strong></li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/comunicacao/ButtonChat.png' %}" alt="Acesso ao Chat" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <h5>2. Pelo botão "Conversar com Cliente"</h5>
+                    <p>Após enviar um orçamento, você verá o botão <strong>"Conversar com Cliente"</strong> na página do anúncio. Ao clicar, uma nova conversa será iniciada com uma mensagem automática contendo o título do anúncio e o valor proposto.</p>
+                    
+                    <img src="{% static 'img/help/comunicacao/Chats.png' %}" alt="Lista de chats" class="img-fluid rounded shadow-sm mb-4" style="max-width: 300px">
+
+                    <h5>Mensagem Padrão Exemplo</h5>
+                    <div class="border p-3 bg-light rounded">
+                        <em>Olá! Estou interessado em conversar sobre '<strong>Suporte Técnico e Infraestrutura | Contrato Profissional</strong>'. Enviei um orçamento de <strong>R$ valor proposto</strong>.</em>
+                    </div>
+
+                    <p class="mt-3">Essa mensagem inicial facilita a identificação do assunto e torna o contato mais profissional.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Prefira manter toda a negociação dentro do chat da plataforma para garantir histórico e segurança na comunicação.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compartilhando arquivos -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaCompartilharArquivos"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaCompartilharArquivos">
+                <i class="fas fa-paperclip me-2 text-success"></i>
+                Compartilhando arquivos
+            </a>
+            <div class="collapse mt-4" id="ajudaCompartilharArquivos">
+                <div class="card card-body">
+                    <h3 class="mb-3">📎 Compartilhando Arquivos</h3>
+                    <p>É possível enviar arquivos relevantes diretamente pelo chat.</p>
+
+                    <h5>Formatos suportados</h5>
+                    <ul>
+                        <li>PDF, DOC, XLS, JPG, PNG, entre outros formatos comuns.</li>
+                        <li>Limite de tamanho: até 10MB por arquivo.</li>
+                    </ul>
+
+                    <h5>Boas práticas</h5>
+                    <ul>
+                        <li>Evite enviar arquivos duplicados ou sem contexto.</li>
+                        <li>Nomeie os arquivos de forma clara (ex.: "orçamento_v2.pdf").</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Arquivos bem organizados agilizam a negociação e evitam retrabalho.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etiqueta de comunicação -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaEtiqueta"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaEtiqueta">
+                <i class="fas fa-user-tie me-2 text-info"></i>
+                Etiqueta de comunicação
+            </a>
+            <div class="collapse mt-4" id="ajudaEtiqueta">
+                <div class="card card-body">
+                    <h3 class="mb-3">🤝 Etiqueta de Comunicação</h3>
+                    <p>Uma comunicação educada e profissional ajuda a construir relações de confiança.</p>
+
+                    <h5>Recomendações</h5>
+                    <ul>
+                        <li>Seja claro e objetivo nas mensagens.</li>
+                        <li>Evite linguagem agressiva, ofensiva ou sarcástica.</li>
+                        <li>Respeite os horários comerciais sempre que possível.</li>
+                        <li>Confirme acordos por escrito dentro do chat.</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/comunicacao/ChatOrcamento.png' %}" alt="Chat com orçamentos" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> A boa comunicação é um diferencial e pode influenciar diretamente na decisão de fechar negócio.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Denúncias e bloqueios -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaDenunciasBloqueios"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaDenunciasBloqueios">
+                <i class="fas fa-shield-alt me-2 text-warning"></i>
+                Denúncias e bloqueios
+            </a>
+            <div class="collapse mt-4" id="ajudaDenunciasBloqueios">
+                <div class="card card-body">
+                    <h3 class="mb-3">🚫 Denúncias e Bloqueios</h3>
+                    <p>Se você se sentir desconfortável ou identificar qualquer comportamento inadequado, a plataforma oferece recursos de proteção.</p>
+
+                    <h5>Como denunciar?</h5>
+                    <ul>
+                        <li>Dentro da conversa, clique no botão "Mais opções" e selecione "Denunciar".</li>
+                        <li>Explique o motivo da denúncia com clareza.</li>
+                    </ul>
+
+                    <h5>Como bloquear alguém?</h5>
+                    <ul>
+                        <li>Você pode impedir que a outra parte envie mensagens futuras clicando em "Bloquear".</li>
+                        <li>O bloqueio é reversível e pode ser desfeito a qualquer momento.</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Utilize esses recursos com responsabilidade. Eles ajudam a manter o ambiente seguro e profissional.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-info btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

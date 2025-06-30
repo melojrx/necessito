@@ -10,6 +10,7 @@
 </head>
 <body>
     {% load chat_tags %}
+    {% load currency_filters %}
     
     <div class="container-fluid h-100">
         <div class="row h-100">
@@ -100,7 +101,7 @@
                         <div class="row g-2 small">
                             <div class="col-12">
                                 <strong>Valor:</strong><br>
-                                <span class="text-success fw-bold fs-5">R$ {{ chat_room.orcamento.valor_total|floatformat:2 }}</span>
+                                <span class="text-success fw-bold fs-5">{{ chat_room.orcamento.valor_total|currency_br }}</span>
                             </div>
                             <div class="col-6">
                                 <strong>Validade:</strong><br>

@@ -82,6 +82,16 @@ class Orcamento(models.Model):
             total += item.total
         return total
 
+    def get_subtotal(self):
+        """Calcula o subtotal do orçamento (sem frete)"""
+        return self.valor_total_com_impostos()
+    
+    def get_total_geral(self):
+        """Calcula o total geral do orçamento (subtotal + frete)"""
+        subtotal = self.get_subtotal()
+        frete = self.valor_frete or Decimal('0.00')
+        return subtotal + frete
+
     def clean(self):
         super().clean()
         # Removida a validação incorreta - prazo de entrega pode ser posterior ao prazo de validade
@@ -173,6 +183,34 @@ class OrcamentoItem(models.Model):
     def total_impostos(self):
         """Calcula o valor total dos impostos para este item"""
         return self.total - (self.valor_unitario * self.quantidade)
+
+    @property
+    def valor_icms(self):
+        """Calcula o valor do ICMS para este item"""
+        if self.tipo == self.MATERIAL and self.icms_percentual:
+            base_calculo = self.valor_unitario * self.quantidade
+            return base_calculo * (self.icms_percentual / Decimal('100'))
+        return Decimal('0.00')
+
+    @property
+    def valor_ipi(self):
+        """Calcula o valor do IPI para este item"""
+        if self.tipo == self.MATERIAL and self.ipi_percentual:
+            base_calculo = self.valor_unitario * self.quantidade
+            return base_calculo * (self.ipi_percentual / Decimal('100'))
+        return Decimal('0.00')
+
+    @property
+    def valor_iss(self):
+        """Calcula o valor do ISS para este item (apenas serviços)"""
+        if self.tipo == self.SERVICO and self.aliquota_iss:
+            base_calculo = self.valor_unitario * self.quantidade
+            return base_calculo * (self.aliquota_iss / Decimal('100'))
+        return Decimal('0.00')
+
+    def get_total(self):
+        """Alias para o property total (compatibilidade com template)"""
+        return self.total
 
     def clean(self):
         super().clean()

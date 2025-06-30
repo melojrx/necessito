@@ -4,7 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from core import settings
-from core.views import HelpView
+from core.views import (
+    HelpView, 
+    HelpStartView, 
+    HelpAnnounceView, 
+    HelpBudgetView, 
+    HelpCommunicationView, 
+    HelpRatingsView, 
+    HelpSupportView
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -18,8 +26,16 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path('api/', include('api.urls')),
     
-    # Páginas institucionais
+    # Central de Ajuda - Página Principal
     path('ajuda/', HelpView.as_view(), name='help'),
+    
+    # Central de Ajuda - Seções Específicas
+    path('ajuda/comecar/', HelpStartView.as_view(), name='help_start'),
+    path('ajuda/anunciar/', HelpAnnounceView.as_view(), name='help_announce'),
+    path('ajuda/orcamentos/', HelpBudgetView.as_view(), name='help_budget'),
+    path('ajuda/comunicacao/', HelpCommunicationView.as_view(), name='help_communication'),
+    path('ajuda/avaliacoes/', HelpRatingsView.as_view(), name='help_ratings'),
+    path('ajuda/suporte/', HelpSupportView.as_view(), name='help_support'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

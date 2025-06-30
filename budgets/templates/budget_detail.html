@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load currency_filters %}
 
 {% block title %}Orçamento #{{ orcamento.id }}{% endblock %}
 
@@ -151,34 +152,34 @@
                                         </td>
                                         <td class="text-center">{{ item.quantidade|floatformat:3 }}</td>
                                         <td class="text-center">{{ item.unidade }}</td>
-                                        <td class="text-end">{{ item.valor_unitario|floatformat:2 }}</td>
+                                        <td class="text-end">{{ item.valor_unitario|currency_br }}</td>
                                         
                                         <!-- Impostos -->
                                         <td class="text-center">
-                                            {% if item.tipo == 'MAT' %}{{ item.icms_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                            {% if item.tipo == 'MAT' %}{{ item.icms_percentual|percentage_br }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if item.tipo == 'MAT' %}{{ item.ipi_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                            {% if item.tipo == 'MAT' %}{{ item.ipi_percentual|percentage_br }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if item.tipo == 'MAT' %}{{ item.st_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                            {% if item.tipo == 'MAT' %}{{ item.st_percentual|percentage_br }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if item.tipo == 'MAT' %}{{ item.difal_percentual|floatformat:2 }}{% else %}-{% endif %}
+                                            {% if item.tipo == 'MAT' %}{{ item.difal_percentual|percentage_br }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center">
-                                            {% if item.tipo == 'SRV' %}{{ item.aliquota_iss|floatformat:2 }}{% else %}-{% endif %}
+                                            {% if item.tipo == 'SRV' %}{{ item.aliquota_iss|percentage_br }}{% else %}-{% endif %}
                                         </td>
                                         
-                                        <td class="text-end">{{ item.preco_com_impostos|floatformat:2 }}</td>
-                                        <td class="text-end"><strong>{{ item.total|floatformat:2 }}</strong></td>
+                                        <td class="text-end">{{ item.preco_com_impostos|currency_br }}</td>
+                                        <td class="text-end"><strong>{{ item.total|currency_br }}</strong></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-secondary">
                                         <th colspan="11" class="text-end">TOTAL GERAL:</th>
-                                        <th class="text-end">R$ {{ orcamento.valor_total_com_impostos|floatformat:2 }}</th>
+                                        <th class="text-end">{{ orcamento.valor_total_com_impostos|currency_br }}</th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -204,7 +205,7 @@
                                     </small>
                                 </div>
                                 <div class="text-end">
-                                    <div class="fw-bold text-primary fs-5">R$ {{ item.total|floatformat:2 }}</div>
+                                    <div class="fw-bold text-primary fs-5">{{ item.total|currency_br }}</div>
                                     <small class="text-muted">Total</small>
                                 </div>
                             </div>
@@ -218,13 +219,13 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="text-center border rounded py-1">
-                                        <div class="fw-bold">R$ {{ item.valor_unitario|floatformat:2 }}</div>
+                                        <div class="fw-bold">{{ item.valor_unitario|currency_br }}</div>
                                         <small class="text-muted">Unit.</small>
                                     </div>
                                 </div>
                                 <div class="col-5">
                                     <div class="text-center border rounded py-1">
-                                        <div class="fw-bold">R$ {{ item.preco_com_impostos|floatformat:2 }}</div>
+                                        <div class="fw-bold">{{ item.preco_com_impostos|currency_br }}</div>
                                         <small class="text-muted">C/ Impostos</small>
                                     </div>
                                 </div>
@@ -236,16 +237,16 @@
                                 <small class="text-muted d-block mb-1">Impostos:</small>
                                 <div class="d-flex flex-wrap gap-1">
                                     {% if item.icms_percentual %}
-                                        <span class="badge bg-secondary">ICMS: {{ item.icms_percentual|floatformat:2 }}%</span>
+                                        <span class="badge bg-secondary">ICMS: {{ item.icms_percentual|percentage_br }}</span>
                                     {% endif %}
                                     {% if item.ipi_percentual %}
-                                        <span class="badge bg-secondary">IPI: {{ item.ipi_percentual|floatformat:2 }}%</span>
+                                        <span class="badge bg-secondary">IPI: {{ item.ipi_percentual|percentage_br }}</span>
                                     {% endif %}
                                     {% if item.st_percentual %}
-                                        <span class="badge bg-secondary">ST: {{ item.st_percentual|floatformat:2 }}%</span>
+                                        <span class="badge bg-secondary">ST: {{ item.st_percentual|percentage_br }}</span>
                                     {% endif %}
                                     {% if item.difal_percentual %}
-                                        <span class="badge bg-secondary">DIFAL: {{ item.difal_percentual|floatformat:2 }}%</span>
+                                        <span class="badge bg-secondary">DIFAL: {{ item.difal_percentual|percentage_br }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -254,7 +255,7 @@
                             {% if item.tipo == 'SRV' and item.aliquota_iss %}
                             <div class="mt-2">
                                 <small class="text-muted d-block mb-1">Impostos:</small>
-                                <span class="badge bg-secondary">ISS: {{ item.aliquota_iss|floatformat:2 }}%</span>
+                                <span class="badge bg-secondary">ISS: {{ item.aliquota_iss|percentage_br }}</span>
                             </div>
                             {% endif %}
                         </div>
@@ -267,7 +268,7 @@
                                     <h5 class="mb-0 text-primary">TOTAL GERAL</h5>
                                 </div>
                                 <div class="col-6">
-                                    <h4 class="mb-0 text-success fw-bold">R$ {{ orcamento.valor_total_com_impostos|floatformat:2 }}</h4>
+                                    <h4 class="mb-0 text-success fw-bold">{{ orcamento.valor_total_com_impostos|currency_br }}</h4>
                                 </div>
                             </div>
                         </div>

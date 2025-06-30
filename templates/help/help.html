@@ -147,116 +147,128 @@
         <div class="row g-4 mb-5">
             <!-- Card 1: Começar -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-start h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-rocket text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_start' %}" class="text-decoration-none">
+                    <div class="help-category-card card-start h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-rocket text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">🚀 Começar</h3>
+                        <p class="text-muted mb-3">
+                            Primeiros passos na plataforma e configuração inicial da conta
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Como criar sua conta</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Completando seu perfil</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Navegação básica</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Configurações iniciais</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">🚀 Começar</h3>
-                    <p class="text-muted mb-3">
-                        Primeiros passos na plataforma e configuração inicial da conta
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-success me-2">▸</span>Como criar sua conta</li>
-                        <li class="mb-2"><span class="text-success me-2">▸</span>Completando seu perfil</li>
-                        <li class="mb-2"><span class="text-success me-2">▸</span>Navegação básica</li>
-                        <li class="mb-2"><span class="text-success me-2">▸</span>Configurações iniciais</li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             <!-- Card 2: Anunciar -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-announce h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-bullhorn text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_announce' %}" class="text-decoration-none">
+                    <div class="help-category-card card-announce h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-bullhorn text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💼 Anunciar</h3>
+                        <p class="text-muted mb-3">
+                            Aprenda a criar anúncios eficazes e atrair fornecedores qualificados
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Criando anúncios eficazes</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Melhores práticas para fotos</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Escolhendo categorias</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Gerenciando anúncios</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">💼 Anunciar</h3>
-                    <p class="text-muted mb-3">
-                        Aprenda a criar anúncios eficazes e atrair fornecedores qualificados
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-primary me-2">▸</span>Criando anúncios eficazes</li>
-                        <li class="mb-2"><span class="text-primary me-2">▸</span>Melhores práticas para fotos</li>
-                        <li class="mb-2"><span class="text-primary me-2">▸</span>Escolhendo categorias</li>
-                        <li class="mb-2"><span class="text-primary me-2">▸</span>Gerenciando anúncios</li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             <!-- Card 3: Orçamentos -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-budget h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-calculator text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_budget' %}" class="text-decoration-none">
+                    <div class="help-category-card card-budget h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-calculator text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💰 Orçamentos</h3>
+                        <p class="text-muted mb-3">
+                            Solicite, envie e gerencie orçamentos de forma profissional
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Solicitando orçamentos</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Enviando propostas</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Negociação de valores</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de aprovação</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">💰 Orçamentos</h3>
-                    <p class="text-muted mb-3">
-                        Solicite, envie e gerencie orçamentos de forma profissional
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Solicitando orçamentos</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Enviando propostas</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Negociação de valores</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de aprovação</li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             <!-- Card 4: Comunicação -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-chat h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-comments text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_communication' %}" class="text-decoration-none">
+                    <div class="help-category-card card-chat h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-comments text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💬 Comunicação</h3>
+                        <p class="text-muted mb-3">
+                            Use o chat integrado para negociar e esclarecer dúvidas
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Iniciando conversas</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Compartilhando arquivos</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Etiqueta de comunicação</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Denúncias e bloqueios</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">💬 Comunicação</h3>
-                    <p class="text-muted mb-3">
-                        Use o chat integrado para negociar e esclarecer dúvidas
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-info me-2">▸</span>Iniciando conversas</li>
-                        <li class="mb-2"><span class="text-info me-2">▸</span>Compartilhando arquivos</li>
-                        <li class="mb-2"><span class="text-info me-2">▸</span>Etiqueta de comunicação</li>
-                        <li class="mb-2"><span class="text-info me-2">▸</span>Denúncias e bloqueios</li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             <!-- Card 5: Avaliações -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-rating h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-star text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_ratings' %}" class="text-decoration-none">
+                    <div class="help-category-card card-rating h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-star text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">⭐ Avaliações</h3>
+                        <p class="text-muted mb-3">
+                            Sistema de reputação e como avaliar experiências
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Como avaliar fornecedores</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Recebendo avaliações</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de reputação</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Construindo credibilidade</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">⭐ Avaliações</h3>
-                    <p class="text-muted mb-3">
-                        Sistema de reputação e como avaliar experiências
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Como avaliar fornecedores</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Recebendo avaliações</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de reputação</li>
-                        <li class="mb-2"><span class="text-warning me-2">▸</span>Construindo credibilidade</li>
-                    </ul>
-                </div>
+                </a>
             </div>
 
             <!-- Card 6: Suporte -->
             <div class="col-lg-4 col-md-6">
-                <div class="help-category-card card-support h-100">
-                    <div class="help-category-icon">
-                        <i class="fas fa-headset text-white" style="font-size: 1.75rem;"></i>
+                <a href="{% url 'help_support' %}" class="text-decoration-none">
+                    <div class="help-category-card card-support h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-headset text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">🔧 Suporte</h3>
+                        <p class="text-muted mb-3">
+                            Problemas técnicos, políticas e contato direto
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Problemas técnicos</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Políticas da plataforma</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Segurança e privacidade</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Contato direto</li>
+                        </ul>
                     </div>
-                    <h3 class="h5 fw-bold text-dark mb-3">🔧 Suporte</h3>
-                    <p class="text-muted mb-3">
-                        Problemas técnicos, políticas e contato direto
-                    </p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="text-dark me-2">▸</span>Problemas técnicos</li>
-                        <li class="mb-2"><span class="text-dark me-2">▸</span>Políticas da plataforma</li>
-                        <li class="mb-2"><span class="text-dark me-2">▸</span>Segurança e privacidade</li>
-                        <li class="mb-2"><span class="text-dark me-2">▸</span>Contato direto</li>
-                    </ul>
-                </div>
+                </a>
             </div>
         </div>
 

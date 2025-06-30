@@ -1,0 +1,49 @@
+h1,
+h3 {
+  color: #0d6efd;
+  border-left: 4px solid #0d6efd;
+  padding-left: 10px;
+}
+
+h5 {
+  color: #084298;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+a {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+a:hover {
+  color: #0a58ca;
+  text-decoration: none;
+}
+
+.password-tip ul {
+  padding-left: 1.5rem;
+}
+
+.flex-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+img.img-fluid {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.card.card-body {
+  padding: 2rem;
+}
+
+.list-group-item:hover {
+  background-color: #e9f2ff;
+  border-left: 4px solid #0d6efd;
+  transition: all 0.2s ease-in-out;
+}

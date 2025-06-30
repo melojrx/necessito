@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+.help-section-header {
+    background: linear-gradient(135deg, #fd7e14 0%, #e56a00 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <h1 class="display-5 fw-bold mb-3">⭐ {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <div class="list-group">
+            <!-- Como avaliar fornecedores -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaAvaliarFornecedores"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaAvaliarFornecedores">
+                <i class="fas fa-star me-2 text-warning"></i>
+                Como avaliar fornecedores
+            </a>
+            <div class="collapse mt-4" id="ajudaAvaliarFornecedores">
+                <div class="card card-body">
+                    <h3 class="mb-3">📝 Como Avaliar Fornecedores</h3>
+                    <p>Após a finalização de um serviço ou entrega de produto, você poderá avaliar o fornecedor com base na sua experiência.</p>
+
+                    <h5>Passo a passo</h5>
+                    <ul>
+                        <li>Acesse a área <strong>"Meus Orçamentos"</strong>.</li>
+                        <li>Localize o orçamento finalizado e clique em <strong>"Avaliar"</strong>.</li>
+                        <li>Escolha a nota de 1 a 5 estrelas e escreva um comentário (opcional).</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/avaliacoes/ButtonAvaliar.png' %}" alt="Botão Avaliar" class="img-fluid rounded shadow-sm mb-4" style="max-width: 600px">
+
+                    <h5>Dicas para uma boa avaliação</h5>
+                    <ul>
+                        <li>Seja objetivo e respeitoso.</li>
+                        <li>Descreva o que deu certo ou o que poderia melhorar.</li>
+                        <li>Evite linguagem ofensiva ou pessoal.</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/avaliacoes/AvaliarNegociacao.png' %}" alt="Avaliar negociação" class="img-fluid rounded shadow-sm mb-4" style="max-width: 600px">
+                    
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Sua avaliação ajuda outros usuários a tomarem decisões com mais segurança.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recebendo avaliações -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaReceberAvaliacoes"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaReceberAvaliacoes">
+                <i class="fas fa-inbox me-2 text-primary"></i>
+                Recebendo avaliações
+            </a>
+            <div class="collapse mt-4" id="ajudaReceberAvaliacoes">
+                <div class="card card-body">
+                    <h3 class="mb-3">📩 Recebendo Avaliações</h3>
+                    <p>Após a entrega de um serviço ou produto, o cliente pode deixar uma avaliação que ficará visível no seu perfil.</p>
+
+                    <h5>Onde visualizar?</h5>
+                    <ul>
+                        <li>Acesse o seu perfil na área do usuário.</li>
+                        <li>Veja a média de avaliações.</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/avaliacoes/AvalaicaoPerfil.png' %}" alt="Avaliação no Perfil" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1200px">
+
+                    <h5>Importante</h5>
+                    <p>As avaliações recebidas não podem ser apagadas ou editadas. Elas representam a transparência e confiança na plataforma.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Mantenha um atendimento de qualidade para receber boas avaliações e se destacar entre os concorrentes.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sistema de reputação -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaReputacao"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaReputacao">
+                <i class="fas fa-chart-line me-2 text-success"></i>
+                Sistema de reputação
+            </a>
+            <div class="collapse mt-4" id="ajudaReputacao">
+                <div class="card card-body">
+                    <h3 class="mb-3">📊 Sistema de Reputação</h3>
+                    <p>A reputação do fornecedor é formada pela média das avaliações recebidas dos clientes.</p>
+
+                    <h5>Como é calculada?</h5>
+                    <ul>
+                        <li>Somamos todas as notas recebidas e dividimos pelo número de avaliações.</li>
+                        <li>Notas variam de 1 a 5 estrelas.</li>
+                    </ul>
+
+                    <h5>Exibição pública</h5>
+                    <p>A nota média e os comentários ficam visíveis no perfil do fornecedor, ajudando novos clientes a avaliar a confiabilidade.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Reputações consistentes e positivas aumentam suas chances de fechar novos negócios.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Construindo credibilidade -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaCredibilidade"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaCredibilidade">
+                <i class="fas fa-medal me-2 text-info"></i>
+                Construindo credibilidade
+            </a>
+            <div class="collapse mt-4" id="ajudaCredibilidade">
+                <div class="card card-body">
+                    <h3 class="mb-3">🏅 Construindo Credibilidade</h3>
+                    <p>Avaliações positivas e comportamento profissional constroem uma boa reputação dentro da plataforma.</p>
+
+                    <h5>Boas práticas</h5>
+                    <ul>
+                        <li>Entregue o que prometeu dentro do prazo acordado.</li>
+                        <li>Mantenha uma comunicação clara e respeitosa.</li>
+                        <li>Solicite feedbacks de forma educada após o serviço.</li>
+                    </ul>
+
+                    <h5>Evite atitudes que prejudicam sua imagem</h5>
+                    <ul>
+                        <li>Descumprir prazos ou abandonar negociações.</li>
+                        <li>Responder de forma agressiva a críticas.</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Sua credibilidade é um ativo valioso. Cuide dela como parte do seu negócio.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-warning btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

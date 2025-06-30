@@ -35,3 +35,98 @@ def validate_cpf(cpf: str) -> str:
 
     # Se chegou aqui, CPF é válido
     return cpf_num
+
+
+def send_email_verification(user, request):
+    """
+    Envia e-mail de verificação para o usuário.
+    
+    Args:
+        user: Instância do modelo User
+        request: Request HTTP para obter domínio atual
+        
+    Returns:
+        bool: True se o e-mail foi enviado com sucesso
+    """
+    from django.core.mail import send_mail
+    from django.template.loader import render_to_string
+    from django.contrib.sites.shortcuts import get_current_site
+    from django.conf import settings
+    from django.urls import reverse
+    
+    try:
+        # Gera token de verificação
+        token = user.generate_email_verification_token()
+        
+        # Obtém o site atual
+        current_site = get_current_site(request)
+        
+        # Monta URL de verificação
+        verification_url = request.build_absolute_uri(
+            reverse('verify_email', kwargs={'token': token})
+        )
+        
+        # Contexto para o template
+        context = {
+            'user': user,
+            'domain': current_site.domain,
+            'site_name': current_site.name,
+            'verification_url': verification_url,
+            'token': token,
+        }
+        
+        # Renderiza o template do e-mail
+        subject = f'[{current_site.name}] Confirme seu e-mail'
+        html_message = render_to_string('users/email/verification_email.html', context)
+        plain_message = render_to_string('users/email/verification_email.txt', context)
+        
+        # Envia o e-mail
+        success = send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        return success == 1
+        
+    except Exception as e:
+        # Log do erro (em produção, usar logging apropriado)
+        print(f"Erro ao enviar e-mail de verificação: {e}")
+        return False
+
+
+def resend_email_verification(user, request):
+    """
+    Reenvia e-mail de verificação se o anterior expirou ou o usuário solicitou.
+    
+    Args:
+        user: Instância do modelo User
+        request: Request HTTP
+        
+    Returns:
+        tuple: (success: bool, message: str)
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Verifica se já está verificado
+    if user.email_verified:
+        return False, "Seu e-mail já está verificado."
+    
+    # Verifica se pode reenviar (limite de 1 e-mail a cada 5 minutos)
+    if user.email_verification_sent_at:
+        time_since_last = timezone.now() - user.email_verification_sent_at
+        if time_since_last < timedelta(minutes=5):
+            minutes_left = 5 - int(time_since_last.total_seconds() / 60)
+            return False, f"Aguarde {minutes_left} minuto(s) para reenviar."
+    
+    # Envia novo e-mail
+    success = send_email_verification(user, request)
+    
+    if success:
+        return True, "E-mail de verificação reenviado com sucesso!"
+    else:
+        return False, "Erro ao enviar e-mail. Tente novamente em instantes."

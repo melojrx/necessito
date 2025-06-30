@@ -10,6 +10,12 @@ urlpatterns = [
      path('complete-profile/', views.complete_profile_view, name='complete_profile'),
      path('skip-profile/', views.skip_profile_completion, name='skip_profile'),
      path('logout/', views.logout_view, name='logout'),
+     
+     # Verificação de e-mail
+     path('email-verification/', views.email_verification_notice, name='email_verification_notice'),
+     path('verify-email/<str:token>/', views.verify_email, name='verify_email'),
+     path('resend-verification/', views.resend_verification_email, name='resend_verification_email'),
+     
      path('minha-conta/<int:pk>/detail/', views.UserDetailView.as_view(), name='minha_conta_detail'),
      path('minha-conta/<int:pk>/update/', views.UserUpdateView.as_view(), name='minha_conta_update'),
      path('perfil/<int:pk>/', views.UserProfileDetailView.as_view(), name='user_profile'),

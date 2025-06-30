@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Erro na Verificação - Indicaai{% endblock %}
+
+{% block content %}
+<style>
+.error-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.error-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 50px 40px;
+    text-align: center;
+    border: 1px solid #e8ecf0;
+}
+
+.error-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+}
+
+.error-icon i {
+    font-size: 36px;
+    color: white;
+}
+
+.error-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary-custom {
+    background: transparent;
+    border: 2px solid #6c757d;
+    padding: 10px 28px;
+    border-radius: 50px;
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary-custom:hover {
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+}
+
+.info-box {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.info-box h5 {
+    color: #856404;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    color: #856404;
+    margin-bottom: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .error-card {
+        padding: 40px 25px;
+        margin: 30px 15px;
+    }
+    
+    .error-title {
+        font-size: 24px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-primary-custom,
+    .btn-secondary-custom {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="error-container">
+    <div class="error-card">
+        <!-- Ícone de erro -->
+        <div class="error-icon">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <!-- Título -->
+        <h1 class="error-title">Link inválido</h1>
+        
+        <!-- Mensagem -->
+        <p class="error-message">
+            O link de verificação é inválido ou já expirou. Isso pode acontecer quando:
+        </p>
+        
+        <!-- Informações sobre possíveis causas -->
+        <div class="info-box">
+            <h5>⚠️ Possíveis causas:</h5>
+            <ul>
+                <li>O link já foi usado anteriormente</li>
+                <li>O link expirou (mais de 24 horas)</li>
+                <li>O link foi copiado incorretamente</li>
+                <li>Você já verificou seu e-mail</li>
+            </ul>
+        </div>
+        
+        <!-- Botões de ação -->
+        <div class="action-buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'email_verification_notice' %}" class="btn-primary-custom">
+                    <i class="fas fa-envelope"></i>
+                    Solicitar novo link
+                </a>
+                <a href="{% url 'home' %}" class="btn-secondary-custom">
+                    <i class="fas fa-home"></i>
+                    Ir para início
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary-custom">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Fazer login
+                </a>
+                <a href="{% url 'register' %}" class="btn-secondary-custom">
+                    <i class="fas fa-user-plus"></i>
+                    Criar conta
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -37,6 +37,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 AUTH_USER_MODEL = 'users.User'
 
+# ID do site (necessário para django.contrib.sites)
+SITE_ID = 1
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",  # Necessário para envio de e-mails
     "django_recaptcha",
     "core",
     "users",

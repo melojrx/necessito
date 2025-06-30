@@ -43,16 +43,32 @@ def register_view(request):
         form = BasicUserCreationForm(request.POST)
         if form.is_valid():
             usuario = form.save(commit=False)
+            # E-mail não verificado por padrão
+            usuario.email_verified = False
             # Não definir is_client/is_supplier ainda
             usuario.save()
             
-            # Fazer login automático após cadastro
+            # Enviar e-mail de verificação
+            from users.utils import send_email_verification
+            email_sent = send_email_verification(usuario, request)
+            
+            if email_sent:
+                messages.success(request, 
+                    f"Cadastro realizado com sucesso! "
+                    f"Enviamos um e-mail de confirmação para {usuario.email}. "
+                    f"Por favor, verifique sua caixa de entrada e spam."
+                )
+            else:
+                messages.warning(request, 
+                    f"Cadastro realizado, mas houve problema ao enviar e-mail de confirmação. "
+                    f"Você pode reenviar na próxima tela."
+                )
+            
+            # Fazer login automático após cadastro (mesmo sem verificar e-mail ainda)
             login(request, usuario)
             
-            messages.success(request, f"Bem-vindo(a), {usuario.first_name}! Complete seu cadastro para ter uma experiência completa.")
-            
-            # Redirecionar para tela de complemento
-            return redirect('complete_profile')
+            # Redirecionar para tela que mostra necessidade de verificação
+            return redirect('email_verification_notice')
         else:
            # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
             messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
@@ -239,3 +255,69 @@ class MyPasswordResetView(auth_views.PasswordResetView):
     # html_email_template_name = "password_reset_email_html.html"
     
     # É possível também definir success_url, etc. se quiser
+
+# =====================================================
+# VIEWS PARA VERIFICAÇÃO DE E-MAIL
+# =====================================================
+
+@login_required
+def email_verification_notice(request):
+    """Tela que informa sobre necessidade de verificar e-mail"""
+    user = request.user
+    
+    # Se já está verificado, redirecionar para completar perfil
+    if user.email_verified:
+        messages.info(request, "Seu e-mail já está verificado!")
+        return redirect('complete_profile')
+    
+    return render(request, 'users/email_verification_notice.html', {
+        'user': user
+    })
+
+def verify_email(request, token):
+    """View para verificar e-mail usando token"""
+    try:
+        # Busca usuário pelo token
+        user = User.objects.filter(email_verification_token=token).first()
+        
+        if not user:
+            messages.error(request, "Token de verificação inválido ou expirado.")
+            return render(request, 'users/email_verification_failed.html')
+        
+        # Verifica o token
+        if user.verify_email(token):
+            messages.success(request, 
+                f"✅ E-mail verificado com sucesso! "
+                f"Bem-vindo(a) à plataforma, {user.first_name}!"
+            )
+            
+            # Se usuário está logado, redirecionar para completar perfil
+            if request.user.is_authenticated and request.user == user:
+                return redirect('complete_profile')
+            else:
+                # Se não está logado, redirecionar para login
+                return redirect('login')
+                
+        else:
+            messages.error(request, "Token de verificação inválido ou expirado.")
+            return render(request, 'users/email_verification_failed.html')
+            
+    except Exception as e:
+        messages.error(request, "Erro ao verificar e-mail. Tente novamente.")
+        return render(request, 'users/email_verification_failed.html')
+
+@login_required
+def resend_verification_email(request):
+    """View para reenviar e-mail de verificação"""
+    user = request.user
+    
+    if request.method == 'POST':
+        from users.utils import resend_email_verification
+        success, message = resend_email_verification(user, request)
+        
+        if success:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
+    
+    return redirect('email_verification_notice')

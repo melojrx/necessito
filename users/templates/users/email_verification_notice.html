@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verificação de E-mail - Indicaai{% endblock %}
+
+{% block content %}
+<style>
+.verification-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.verification-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 50px 40px;
+    text-align: center;
+    border: 1px solid #e8ecf0;
+}
+
+.verification-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    animation: pulse 2s infinite;
+}
+
+.verification-icon i {
+    font-size: 36px;
+    color: white;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.verification-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.verification-message {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.email-display {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #0d6efd;
+}
+
+.email-display strong {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary-custom {
+    background: transparent;
+    border: 2px solid #6c757d;
+    padding: 10px 28px;
+    border-radius: 50px;
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary-custom:hover {
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+}
+
+.info-box {
+    background: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.info-box h5 {
+    color: #0856b3;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    color: #0856b3;
+    margin-bottom: 5px;
+}
+
+.resend-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #e8ecf0;
+}
+
+.resend-text {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .verification-card {
+        padding: 40px 25px;
+        margin: 30px 15px;
+    }
+    
+    .verification-title {
+        font-size: 24px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-primary-custom,
+    .btn-secondary-custom {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="verification-container">
+    <div class="verification-card">
+        <!-- Ícone -->
+        <div class="verification-icon">
+            <i class="fas fa-envelope-open"></i>
+        </div>
+        
+        <!-- Título -->
+        <h1 class="verification-title">Verifique seu e-mail</h1>
+        
+        <!-- Mensagem -->
+        <p class="verification-message">
+            Quase pronto! Enviamos um e-mail de confirmação para garantir a segurança da sua conta.
+        </p>
+        
+        <!-- E-mail do usuário -->
+        <div class="email-display">
+            📧 Enviado para: <strong>{{ user.email }}</strong>
+        </div>
+        
+        <!-- Informações importantes -->
+        <div class="info-box">
+            <h5>📋 O que fazer agora:</h5>
+            <ul>
+                <li>Verifique sua caixa de entrada</li>
+                <li>Procure também na pasta de <strong>spam/lixo eletrônico</strong></li>
+                <li>Clique no link "Confirmar E-mail" no e-mail</li>
+                <li>O link expira em <strong>24 horas</strong></li>
+            </ul>
+        </div>
+        
+        <!-- Botões de ação -->
+        <div class="action-buttons">
+            <a href="{% url 'complete_profile' %}" class="btn-secondary-custom">
+                <i class="fas fa-arrow-right"></i>
+                Continuar mesmo assim
+            </a>
+        </div>
+        
+        <!-- Seção para reenviar -->
+        <div class="resend-section">
+            <p class="resend-text">Não recebeu o e-mail?</p>
+            
+            <form method="post" action="{% url 'resend_verification_email' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary-custom">
+                    <i class="fas fa-redo"></i>
+                    Reenviar e-mail de confirmação
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh da página a cada 30 segundos para verificar se o e-mail foi confirmado
+setTimeout(function() {
+    location.reload();
+}, 30000);
+
+// Feedback visual ao clicar no botão de reenviar
+document.querySelector('form').addEventListener('submit', function(e) {
+    const button = this.querySelector('button');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    button.disabled = true;
+});
+</script>
+{% endblock %} 

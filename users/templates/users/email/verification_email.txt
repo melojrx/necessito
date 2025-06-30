@@ -1,0 +1,21 @@
+{{ site_name }} - Confirme seu e-mail
+
+Olá, {{ user.first_name }}!
+
+Obrigado por se cadastrar em nossa plataforma!
+
+Para garantir a segurança da sua conta e ativar todas as funcionalidades, precisamos confirmar seu endereço de e-mail.
+
+CONFIRMAR E-MAIL:
+{{ verification_url }}
+
+IMPORTANTE:
+- Este link expira em 24 horas por questões de segurança
+- Se você não se cadastrou em {{ site_name }}, ignore este e-mail
+
+Precisa de ajuda? Acesse nossa Central de Ajuda:
+http://{{ domain }}/ajuda/
+
+---
+{{ site_name }}
+Este é um e-mail automático, não responda. 

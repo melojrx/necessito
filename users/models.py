@@ -147,6 +147,20 @@ class User(AbstractUser):
         help_text="Envie uma imagem quadrada (recomendado 400×400 px)",
     )
 
+    # Verificação de e-mail
+    email_verified = models.BooleanField("E-mail verificado", default=False)
+    email_verification_token = models.CharField(
+        "Token de verificação de e-mail", 
+        max_length=255, 
+        blank=True, 
+        null=True
+    )
+    email_verification_sent_at = models.DateTimeField(
+        "E-mail de verificação enviado em", 
+        null=True, 
+        blank=True
+    )
+
     # Metadados
     date_joined = models.DateTimeField("Data de cadastro", auto_now_add=True)
 
@@ -166,6 +180,41 @@ class User(AbstractUser):
 
     def get_short_name(self):
         return self.first_name
+
+    def generate_email_verification_token(self):
+        """Gera um token único para verificação de e-mail"""
+        import uuid
+        from django.utils import timezone
+        
+        self.email_verification_token = str(uuid.uuid4())
+        self.email_verification_sent_at = timezone.now()
+        self.save(update_fields=['email_verification_token', 'email_verification_sent_at'])
+        return self.email_verification_token
+
+    def is_email_verification_token_valid(self, token):
+        """Verifica se o token é válido e não expirou (24 horas)"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        if not self.email_verification_token or self.email_verification_token != token:
+            return False
+        
+        if not self.email_verification_sent_at:
+            return False
+        
+        # Token expira em 24 horas
+        expiration_time = self.email_verification_sent_at + timedelta(hours=24)
+        return timezone.now() < expiration_time
+
+    def verify_email(self, token):
+        """Verifica o e-mail usando o token"""
+        if self.is_email_verification_token_valid(token):
+            self.email_verified = True
+            self.email_verification_token = None
+            self.email_verification_sent_at = None
+            self.save(update_fields=['email_verified', 'email_verification_token', 'email_verification_sent_at'])
+            return True
+        return False
 
     # Validações personalizadas
     def clean(self):

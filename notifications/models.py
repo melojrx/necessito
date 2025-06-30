@@ -8,6 +8,7 @@ class NotificationType(models.TextChoices):
     NEW_BUDGET = 'NEW_BUDGET', 'Novo Orçamento'
     BUDGET_REJECTED = 'BUDGET_REJECTED', 'Orçamento Rejeitado'
     NEW_AVALIACAO = 'NEW_AVALIACAO', 'Nova Avaliação'
+    NEW_CHAT_MESSAGE = 'NEW_CHAT_MESSAGE', 'Nova Mensagem no Chat'
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
@@ -20,6 +21,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     necessidade = models.ForeignKey('ads.Necessidade', on_delete=models.CASCADE, null=True, blank=True)
+    chat_room = models.ForeignKey('chat.ChatRoom', on_delete=models.CASCADE, null=True, blank=True)
     
     class Meta:
         ordering = ['-created_at']

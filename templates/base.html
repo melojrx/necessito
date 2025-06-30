@@ -168,6 +168,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
             crossorigin="anonymous"></script>
+            
+    <!-- Socket.IO para WebSocket e notificações em tempo real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 
     <!-- Scripts Globais -->
     <script>
@@ -195,6 +198,9 @@
 
     <!-- Scripts Específicos das Páginas -->
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Sistema de Notificações em Tempo Real -->
+    {% include 'components/_real_time_notifications.html' %}
 
     <!-- Floating Action Button (apenas mobile) -->
     <a href="{% url 'necessidade_create' %}" class="fab-mobile fab-pulse d-md-none" title="Anunciar grátis">

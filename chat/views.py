@@ -97,6 +97,51 @@ def chat_detail(request, chat_id):
     return render(request, 'chat/chat_detail.html', context)
 
 @login_required
+def chat_websocket(request, chat_id):
+    """Exibe a interface de chat com WebSocket (versão moderna)"""
+    
+    chat_room = get_object_or_404(
+        ChatRoom.objects.select_related(
+            'necessidade', 
+            'cliente', 
+            'fornecedor', 
+            'orcamento'
+        ), 
+        id=chat_id,
+        ativo=True
+    )
+    
+    # Verificar permissões
+    if request.user not in [chat_room.cliente, chat_room.fornecedor]:
+        messages.error(request, "Você não tem permissão para acessar este chat.")
+        return redirect('chat:lista_chats')
+    
+    # Marcar mensagens como lidas
+    ChatMessage.objects.filter(
+        chat_room=chat_room,
+        lida=False
+    ).exclude(remetente=request.user).update(lida=True)
+    
+    # Buscar mensagens com paginação
+    mensagens = chat_room.mensagens.select_related('remetente').order_by('data_envio')
+    paginator = Paginator(mensagens, 50)
+    page_number = request.GET.get('page')
+    mensagens_paginadas = paginator.get_page(page_number)
+    
+    # Determinar papel do usuário
+    is_cliente = request.user == chat_room.cliente
+    
+    context = {
+        'chat_room': chat_room,
+        'mensagens': mensagens_paginadas,
+        'is_cliente': is_cliente,
+        'outro_usuario': chat_room.fornecedor if is_cliente else chat_room.cliente,
+        'use_websocket': True,  # Flag para ativar WebSocket
+    }
+    
+    return render(request, 'chat/chat_detail.html', context)
+
+@login_required
 @require_http_methods(["POST"])
 def enviar_mensagem(request, chat_id):
     """API para enviar nova mensagem"""

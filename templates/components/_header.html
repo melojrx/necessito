@@ -528,7 +528,7 @@
               <span class="d-none d-md-inline d-lg-inline">Notificações</span>
               <span class="d-block d-md-none mobile-text-small">Notificações</span>
               {% if unread_notifications_count > 0 %}
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-counter">
                 {{ unread_notifications_count }}
               </span>
               {% endif %}
@@ -552,7 +552,7 @@
                         <i class="fas fa-comments me-2"></i> Chats
                     </span>
                     {% if unread_messages_count > 0 %}
-                        <span class="badge rounded-pill bg-danger ms-2">
+                        <span class="badge rounded-pill bg-danger ms-2 message-counter">
                             {{ unread_messages_count }}
                             <span class="visually-hidden">mensagens não lidas</span>
                         </span>

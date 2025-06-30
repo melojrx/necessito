@@ -37,7 +37,7 @@ def mark_all_read(request):
         return HttpResponseRedirect(referer)
     return redirect('home')
 
-login_required
+@login_required
 def get_notifications(request):
     """Retorna as notificações paginadas do usuário"""
     # Se apenas a contagem for solicitada
@@ -64,4 +64,28 @@ def get_notifications(request):
         'has_previous': page_obj.has_previous(),
         'current_page': page_obj.number,
         'total_pages': paginator.num_pages,
+    })
+
+@login_required
+def get_notification_counts(request):
+    """Retorna contadores de notificações e mensagens em tempo real"""
+    from chat.models import ChatRoom, ChatMessage
+    from django.db.models import Q
+    
+    # Contar notificações não lidas
+    unread_notifications = request.user.notifications.filter(is_read=False).count()
+    
+    # Contar mensagens não lidas
+    unread_messages = ChatMessage.objects.filter(
+        chat_room__in=ChatRoom.objects.filter(
+            Q(cliente=request.user) | Q(fornecedor=request.user),
+            ativo=True
+        ),
+        lida=False
+    ).exclude(remetente=request.user).count()
+    
+    return JsonResponse({
+        'unread_notifications': unread_notifications,
+        'unread_messages': unread_messages,
+        'total_unread': unread_notifications + unread_messages
     })

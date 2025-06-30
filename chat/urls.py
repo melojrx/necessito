@@ -7,8 +7,11 @@ urlpatterns = [
     # Lista de chats
     path('', views.lista_chats, name='lista_chats'),
     
-    # Chat específico
+    # Chat específico (versão tradicional)
     path('<int:chat_id>/', views.chat_detail, name='chat_detail'),
+    
+    # Chat com WebSocket (versão moderna)
+    path('<int:chat_id>/websocket/', views.chat_websocket, name='chat_websocket'),
     
     # APIs
     path('<int:chat_id>/enviar/', views.enviar_mensagem, name='enviar_mensagem'),

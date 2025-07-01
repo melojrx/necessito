@@ -1,20 +1,21 @@
 # notifications/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
-from django.conf import settings
+from django.urls import reverse
 from ads.models import Necessidade
 from notifications.models import Notification, NotificationType
 from budgets.models import Orcamento
 from rankings.models import Avaliacao
+from notifications.utils import send_notification_email, get_anuncio_url, get_perfil_url, get_avaliacao_url
 
 @receiver(post_save, sender=Necessidade)
 def notificar_criacao_anuncio(sender, instance, created, **kwargs):
     """
-    Cria uma notificação quando um novo anúncio é criado
+    Cria uma notificação e envia e-mail quando um novo anúncio é criado
     """
     if created:
         user = instance.cliente
+        
         # Criar notificação no sistema
         Notification.objects.create(
             user=user,
@@ -22,10 +23,26 @@ def notificar_criacao_anuncio(sender, instance, created, **kwargs):
             notification_type=NotificationType.NEW_AD,
             necessidade=instance
         )
+        
+        # Enviar e-mail profissional
+        context = {
+            'user': user,
+            'anuncio': instance,
+            'anuncio_url': get_anuncio_url(instance),
+        }
+        
+        send_notification_email(
+            template_name='anuncio_criado',
+            subject='🎯 Anúncio criado com sucesso!',
+            recipient_email=user.email,
+            context=context
+        )
 
 @receiver(post_save, sender=Necessidade)
 def notificar_finalizacao_anuncio(sender, instance, **kwargs):
     if instance.status == 'finalizado':
+        orcamento_aceito = instance.orcamentos.filter(status='aceito').first()
+        
         # Notifica cliente
         Notification.objects.create(
             user=instance.cliente,
@@ -33,9 +50,23 @@ def notificar_finalizacao_anuncio(sender, instance, **kwargs):
             notification_type=NotificationType.NEW_END_AD,
             necessidade=instance
         )
+        
+        # Envia e-mail para cliente
+        context_cliente = {
+            'user': instance.cliente,
+            'anuncio': instance,
+            'orcamento_aceito': orcamento_aceito,
+            'avaliacao_url': get_avaliacao_url(instance) if orcamento_aceito else None,
+        }
+        
+        send_notification_email(
+            template_name='anuncio_finalizado',
+            subject='✅ Projeto finalizado com sucesso!',
+            recipient_email=instance.cliente.email,
+            context=context_cliente
+        )
 
         # Notifica fornecedor (caso exista orçamento aceito)
-        orcamento_aceito = instance.orcamentos.filter(status='aceito').first()
         if orcamento_aceito:
             Notification.objects.create(
                 user=orcamento_aceito.fornecedor,
@@ -44,23 +75,19 @@ def notificar_finalizacao_anuncio(sender, instance, **kwargs):
                 necessidade=instance
             )
 
-            # Envia email para fornecedor
-            send_mail(
-                subject="Anúncio Finalizado",
-                message=f"Olá {orcamento_aceito.fornecedor.first_name},\n\nO anúncio '{instance.titulo}' que você atendeu foi finalizado pelo cliente.\n\nAtenciosamente,\Indicaai",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[orcamento_aceito.fornecedor.email],
-                fail_silently=False
+            # Envia e-mail para fornecedor
+            context_fornecedor = {
+                'user': orcamento_aceito.fornecedor,
+                'anuncio': instance,
+                'orcamento_aceito': orcamento_aceito,
+            }
+            
+            send_notification_email(
+                template_name='anuncio_finalizado',
+                subject='🎯 Projeto concluído!',
+                recipient_email=orcamento_aceito.fornecedor.email,
+                context=context_fornecedor
             )
-
-        # Envia email para cliente
-        send_mail(
-            subject="Anúncio Finalizado",
-            message=f"Olá {instance.cliente.first_name},\n\nSeu anúncio '{instance.titulo}' foi finalizado com sucesso.\n\nObrigado por usar nossa plataforma.\n\nAtenciosamente,\Indicaai",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[instance.cliente.email],
-            fail_silently=False
-        )
 
 @receiver(post_save, sender=Orcamento)
 def notificar_novo_orcamento(sender, instance, created, **kwargs):
@@ -77,6 +104,21 @@ def notificar_novo_orcamento(sender, instance, created, **kwargs):
             message=f"<strong>Novo Orçamento Recebido</strong><br>Você recebeu um novo orçamento para seu anúncio <strong>{anuncio.titulo}</strong>.",
             notification_type=NotificationType.NEW_BUDGET,
             necessidade=anuncio
+        )
+        
+        # Enviar e-mail profissional
+        context = {
+            'user': cliente,
+            'anuncio': anuncio,
+            'orcamento': instance,
+            'anuncio_url': get_anuncio_url(anuncio),
+        }
+        
+        send_notification_email(
+            template_name='orcamento_recebido',
+            subject='💰 Novo orçamento recebido!',
+            recipient_email=cliente.email,
+            context=context
         )
 
 @receiver(post_save, sender=Orcamento)
@@ -95,6 +137,21 @@ def notificar_orcamento_aceito(sender, instance, **kwargs):
             message=f"<strong>Orçamento Aceito</strong><br>Seu orçamento para o anúncio <strong>{anuncio.titulo}</strong> foi aceito pelo cliente.",
             notification_type=NotificationType.NEW_BUDGET,
             necessidade=anuncio
+        )
+        
+        # Enviar e-mail profissional
+        context = {
+            'user': fornecedor,
+            'anuncio': anuncio,
+            'orcamento': instance,
+            'anuncio_url': get_anuncio_url(anuncio),
+        }
+        
+        send_notification_email(
+            template_name='orcamento_aceito',
+            subject='🎉 Parabéns! Seu orçamento foi aceito!',
+            recipient_email=fornecedor.email,
+            context=context
         )
 
 @receiver(post_save, sender=Orcamento)
@@ -117,20 +174,18 @@ def notificar_orcamento_rejeitado(sender, instance, **kwargs):
             necessidade=anuncio
         )
 
-        # Enviar email
-        assunto = "Orçamento Rejeitado"
-        corpo = (
-            f"Olá, {fornecedor.first_name}!\n\n"
-            f"O cliente rejeitou seu orçamento enviado para o anúncio '{anuncio.titulo}'.\n"
-            "Acesse a plataforma para mais detalhes.\n\n"
-            "Atenciosamente,\Indicaai"
-        )
-        send_mail(
-            subject=assunto,
-            message=corpo,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[fornecedor.email],
-            fail_silently=False
+        # Enviar e-mail profissional
+        context = {
+            'user': fornecedor,
+            'anuncio': anuncio,
+            'orcamento': instance,
+        }
+        
+        send_notification_email(
+            template_name='orcamento_rejeitado',
+            subject='📋 Atualização sobre sua proposta',
+            recipient_email=fornecedor.email,
+            context=context
         )
 
 @receiver(post_save, sender=Avaliacao)
@@ -154,18 +209,17 @@ def notificar_nova_avaliacao(sender, instance, created, **kwargs):
             necessidade=anuncio
         )
 
-        # Enviar email
-        assunto = "Nova Avaliação Recebida"
-        corpo = (
-            f"Olá, {avaliado.first_name}!\n\n"
-            f"Você recebeu uma nova avaliação no anúncio '{anuncio.titulo}'.\n"
-            "Acesse a plataforma para visualizar os detalhes.\n\n"
-            "Atenciosamente,\Indicaai"
-        )
-        send_mail(
-            subject=assunto,
-            message=corpo,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[avaliado.email],
-            fail_silently=False
+        # Enviar e-mail profissional
+        context = {
+            'user': avaliado,
+            'anuncio': anuncio,
+            'avaliacao': instance,
+            'perfil_url': get_perfil_url(avaliado),
+        }
+        
+        send_notification_email(
+            template_name='nova_avaliacao',
+            subject='⭐ Nova avaliação recebida!',
+            recipient_email=avaliado.email,
+            context=context
         )

@@ -1,0 +1,36 @@
+Olá, {{ user.first_name }}!
+
+NOVO ORÇAMENTO RECEBIDO
+
+Excelente notícia! Um fornecedor interessou-se pelo seu anúncio e enviou uma proposta detalhada.
+
+DETALHES DA PROPOSTA:
+• Anúncio: {{ anuncio.titulo }}
+• Fornecedor: {{ orcamento.fornecedor.get_full_name }}
+• Valor proposto: R$ {{ orcamento.valor_total|floatformat:2 }}
+• Data da proposta: {{ orcamento.data_criacao|date:"d/m/Y às H:i" }}
+{% if orcamento.observacoes %}• Observações: {{ orcamento.observacoes|truncatewords:15 }}{% endif %}
+
+VER PROPOSTA COMPLETA:
+{{ anuncio_url }}
+
+COMO ANALISAR A PROPOSTA:
+• Verifique se o valor está dentro do seu orçamento
+• Analise o prazo de entrega proposto
+• Leia atentamente as observações e condições
+• Confira o perfil e avaliações do fornecedor
+
+PRÓXIMOS PASSOS:
+• Use o chat para esclarecer dúvidas com o fornecedor
+• Compare com outras propostas que possam chegar
+• Negocie termos, prazos ou valores se necessário
+• Aceite a proposta quando estiver satisfeito
+
+DICA: Quanto mais rápido você responder, maior a chance de fechar o negócio com condições favoráveis!
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

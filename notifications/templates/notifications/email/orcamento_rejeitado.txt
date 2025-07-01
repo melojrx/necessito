@@ -1,0 +1,37 @@
+Olá, {{ user.first_name }}!
+
+ORÇAMENTO NÃO SELECIONADO
+
+Informamos que o cliente optou por não seguir com sua proposta para o projeto abaixo.
+
+DETALHES DA PROPOSTA:
+• Anúncio: {{ anuncio.titulo }}
+• Cliente: {{ anuncio.cliente.get_full_name }}
+• Sua proposta: R$ {{ orcamento.valor_total|floatformat:2 }}
+• Data da decisão: {{ orcamento.data_atualizacao|date:"d/m/Y às H:i" }}
+
+VER NOVOS PROJETOS:
+http://{{ domain }}/
+
+DICAS PARA MELHORAR SUAS PROPOSTAS:
+• Analise cuidadosamente os requisitos do projeto
+• Seja competitivo no preço, mas mantenha a qualidade
+• Detalhe bem sua proposta e cronograma
+• Destaque seus diferenciais e experiências anteriores
+
+CONTINUE CRESCENDO NA PLATAFORMA:
+• Complete seu perfil com portfólio e certificações
+• Mantenha-se ativo respondendo rapidamente
+• Colete avaliações positivas dos clientes atendidos
+• Participe de projetos em suas áreas de especialidade
+
+LEMBRE-SE: Fornecedores com boas avaliações e perfis completos têm 5x mais chances de fechar negócios!
+
+Não desanime! Cada experiência é uma oportunidade de aprendizado. Continue participando de outros projetos e aprimorando suas propostas.
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

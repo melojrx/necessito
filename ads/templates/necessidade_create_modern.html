@@ -1,0 +1,692 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar Anúncio - Indicaai{% endblock %}
+
+{% block content %}
+<style>
+/* TEMPLATE MODERNO CRIAR ANÚNCIO */
+.create-ad-page {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+}
+
+.create-hero {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+    border-radius: 0 0 30px 30px;
+}
+
+.form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+}
+
+.form-section {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: #20c997;
+    transform: translateY(-2px);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.section-basic .section-icon { background: #0d6efd; }
+.section-category .section-icon { background: #6f42c1; }
+.section-specs .section-icon { background: #fd7e14; }
+.section-media .section-icon { background: #20c997; }
+
+.modern-input {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.modern-input:focus {
+    border-color: #20c997;
+    box-shadow: 0 0 0 0.2rem rgba(32, 201, 151, 0.25);
+    transform: translateY(-1px);
+}
+
+.modern-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.modern-label i {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+.request-category-card {
+    background: linear-gradient(135deg, #6f42c1 0%, #495057 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.submit-section {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.modern-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.modern-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    color: white;
+}
+
+.modern-btn-secondary {
+    background: white;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+}
+
+.modern-btn-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.preview-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.preview-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.preview-actions {
+    padding: 1rem;
+    text-align: center;
+}
+
+.remove-image {
+    background: #dc3545;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.remove-image:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .create-hero { padding: 2rem 0 1.5rem; }
+    .form-section { padding: 1.5rem; }
+}
+</style>
+
+<div class="create-ad-page">
+    <!-- Hero Section -->
+    <div class="create-hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-bullhorn me-3"></i>
+                    Criar Novo Anúncio
+                </h1>
+                <p class="lead mb-0 opacity-75">
+                    Publique sua necessidade e receba orçamentos de fornecedores qualificados
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <!-- Formulário Principal -->
+        <div class="form-card">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" id="modern-ad-form" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Mensagens de Erro -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger rounded-4 mb-4">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Erro ao criar anúncio</h5>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Seção 1: Informações Básicas -->
+                    <div class="form-section section-basic">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Informações Básicas</h3>
+                                <p class="text-muted mb-0">Defina o título e descrição do seu anúncio</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-heading"></i>
+                                    Título do Anúncio
+                                </label>
+                                {{ form.titulo }}
+                                <div class="help-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Seja específico e claro sobre o que você precisa
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-align-left"></i>
+                                    Descrição Detalhada
+                                </label>
+                                {{ form.descricao }}
+                                <div class="help-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Quanto mais detalhes, melhores serão os orçamentos recebidos
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Categoria e Subcategoria -->
+                    <div class="form-section section-category">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Categoria e Subcategoria</h3>
+                                <p class="text-muted mb-0">Escolha a categoria que melhor define sua necessidade</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-layer-group"></i>
+                                    Categoria Principal
+                                </label>
+                                {{ form.categoria }}
+                                <div class="help-text">
+                                    <i class="fas fa-mouse-pointer me-1"></i>
+                                    Selecione a categoria principal do seu projeto
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-sitemap"></i>
+                                    Subcategoria
+                                </label>
+                                {{ form.subcategoria }}
+                                <div class="help-text">
+                                    <i class="fas fa-search me-1"></i>
+                                    Escolha uma subcategoria específica
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Solicitação de Nova Categoria -->
+                        <div class="request-category-card">
+                            <i class="fas fa-plus-circle fa-2x mb-3"></i>
+                            <h4 class="fw-bold">Não encontrou sua categoria?</h4>
+                            <p class="mb-3">Se não encontrou a categoria ideal para seu projeto, nossa equipe pode criar uma nova para você!</p>
+                            <button type="button" class="btn btn-light btn-lg rounded-pill" data-bs-toggle="modal" data-bs-target="#requestCategoryModal">
+                                <i class="fas fa-envelope me-2"></i>
+                                Solicitar Nova Categoria
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Especificações -->
+                    <div class="form-section section-specs">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Especificações e Detalhes</h3>
+                                <p class="text-muted mb-0">Informe quantidade, medidas e características específicas</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-calculator"></i>
+                                    Quantidade
+                                </label>
+                                {{ form.quantidade }}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-balance-scale"></i>
+                                    Unidade
+                                </label>
+                                {{ form.unidade }}
+                                <div class="help-text">{{ form.unidade.help_text }}</div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <div class="form-check">
+                                    {{ form.medir_no_local }}
+                                    <label class="form-check-label modern-label">
+                                        <i class="fas fa-ruler-combined"></i>
+                                        {{ form.medir_no_local.label }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-tag"></i>
+                                    Marca (Opcional)
+                                </label>
+                                {{ form.marca }}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-shapes"></i>
+                                    Tipo (Opcional)
+                                </label>
+                                {{ form.tipo }}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    Bitola (mm)
+                                </label>
+                                <div class="input-group">
+                                    {{ form.bitola }}
+                                    <span class="input-group-text">mm</span>
+                                </div>
+                                <div class="help-text">{{ form.bitola.help_text }}</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-ruler"></i>
+                                    Comprimento (m)
+                                </label>
+                                <div class="input-group">
+                                    {{ form.compr }}
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <div class="help-text">{{ form.compr.help_text }}</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-weight"></i>
+                                    Peso (kg)
+                                </label>
+                                <div class="input-group">
+                                    {{ form.peso }}
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                                <div class="help-text">{{ form.peso.help_text }}</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    Altura (m)
+                                </label>
+                                <div class="input-group">
+                                    {{ form.altura }}
+                                    <span class="input-group-text">m</span>
+                                </div>
+                                <div class="help-text">{{ form.altura.help_text }}</div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-clock"></i>
+                                    Duração/Prazo
+                                </label>
+                                {{ form.duracao }}
+                                <div class="help-text">{{ form.duracao.help_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 4: Imagens -->
+                    <div class="form-section section-media">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Fotos do Projeto</h3>
+                                <p class="text-muted mb-0">Adicione fotos para ajudar fornecedores a entender melhor sua necessidade</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="modern-label">
+                                <i class="fas fa-camera"></i>
+                                Selecionar Imagens
+                            </label>
+                            {{ form.imagens }}
+                            <div class="help-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ form.imagens.help_text }}
+                            </div>
+                        </div>
+
+                        <!-- Preview das Imagens -->
+                        <div id="image-preview" style="display: none;">
+                            <h5 class="fw-bold mb-3">
+                                <i class="fas fa-eye me-2 text-primary"></i>
+                                Pré-visualização das Imagens
+                            </h5>
+                            <div class="preview-container" id="preview-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Seção de Envio -->
+                    <div class="submit-section">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="fw-bold mb-2">
+                                    <i class="fas fa-rocket me-2"></i>
+                                    Pronto para Publicar?
+                                </h3>
+                                <p class="mb-0 opacity-75">
+                                    Seu anúncio será visível para milhares de fornecedores qualificados
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <button type="submit" class="modern-btn btn-lg">
+                                    <i class="fas fa-bullhorn me-2"></i>
+                                    Publicar Anúncio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Botão Cancelar -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'necessidade_list' %}" class="modern-btn modern-btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Cancelar e Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Solicitar Nova Categoria -->
+<div class="modal fade" id="requestCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Solicitar Nova Categoria
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="request-category-form">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Nossa equipe analisará sua solicitação e criará a nova categoria em até 24 horas úteis.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome da Categoria Sugerida</label>
+                        <input type="text" class="form-control" id="suggested-category" 
+                               placeholder="Ex: Instalação de Ar Condicionado Automotivo" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descrição da Categoria</label>
+                        <textarea class="form-control" id="category-description" rows="3" 
+                                  placeholder="Descreva brevemente que tipo de serviços/produtos esta categoria abrangeria..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seu Nome</label>
+                        <input type="text" class="form-control" id="requester-name" 
+                               value="{% if user.is_authenticated %}{{ user.get_full_name }}{% endif %}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seu E-mail</label>
+                        <input type="email" class="form-control" id="requester-email" 
+                               value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="sendCategoryRequest()">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Enviar Solicitação
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Aplicar classes CSS aos campos do formulário
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (!input.classList.contains('btn') && !input.classList.contains('form-check-input')) {
+            input.classList.add('form-control', 'modern-input');
+        }
+    });
+
+    // Sistema de Categorias/Subcategorias
+    const categoriaSelect = document.getElementById('id_categoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
+
+    if (categoriaSelect && subcategoriaSelect) {
+        categoriaSelect.addEventListener('change', function() {
+            const catId = this.value;
+            
+            // Limpar subcategorias
+            subcategoriaSelect.innerHTML = '<option value="">Selecione a Subcategoria</option>';
+            
+            if (!catId) return;
+
+            // Buscar subcategorias via AJAX
+            fetch(`/categorias/${catId}/subcats-json/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.subcategorias.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.nome;
+                        subcategoriaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar subcategorias:', error);
+                });
+        });
+    }
+
+    // Preview de Imagens
+    const imageInput = document.getElementById('id_imagens');
+    const previewContainer = document.getElementById('preview-container');
+    const previewSection = document.getElementById('image-preview');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            if (files.length === 0) {
+                previewSection.style.display = 'none';
+                return;
+            }
+
+            previewContainer.innerHTML = '';
+            previewSection.style.display = 'block';
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const previewCard = document.createElement('div');
+                        previewCard.className = 'preview-card';
+                        
+                        previewCard.innerHTML = `
+                            <img src="${e.target.result}" class="preview-image" alt="Preview ${index + 1}">
+                            <div class="preview-actions">
+                                <small class="d-block text-muted mb-2">${file.name}</small>
+                                <button type="button" class="remove-image" onclick="removePreview(this, ${index})">
+                                    <i class="fas fa-trash me-1"></i>Remover
+                                </button>
+                            </div>
+                        `;
+                        
+                        previewContainer.appendChild(previewCard);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    }
+});
+
+// Função para remover preview (simplificada)
+function removePreview(button, index) {
+    button.closest('.preview-card').remove();
+    
+    // Se não há mais previews, esconder a seção
+    const previewContainer = document.getElementById('preview-container');
+    if (previewContainer.children.length === 0) {
+        document.getElementById('image-preview').style.display = 'none';
+    }
+}
+
+// Função para enviar solicitação de nova categoria
+function sendCategoryRequest() {
+    const category = document.getElementById('suggested-category').value;
+    const description = document.getElementById('category-description').value;
+    const name = document.getElementById('requester-name').value;
+    const email = document.getElementById('requester-email').value;
+    
+    if (!category || !description || !name || !email) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+    }
+    
+    // Criar link mailto para envio de e-mail
+    const subject = encodeURIComponent('Solicitação de Nova Categoria - Indicaai');
+    const body = encodeURIComponent(`
+Solicitação de Nova Categoria:
+
+Nome da Categoria: ${category}
+Descrição: ${description}
+
+Solicitante: ${name}
+E-mail: ${email}
+
+---
+Esta solicitação foi enviada através do formulário de criação de anúncio da plataforma Indicaai.
+    `);
+    
+    const mailtoLink = `mailto:suporte@indicaai.com?subject=${subject}&body=${body}`;
+    window.open(mailtoLink);
+    
+    // Fechar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('requestCategoryModal'));
+    modal.hide();
+    
+    // Mostrar confirmação
+    alert('Solicitação enviada! Nossa equipe analisará e responderá em até 24 horas úteis.');
+}
+</script>
+
+{% endblock %} 

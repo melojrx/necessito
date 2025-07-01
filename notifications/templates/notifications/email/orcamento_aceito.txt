@@ -1,0 +1,36 @@
+Olá, {{ user.first_name }}!
+
+PARABÉNS! SEU ORÇAMENTO FOI ACEITO
+
+Sua proposta foi aceita pelo cliente. Agora é hora de colocar a mão na massa!
+
+DETALHES DO PROJETO:
+• Anúncio: {{ anuncio.titulo }}
+• Cliente: {{ anuncio.cliente.get_full_name }}
+• Valor acordado: R$ {{ orcamento.valor_total|floatformat:2 }}
+• Data da aceitação: {{ orcamento.data_atualizacao|date:"d/m/Y às H:i" }}
+{% if orcamento.observacoes %}• Detalhes: {{ orcamento.observacoes|truncatewords:20 }}{% endif %}
+
+CONVERSAR COM CLIENTE:
+{{ anuncio_url }}
+
+PRÓXIMOS PASSOS IMPORTANTES:
+• Entre em contato com o cliente via chat para confirmar detalhes
+• Alinhe cronograma, forma de pagamento e especificações
+• Mantenha o cliente informado sobre o andamento do projeto
+• Documente acordos importantes no próprio chat
+
+DICAS PARA UM TRABALHO DE SUCESSO:
+• Cumpra rigorosamente os prazos acordados
+• Communique qualquer imprevisto com antecedência
+• Entregue com qualidade superior ao esperado
+• Solicite uma avaliação positiva ao final do projeto
+
+IMPORTANTE: Um trabalho bem executado gera avaliações positivas e mais oportunidades de negócio na plataforma!
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

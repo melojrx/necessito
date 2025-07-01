@@ -1,0 +1,64 @@
+{% extends 'notifications/email/base_email.html' %}
+
+{% block email_title %}Orçamento Não Selecionado - Indicaai{% endblock %}
+
+{% block header_color %}linear-gradient(135deg, #dc3545 0%, #c82333 100%){% endblock %}
+{% block header_subtitle %}Atualização sobre sua proposta{% endblock %}
+
+{% block icon_color %}linear-gradient(135deg, #ffc107 0%, #fd7e14 100%){% endblock %}
+{% block highlight_color %}#dc3545{% endblock %}
+{% block highlight_text_color %}#721c24{% endblock %}
+{% block button_color %}linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%){% endblock %}
+
+{% block notification_icon %}<i class="fas fa-info-circle"></i>{% endblock %}
+
+{% block main_message %}
+<p>Informamos que o cliente optou por não seguir com sua proposta para o projeto abaixo.</p>
+
+<p>Não desanime! Cada experiência é uma oportunidade de aprendizado. Continue participando de outros projetos e aprimorando suas propostas.</p>
+{% endblock %}
+
+{% block highlight_section %}
+<div class="highlight-box">
+    <h3>📋 Proposta para: {{ anuncio.titulo }}</h3>
+    <p><strong>Cliente:</strong> {{ anuncio.cliente.get_full_name }}</p>
+    <p><strong>Sua proposta:</strong> R$ {{ orcamento.valor_total|floatformat:2 }}</p>
+    <p><strong>Data da decisão:</strong> {{ orcamento.data_atualizacao|date:"d/m/Y às H:i" }}</p>
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div class="action-button">
+    <a href="http://{{ domain }}/" class="btn">
+        🔍 Ver novos projetos
+    </a>
+</div>
+{% endblock %}
+
+{% block details_section %}
+<div class="details-section">
+    <h4>💡 Dicas para melhorar suas propostas</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Analise cuidadosamente os requisitos do projeto</li>
+        <li style="margin-bottom: 8px;">Seja competitivo no preço, mas mantenha a qualidade</li>
+        <li style="margin-bottom: 8px;">Detalhe bem sua proposta e cronograma</li>
+        <li style="margin-bottom: 8px;">Destaque seus diferenciais e experiências anteriores</li>
+    </ul>
+</div>
+
+<div class="details-section">
+    <h4>🚀 Continue crescendo na plataforma</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Complete seu perfil com portfólio e certificações</li>
+        <li style="margin-bottom: 8px;">Mantenha-se ativo respondendo rapidamente</li>
+        <li style="margin-bottom: 8px;">Colete avaliações positivas dos clientes atendidos</li>
+        <li style="margin-bottom: 8px;">Participe de projetos em suas áreas de especialidade</li>
+    </ul>
+</div>
+
+<div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin: 20px 0;">
+    <p style="margin: 0; color: #0856b3; font-size: 14px;">
+        <strong>🌟 Lembre-se:</strong> Fornecedores com boas avaliações e perfis completos têm 5x mais chances de fechar negócios!
+    </p>
+</div>
+{% endblock %} 

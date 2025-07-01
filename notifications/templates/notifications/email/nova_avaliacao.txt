@@ -1,0 +1,37 @@
+Olá, {{ user.first_name }}!
+
+NOVA AVALIAÇÃO RECEBIDA
+
+Ótima notícia! Um cliente avaliou seu trabalho na plataforma.
+
+DETALHES DA AVALIAÇÃO:
+• Projeto: {{ anuncio.titulo }}
+• Cliente: {{ avaliacao.usuario.get_full_name }}
+• Nota geral: {{ avaliacao.media_estrelas }}/5 estrelas
+• Data: {{ avaliacao.data_criacao|date:"d/m/Y às H:i" }}
+{% if avaliacao.comentario %}• Comentário: "{{ avaliacao.comentario|truncatewords:25 }}"{% endif %}
+
+VER MEU PERFIL:
+{{ perfil_url }}
+
+POR QUE AS AVALIAÇÕES SÃO IMPORTANTES:
+• Aumentam sua credibilidade na plataforma
+• Aparecem em destaque no seu perfil público
+• Influenciam na decisão dos próximos clientes
+• Melhoram seu posicionamento nos resultados de busca
+
+{% if avaliacao.media_estrelas >= 4 %}PARABÉNS! Você recebeu uma excelente avaliação! Continue assim e sua reputação só vai crescer.{% else %}COMO MELHORAR SUAS AVALIAÇÕES:
+• Mantenha comunicação clara e constante com o cliente
+• Cumpra rigorosamente os prazos acordados
+• Entregue sempre com qualidade superior
+• Esteja disponível para esclarecer dúvidas{% endif %}
+
+ACOMPANHE SUA REPUTAÇÃO:
+Acesse seu perfil regularmente para acompanhar suas estatísticas: média de avaliações, número de projetos concluídos e comentários dos clientes. Uma boa reputação é seu maior patrimônio na plataforma!
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

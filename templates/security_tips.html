@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block head_extra_content %}
+<!-- Meta tags SEO -->
+<meta name="description" content="{{ page_description }}">
+<meta name="keywords" content="{{ page_keywords }}">
+<link rel="canonical" href="{{ canonical_url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ page_title }}">
+<meta property="og:description" content="{{ page_description }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{{ request.build_absolute_uri }}{% static 'img/logo2.png' %}">
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ESTILOS ESPECÍFICOS DA PÁGINA DE SEGURANÇA */
+.security-page {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+}
+
+.security-hero {
+    background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+    color: white;
+    padding: 4rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.security-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") center;
+    opacity: 0.3;
+}
+
+.security-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.security-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.security-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+}
+
+.security-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    padding: 2rem;
+    border-bottom: 3px solid #dc3545;
+}
+
+.security-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+}
+
+.tip-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #28a745;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.tip-item.warning {
+    border-left-color: #ffc107;
+}
+
+.tip-item.danger {
+    border-left-color: #dc3545;
+}
+
+.tip-item.info {
+    border-left-color: #17a2b8;
+}
+
+.alert-custom {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.emergency-box {
+    background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    margin: 3rem 0;
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+}
+
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    border-color: #dc3545;
+    transform: translateY(-3px);
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #dc3545;
+    display: block;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 4rem 0;
+    border-radius: 30px;
+    margin: 4rem 0;
+    text-align: center;
+}
+
+.modern-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.modern-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.modern-btn-secondary {
+    background: white;
+    color: #dc3545;
+    border: 2px solid #dc3545;
+}
+
+.modern-btn-secondary:hover {
+    background: #dc3545;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .security-hero { padding: 2rem 0; }
+    .security-card-header { padding: 1.5rem; }
+    .tip-item { padding: 1rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-page">
+    <!-- Hero Section -->
+    <section class="security-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <div class="security-icon mx-auto mb-4">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <h1 class="display-4 fw-bold mb-3">
+                        🔒 Dicas de Segurança
+                    </h1>
+                    <p class="lead mb-4 opacity-75">
+                        Sua segurança é nossa prioridade. Aprenda como se proteger e fazer negócios com tranquilidade na nossa plataforma.
+                    </p>
+                    <div class="row text-center mt-4">
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">100%</h3>
+                            <p class="opacity-75">Transações Monitoradas</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">24/7</h3>
+                            <p class="opacity-75">Suporte Ativo</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="fw-bold">0%</h3>
+                            <p class="opacity-75">Tolerância a Fraudes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container py-5">
+
+        <!-- Alerta Principal -->
+        <div class="alert-custom text-center">
+            <h3><i class="fas fa-exclamation-triangle text-warning me-2"></i>Atenção Importante</h3>
+            <p class="mb-0">
+                <strong>Nunca faça pagamentos antecipados ou transferências sem conferência presencial.</strong>
+                Esta é a regra #1 para evitar golpes online.
+            </p>
+        </div>
+
+        <!-- Seção 1: Identificação de Golpes -->
+        <div class="security-card">
+            <div class="security-card-header">
+                <div class="security-icon" style="background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Como Identificar Golpes</h2>
+                <p class="text-muted mb-0">Sinais de alerta que você deve conhecer</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="tip-item danger">
+                    <h5><i class="fas fa-money-bill-wave text-danger me-2"></i>Pagamento Antecipado</h5>
+                    <p class="mb-0">Desconfie de fornecedores que exigem pagamento total antes de iniciar o serviço ou entregar produtos.</p>
+                </div>
+                
+                <div class="tip-item danger">
+                    <h5><i class="fas fa-clock text-danger me-2"></i>Pressão de Tempo</h5>
+                    <p class="mb-0">Ofertas "imperdíveis" com prazo muito curto são táticas para pressionar decisões precipitadas.</p>
+                </div>
+                
+                <div class="tip-item danger">
+                    <h5><i class="fas fa-gem text-danger me-2"></i>Preços Muito Baixos</h5>
+                    <p class="mb-0">Orçamentos significativamente abaixo do mercado podem indicar golpe ou má qualidade.</p>
+                </div>
+                
+                <div class="tip-item danger">
+                    <h5><i class="fas fa-user-secret text-danger me-2"></i>Falta de Informações</h5>
+                    <p class="mb-0">Perfis sem foto, dados incompletos ou relutância em fornecer documentos são sinais de alerta.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Verificação de Fornecedores -->
+        <div class="security-card">
+            <div class="security-card-header">
+                <div class="security-icon" style="background: linear-gradient(135deg, #0d6efd 0%, #0066cc 100%);">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Verificação de Fornecedores</h2>
+                <p class="text-muted mb-0">Como verificar a credibilidade antes de contratar</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="tip-item info">
+                    <h5><i class="fas fa-star text-info me-2"></i>Avaliações e Histórico</h5>
+                    <p class="mb-0">Consulte avaliações de outros clientes e o histórico de trabalhos realizados na plataforma.</p>
+                </div>
+                
+                <div class="tip-item info">
+                    <h5><i class="fas fa-id-card text-info me-2"></i>Documentação</h5>
+                    <p class="mb-0">Solicite CNPJ, alvará, certificações e outros documentos relevantes para a atividade.</p>
+                </div>
+                
+                <div class="tip-item info">
+                    <h5><i class="fas fa-map-marker-alt text-info me-2"></i>Endereço Físico</h5>
+                    <p class="mb-0">Verifique se o fornecedor possui endereço comercial real e visite quando possível.</p>
+                </div>
+                
+                <div class="tip-item info">
+                    <h5><i class="fas fa-phone text-info me-2"></i>Contato Direto</h5>
+                    <p class="mb-0">Converse por telefone e, se possível, agende uma reunião presencial antes de fechar negócio.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: Segurança em Pagamentos -->
+        <div class="security-card">
+            <div class="security-card-header">
+                <div class="security-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Segurança em Pagamentos</h2>
+                <p class="text-muted mb-0">Melhores práticas para transações seguras</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="tip-item">
+                    <h5><i class="fas fa-handshake text-success me-2"></i>Pagamento Parcelado</h5>
+                    <p class="mb-0">Negocie pagamentos em etapas conforme o andamento do trabalho: entrada, meio e finalização.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h5><i class="fas fa-receipt text-success me-2"></i>Sempre Peça Recibo</h5>
+                    <p class="mb-0">Exija nota fiscal ou recibo para todos os pagamentos realizados, por menor que seja o valor.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h5><i class="fas fa-shield-alt text-success me-2"></i>Evite Dinheiro</h5>
+                    <p class="mb-0">Prefira transferências bancárias, PIX ou cartão para ter rastro da transação.</p>
+                </div>
+                
+                <div class="tip-item">
+                    <h5><i class="fas fa-contract text-success me-2"></i>Formalize o Acordo</h5>
+                    <p class="mb-0">Use contratos simples mesmo para serviços pequenos, definindo prazos, valores e responsabilidades.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Proteção de Dados -->
+        <div class="security-card">
+            <div class="security-card-header">
+                <div class="security-icon" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h2 class="fw-bold mb-2">Proteção de Dados Pessoais</h2>
+                <p class="text-muted mb-0">Como proteger suas informações privadas</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="tip-item warning">
+                    <h5><i class="fas fa-eye-slash text-warning me-2"></i>Informações Sensíveis</h5>
+                    <p class="mb-0">Nunca compartilhe senhas, CPF completo ou dados bancários desnecessariamente.</p>
+                </div>
+                
+                <div class="tip-item warning">
+                    <h5><i class="fas fa-comments text-warning me-2"></i>Use o Chat da Plataforma</h5>
+                    <p class="mb-0">Mantenha conversas importantes dentro da plataforma para ter registro e proteção.</p>
+                </div>
+                
+                <div class="tip-item warning">
+                    <h5><i class="fas fa-camera text-warning me-2"></i>Cuidado com Fotos</h5>
+                    <p class="mb-0">Evite mostrar informações pessoais em fotos de projetos (documentos, endereços completos).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas de Segurança -->
+        <div class="row my-5">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <span class="stats-number">97%</span>
+                    <p class="text-muted mb-0">Usuários Satisfeitos</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <span class="stats-number">24h</span>
+                    <p class="text-muted mb-0">Tempo de Resposta</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <span class="stats-number">+50k</span>
+                    <p class="text-muted mb-0">Negócios Seguros</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <span class="stats-number">0.01%</span>
+                    <p class="text-muted mb-0">Taxa de Fraudes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Caixa de Emergência -->
+        <div class="emergency-box">
+            <h3><i class="fas fa-exclamation-circle me-2"></i>Suspeita de Golpe?</h3>
+            <p class="mb-4">Se você identificou algo suspeito ou foi vítima de golpe, tome ação imediatamente:</p>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="text-center">
+                        <i class="fas fa-flag fa-2x mb-2"></i>
+                        <h5>1. Denuncie</h5>
+                        <p class="small mb-0">Reporte o usuário na plataforma</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="text-center">
+                        <i class="fas fa-phone fa-2x mb-2"></i>
+                        <h5>2. Contate-nos</h5>
+                        <p class="small mb-0">Ligue para nosso suporte</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="text-center">
+                        <i class="fas fa-gavel fa-2x mb-2"></i>
+                        <h5>3. Polícia</h5>
+                        <p class="small mb-0">Registre boletim de ocorrência</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'help_support' %}" class="modern-btn modern-btn-secondary me-3">
+                    <i class="fas fa-headset me-2"></i>
+                    Falar com Suporte
+                </a>
+                <a href="tel:+5511999999999" class="modern-btn modern-btn-secondary">
+                    <i class="fas fa-phone me-2"></i>
+                    (11) 9999-9999
+                </a>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="cta-section">
+            <div class="container">
+                <h3 class="fw-bold mb-3">
+                    <i class="fas fa-shield-check me-2"></i>
+                    Mantenha-se Sempre Protegido
+                </h3>
+                <p class="lead mb-4">
+                    Siga nossas dicas e faça negócios com total tranquilidade. 
+                    Estamos aqui para garantir sua segurança.
+                </p>
+                <div>
+                    <a href="{% url 'home' %}" class="modern-btn me-3">
+                        <i class="fas fa-home me-2"></i>
+                        Voltar ao Início
+                    </a>
+                    <a href="{% url 'help' %}" class="modern-btn modern-btn-secondary">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Central de Ajuda
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animação suave para cards ao scroll
+    const cards = document.querySelectorAll('.security-card, .tip-item');
+    
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %} 

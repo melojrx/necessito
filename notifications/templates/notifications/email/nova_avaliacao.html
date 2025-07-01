@@ -1,0 +1,88 @@
+{% extends 'notifications/email/base_email.html' %}
+
+{% block email_title %}Nova Avaliação Recebida - Indicaai{% endblock %}
+
+{% block header_color %}linear-gradient(135deg, #fd7e14 0%, #e56a00 100%){% endblock %}
+{% block header_subtitle %}Você recebeu uma nova avaliação!{% endblock %}
+
+{% block icon_color %}linear-gradient(135deg, #fd7e14 0%, #e56a00 100%){% endblock %}
+{% block highlight_color %}#fd7e14{% endblock %}
+{% block highlight_text_color %}#dc4a00{% endblock %}
+{% block button_color %}linear-gradient(135deg, #fd7e14 0%, #e56a00 100%){% endblock %}
+
+{% block notification_icon %}<i class="fas fa-star"></i>{% endblock %}
+
+{% block main_message %}
+<p>Ótima notícia! Um cliente avaliou seu trabalho na plataforma.</p>
+
+<p>As avaliações são fundamentais para construir sua reputação e atrair mais clientes. Continue oferecendo serviços de qualidade!</p>
+{% endblock %}
+
+{% block highlight_section %}
+<div class="highlight-box">
+    <h3>⭐ Nova Avaliação Recebida</h3>
+    <p><strong>Projeto:</strong> {{ anuncio.titulo }}</p>
+    <p><strong>Cliente:</strong> {{ avaliacao.usuario.get_full_name }}</p>
+    <p><strong>Nota geral:</strong> 
+        {% for i in "12345"|make_list %}
+            {% if forloop.counter <= avaliacao.media_estrelas %}
+                ⭐
+            {% else %}
+                ☆
+            {% endif %}
+        {% endfor %}
+        ({{ avaliacao.media_estrelas }}/5)
+    </p>
+    <p><strong>Data:</strong> {{ avaliacao.data_criacao|date:"d/m/Y às H:i" }}</p>
+    {% if avaliacao.comentario %}
+        <p><strong>Comentário:</strong> "{{ avaliacao.comentario|truncatewords:25 }}"</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div class="action-button">
+    <a href="{{ perfil_url }}" class="btn">
+        👤 Ver meu perfil
+    </a>
+</div>
+{% endblock %}
+
+{% block details_section %}
+<div class="details-section">
+    <h4>🌟 Por que as avaliações são importantes</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Aumentam sua credibilidade na plataforma</li>
+        <li style="margin-bottom: 8px;">Aparecem em destaque no seu perfil público</li>
+        <li style="margin-bottom: 8px;">Influenciam na decisão dos próximos clientes</li>
+        <li style="margin-bottom: 8px;">Melhoram seu posicionamento nos resultados de busca</li>
+    </ul>
+</div>
+
+{% if avaliacao.media_estrelas >= 4 %}
+<div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 20px 0;">
+    <p style="margin: 0; color: #155724; font-size: 14px;">
+        <strong>🎉 Parabéns!</strong> Você recebeu uma excelente avaliação! Continue assim e sua reputação só vai crescer.
+    </p>
+</div>
+{% else %}
+<div class="details-section">
+    <h4>💡 Como melhorar suas avaliações</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Mantenha comunicação clara e constante com o cliente</li>
+        <li style="margin-bottom: 8px;">Cumpra rigorosamente os prazos acordados</li>
+        <li style="margin-bottom: 8px;">Entregue sempre com qualidade superior</li>
+        <li style="margin-bottom: 8px;">Esteja disponível para esclarecer dúvidas</li>
+    </ul>
+</div>
+{% endif %}
+
+<div class="details-section">
+    <h4>📈 Acompanhe sua reputação</h4>
+    <p style="margin: 0; color: #555; line-height: 1.6;">
+        Acesse seu perfil regularmente para acompanhar suas estatísticas:
+        média de avaliações, número de projetos concluídos e comentários dos clientes.
+        Uma boa reputação é seu maior patrimônio na plataforma!
+    </p>
+</div>
+{% endblock %} 

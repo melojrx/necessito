@@ -1,0 +1,33 @@
+Olá, {{ user.first_name }}!
+
+ANÚNCIO CRIADO COM SUCESSO
+
+Parabéns! Seu anúncio foi criado com sucesso e já está disponível para receber orçamentos de fornecedores qualificados.
+
+DETALHES DO ANÚNCIO:
+• Título: {{ anuncio.titulo }}
+• Categoria: {{ anuncio.categoria.nome }}
+• Data de criação: {{ anuncio.data_criacao|date:"d/m/Y às H:i" }}
+{% if anuncio.descricao %}• Descrição: {{ anuncio.descricao|truncatewords:20 }}{% endif %}
+
+PRÓXIMOS PASSOS:
+• Os fornecedores interessados verão seu anúncio e enviarão orçamentos
+• Você receberá notificações por e-mail para cada novo orçamento
+• Compare as propostas e escolha a melhor opção
+• Use o chat integrado para tirar dúvidas com os fornecedores
+
+ACESSE SEU ANÚNCIO:
+{{ anuncio_url }}
+
+DICAS PARA RECEBER MELHORES ORÇAMENTOS:
+• Adicione fotos do local ou do produto desejado
+• Seja específico na descrição (medidas, cores, materiais)
+• Informe o prazo esperado para a entrega/execução
+• Mantenha-se ativo no chat para responder dúvidas rapidamente
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

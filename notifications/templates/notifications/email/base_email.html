@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block email_title %}{{ subject }} - Indicaai{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: {% block header_color %}linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%){% endblock %};
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 8px 0 0 0;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .icon-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .notification-icon {
+            width: 80px;
+            height: 80px;
+            background: {% block icon_color %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% endblock %};
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .notification-icon i {
+            font-size: 36px;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555555;
+        }
+        
+        .highlight-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid {% block highlight_color %}#0d6efd{% endblock %};
+        }
+        
+        .highlight-box h3 {
+            margin: 0 0 10px 0;
+            color: {% block highlight_text_color %}#0d6efd{% endblock %};
+            font-weight: 600;
+        }
+        
+        .highlight-box p {
+            margin: 0;
+            color: #555555;
+        }
+        
+        .action-button {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: {% block button_color %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% endblock %};
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .details-section {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .details-section h4 {
+            color: #495057;
+            margin: 0 0 15px 0;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        
+        .detail-value {
+            color: #495057;
+            text-align: right;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .footer p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .footer a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsividade */
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 14px 28px;
+                font-size: 15px;
+            }
+            
+            .details-section {
+                padding: 20px 15px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            
+            .detail-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Indicaai</h1>
+            <p class="subtitle">{% block header_subtitle %}Nova notificação{% endblock %}</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            {% block content %}
+            <!-- Ícone -->
+            <div class="icon-section">
+                <div class="notification-icon">
+                    {% block notification_icon %}<i class="fas fa-bell"></i>{% endblock %}
+                </div>
+            </div>
+            
+            <!-- Saudação -->
+            <div class="greeting">
+                {% block greeting %}Olá, {{ user.first_name }}! 👋{% endblock %}
+            </div>
+            
+            <!-- Mensagem principal -->
+            <div class="message">
+                {% block main_message %}
+                <!-- Conteúdo da mensagem específica -->
+                {% endblock %}
+            </div>
+            
+            <!-- Seção destacada -->
+            {% block highlight_section %}
+            {% endblock %}
+            
+            <!-- Botão de ação -->
+            {% block action_button %}
+            {% endblock %}
+            
+            <!-- Detalhes adicionais -->
+            {% block details_section %}
+            {% endblock %}
+            {% endblock %}
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Indicaai</strong></p>
+            <p>Este é um e-mail automático, não responda.</p>
+            <p>Precisa de ajuda? Acesse nossa <a href="http://{{ domain }}/ajuda/">Central de Ajuda</a></p>
+            <p><a href="http://{{ domain }}/">Acessar Plataforma</a> | <a href="#">Cancelar Notificações</a></p>
+        </div>
+    </div>
+</body>
+</html> 

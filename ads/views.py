@@ -134,7 +134,7 @@ class NecessidadeListView(ListView):
 class NecessidadeCreateView(LoginRequiredMixin, CreateView):
     model = Necessidade
     form_class = AdsForms
-    template_name = 'necessidade_create.html'
+    template_name = 'necessidade_create_modern.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):

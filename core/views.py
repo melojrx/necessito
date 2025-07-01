@@ -25,6 +25,24 @@ class HelpView(TemplateView):
         return context
 
 
+class SecurityTipsView(TemplateView):
+    """View para a página de Dicas de Segurança"""
+    template_name = 'security_tips.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': '🔒 Dicas de Segurança - Indicaai.com',
+            'page_description': 'Mantenha-se seguro na plataforma com nossas dicas essenciais de segurança para negócios online',
+            'page_keywords': 'segurança, proteção, golpes, fraudes, dicas, segurança online, negócios seguros',
+            'section_name': 'Segurança',
+            'section_icon': 'shield-halved',
+            'section_color': '#dc3545',
+            'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context
+
+
 # VIEWS ESPECÍFICAS PARA CADA SEÇÃO DA CENTRAL DE AJUDA
 
 class HelpStartView(TemplateView):

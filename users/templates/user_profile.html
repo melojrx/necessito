@@ -1,180 +1,1426 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Perfil de {{ user.get_full_name }}{% endblock %}
+{% block title %}{{ user.get_full_name }} - Perfil Público{% endblock %}
+
+{% block head_extra_content %}
+<!-- Meta tags SEO -->
+<meta name="description" content="Perfil de {{ user.get_full_name }} na Indicaai. Veja avaliações, histórico de anúncios e informações de contato.">
+<meta name="keywords" content="{{ user.get_full_name }}, perfil, indicaai, {{ user.cidade }}, {{ user.estado }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ user.get_full_name }} - Perfil Público">
+<meta property="og:description" content="Conheça {{ user.get_full_name }} na plataforma Indicaai. Avaliações, histórico e informações verificadas.">
+<meta property="og:type" content="profile">
+{% if user.foto %}
+<meta property="og:image" content="{{ request.build_absolute_uri }}{{ user.foto.url }}">
+{% else %}
+<meta property="og:image" content="{{ request.build_absolute_uri }}{% static 'img/logo2.png' %}">
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* PERFIL PÚBLICO MODERNO */
+.profile-page {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.profile-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 25px;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10-10-4.5-10-10z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+    animation: float 20s infinite linear;
+    opacity: 0.3;
+}
+
+@keyframes float {
+    0% { transform: translateX(-50px) translateY(-50px); }
+    100% { transform: translateX(0px) translateY(0px); }
+}
+
+.profile-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border: 5px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.modern-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    border: none;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.modern-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.card-header-modern {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid #667eea;
+}
+
+.verification-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0.2rem;
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+}
+
+.verification-badge.email {
+    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+}
+
+.verification-badge.phone {
+    background: linear-gradient(135deg, #fd7e14 0%, #e85d04 100%);
+}
+
+.verification-badge.pro {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #667eea;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.star-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    margin: 1rem 0;
+}
+
+.star-display i {
+    font-size: 1.2rem;
+}
+
+.activity-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-left: 1rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.2rem;
+    top: 1.5rem;
+    width: 12px;
+    height: 12px;
+    background: #667eea;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.ad-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.ad-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.ad-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.category-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.ativo {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.status-badge.finalizado {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white;
+}
+
+.status-badge.em-andamento {
+    background: linear-gradient(135deg, #ffc107 0%, #e85d04 100%);
+    color: white;
+}
+
+.contact-section {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.btn-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 25px;
+    padding: 0.8rem 1.8rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-modern-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-modern-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    .profile-hero {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .activity-timeline {
+        padding-left: 1rem;
+    }
+    
+    .timeline-item {
+        margin-left: 0.5rem;
+    }
+}
+
+/* ========== SEÇÃO DE ANÚNCIOS MELHORADA ========== */
+
+.section-header-enhanced {
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.counter-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.filter-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 3rem;
+}
+
+.search-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 2;
+    min-width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 2;
+    font-size: 0.9rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.search-input::placeholder {
+    text-indent: 0;
+    padding-left: 0;
+    color: #6c757d;
+}
+
+.search-input::-webkit-input-placeholder {
+    text-indent: 0;
+    padding-left: 0;
+    color: #6c757d;
+}
+
+.search-input::-moz-placeholder {
+    text-indent: 0;
+    padding-left: 0;
+    color: #6c757d;
+}
+
+.search-input:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.filter-dropdown {
+    flex: 1;
+    min-width: 200px;
+}
+
+.category-select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    font-size: 1rem;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.category-select:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 1rem 2rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.active-filters {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+.filter-tag {
+    background: #667eea;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.remove-filter {
+    color: white;
+    text-decoration: none;
+    margin-left: 0.3rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.remove-filter:hover {
+    color: #ff6b6b;
+}
+
+.clear-all-filters {
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 1rem;
+}
+
+.clear-all-filters:hover {
+    text-decoration: underline;
+}
+
+/* ========== GRID DE ANÚNCIOS MELHORADO ========== */
+
+.ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.ad-card-enhanced {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ad-card-enhanced:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.ad-image {
+    position: relative;
+    height: 200px;
+    background: #f8f9fa;
+    overflow: hidden;
+}
+
+.ad-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ad-card-enhanced:hover .ad-image img {
+    transform: scale(1.05);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.view-count {
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.ad-image-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.ad-image-placeholder i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.ad-content {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ad-header {
+    margin-bottom: 1.5rem;
+}
+
+.ad-badges {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.category-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-indicator.status-ativo {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.status-indicator.status-finalizado {
+    background: rgba(111, 66, 193, 0.1);
+    color: #6f42c1;
+}
+
+.status-indicator.status-em_andamento {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.ad-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+}
+
+.ad-description {
+    color: #6c757d;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.ad-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.meta-item i {
+    color: #667eea;
+}
+
+.ad-actions {
+    margin-top: auto;
+}
+
+.view-ad-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.view-ad-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.load-more-section {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.load-more-btn {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.load-more-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ========== ESTADO VAZIO MELHORADO ========== */
+
+.empty-state-enhanced {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.empty-icon {
+    margin-bottom: 2rem;
+}
+
+.empty-icon i {
+    font-size: 4rem;
+    color: #e9ecef;
+}
+
+.empty-state-enhanced h4 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.empty-state-enhanced p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+.reset-search-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.reset-search-btn:hover {
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+/* ========== PAGINAÇÃO CUSTOMIZADA ========== */
+
+.pagination-section {
+    margin: 3rem 0;
+    text-align: center;
+}
+
+.pagination-custom {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.pagination-custom .page-item {
+    margin: 0;
+}
+
+.pagination-custom .page-link {
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: #667eea;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: white;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid #e9ecef;
+}
+
+.pagination-custom .page-item:last-child .page-link {
+    border-right: none;
+}
+
+.pagination-custom .page-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.pagination-custom .page-item.active .page-link,
+.pagination-custom .page-link.current-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination-custom .page-item.disabled .page-link {
+    color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.pagination-custom .page-item.disabled .page-link:hover {
+    background: white;
+    color: #adb5bd;
+    transform: none;
+}
+
+.pagination-info {
+    margin-top: 1rem;
+}
+
+.pagination-info small {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .profile-hero {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .activity-timeline {
+        padding-left: 1rem;
+    }
+    
+    .timeline-item {
+        margin-left: 0.5rem;
+    }
+    
+    .search-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-input-wrapper,
+    .filter-dropdown {
+        min-width: 100%;
+        flex: 1;
+    }
+    
+    .ads-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .ad-card-enhanced {
+        min-height: auto;
+    }
+    
+    .ad-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .pagination-custom {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto 1rem;
+    }
+    
+    .pagination-custom .page-link {
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+        padding: 0.8rem 1rem;
+        justify-content: center;
+    }
+    
+    .pagination-custom .page-item:last-child .page-link {
+        border-bottom: none;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <!-- COLUNA ESQUERDA: INFORMAÇÕES DO USUÁRIO -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow">
-                <div class="card-body text-center">
-
+<div class="profile-page">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="profile-hero">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
                     {% if user.foto and user.foto.url %}
-                    <img src="{{ user.foto.url }}" alt="Foto do usuário" class="rounded-circle"
-                        style="width: 120px; height: 120px; object-fit: cover;" />
+                    <img src="{{ user.foto.url }}" alt="Foto de {{ user.get_full_name }}" class="profile-avatar">
                     {% else %}
-                    <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle"
-                        style="width: 120px; height: 120px; object-fit: cover;" />
+                    <img src="{% static 'img/avatar.png' %}" alt="Avatar padrão" class="profile-avatar">
                     {% endif %}
-
-                    <h5 class="card-title mb-1">{{ user.get_full_name|capfirst }}</h5>
+                </div>
+                
+                <div class="col-md-9">
+                    <h1 class="display-5 fw-bold mb-2">{{ user.get_full_name|capfirst }}</h1>
                     
-                    <!-- Exemplo de "último acesso há X min" -->
-                    <p class="text-muted">
-                        último acesso há 
-                        {% if user.last_login %}
-                           {{ user.last_login|timesince }} atrás
-                        {% else %}
-                           n/d
+                    <div class="mb-3">
+                        {% if user.email_verified %}
+                        <span class="verification-badge email">
+                            <i class="fas fa-envelope-circle-check me-1"></i>E-mail Verificado
+                        </span>
                         {% endif %}
-                    </p>
+                        
+                        {% if user.telefone %}
+                        <span class="verification-badge phone">
+                            <i class="fas fa-phone-circle-check me-1"></i>Telefone Verificado
+                        </span>
+                        {% endif %}
+                        
+                        {% if user.is_supplier %}
+                        <span class="verification-badge pro">
+                            <i class="fas fa-crown me-1"></i>Fornecedor
+                        </span>
+                        {% endif %}
+                        
+                        {% if user.is_client %}
+                        <span class="verification-badge">
+                            <i class="fas fa-user-check me-1"></i>Cliente
+                        </span>
+                        {% endif %}
+                    </div>
                     
-                    <hr/>
-
-                    <!-- Informações básicas: data de cadastro, cidade, estado -->
-                    <p>
-                        <i class="fas fa-calendar-check me-1"></i> 
-                        Na Indicaai desde {{ user.date_joined|date:"Y" }}<br/>
-                        {% if user.cidade and user.estado  %}
-                        <i class="fas fa-map-marker-alt me-1"></i> 
-                        {{ user.cidade }}, {{ user.estado }}
-                        {% endif %}
-                    </p>
-
-                    <!-- "Nível de cadastro" (exemplo de progress bar) -->
-                    <h6 class="mt-4">Nível de cadastro</h6>
-                    <div class="progress" style="height: 6px;">
-                        <!-- Ajuste width para representar % de completude -->
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: 70%;" aria-valuenow="70" 
-                             aria-valuemin="0" aria-valuemax="100">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1 opacity-75">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Membro desde {{ user.date_joined|date:"F Y" }}
+                            </p>
+                            {% if user.cidade and user.estado %}
+                            <p class="mb-1 opacity-75">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {{ user.cidade }}, {{ user.estado }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <p class="mb-1 opacity-75">
+                                <i class="fas fa-clock me-2"></i>
+                                Último acesso: 
+                                {% if user.last_login %}
+                                {{ user.last_login|timesince }} atrás
+                                {% else %}
+                                Nunca
+                                {% endif %}
+                            </p>
+                            <p class="mb-0 opacity-75">
+                                <i class="fas fa-chart-line me-2"></i>
+                                {{ total_anuncios_6meses }} anúncios nos últimos 6 meses
+                            </p>
                         </div>
                     </div>
-                    <small class="text-muted">
-                        (Ex.: E-mail verificado, Telefone verificado, Facebook etc.)
-                    </small>
-                    <!-- NOVA SEÇÃO: AVALIAÇÕES -->
-                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2 mt-2">
-                        <div class="star-rating">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Coluna Esquerda: Informações e Estatísticas -->
+            <div class="col-lg-4">
+                
+                <!-- Card de Avaliações -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            Avaliações
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if total_avaliacoes > 0 %}
+                        <div class="star-display">
                             {% for i in estrelas_cheias|make_list %}
-                                <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
                             {% endfor %}
                             {% if estrelas_meia %}
-                                <i class="fas fa-star-half-alt text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
                             {% endif %}
                             {% for i in estrelas_vazias|make_list %}
-                                <i class="far fa-star text-warning"></i>
+                            <i class="far fa-star text-warning"></i>
                             {% endfor %}
                         </div>
                         
-                        <span class="text-muted">
-                            {{ media_estrelas|floatformat:1 }} / 5 ({{ total_avaliacoes }} avaliações)
-                        </span>
+                        <h3 class="fw-bold text-primary mb-1">{{ media_estrelas|floatformat:1 }}/5</h3>
+                        <p class="text-muted mb-0">
+                            Baseado em {{ total_avaliacoes }} avaliação{{ total_avaliacoes|pluralize:"ões" }}
+                        </p>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-star-o"></i>
+                            <h6>Ainda sem avaliações</h6>
+                            <p class="small text-muted">As avaliações aparecerão aqui após negócios finalizados.</p>
+                        </div>
+                        {% endif %}
                     </div>
+                </div>
 
-                    <!-- Botão "Quero uma loja profissional" -->
-                    <a href="#" class="btn btn-warning w-100 mt-3" style="font-weight: 500;">
-                        Perfil Indicaai Profissional
+                <!-- Card de Estatísticas -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Estatísticas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">{{ total_anuncios_6meses|default:0 }}</span>
+                                <small class="text-muted">Anúncios<br>6 meses</small>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <span class="stat-number">{{ total_avaliacoes|default:0 }}</span>
+                                <small class="text-muted">Avaliações<br>Recebidas</small>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <span class="stat-number">
+                                    {% if user.date_joined %}
+                                    {{ user.date_joined|timesince|floatformat:0 }}
+                                    {% else %}0{% endif %}
+                                </span>
+                                <small class="text-muted">Tempo na<br>Plataforma</small>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <span class="stat-number">97%</span>
+                                <small class="text-muted">Taxa de<br>Resposta</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Contato -->
+                <div class="contact-section">
+                    <h4 class="fw-bold mb-3">
+                        <i class="fas fa-handshake me-2"></i>
+                        Entre em Contato
+                    </h4>
+                    <p class="mb-3 opacity-75">
+                        Interessado nos serviços? Envie uma mensagem!
+                    </p>
+                    
+                    {% if user.telefone %}
+                    <a href="tel:{{ user.telefone }}" class="btn-modern btn-modern-secondary me-2 mb-2">
+                        <i class="fas fa-phone me-2"></i>
+                        Ligar
+                    </a>
+                    {% endif %}
+                    
+                    <a href="mailto:{{ user.email }}" class="btn-modern btn-modern-secondary mb-2">
+                        <i class="fas fa-envelope me-2"></i>
+                        E-mail
                     </a>
                 </div>
             </div>
-        </div>
 
-        <!-- COLUNA DIREITA: HISTÓRICO E ANÚNCIOS -->
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Histórico 
-                    <!-- ícone de info (opcional) -->
-                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
-                       title="Informações sobre os últimos anúncios publicados"></i>
-                </h4>
-            </div>
-            
-            <!-- Card com estatísticas de anúncios -->
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">
-                        {{ total_anuncios_6meses|default:0 }} anúncios
-                    </h5>
-                    <p class="card-text text-muted mb-0">
-                        Publicados nos últimos 180 dias
-                    </p>
-                </div>
-            </div>
-
-            <!-- Título: Anúncios do vendedor -->
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="mb-0">Anúncios de {{ user.get_full_name }}</h5>
-                <small class="text-muted">
-                    {{ anuncios_count|default:0 }} de {{ total_anuncios_6meses|default:0 }} publicados
-                </small>
-            </div>
-
-            <!-- Barra de busca e filtros -->
-            <form method="get" class="mb-4">
-            <div class="row g-2 mb-3">
-                 <!-- Campo de Busca -->
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text" name="search" value="{{ search_query }}" class="form-control"
-                   placeholder="Ex: Apartamento de 2 quartos" />
+            <!-- Coluna Direita: Anúncios e Atividades -->
+            <div class="col-lg-8">
+                
+                <!-- Header da Seção de Anúncios -->
+                <div class="section-header-enhanced mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-2">
+                                <i class="fas fa-bullhorn me-3" style="color: #667eea;"></i>
+                                Anúncios Publicados
+                            </h3>
+                            <p class="text-muted mb-0">
+                                Explore o portfólio de {{ user.get_full_name }} • {{ total_anuncios }} anúncio{{ total_anuncios|pluralize:"s" }} encontrado{{ total_anuncios|pluralize:"s" }}
+                            </p>
+                        </div>
+                        <div class="badge-counter">
+                            <span class="counter-badge">{{ total_anuncios }}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="categoria" class="form-select">
-                        <option value="">Categoria</option>
-                        {% for categoria in categorias %}
-                        <option value="{{ categoria.categoria__id }}" {% if categoria.categoria__id|stringformat:"s" == categoria_id %}selected{% endif %}>
-                            {{ categoria.categoria__nome }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="cidade" class="form-select">
-                        <option value="">Cidade</option>
-                        {% for cidade in cidades %}
-                        <option value="{{ cidade.cliente__cidade }}" {% if cidade.cliente__cidade == cidade %}selected{% endif %}>
-                            {{ cidade.cliente__cidade }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
 
-            <!-- Ordenar por -->
-            <div class="d-flex align-items-center mb-3 gap-2">
-                <label class="text-muted">Ordenar por</label>
-                <select name="order_by" class="form-select w-auto">
-                    <option value="-data_criacao" {% if order_by == "-data_criacao" %}selected{% endif %}>Mais recentes</option>
-                    <option value="data_criacao" {% if order_by == "data_criacao" %}selected{% endif %}>Mais antigos</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Filtrar</button>
-            </div>
-            </form>
-            {% if anuncios.count > 0 %}
-    <div class="row">
-        {% for anuncio in anuncios %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ anuncio.titulo }}</h5>
-                    <p class="card-text text-muted">{{ anuncio.descricao|truncatechars:100 }}</p>
-                    <p class="card-text"><strong>Publicado em:</strong> {{ anuncio.data_criacao|date:"d/m/Y" }}</p>
-                    <p class="card-text"><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
-                    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary btn-sm">Ver detalhes</a>
+                <!-- Filtros Melhorados -->
+                <div class="filter-section">
+                    <form method="get" class="search-form">
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" name="search" value="{{ search_query }}" 
+                                       class="search-input" placeholder="Buscar por título, descrição...">
+                            </div>
+                            
+                            <div class="filter-dropdown">
+                                <select name="categoria" class="category-select">
+                                    <option value="">📂 Todas as categorias</option>
+                                    {% for categoria in categorias %}
+                                    <option value="{{ categoria.categoria__id }}" 
+                                            {% if categoria.categoria__id|stringformat:"s" == categoria_id %}selected{% endif %}>
+                                        {{ categoria.categoria__nome }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search me-2"></i>
+                                Buscar
+                            </button>
+                        </div>
+                        
+                        <!-- Preservar página na busca -->
+                        {% if anuncios.number %}
+                        <input type="hidden" name="page" value="{{ anuncios.number }}">
+                        {% endif %}
+                        
+                        {% if search_query or categoria_id %}
+                        <div class="active-filters">
+                            <span class="filter-label">Filtros ativos:</span>
+                            {% if search_query %}
+                            <span class="filter-tag">
+                                <i class="fas fa-search me-1"></i>
+                                "{{ search_query }}"
+                                <a href="?categoria={{ categoria_id }}" class="remove-filter">×</a>
+                            </span>
+                            {% endif %}
+                            {% if categoria_id %}
+                            <span class="filter-tag">
+                                <i class="fas fa-tag me-1"></i>
+                                {% for categoria in categorias %}
+                                    {% if categoria.categoria__id|stringformat:"s" == categoria_id %}
+                                        {{ categoria.categoria__nome }}
+                                    {% endif %}
+                                {% endfor %}
+                                <a href="?search={{ search_query }}" class="remove-filter">×</a>
+                            </span>
+                            {% endif %}
+                            <a href="?" class="clear-all-filters">Limpar todos</a>
+                        </div>
+                        {% endif %}
+                    </form>
                 </div>
+
+                <!-- Grid de Anúncios Melhorado -->
+                {% if anuncios %}
+                <div class="ads-grid">
+                    {% for anuncio in anuncios %}
+                    <div class="ad-card-enhanced">
+                        {% if anuncio.imagens.first %}
+                        <div class="ad-image">
+                            <img src="{{ anuncio.imagens.first.imagem.url }}" alt="{{ anuncio.titulo }}" loading="lazy">
+                            <div class="image-overlay">
+                                <span class="view-count">
+                                    <i class="fas fa-eye"></i>
+                                    {{ anuncio.orcamentos.count }}
+                                </span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="ad-image-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>Sem imagem</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="ad-content">
+                            <div class="ad-header">
+                                <div class="ad-badges">
+                                    <span class="category-tag">{{ anuncio.categoria.nome }}</span>
+                                    <span class="status-indicator status-{{ anuncio.status }}">
+                                        {% if anuncio.status == 'ativo' %}
+                                        <i class="fas fa-circle"></i> Ativo
+                                        {% elif anuncio.status == 'finalizado' %}
+                                        <i class="fas fa-check-circle"></i> Finalizado
+                                        {% elif anuncio.status == 'em_andamento' %}
+                                        <i class="fas fa-clock"></i> Em Andamento
+                                        {% else %}
+                                        <i class="fas fa-pause-circle"></i> {{ anuncio.get_status_display }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <h4 class="ad-title">{{ anuncio.titulo }}</h4>
+                                <p class="ad-description">{{ anuncio.descricao|truncatechars:120 }}</p>
+                            </div>
+                            
+                            <div class="ad-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>{{ anuncio.data_criacao|date:"d/m/Y" }}</span>
+                                </div>
+                                
+                                <div class="meta-item">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span>{{ anuncio.orcamentos.count }} orçamento{{ anuncio.orcamentos.count|pluralize:"s" }}</span>
+                                </div>
+                                
+                                {% if anuncio.quantidade %}
+                                <div class="meta-item">
+                                    <i class="fas fa-cubes"></i>
+                                    <span>{{ anuncio.quantidade }} {{ anuncio.unidade|default:"unid" }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ad-actions">
+                                <a href="{% url 'necessidade_detail' anuncio.pk %}" class="view-ad-btn">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    Ver Anúncio Completo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Paginação -->
+                {% if paginator.num_pages > 1 %}
+                <div class="pagination-section">
+                    <nav aria-label="Navegação dos anúncios">
+                        <ul class="pagination-custom">
+                            <!-- Página anterior -->
+                            {% if anuncios.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ anuncios.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_id %}&categoria={{ categoria_id }}{% endif %}" aria-label="Anterior">
+                                    <i class="fas fa-chevron-left me-1"></i>
+                                    Anterior
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-left me-1"></i>
+                                    Anterior
+                                </span>
+                            </li>
+                            {% endif %}
+
+                            <!-- Informação da página atual -->
+                            <li class="page-item active">
+                                <span class="page-link current-page">
+                                    Página {{ anuncios.number }} de {{ paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            <!-- Próxima página -->
+                            {% if anuncios.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ anuncios.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if categoria_id %}&categoria={{ categoria_id }}{% endif %}" aria-label="Próximo">
+                                    Próximo
+                                    <i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">
+                                    Próximo
+                                    <i class="fas fa-chevron-right ms-1"></i>
+                                </span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    
+                    <!-- Informação resumida -->
+                    <div class="pagination-info">
+                        <small class="text-muted">
+                            Mostrando {{ anuncios.start_index }} a {{ anuncios.end_index }} de {{ total_anuncios }} anúncio{{ total_anuncios|pluralize:"s" }}
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Timeline de Atividades Recentes -->
+                {% if avaliacoes %}
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            Atividade Recente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-timeline">
+                            {% for avaliacao in avaliacoes|slice:":5" %}
+                            <div class="timeline-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Avaliação Recebida</h6>
+                                        <p class="text-muted small mb-2">{{ avaliacao.comentario|truncatechars:100 }}</p>
+                                        <div class="star-display justify-content-start">
+                                            {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= avaliacao.media_estrelas %}
+                                            <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ avaliacao.data_criacao|timesince }} atrás</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="empty-state-enhanced">
+                    <div class="empty-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h4>
+                        {% if search_query or categoria_id %}
+                        Nenhum anúncio encontrado
+                        {% else %}
+                        Ainda sem anúncios publicados
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if search_query or categoria_id %}
+                        Tente ajustar os filtros de busca ou escolher uma categoria diferente.
+                        {% else %}
+                        {{ user.get_full_name }} ainda não publicou anúncios na plataforma.
+                        {% endif %}
+                    </p>
+                    {% if search_query or categoria_id %}
+                    <a href="?" class="reset-search-btn">
+                        <i class="fas fa-undo me-2"></i>
+                        Ver Todos os Anúncios
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
     </div>
-{% else %}
-    <div class="alert alert-warning text-center">Nenhum anúncio encontrado.</div>
-{% endif %}
+</div>
+{% endblock %}
 
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animações de entrada suave
+    const cards = document.querySelectorAll('.modern-card, .ad-card');
+    
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -20px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+    
+    // Contador animado para estatísticas
+    function animateNumbers() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const finalNumber = parseInt(stat.textContent) || 0;
+            if (finalNumber > 0 && finalNumber < 1000) {
+                let currentNumber = 0;
+                const increment = finalNumber / 20;
+                
+                const timer = setInterval(() => {
+                    currentNumber += increment;
+                    if (currentNumber >= finalNumber) {
+                        stat.textContent = finalNumber;
+                        clearInterval(timer);
+                    } else {
+                        stat.textContent = Math.round(currentNumber);
+                    }
+                }, 50);
+            }
+        });
+    }
+    
+    // Iniciar animação dos números após um delay
+    setTimeout(animateNumbers, 800);
+    
+    // Tooltip para badges
+    const badges = document.querySelectorAll('.verification-badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
 {% endblock %}

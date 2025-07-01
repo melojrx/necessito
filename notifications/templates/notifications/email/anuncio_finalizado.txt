@@ -1,0 +1,49 @@
+Olá, {{ user.first_name }}!
+
+PROJETO FINALIZADO COM SUCESSO
+
+Excelente! Seu projeto foi finalizado com sucesso.
+
+DETALHES DO PROJETO:
+• Projeto: {{ anuncio.titulo }}
+• Categoria: {{ anuncio.categoria.nome }}
+• Data de finalização: {{ anuncio.data_atualizacao|date:"d/m/Y às H:i" }}
+
+{% if orcamento_aceito %}
+{% if user == anuncio.cliente %}• Fornecedor: {{ orcamento_aceito.fornecedor.get_full_name }}
+• Valor final: R$ {{ orcamento_aceito.valor_total|floatformat:2 }}{% else %}• Cliente: {{ anuncio.cliente.get_full_name }}
+• Valor recebido: R$ {{ orcamento_aceito.valor_total|floatformat:2 }}{% endif %}
+{% endif %}
+
+{% if user == anuncio.cliente %}AVALIAR FORNECEDOR:
+{{ avaliacao_url }}
+
+AVALIE O FORNECEDOR:
+• Sua avaliação ajuda outros usuários a escolher
+• Comente sobre qualidade, prazo e atendimento
+• Seja justo e construtivo em sua avaliação
+• Destaque pontos positivos do trabalho realizado
+
+PRECISA DE MAIS SERVIÇOS?
+Ficou satisfeito com a plataforma? Publique novos anúncios sempre que precisar! Nossa comunidade de fornecedores está sempre pronta para atender suas necessidades.{% else %}VER NOVOS PROJETOS:
+http://{{ domain }}/
+
+PARABÉNS PELO PROJETO CONCLUÍDO!
+• Você demonstrou profissionalismo e competência
+• Continue participando de novos projetos
+• Aguarde a avaliação do cliente em seu perfil
+• Compartilhe seu sucesso nas redes sociais
+
+CONTINUE CRESCENDO NA PLATAFORMA:
+Cada projeto concluído fortalece sua reputação. Mantenha-se ativo, participe de novos projetos e continue oferecendo serviços de excelência!{% endif %}
+
+{% if user == anuncio.cliente %}Esperamos que tenha ficado satisfeito com o resultado. Não esqueça de avaliar o fornecedor para ajudar outros usuários da plataforma.{% else %}O cliente finalizou o projeto que você atendeu. Parabéns pelo trabalho realizado!{% endif %}
+
+PRECISA DE SUPORTE? Nossa equipe está sempre disponível através da Central de Ajuda: http://{{ domain }}/ajuda/
+
+---
+
+Indicaai
+Este é um e-mail automático, não responda.
+Precisa de ajuda? Acesse: http://{{ domain }}/ajuda/
+Plataforma: http://{{ domain }}/ 

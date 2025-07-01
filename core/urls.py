@@ -11,7 +11,8 @@ from core.views import (
     HelpBudgetView, 
     HelpCommunicationView, 
     HelpRatingsView, 
-    HelpSupportView
+    HelpSupportView,
+    SecurityTipsView
 )
 
 urlpatterns = [
@@ -25,6 +26,9 @@ urlpatterns = [
     path('buscar/', include('search.urls')),
     path('chat/', include('chat.urls')),
     path('api/', include('api.urls')),
+    
+    # Páginas institucionais
+    path('dicas-de-seguranca/', SecurityTipsView.as_view(), name='security_tips'),
     
     # Central de Ajuda - Página Principal
     path('ajuda/', HelpView.as_view(), name='help'),

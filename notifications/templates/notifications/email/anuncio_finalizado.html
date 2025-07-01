@@ -1,0 +1,104 @@
+{% extends 'notifications/email/base_email.html' %}
+
+{% block email_title %}Anúncio Finalizado - Indicaai{% endblock %}
+
+{% block header_color %}linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%){% endblock %}
+{% block header_subtitle %}Projeto concluído com sucesso!{% endblock %}
+
+{% block icon_color %}linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%){% endblock %}
+{% block highlight_color %}#6f42c1{% endblock %}
+{% block highlight_text_color %}#5a2d91{% endblock %}
+{% block button_color %}linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%){% endblock %}
+
+{% block notification_icon %}<i class="fas fa-flag-checkered"></i>{% endblock %}
+
+{% block main_message %}
+<p>✅ Excelente! Seu projeto foi finalizado com sucesso.</p>
+
+{% if user == anuncio.cliente %}
+    <p>Esperamos que tenha ficado satisfeito com o resultado. Não esqueça de avaliar o fornecedor para ajudar outros usuários da plataforma.</p>
+{% else %}
+    <p>O cliente finalizou o projeto que você atendeu. Parabéns pelo trabalho realizado!</p>
+{% endif %}
+{% endblock %}
+
+{% block highlight_section %}
+<div class="highlight-box">
+    <h3>🎯 Projeto Finalizado: {{ anuncio.titulo }}</h3>
+    <p><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
+    <p><strong>Data de finalização:</strong> {{ anuncio.data_atualizacao|date:"d/m/Y às H:i" }}</p>
+    
+    {% if orcamento_aceito %}
+        {% if user == anuncio.cliente %}
+            <p><strong>Fornecedor:</strong> {{ orcamento_aceito.fornecedor.get_full_name }}</p>
+            <p><strong>Valor final:</strong> R$ {{ orcamento_aceito.valor_total|floatformat:2 }}</p>
+        {% else %}
+            <p><strong>Cliente:</strong> {{ anuncio.cliente.get_full_name }}</p>
+            <p><strong>Valor recebido:</strong> R$ {{ orcamento_aceito.valor_total|floatformat:2 }}</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block action_button %}
+{% if user == anuncio.cliente %}
+    <div class="action-button">
+        <a href="{{ avaliacao_url }}" class="btn">
+            ⭐ Avaliar fornecedor
+        </a>
+    </div>
+{% else %}
+    <div class="action-button">
+        <a href="http://{{ domain }}/" class="btn">
+            🔍 Ver novos projetos
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block details_section %}
+{% if user == anuncio.cliente %}
+    <div class="details-section">
+        <h4>⭐ Avalie o fornecedor</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #555;">
+            <li style="margin-bottom: 8px;">Sua avaliação ajuda outros usuários a escolher</li>
+            <li style="margin-bottom: 8px;">Comente sobre qualidade, prazo e atendimento</li>
+            <li style="margin-bottom: 8px;">Seja justo e construtivo em sua avaliação</li>
+            <li style="margin-bottom: 8px;">Destaque pontos positivos do trabalho realizado</li>
+        </ul>
+    </div>
+    
+    <div class="details-section">
+        <h4>🚀 Precisa de mais serviços?</h4>
+        <p style="margin: 0; color: #555; line-height: 1.6;">
+            Ficou satisfeito com a plataforma? Publique novos anúncios sempre que precisar!
+            Nossa comunidade de fornecedores está sempre pronta para atender suas necessidades.
+        </p>
+    </div>
+{% else %}
+    <div class="details-section">
+        <h4>🎉 Parabéns pelo projeto concluído!</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #555;">
+            <li style="margin-bottom: 8px;">Você demonstrou profissionalismo e competência</li>
+            <li style="margin-bottom: 8px;">Continue participando de novos projetos</li>
+            <li style="margin-bottom: 8px;">Aguarde a avaliação do cliente em seu perfil</li>
+            <li style="margin-bottom: 8px;">Compartilhe seu sucesso nas redes sociais</li>
+        </ul>
+    </div>
+    
+    <div class="details-section">
+        <h4>📈 Continue crescendo na plataforma</h4>
+        <p style="margin: 0; color: #555; line-height: 1.6;">
+            Cada projeto concluído fortalece sua reputação. Mantenha-se ativo, 
+            participe de novos projetos e continue oferecendo serviços de excelência!
+        </p>
+    </div>
+{% endif %}
+
+<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 20px 0;">
+    <p style="margin: 0; color: #495057; font-size: 14px;">
+        <strong>📞 Precisa de suporte?</strong> Nossa equipe está sempre disponível através da 
+        <a href="http://{{ domain }}/ajuda/" style="color: #6f42c1;">Central de Ajuda</a>.
+    </p>
+</div>
+{% endblock %} 

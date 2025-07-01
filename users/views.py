@@ -15,6 +15,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, UpdateView
 from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 @csrf_exempt
@@ -201,6 +202,21 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
         order_by = query_params.get('order_by', '-data_criacao')
         anuncios = anuncios.order_by(order_by)
 
+        # ======================
+        # PAGINAÇÃO DOS ANÚNCIOS
+        # ======================
+        paginator = Paginator(anuncios, 2)  # 2 anúncios por página
+        page = query_params.get('page', 1)
+        
+        try:
+            anuncios_paginados = paginator.page(page)
+        except PageNotAnInteger:
+            # Se a página não for um inteiro, exibir a primeira página
+            anuncios_paginados = paginator.page(1)
+        except EmptyPage:
+            # Se a página estiver fora do intervalo, exibir a última página
+            anuncios_paginados = paginator.page(paginator.num_pages)
+
         # Total de anúncios nos últimos 180 dias
         six_months_ago = timezone.now() - datetime.timedelta(days=180)
         total_anuncios_6meses = Necessidade.objects.filter(
@@ -223,8 +239,10 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
             'estrelas_meia': estrelas_meia,
             'estrelas_vazias': estrelas_vazias,
 
-            # Anúncios
-            'anuncios': anuncios,
+            # Anúncios com paginação
+            'anuncios': anuncios_paginados,
+            'paginator': paginator,
+            'total_anuncios': anuncios.count(),
             'categorias': categorias_disponiveis,
             'cidades': cidades_disponiveis,
             'total_anuncios_6meses': total_anuncios_6meses,

@@ -1,0 +1,60 @@
+{% extends 'notifications/email/base_email.html' %}
+
+{% block email_title %}Anúncio Criado com Sucesso - Indicaai{% endblock %}
+
+{% block header_color %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% endblock %}
+{% block header_subtitle %}Seu anúncio foi criado!{% endblock %}
+
+{% block icon_color %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% endblock %}
+{% block highlight_color %}#28a745{% endblock %}
+{% block highlight_text_color %}#28a745{% endblock %}
+{% block button_color %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% endblock %}
+
+{% block notification_icon %}<i class="fas fa-bullhorn"></i>{% endblock %}
+
+{% block main_message %}
+<p>Parabéns! Seu anúncio foi criado com sucesso e já está disponível para receber orçamentos de fornecedores qualificados.</p>
+
+<p>Agora é só aguardar as propostas chegarem! Você será notificado por e-mail sempre que receber um novo orçamento.</p>
+{% endblock %}
+
+{% block highlight_section %}
+<div class="highlight-box">
+    <h3>📢 {{ anuncio.titulo }}</h3>
+    <p><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
+    <p><strong>Data de criação:</strong> {{ anuncio.data_criacao|date:"d/m/Y às H:i" }}</p>
+    {% if anuncio.descricao %}
+        <p><strong>Descrição:</strong> {{ anuncio.descricao|truncatewords:20 }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block action_button %}
+<div class="action-button">
+    <a href="{{ anuncio_url }}" class="btn">
+        👁️ Ver meu anúncio
+    </a>
+</div>
+{% endblock %}
+
+{% block details_section %}
+<div class="details-section">
+    <h4>📋 Próximos passos</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Os fornecedores interessados verão seu anúncio e enviarão orçamentos</li>
+        <li style="margin-bottom: 8px;">Você receberá notificações por e-mail para cada novo orçamento</li>
+        <li style="margin-bottom: 8px;">Compare as propostas e escolha a melhor opção</li>
+        <li style="margin-bottom: 8px;">Use o chat integrado para tirar dúvidas com os fornecedores</li>
+    </ul>
+</div>
+
+<div class="details-section">
+    <h4>💡 Dicas para receber melhores orçamentos</h4>
+    <ul style="margin: 0; padding-left: 20px; color: #555;">
+        <li style="margin-bottom: 8px;">Adicione fotos do local ou do produto desejado</li>
+        <li style="margin-bottom: 8px;">Seja específico na descrição (medidas, cores, materiais)</li>
+        <li style="margin-bottom: 8px;">Informe o prazo esperado para a entrega/execução</li>
+        <li style="margin-bottom: 8px;">Mantenha-se ativo no chat para responder dúvidas rapidamente</li>
+    </ul>
+</div>
+{% endblock %} 

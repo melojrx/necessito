@@ -72,6 +72,22 @@ class Necessidade(models.Model):
     def result_type(self):
         return 'ads'
 
+    def get_imagem_principal(self):
+        """Retorna a primeira imagem do anúncio ou None se não houver imagens"""
+        return self.imagens.first()
+    
+    def get_imagem_principal_url(self):
+        """Retorna a URL da primeira imagem ou URL da imagem padrão se não houver imagens"""
+        imagem = self.get_imagem_principal()
+        if imagem and imagem.imagem:
+            return imagem.imagem.url
+        # Retorna a URL da imagem padrão se não houver imagens
+        return '/static/img/logo_Indicaai_anuncio.png'
+    
+    def tem_imagens(self):
+        """Verifica se o anúncio tem pelo menos uma imagem"""
+        return self.imagens.exists()
+
     def __str__(self):
         return self.titulo
     

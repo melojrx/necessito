@@ -293,7 +293,7 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-warning mb-1">{{ necessidade.orcamentos.filter.status='pendente'.count }}</h5>
+                <h5 class="card-title text-warning mb-1">{{ necessidade.orcamentos.all|count_pendentes }}</h5>
                 <p class="card-text small text-muted mb-0">Pendentes</p>
               </div>
             </div>
@@ -301,7 +301,7 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-success mb-1">{{ necessidade.orcamentos.filter.status='aceito'.count }}</h5>
+                <h5 class="card-title text-success mb-1">{{ necessidade.orcamentos.all|count_aceitos }}</h5>
                 <p class="card-text small text-muted mb-0">Aceitos</p>
               </div>
             </div>
@@ -309,7 +309,7 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-danger mb-1">{{ necessidade.orcamentos.filter.status='rejeitado'.count }}</h5>
+                <h5 class="card-title text-danger mb-1">{{ necessidade.orcamentos.all|count_rejeitados }}</h5>
                 <p class="card-text small text-muted mb-0">Rejeitados</p>
               </div>
             </div>

@@ -1,0 +1,29 @@
+{% load static %}
+{% load custom_filters %}
+
+<div class="card-container">
+    <div class="card flex-fill app-card">
+        <div class="card-img-wrapper">
+            {% if anuncio.imagens.first %}
+            <img src="{{ anuncio.imagens.first.imagem.url }}" class="card-img-top" alt="{{ anuncio.titulo }}">
+            {% else %}
+            <img src="{% static 'img/logo_Indicaai_anuncio.png' %}" class="image-placeholder-default" alt="Imagem padrão">
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h6 class="card-title">{{ anuncio.titulo }}</h6>
+            <p class="card-category">{{ anuncio.categoria }}</p>
+            {% if anuncio.cliente.cidade or anuncio.cliente.estado %}
+            <p class="location-text"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ anuncio.cliente.cidade }} - {{ anuncio.cliente.estado|upper }}</p>
+            {% endif %}
+            <div class="card-footer-info">
+                <span class="date-text">{{ anuncio.data_criacao|date:"d/m/Y" }}</span>
+                {% if anuncio.duracao %}
+                <span class="app-badge">{{ anuncio.duracao }}</span>
+                {% elif anuncio.status and show_status %}
+                <span class="app-badge badge-{{ anuncio.status }}">{{ anuncio.get_status_display }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div> 

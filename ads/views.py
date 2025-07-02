@@ -21,6 +21,9 @@ from itertools import islice
 from django.views.generic import TemplateView
 from categories.models import Categoria
 from .models import Necessidade
+import os
+from django.conf import settings
+from django.core.files.base import ContentFile
 
 class HomeView(TemplateView):
     template_name = "home.html"
@@ -147,8 +150,14 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
 
         # Processar imagens
         imagens = self.request.FILES.getlist('imagens')
-        for img in imagens[:3]:  # Garante o limite máximo
-            AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+        
+        # Se há imagens enviadas pelo usuário, adicioná-las
+        if imagens:
+            for img in imagens[:3]:  # Garante o limite máximo de 3 imagens
+                AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+        else:
+            # Se não há imagens, adicionar a imagem padrão do Indicaai
+            self.adicionar_imagem_padrao()
         
         # Calcula a diferença de dias
         # Usamos data_criacao (DateTimeField, auto_now_add=True) que você tem no model Necessidade
@@ -161,7 +170,7 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
         # elif days_diff == 1:
         #     dias_str = "Há 1 dia"
         # else:
-        #     dias_str = f"Há {days_diff} dias"
+        #     dias_str = f"Há {dias_diff} dias"
 
         # Cria a notificação com HTML embutido
         Notification.objects.create(
@@ -177,6 +186,35 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
 
         messages.success(self.request, "Anúncio criado com sucesso!")
         return super().form_valid(form)
+
+    def adicionar_imagem_padrao(self):
+        """Adiciona a imagem padrão do Indicaai quando nenhuma imagem é enviada"""
+        try:
+            # Caminho para a imagem padrão
+            imagem_padrao_path = os.path.join(settings.STATIC_ROOT or 'static', 'img', 'logo_Indicaai_anuncio.png')
+            
+            # Se STATIC_ROOT não estiver definido, usar o diretório static local
+            if not os.path.exists(imagem_padrao_path):
+                imagem_padrao_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo_Indicaai_anuncio.png')
+            
+            if os.path.exists(imagem_padrao_path):
+                with open(imagem_padrao_path, 'rb') as f:
+                    imagem_content = f.read()
+                
+                # Criar uma instância AnuncioImagem com a imagem padrão
+                imagem_padrao = AnuncioImagem(anuncio=self.object)
+                imagem_padrao.imagem.save(
+                    f'anuncio_{self.object.id}_padrao.png',
+                    ContentFile(imagem_content),
+                    save=True
+                )
+                
+                messages.info(self.request, "Como nenhuma imagem foi enviada, adicionamos uma imagem padrão ao seu anúncio. Você pode editá-lo depois para adicionar suas próprias fotos.")
+            
+        except Exception as e:
+            # Em caso de erro, registrar no log mas não interromper o processo
+            print(f"Erro ao adicionar imagem padrão: {e}")
+            # O anúncio continua sendo criado mesmo sem imagem
 
     def get_client_ip(self):
         try:

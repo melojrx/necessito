@@ -189,7 +189,27 @@
 
 @media (max-width: 768px) {
     .create-hero { padding: 2rem 0 1.5rem; }
-    .form-section { padding: 1.5rem; }
+    .form-section { padding: 1.25rem 1rem; margin-bottom: 1.5rem; }
+    .form-card { padding: 0 0.5rem; }
+    .section-header { margin-bottom: 1rem; padding-bottom: 0.75rem; }
+    .section-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 2rem;
+        margin-right: 0.75rem;
+    }
+    .modern-input {
+        padding: 1rem 1rem;
+        font-size: 1rem;
+    }
+    .modern-label {
+        font-size: 1rem;
+    }
+    .request-category-card { padding: 1.25rem 1rem; margin: 1.5rem 0; }
+    .submit-section { padding: 1.25rem 1rem; margin-top: 1.5rem; }
+    .preview-container { gap: 0.5rem; }
+    .help-text { font-size: 0.95rem; }
+    .create-ad-page { padding-bottom: 90px; } /* Espaço extra para não sobrepor o botão flutuante */
 }
 </style>
 
@@ -227,45 +247,6 @@
                             </ul>
                         </div>
                     {% endif %}
-
-                    <!-- Seção 1: Informações Básicas -->
-                    <div class="form-section section-basic">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-edit"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-1 fw-bold">Informações Básicas</h3>
-                                <p class="text-muted mb-0">Defina o título e descrição do seu anúncio</p>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12 mb-4">
-                                <label class="modern-label">
-                                    <i class="fas fa-heading"></i>
-                                    Título do Anúncio
-                                </label>
-                                {{ form.titulo }}
-                                <div class="help-text">
-                                    <i class="fas fa-lightbulb me-1"></i>
-                                    Seja específico e claro sobre o que você precisa
-                                </div>
-                            </div>
-
-                            <div class="col-12 mb-4">
-                                <label class="modern-label">
-                                    <i class="fas fa-align-left"></i>
-                                    Descrição Detalhada
-                                </label>
-                                {{ form.descricao }}
-                                <div class="help-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Quanto mais detalhes, melhores serão os orçamentos recebidos
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Seção 2: Categoria e Subcategoria -->
                     <div class="form-section section-category">
@@ -314,6 +295,45 @@
                                 <i class="fas fa-envelope me-2"></i>
                                 Solicitar Nova Categoria
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Seção 1: Informações Básicas -->
+                    <div class="form-section section-basic">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Informações Básicas</h3>
+                                <p class="text-muted mb-0">Defina o título e descrição do seu anúncio</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-heading"></i>
+                                    Título do Anúncio
+                                </label>
+                                {{ form.titulo }}
+                                <div class="help-text">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    Seja específico e claro sobre o que você precisa
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label class="modern-label">
+                                    <i class="fas fa-align-left"></i>
+                                    Descrição Detalhada
+                                </label>
+                                {{ form.descricao }}
+                                <div class="help-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Quanto mais detalhes, melhores serão os orçamentos recebidos
+                                </div>
+                            </div>
                         </div>
                     </div>
 

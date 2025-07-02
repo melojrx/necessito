@@ -7,6 +7,20 @@ from users.models import User
 from ads.models import Necessidade
 
 
+class OrcamentoManager(models.Manager):
+    def pendentes(self):
+        return self.filter(status='pendente')
+    
+    def aceitos(self):
+        return self.filter(status='aceito')
+    
+    def rejeitados(self):
+        return self.filter(status='rejeitado')
+    
+    def aguardando(self):
+        return self.filter(status='aguardando')
+
+
 class Orcamento(models.Model):
     fornecedor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orcamentos')
     anuncio = models.ForeignKey(Necessidade, on_delete=models.CASCADE, related_name='orcamentos')
@@ -68,6 +82,9 @@ class Orcamento(models.Model):
     status = models.CharField(max_length=50, choices=STATUS, default='pendente')
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(auto_now=True)
+
+    # Manager personalizado
+    objects = OrcamentoManager()
 
     def valor_total(self):
         """Calcula o valor total do orçamento baseado nos itens"""

@@ -118,7 +118,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
-class UserDetailView(DetailView):
+class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'minha-conta-detail.html'
     context_object_name = 'user'
@@ -131,11 +131,17 @@ class UserDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
 
-        avaliacoes = Avaliacao.objects.filter(avaliado=user)
-        total_avaliacoes = avaliacoes.count()
+        # Verificar se o usuário está autenticado antes de fazer consultas
+        if user.is_authenticated:
+            avaliacoes = Avaliacao.objects.filter(avaliado=user)
+            total_avaliacoes = avaliacoes.count()
 
-        media_estrelas = avaliacoes.aggregate(avg=Avg('media_estrelas'))['avg'] or 0
-        media_estrelas = round(media_estrelas, 1)
+            media_estrelas = avaliacoes.aggregate(avg=Avg('media_estrelas'))['avg'] or 0
+            media_estrelas = round(media_estrelas, 1)
+        else:
+            avaliacoes = Avaliacao.objects.none()
+            total_avaliacoes = 0
+            media_estrelas = 0
 
         context.update({
             'media_estrelas': media_estrelas,

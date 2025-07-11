@@ -13,13 +13,24 @@ from .models import Orcamento
 from .forms import OrcamentoForm, ItemFormSet
 import logging
 
+# Importar os novos decorators e validadores de permissão
+from core.decorators import supplier_required
+from core.permissions import PermissionValidator
+from core.mixins import SupplierRequiredMixin, BudgetOwnerMixin
+
 logger = logging.getLogger(__name__)
 
-@login_required
+@supplier_required
 @transaction.atomic
 def submeter_orcamento(request, pk):
     """View para submeter orçamento com múltiplos itens"""
     anuncio = get_object_or_404(Necessidade, pk=pk, status__in=['ativo', 'em_andamento'])
+    
+    # Validação adicional usando o sistema de permissões
+    can_create, message = PermissionValidator.can_create_budget(request.user)
+    if not can_create:
+        messages.error(request, message)
+        return redirect(anuncio.get_absolute_url())
     
     logger.info(f"submeter_orcamento chamado - Método: {request.method}, Anúncio: {anuncio.id}")
     logger.info(f"Usuário: {request.user}, Autenticado: {request.user.is_authenticated}")
@@ -93,13 +104,10 @@ class OrcamentoAceitarView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
 
-        # Verifica se o orçamento ainda está pendente
-        if orcamento.status != 'pendente':
-            return JsonResponse({'error': 'Este orçamento já foi processado e não pode mais ser aceito!'}, status=400)
-
-        # Verifica se o usuário logado é o dono do anúncio
-        if request.user != orcamento.anuncio.cliente:
-            return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
+        # Usar o sistema de permissões centralizado
+        can_accept, message = PermissionValidator.can_accept_budget(request.user, orcamento)
+        if not can_accept:
+            return JsonResponse({'error': message}, status=403)
 
         # Atualiza o status do orçamento e mantém o status do anúncio
         orcamento.status = 'aguardando'
@@ -117,9 +125,13 @@ class OrcamentoFornecedorAceitarView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
 
-        # Verifica se o usuário logado é o fornecedor do orçamento
+        # Verificar se é o fornecedor do orçamento
         if request.user != orcamento.fornecedor:
             return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
+
+        # Verificar se o orçamento está no status correto
+        if orcamento.status != 'aguardando':
+            return JsonResponse({'error': 'Este orçamento não está aguardando confirmação!'}, status=400)
 
         # Atualiza o status do orçamento para "aceito"
         orcamento.status = 'aceito'
@@ -138,17 +150,10 @@ class OrcamentoRejeitarView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         orcamento = get_object_or_404(Orcamento, id=self.kwargs['pk'])
 
-        # Verifica se o orçamento ainda está pendente
-        if orcamento.status != 'pendente':
-            return JsonResponse({'error': 'Este orçamento já foi processado e não pode mais ser rejeitado!'}, status=400)
-
-        # Verifica se o usuário logado é o dono do anúncio
-        if request.user != orcamento.anuncio.cliente:
-            return JsonResponse({'error': 'Você não tem permissão para rejeitar este orçamento!'}, status=403)
-
-        # Verifica se o anúncio está em andamento
-        if orcamento.anuncio.status != 'em_andamento':
-            return JsonResponse({'error': 'Você só pode rejeitar orçamentos enquanto o anúncio está em andamento!'}, status=400)
+        # Usar o sistema de permissões centralizado
+        can_reject, message = PermissionValidator.can_reject_budget(request.user, orcamento)
+        if not can_reject:
+            return JsonResponse({'error': message}, status=403)
 
         # Atualiza o status do orçamento para "rejeitado"
         orcamento.status = 'rejeitado'
@@ -157,7 +162,7 @@ class OrcamentoRejeitarView(LoginRequiredMixin, View):
         messages.success(request, "Orçamento rejeitado com sucesso!")
         return JsonResponse({'success': True, 'message': 'Orçamento rejeitado com sucesso!'})
 
-class budgetListView(LoginRequiredMixin, ListView):
+class budgetListView(SupplierRequiredMixin, ListView):
     model = Orcamento
     template_name = 'budget_list.html'
     context_object_name = 'orcamentos'
@@ -178,7 +183,7 @@ class budgetListView(LoginRequiredMixin, ListView):
         
         return queryset
 
-class BudgetUpdateView(LoginRequiredMixin, UpdateView):
+class BudgetUpdateView(SupplierRequiredMixin, UpdateView):
     model = Orcamento
     form_class = OrcamentoForm
     template_name = 'budget_update.html'
@@ -198,6 +203,12 @@ class BudgetUpdateView(LoginRequiredMixin, UpdateView):
 
     @transaction.atomic
     def form_valid(self, form):
+        # Validação adicional usando o sistema de permissões
+        can_edit, message = PermissionValidator.can_edit_budget(self.request.user, self.object)
+        if not can_edit:
+            messages.error(self.request, message)
+            return redirect('budget_list')
+        
         context = self.get_context_data()
         formset = context['formset']
         
@@ -213,12 +224,12 @@ class BudgetUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('budget_list')
 
-class budgetDetailView(LoginRequiredMixin, DetailView):
+class budgetDetailView(BudgetOwnerMixin, DetailView):
     model = Orcamento
     template_name = 'budget_detail.html'
     context_object_name = 'orcamento'
 
-class budgetDeleteView(LoginRequiredMixin, DeleteView):
+class budgetDeleteView(SupplierRequiredMixin, DeleteView):
     model = Orcamento
     template_name = 'budget_delete.html'
     success_url = reverse_lazy('budget_list')
@@ -230,9 +241,15 @@ class budgetDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         orcamento = self.get_object()
 
-        # Checa a regra de negócio
-        if orcamento.status == 'aguardando':
-            messages.error(request, "Não é permitido excluir um orçamento aprovado pelo cliente e aguardando seu aceite.")
+        # Verificar se é o dono do orçamento
+        if request.user != orcamento.fornecedor:
+            messages.error(request, "Você não tem permissão para excluir este orçamento.")
+            return redirect('budget_list')
+
+        # Checa a regra de negócio usando o sistema de permissões
+        can_edit, message = PermissionValidator.can_edit_budget(request.user, orcamento)
+        if not can_edit:
+            messages.error(request, message)
             return redirect('budget_list')
 
         messages.success(request, "Orçamento excluído com sucesso!")
@@ -255,9 +272,10 @@ def export_orcamento_pdf(request, pk):
     """
     orcamento = get_object_or_404(Orcamento, pk=pk)
 
-    # Verificar permissão (apenas o dono do orçamento ou o cliente do anúncio pode exportar)
-    if request.user != orcamento.fornecedor and request.user != orcamento.anuncio.cliente:
-        return HttpResponse("Acesso negado", status=403)
+    # Usar o sistema de permissões centralizado
+    can_view, message = PermissionValidator.can_view_budget_details(request.user, orcamento)
+    if not can_view:
+        return HttpResponse(message, status=403)
 
     # Preparar o contexto para o template
     context = {

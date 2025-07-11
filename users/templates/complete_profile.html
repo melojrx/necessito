@@ -19,8 +19,8 @@
                     Complete suas informações e tenha uma experiência completa na plataforma!
                 </p>
                 
-                <!-- Progress Bar -->
-                <div class="progress mb-4" style="height: 8px;">
+                <!-- Progress Bar Enhanced -->
+                <div class="progress-enhanced mb-4">
                     <div class="progress-bar bg-primary" role="progressbar" style="width: 70%"></div>
                 </div>
                 <small class="text-muted">70% completo - Quase lá!</small>
@@ -83,11 +83,15 @@
                             <div class="row g-3">
                                 <!-- Telefone -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">{{ form.telefone.label }}</label>
-                                    {{ form.telefone }}
-                                    {% if form.telefone.errors %}
-                                        <div class="text-danger small">{{ form.telefone.errors.0 }}</div>
-                                    {% endif %}
+                                    <div class="field-group">
+                                        <label class="form-label fw-semibold">{{ form.telefone.label }}</label>
+                                        {{ form.telefone }}
+                                        <i class="field-icon fas fa-phone"></i>
+                                        <div class="field-message"></div>
+                                        {% if form.telefone.errors %}
+                                            <div class="text-danger small">{{ form.telefone.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
 
                                 <!-- Foto -->
@@ -125,11 +129,15 @@
                                     {% endif %}
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label fw-semibold">{{ form.cep.label }}</label>
-                                    {{ form.cep }}
-                                    {% if form.cep.errors %}
-                                        <div class="text-danger small">{{ form.cep.errors.0 }}</div>
-                                    {% endif %}
+                                    <div class="field-group">
+                                        <label class="form-label fw-semibold">{{ form.cep.label }}</label>
+                                        {{ form.cep }}
+                                        <i class="field-icon fas fa-map-pin"></i>
+                                        <div class="field-message"></div>
+                                        {% if form.cep.errors %}
+                                            <div class="text-danger small">{{ form.cep.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label fw-semibold">{{ form.cidade.label }}</label>

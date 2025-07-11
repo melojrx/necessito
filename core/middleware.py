@@ -15,6 +15,7 @@ class ProfileCompleteMiddleware:
     """
     Middleware que sugere ao usuário completar perfil após login.
     NÃO bloqueia o acesso - apenas redireciona uma vez e permite pular.
+    Versão melhorada com melhor UX.
     """
     
     def __init__(self, get_response):
@@ -26,9 +27,11 @@ class ProfileCompleteMiddleware:
             # Debug info
             logger.info(f"Suggesting profile completion for user {request.user.id} from {request.path}")
             
+            # Mensagem mais amigável e informativa
             messages.info(
                 request, 
-                "Complete seu perfil para ter uma experiência completa na plataforma!"
+                "🎯 Complete seu perfil para ter acesso completo à plataforma! "
+                "Defina se você é cliente, fornecedor ou ambos."
             )
             
             # Marcar que já sugerimos o perfil para este usuário nesta sessão

@@ -1,7 +1,14 @@
-from rest_framework import viewsets, permissions, filters
-from rest_framework.decorators import action
+from rest_framework import viewsets, permissions, status, filters
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import models
+
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 from users.models import User
 from ads.models import Necessidade
@@ -10,28 +17,35 @@ from budgets.models import Orcamento
 from rankings.models import Avaliacao
 
 from .serializers import (
-    UserSerializer,
-    UserDetailSerializer,
-    CategoriaSerializer,
-    SubCategoriaSerializer,
-    NecessidadeSerializer,
-    NecessidadeDetailSerializer,
-    OrcamentoSerializer,
-    AvaliacaoSerializer,
+    UserSerializer, UserDetailSerializer,
+    CategoriaSerializer, SubCategoriaSerializer,
+    NecessidadeSerializer, NecessidadeDetailSerializer,
+    OrcamentoSerializer, AvaliacaoSerializer,
+    PasswordChangeSerializer, ErrorResponseSerializer, SuccessResponseSerializer,
+    VersionInfoSerializer
 )
-from .permissions import IsOwnerOrReadOnly, IsAdminOrReadOnly
-from .filters import UserFilter, NecessidadeFilter, OrcamentoFilter, AvaliacaoFilter
+from .permissions import (
+    IsAdminOrReadOnly, NecessidadePermission, OrcamentoPermission, AvaliacaoPermission
+)
+from .filters import NecessidadeFilter, OrcamentoFilter, AvaliacaoFilter
+from .versions import CURRENT_API_VERSION, SUPPORTED_VERSIONS, VERSION_METADATA
 
+# ViewSets simplificados sem decoradores drf_yasg
 
+@extend_schema_view(
+    list=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+    create=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+    retrieve=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+    update=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+    partial_update=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+    destroy=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
+)
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de usuários.
-    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_class = UserFilter
+    filterset_fields = ['is_client', 'is_supplier', 'cidade', 'estado']
     search_fields = ['first_name', 'last_name', 'email']
 
     def get_serializer_class(self):
@@ -39,72 +53,36 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserDetailSerializer
         return UserSerializer
 
-    @action(detail=True, methods=['get'])
-    def avaliacoes(self, request, pk=None):
-        """
-        Retorna as avaliações recebidas pelo usuário.
-        """
-        user = self.get_object()
-        avaliacoes = Avaliacao.objects.filter(avaliado=user)
-        serializer = AvaliacaoSerializer(avaliacoes, many=True)
-        return Response(serializer.data)
-    
-    @action(detail=True, methods=['get'])
-    def necessidades(self, request, pk=None):
-        """
-        Retorna as necessidades (anúncios) criados pelo usuário.
-        """
-        user = self.get_object()
-        necessidades = Necessidade.objects.filter(cliente=user)
-        serializer = NecessidadeSerializer(necessidades, many=True)
-        return Response(serializer.data)
-    
-    @action(detail=True, methods=['get'])
-    def orcamentos(self, request, pk=None):
-        """
-        Retorna os orçamentos feitos pelo usuário (como fornecedor).
-        """
-        user = self.get_object()
-        orcamentos = Orcamento.objects.filter(fornecedor=user)
-        serializer = OrcamentoSerializer(orcamentos, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        queryset = User.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True)
+        return queryset
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+    create=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+    retrieve=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+    update=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+    partial_update=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+    destroy=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
+)
 class CategoriaViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de categorias.
-    """
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['nome', 'descricao']
 
-    @action(detail=True, methods=['get'])
-    def subcategorias(self, request, pk=None):
-        """
-        Retorna as subcategorias de uma categoria específica.
-        """
-        categoria = self.get_object()
-        subcategorias = SubCategoria.objects.filter(categoria=categoria)
-        serializer = SubCategoriaSerializer(subcategorias, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def necessidades(self, request, pk=None):
-        """
-        Retorna as necessidades (anúncios) de uma categoria específica.
-        """
-        categoria = self.get_object()
-        necessidades = Necessidade.objects.filter(categoria=categoria)
-        serializer = NecessidadeSerializer(necessidades, many=True)
-        return Response(serializer.data)
-
-
+@extend_schema_view(
+    list=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+    create=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+    retrieve=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+    update=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+    partial_update=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+    destroy=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
+)
 class SubCategoriaViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de subcategorias.
-    """
     queryset = SubCategoria.objects.all()
     serializer_class = SubCategoriaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
@@ -112,24 +90,18 @@ class SubCategoriaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['categoria']
     search_fields = ['nome', 'descricao']
 
-    @action(detail=True, methods=['get'])
-    def necessidades(self, request, pk=None):
-        """
-        Retorna as necessidades (anúncios) de uma subcategoria específica.
-        """
-        subcategoria = self.get_object()
-        necessidades = Necessidade.objects.filter(subcategoria=subcategoria)
-        serializer = NecessidadeSerializer(necessidades, many=True)
-        return Response(serializer.data)
-
-
+@extend_schema_view(
+    list=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+    create=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+    retrieve=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+    update=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+    partial_update=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+    destroy=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
+)
 class NecessidadeViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de necessidades (anúncios).
-    """
     queryset = Necessidade.objects.all()
     serializer_class = NecessidadeSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [NecessidadePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = NecessidadeFilter
     search_fields = ['titulo', 'descricao']
@@ -139,45 +111,95 @@ class NecessidadeViewSet(viewsets.ModelViewSet):
             return NecessidadeDetailSerializer
         return NecessidadeSerializer
 
-    @action(detail=True, methods=['get'])
-    def orcamentos(self, request, pk=None):
-        """
-        Retorna os orçamentos de uma necessidade (anúncio) específica.
-        """
-        necessidade = self.get_object()
-        orcamentos = Orcamento.objects.filter(anuncio=necessidade)
-        serializer = OrcamentoSerializer(orcamentos, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        queryset = Necessidade.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(status='ativo')
+        return queryset
 
-    @action(detail=True, methods=['get'])
-    def avaliacoes(self, request, pk=None):
-        """
-        Retorna as avaliações de uma necessidade (anúncio) específica.
-        """
-        necessidade = self.get_object()
-        avaliacoes = Avaliacao.objects.filter(anuncio=necessidade)
-        serializer = AvaliacaoSerializer(avaliacoes, many=True)
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        serializer.save(cliente=self.request.user)
 
-
+@extend_schema_view(
+    list=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+    create=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+    retrieve=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+    update=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+    partial_update=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+    destroy=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
+)
 class OrcamentoViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de orçamentos.
-    """
     queryset = Orcamento.objects.all()
     serializer_class = OrcamentoSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [OrcamentoPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = OrcamentoFilter
     search_fields = ['descricao']
 
+    def get_queryset(self):
+        queryset = Orcamento.objects.all()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(
+                models.Q(fornecedor=self.request.user) |
+                models.Q(anuncio__cliente=self.request.user)
+            ).distinct()
+        return queryset
 
+    def perform_create(self, serializer):
+        serializer.save(fornecedor=self.request.user)
+
+@extend_schema_view(
+    list=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+    create=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+    retrieve=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+    update=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+    partial_update=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+    destroy=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
+)
 class AvaliacaoViewSet(viewsets.ModelViewSet):
-    """
-    API para gerenciamento de avaliações.
-    """
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [AvaliacaoPermission]
     filter_backends = [DjangoFilterBackend]
-    filterset_class = AvaliacaoFilter 
+    filterset_class = AvaliacaoFilter
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+
+@extend_schema(
+    tags=['00 - SISTEMA - INFORMAÇÕES GERAIS'],
+    summary="Informações sobre versões da API",
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_version_info(request, version=None):
+    if version:
+        if version in VERSION_METADATA:
+            return Response({
+                'version': version,
+                **VERSION_METADATA[version]
+            })
+        else:
+            return Response(
+                {'error': f'Versão {version} não encontrada'},
+                status=404
+            )
+    
+    return Response({
+        'current_version': CURRENT_API_VERSION,
+        'supported_versions': SUPPORTED_VERSIONS,
+        'versions': VERSION_METADATA
+    })
+
+@extend_schema(exclude=True)
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def api_logout_redirect(request):
+    if request.user.is_authenticated:
+        logout(request)
+    
+    next_url = request.GET.get('next', '/')
+    if 'swagger' in next_url or 'api' in next_url:
+        return redirect('/api/v1/swagger/')
+    
+    return redirect('/') 

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",  # Necessário para envio de e-mails
     "django_recaptcha",
+    "corsheaders",  # CORS headers
     "core",
     "users",
     "ads",
@@ -63,12 +64,19 @@ INSTALLED_APPS = [
     
     # API e documentação
     "rest_framework",
-    "drf_yasg",
+    "rest_framework.authtoken", # Necessário para dj-rest-auth
+    "dj_rest_auth",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth.registration",
+    "drf_spectacular",
     "django_filters",
     "api",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # CORS deve ser o primeiro
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -76,7 +84,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.ProfileCompleteMiddleware",  # Temporariamente desabilitado para debug
+    "allauth.account.middleware.AccountMiddleware", # Adicionado para allauth
+    "api.middleware.APIVersionMiddleware",  # Middleware de versionamento da API
+    "core.middleware.ProfileCompleteMiddleware",  # Reativado com melhorias
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -179,7 +189,7 @@ LOGIN_REDIRECT_URL = '/home'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configurações relacionadas a proxies e balanceadores de carga
-USE_X_FORWARDED_HOST = True
+# USE_X_FORWARDED_HOST = True  # Comentado temporariamente para debug
 
 # Indica que o Django deve respeitar o cabeçalho X-Forwarded-Proto
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -198,8 +208,8 @@ MESSAGE_TAGS = {
 # Se quiser ver os e-mails diretamente no console (modo dev):
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = "Necessito <no-reply@necessito.br>"
-EMAIL_SUBJECT_PREFIX = "[Necessito]"
+DEFAULT_FROM_EMAIL = "Indicai <no-reply@indicai.com.br>"
+EMAIL_SUBJECT_PREFIX = "[Indicai]"
 
 # Backend de e-mail
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
@@ -208,12 +218,12 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Necessito <no-reply@necessito.br>")
-EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "[Necessito]")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Indicai <no-reply@indicai.com.br>")
+EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "[Indicai]")
 
-# Tamanho máximo de upload (5MB)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
+# Tamanho máximo de upload (10MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # Configurações de segurança
 # Em desenvolvimento (DEBUG=True), permitir HTTP
@@ -234,8 +244,7 @@ if not DEBUG:
 # Configurações REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -247,25 +256,78 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'URL_FIELD_NAME': 'url',
 }
 
-# Configurações Swagger/OpenAPI
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
-        },
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
+# Configurações removidas - usando apenas drf_spectacular
+
+# Configurações DRF Spectacular
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Indicai',
+    'DESCRIPTION': '''
+    API de integração do sistema Indicai.
+    
+    Esta API fornece acesso às principais funcionalidades do sistema, incluindo:
+    - Autenticação JWT (dj-rest-auth)
+    - Gerenciamento de usuários
+    - Categorias e subcategorias
+    - Necessidades (anúncios)
+    - Orçamentos
+    - Avaliações
+    
+    ## Como usar a API
+    
+    1. **Faça login** no endpoint `/api/v1/auth/login/` com email e senha
+    2. **Copie o access token** da resposta
+    3. **Clique em "Authorize"** no topo da página
+    4. **Cole o token** no campo "Value" (apenas o token, sem "Bearer")
+    5. **Clique em "Authorize"** novamente
+    6. **Use os endpoints** normalmente por 1 hora (duração do token)
+    
+    ## Versionamento
+    
+    A API utiliza versionamento via URL. A versão atual é **v1**.
+    
+    ## Autenticação
+    
+    A API utiliza autenticação JWT. O token de acesso tem duração de 1 hora.
+    ''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': False,
+    'COMPONENTS': {
+        'securitySchemes': {
+            'bearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+                'description': 'Token JWT obtido através do endpoint de login'
+            }
         }
     },
-    'USE_SESSION_AUTH': True,
-    'JSON_EDITOR': True,
-    'VALIDATOR_URL': None,
+    'SECURITY': [{'bearerAuth': []}],
+    'TAGS': [
+        {'name': '00 - SISTEMA - INFORMAÇÕES GERAIS', 'description': 'Informações sobre versões e sistema'},
+        {'name': '01 - USUÁRIOS - GESTÃO DE PERFIS', 'description': 'Gerenciamento de usuários do sistema'},
+        {'name': '02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS', 'description': 'Categorias de produtos e serviços'},
+        {'name': '03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS', 'description': 'Subcategorias especializadas'},
+        {'name': '04 - NECESSIDADES - ANÚNCIOS DE DEMANDA', 'description': 'Anúncios de necessidades dos clientes'},
+        {'name': '05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES', 'description': 'Propostas de fornecedores'},
+        {'name': '06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO', 'description': 'Sistema de avaliações entre usuários'},
+        {'name': '07 - AUTENTICAÇÃO - ACESSO AO SISTEMA', 'description': 'Endpoints de autenticação e acesso'},
+    ],
+    'CONTACT': {
+        'email': 'contato@indicai.com.br',
+    },
+    'LICENSE': {
+        'name': 'Licença Proprietária',
+    },
+    'TERMS_OF_SERVICE': 'https://indicai.com.br/termos/',
 }
+
+# Configurações removidas - usando apenas drf_spectacular
 
 # Configurações de logging
 # Criar diretório de logs se não existir
@@ -303,3 +365,118 @@ LOGGING = {
         },
     },
 }
+
+# Configurações SimpleJWT
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Token de acesso válido por 1 hora
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Token de refresh válido por 7 dias
+    'ROTATE_REFRESH_TOKENS': True,  # Gera novo refresh token a cada uso
+    'BLACKLIST_AFTER_ROTATION': True,  # Invalida o refresh token anterior
+    'UPDATE_LAST_LOGIN': True,  # Atualiza last_login do usuário
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': 'Indicai',
+    'JSON_ENCODER': None,
+    'JWK_URL': None,
+    'LEEWAY': 0,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(hours=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
+}
+
+# Configurações DJ-REST-AUTH
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'jwt-auth-token',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
+    'USER_DETAILS_SERIALIZER': 'api.serializers.UserDetailSerializer',
+    'LOGIN_SERIALIZER': 'api.serializers.CustomLoginSerializer',
+    'LOGOUT_ON_PASSWORD_CHANGE': False,
+    'OLD_PASSWORD_FIELD_ENABLED': True,
+    'LOGOUT_URL': '/api/v1/auth/logout/',
+    'LOGIN_URL': '/api/v1/auth/login/',
+    'SESSION_LOGIN': False,  # Desabilitar login de sessão
+}
+
+# Configurações Allauth
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional' # ou 'mandatory' ou 'none'
+
+
+SITE_ID = 1 # dj-rest-auth requer isso
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Para testes de email
+
+# Configurações CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Em desenvolvimento, permitir todas as origens
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Configurações CSRF para API
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Para desenvolvimento, permitir CSRF em localhost
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += [
+        "http://localhost",
+        "http://127.0.0.1",
+    ]
+    # Configurações mais permissivas para desenvolvimento
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^http://localhost:\d+$",
+        r"^http://127\.0\.0\.1:\d+$",
+    ]

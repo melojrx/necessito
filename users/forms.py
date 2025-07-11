@@ -5,7 +5,7 @@ from users.models import User
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from categories.models import Categoria
-from users.utils import validate_cpf
+from users.utils import validate_cpf, validate_password_strength
 
 class UserLoginForm(forms.Form):
     email = forms.EmailField(
@@ -93,12 +93,39 @@ class BasicUserCreationForm(UserCreationForm):
             }),
         }
 
+    def clean_email(self):
+        """
+        Valida que o e-mail não está sendo usado por outro usuário.
+        """
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar se já existe um usuário com este e-mail
+            if User.objects.filter(email=email).exists():
+                raise forms.ValidationError(
+                    "Este e-mail já está sendo usado por outro usuário. "
+                    "Tente fazer login ou use outro e-mail."
+                )
+        return email
+
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("As senhas não coincidem!")
         return password2
+
+    def clean_password1(self):
+        """
+        Valida a força da senha usando critérios de segurança.
+        """
+        password1 = self.cleaned_data.get('password1')
+        if password1:
+            try:
+                validate_password_strength(password1)
+            except forms.ValidationError as e:
+                # Re-lançar com as mensagens de validação
+                raise forms.ValidationError(e.messages)
+        return password1
 
 class UserCompletionForm(forms.ModelForm):
     """Formulário para completar o perfil após cadastro básico"""
@@ -250,6 +277,19 @@ class CustomUserCreationForm(UserCreationForm):
         }
         
         
+    def clean_email(self):
+        """
+        Valida que o e-mail não está sendo usado por outro usuário.
+        """
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar se já existe um usuário com este e-mail
+            if User.objects.filter(email=email).exists():
+                raise forms.ValidationError(
+                    "Este e-mail já está sendo usado por outro usuário. "
+                    "Tente fazer login ou use outro e-mail."
+                )
+        return email
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -257,6 +297,19 @@ class CustomUserCreationForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("As senhas não coincidem!")
         return password2
+
+    def clean_password1(self):
+        """
+        Valida a força da senha usando critérios de segurança.
+        """
+        password1 = self.cleaned_data.get('password1')
+        if password1:
+            try:
+                validate_password_strength(password1)
+            except forms.ValidationError as e:
+                # Re-lançar com as mensagens de validação
+                raise forms.ValidationError(e.messages)
+        return password1
     
 class UserUpdateForm(forms.ModelForm):
     # Campo ManyToMany manual, para permitir escolha de múltiplas categorias
@@ -338,13 +391,33 @@ class UserUpdateForm(forms.ModelForm):
         help_texts = {
             'preferred_categories': 'Escolha até 2 categorias',
         }
-def clean_preferred_categories(self):
-    cats = self.cleaned_data.get('preferred_categories')
-    if cats and len(cats) > 2:
-        raise forms.ValidationError("Você só pode escolher no máximo 2 categorias.")
-    return cats
 
-def clean_cpf(self):
+    def clean_email(self):
+        """
+        Valida que o e-mail não está sendo usado por outro usuário.
+        Permite que o usuário mantenha seu próprio e-mail.
+        """
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar se já existe outro usuário com este e-mail
+            existing_user = User.objects.filter(email=email).exclude(pk=self.instance.pk).first()
+            if existing_user:
+                raise forms.ValidationError(
+                    "Este e-mail já está sendo usado por outro usuário. "
+                    "Por favor, use um e-mail diferente."
+                )
+        return email
+
+    def clean_preferred_categories(self):
+        """
+        Valida que o usuário escolheu no máximo 2 categorias preferidas.
+        """
+        cats = self.cleaned_data.get('preferred_categories')
+        if cats and len(cats) > 2:
+            raise forms.ValidationError("Você só pode escolher no máximo 2 categorias.")
+        return cats
+
+    def clean_cpf(self):
         """
         Valida o CPF e armazena somente dígitos.
         """
@@ -379,6 +452,19 @@ class CustomSetPasswordForm(SetPasswordForm):
             'placeholder': 'Confirme a nova senha'
         })
 
+    def clean_new_password1(self):
+        """
+        Valida a força da nova senha usando critérios de segurança.
+        """
+        password1 = self.cleaned_data.get('new_password1')
+        if password1:
+            try:
+                validate_password_strength(password1)
+            except forms.ValidationError as e:
+                # Re-lançar com as mensagens de validação
+                raise forms.ValidationError(e.messages)
+        return password1
+
 class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
@@ -394,3 +480,16 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             'class': 'form-control',
             'placeholder': 'Confirme a nova senha'
         })
+
+    def clean_new_password1(self):
+        """
+        Valida a força da nova senha usando critérios de segurança.
+        """
+        password1 = self.cleaned_data.get('new_password1')
+        if password1:
+            try:
+                validate_password_strength(password1)
+            except forms.ValidationError as e:
+                # Re-lançar com as mensagens de validação
+                raise forms.ValidationError(e.messages)
+        return password1

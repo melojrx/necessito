@@ -37,6 +37,164 @@ def validate_cpf(cpf: str) -> str:
     return cpf_num
 
 
+def validate_password_strength(password: str) -> str:
+    """
+    Valida a força de uma senha baseada em critérios de segurança.
+    
+    Critérios:
+    - Mínimo 8 caracteres
+    - Pelo menos 1 letra maiúscula
+    - Pelo menos 1 letra minúscula
+    - Pelo menos 1 dígito
+    - Pelo menos 1 caractere especial
+    - Não pode ser uma senha comum
+    
+    Args:
+        password (str): A senha a ser validada
+        
+    Returns:
+        str: A senha validada
+        
+    Raises:
+        ValidationError: Se a senha não atender aos critérios
+    """
+    
+    # Lista de senhas comuns que devem ser rejeitadas
+    COMMON_PASSWORDS = [
+        '123456', 'password', '123456789', '12345678', '12345', '1234567',
+        'qwerty', 'abc123', 'password123', '123123', 'admin', 'letmein',
+        'welcome', 'monkey', '1234567890', 'dragon', 'master', 'hello',
+        'freedom', 'whatever', 'qazwsx', 'trustno1', 'batman', 'zaq1zaq1'
+    ]
+    
+    errors = []
+    
+    # Verificar comprimento mínimo
+    if len(password) < 8:
+        errors.append("A senha deve ter pelo menos 8 caracteres.")
+    
+    # Verificar se tem pelo menos uma letra maiúscula
+    if not re.search(r'[A-Z]', password):
+        errors.append("A senha deve conter pelo menos uma letra maiúscula.")
+    
+    # Verificar se tem pelo menos uma letra minúscula
+    if not re.search(r'[a-z]', password):
+        errors.append("A senha deve conter pelo menos uma letra minúscula.")
+    
+    # Verificar se tem pelo menos um dígito
+    if not re.search(r'\d', password):
+        errors.append("A senha deve conter pelo menos um número.")
+    
+    # Verificar se tem pelo menos um caractere especial
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        errors.append("A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?\":{}|<>).")
+    
+    # Verificar se não é uma senha comum
+    if password.lower() in [p.lower() for p in COMMON_PASSWORDS]:
+        errors.append("Esta senha é muito comum. Escolha uma senha mais segura.")
+    
+    # Verificar se não é uma sequência simples
+    if re.search(r'(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def)', password.lower()):
+        errors.append("A senha não pode conter sequências simples (123, abc, etc.).")
+    
+    # Verificar se não tem muitos caracteres repetidos
+    if re.search(r'(.)\1{2,}', password):
+        errors.append("A senha não pode ter mais de 2 caracteres iguais consecutivos.")
+    
+    # Se houver erros, lançar ValidationError
+    if errors:
+        raise ValidationError(errors)
+    
+    return password
+
+
+def get_password_strength_score(password: str) -> dict:
+    """
+    Calcula a pontuação de força da senha de 0 a 100.
+    
+    Args:
+        password (str): A senha a ser avaliada
+        
+    Returns:
+        dict: Dicionário com score, nível e sugestões
+    """
+    
+    score = 0
+    suggestions = []
+    
+    # Comprimento (0-25 pontos)
+    if len(password) >= 8:
+        score += 10
+    if len(password) >= 12:
+        score += 10
+    if len(password) >= 16:
+        score += 5
+    else:
+        suggestions.append("Use pelo menos 12 caracteres para maior segurança.")
+    
+    # Variedade de caracteres (0-40 pontos)
+    if re.search(r'[a-z]', password):
+        score += 10
+    else:
+        suggestions.append("Adicione letras minúsculas.")
+        
+    if re.search(r'[A-Z]', password):
+        score += 10
+    else:
+        suggestions.append("Adicione letras maiúsculas.")
+        
+    if re.search(r'\d', password):
+        score += 10
+    else:
+        suggestions.append("Adicione números.")
+        
+    if re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        score += 10
+    else:
+        suggestions.append("Adicione caracteres especiais.")
+    
+    # Complexidade (0-35 pontos)
+    if not re.search(r'(.)\1{2,}', password):
+        score += 10  # Sem repetições excessivas
+    
+    if not re.search(r'(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def)', password.lower()):
+        score += 10  # Sem sequências simples
+    
+    # Mistura de tipos de caracteres
+    char_types = sum([
+        bool(re.search(r'[a-z]', password)),
+        bool(re.search(r'[A-Z]', password)),
+        bool(re.search(r'\d', password)),
+        bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', password))
+    ])
+    
+    if char_types >= 3:
+        score += 10
+    if char_types == 4:
+        score += 5
+    
+    # Determinar nível
+    if score >= 80:
+        level = "Muito Forte"
+        color = "success"
+    elif score >= 60:
+        level = "Forte"
+        color = "info"
+    elif score >= 40:
+        level = "Média"
+        color = "warning"
+    else:
+        level = "Fraca"
+        color = "danger"
+    
+    return {
+        'score': score,
+        'level': level,
+        'color': color,
+        'suggestions': suggestions
+    }
+
+
 def send_email_verification(user, request):
     """
     Envia e-mail de verificação para o usuário.

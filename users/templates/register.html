@@ -4,211 +4,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Necessito - Seu Marketplace de Necessidades{% endblock %}</title>
-    <!-- Link para o CSS do Bootstrap via CDN -->
+    <title>Criar Conta - Indicai</title>
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
           rel="stylesheet" 
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
           crossorigin="anonymous">
-    <!-- Link para o CSS do Font Awesome via CDN -->
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Google Font: Nunito Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,200;0,400;0,600;0,800;1,200;1,400;1,600;1,800&display=swap" rel="stylesheet">
-    <!-- Script do Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-</head>
+
 <style>
     body {
-        font-family: 'Nunito Sans', sans-serif;
+        background-color: #f8f9fa;
     }
-    @media (max-width: 768px) {
-        /* Ajustes para mobile */
-        .card {
-            margin: 1rem;
-        }
-        .card-body {
-            padding: 1.5rem !important;
-        }
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
     }
-    .btn {
-        transition: all 0.3s ease;
+    .register-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 100%;
     }
-    .btn:hover {
-        transform: translateY(-1px);
+    .register-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
     }
-    #password-strength-container {
-        transition: all 0.3s ease;
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
     }
-    #password-requirements li {
-        font-size: 0.9rem;
-        margin-bottom: 2px;
-        transition: all 0.2s ease;
-    }
-    .progress-bar {
-        transition: width 0.5s ease, background-color 0.5s ease;
+    .password-toggle {
+        cursor: pointer;
     }
 </style>
+</head>
 
-{% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card shadow" style="width: 100%; max-width: 600px;">
-        <div class="card-body">
-            <h4 class="card-title text-center mb-4">Criar uma conta</h4>
-            
+<body>
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Criar Conta</h2>
+            <p class="mb-0">Junte-se à nossa comunidade</p>
+        </div>
+        
+        <div class="p-4">
+            <!-- Mensagens -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             <form method="post" action="{% url 'register' %}">
                 {% csrf_token %}
-                <!-- Mensagens de erro ou sucesso -->
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
                 
-                <div class="row">
-                    <!-- Campo: first_name  -->
-                    <div class="col-lg-6 col-sm-12 mb-3">
-                        <label for="id_first_name" class="form-label">Nome:</label>
+                <!-- Nome e Sobrenome -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                            <i class="fas fa-user me-1"></i>{{ form.first_name.label }}
+                        </label>
                         {{ form.first_name }}
-                        <!-- Exibir erros específicos do campo e help_text, se houver -->
-                        {% for error in form.first_name.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                        {% if form.first_name.help_text %}
-                            <small class="form-text text-muted">
-                                {{ form.first_name.help_text }}
-                            </small>
+                        {% if form.first_name.errors %}
+                            <div class="text-danger small">{{ form.first_name.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <!-- Campo: last_name -->
-                    <div class="col-lg-6 col-sm-12 mb-3">
-                        <label for="id_last_name" class="form-label">Sobrenome:</label>
+                    <div class="col-md-6">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                            <i class="fas fa-user me-1"></i>{{ form.last_name.label }}
+                        </label>
                         {{ form.last_name }}
-                        {% for error in form.last_name.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger small">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
                     </div>
                 </div>
-                <!-- Campo: email -->
+
+                <!-- Email -->
                 <div class="mb-3">
-                    <label for="id_email" class="form-label">Email:</label>
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="fas fa-envelope me-1"></i>{{ form.email.label }}
+                    </label>
                     {{ form.email }}
-                    {% for error in form.email.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                    {% if form.email.errors %}
+                        <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                    {% endif %}
                 </div>
-                
-                <!-- Campo: password1 com toggle -->
+
+                <!-- Senha -->
                 <div class="mb-3">
-                    <label for="id_password1" class="form-label">Senha:</label>
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-1"></i>{{ form.password1.label }}
+                    </label>
                     <div class="input-group">
                         {{ form.password1 }}
-                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password1')" area-label="Mostrar Senha">
+                        <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword('{{ form.password1.id_for_label }}')">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    {% for error in form.password1.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                    {% if form.password1.errors %}
+                        <div class="text-danger small">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
                 </div>
 
-                <!-- Adicione isto após o campo de senha e antes do campo de confirmar senha -->
-                <div class="mt-3" id="password-strength-container">
-                    <div class="progress mb-2" style="height: 5px;">
-                        <div id="password-strength-bar" class="progress-bar" role="progressbar"></div>
-                    </div>
-                    <small class="form-text text-muted" id="password-strength-text"></small>
-                    <ul class="list-unstyled mt-2" id="password-requirements">
-                        <li class="text-danger" id="length"><i class="fas fa-times-circle"></i> Mínimo 8 caracteres</li>
-                        <li class="text-danger" id="uppercase"><i class="fas fa-times-circle"></i> Letra maiúscula</li>
-                        <li class="text-danger" id="number"><i class="fas fa-times-circle"></i> Número</li>
-                        <li class="text-danger" id="special"><i class="fas fa-times-circle"></i> Caractere especial</li>
-                    </ul>
-                </div>
-
-                <!-- Campo: password2 com toggle -->
+                <!-- Confirmar Senha -->
                 <div class="mb-3">
-                    <label for="id_password2" class="form-label">Confirmar Senha:</label>
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-1"></i>{{ form.password2.label }}
+                    </label>
                     <div class="input-group">
                         {{ form.password2 }}
-                        <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('id_password2')">
+                        <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword('{{ form.password2.id_for_label }}')">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    {% for error in form.password2.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                    {% if form.password2.errors %}
+                        <div class="text-danger small">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
                 </div>
 
                 <!-- reCAPTCHA -->
-                <div class="mb-3 d-flex justify-content-center">
-                    <div>
+                <div class="mb-3 text-center">
                     {{ form.captcha }}
-                    </div>
-                    {% for error in form.captcha.errors %}
-                    <div class="text-danger small">{{ error }}</div>
-                    {% endfor %}
+                    {% if form.captcha.errors %}
+                        <div class="text-danger small">{{ form.captcha.errors.0 }}</div>
+                    {% endif %}
                 </div>
-                
-                <!-- Botão de Registro -->
-                <button type="submit" class="btn btn-primary w-100">Registrar</button>
-                
-                <!-- Link para login -->
-                <div class="mt-3 text-center">
-                    <span>Já tem conta? 
-                        <a href="{% url 'login' %}">Faça login</a>
-                    </span>
+
+                <!-- Botão -->
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Criar Conta
+                    </button>
+                </div>
+
+                <!-- Link Login -->
+                <div class="text-center">
+                    <p class="mb-0">
+                        Já tem uma conta? 
+                        <a href="{% url 'login' %}" class="text-decoration-none">Faça login</a>
+                    </p>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+        crossorigin="anonymous"></script>
+
 <script>
-    function togglePassword(fieldId) {
-        const passwordField = document.getElementById(fieldId);
-        const icon = passwordField.nextElementSibling.querySelector('i');
-        
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            passwordField.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = field.parentElement.querySelector('button i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
     }
+}
 </script>
-<!-- Calculador de Força de Senha -->
-<script>
-    document.getElementById('id_password1').addEventListener('input', function(e) {
-        const password = e.target.value;
-        const strengthBar = document.getElementById('password-strength-bar');
-        const strengthText = document.getElementById('password-strength-text');
-        const requirements = {
-            length: password.length >= 8,
-            uppercase: /[A-Z]/.test(password),
-            number: /\d/.test(password),
-            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-        };
-    
-        // Atualizar ícones dos requisitos
-        Object.keys(requirements).forEach(key => {
-            const element = document.getElementById(key);
-            if(requirements[key]) {
-                element.classList.remove('text-danger');
-                element.classList.add('text-success');
-                element.querySelector('i').className = 'fas fa-check-circle';
-            } else {
-                element.classList.remove('text-success');
-                element.classList.add('text-danger');
-                element.querySelector('i').className = 'fas fa-times-circle';
-            }
-        });
-    
-        // Calcular força da senha
-        const strength = Object.values(requirements).filter(Boolean).length;
-        const colors = ['bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
-        const messages = ['Muito fraca', 'Fraca', 'Boa', 'Forte'];
-        
-        strengthBar.style.width = `${(strength/4)*100}%`;
-        strengthBar.className = `progress-bar ${colors[strength-1]}`;
-        strengthText.textContent = `Força: ${messages[strength-1] || 'Muito fraca'}`;
-    });
-    </script>
-{% endblock %}
+
+</body>
+</html>

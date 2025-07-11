@@ -16,6 +16,7 @@ from django.views.generic import DetailView, UpdateView
 from django.db.models import Avg
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.decorators.http import require_http_methods
 
 
 @csrf_exempt
@@ -263,11 +264,11 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
 from django.contrib.auth import views as auth_views
 
 class MyPasswordResetView(auth_views.PasswordResetView):
-    # Força o domínio a ser "necessito.br" no link enviado
-    domain_override = "necessito.br"
+    # Força o domínio a ser "indicai.com.br" no link enviado
+    domain_override = "indicai.com.br"
 
     # Altera o remetente
-    from_email = "Necessito <no-reply@necessito.br>"
+    from_email = "Indicai <no-reply@indicai.com.br>"
 
     # Personaliza o assunto
     subject_template_name = "password_reset_subject.txt"

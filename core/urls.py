@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
-from core import settings
 from core.views import (
     HelpView, 
     HelpStartView, 
@@ -25,7 +25,12 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('buscar/', include('search.urls')),
     path('chat/', include('chat.urls')),
+    
+    # API com versionamento
     path('api/', include('api.urls')),
+    
+    # Redirecionamento para corrigir logout do DRF
+    path('accounts/logout/', RedirectView.as_view(url='/api/logout-redirect/', permanent=False), name='account_logout'),
     
     # Páginas institucionais
     path('dicas-de-seguranca/', SecurityTipsView.as_view(), name='security_tips'),

@@ -25,6 +25,10 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 
+# Importar os novos mixins e validadores de permissão
+from core.mixins import ClientRequiredMixin, EmailVerifiedRequiredMixin, AdminRequiredMixin, OwnerRequiredMixin
+from core.permissions import PermissionValidator
+
 class HomeView(TemplateView):
     template_name = "home.html"
 
@@ -134,13 +138,19 @@ class NecessidadeListView(ListView):
 
         return queryset
 
-class NecessidadeCreateView(LoginRequiredMixin, CreateView):
+class NecessidadeCreateView(ClientRequiredMixin, EmailVerifiedRequiredMixin, CreateView):
     model = Necessidade
     form_class = AdsForms
     template_name = 'necessidade_create_modern.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
+        # Validação adicional usando o sistema de permissões
+        can_create, message = PermissionValidator.can_create_ad(self.request.user)
+        if not can_create:
+            messages.error(self.request, message)
+            return redirect('home')
+        
         # Salvar a instância principal primeiro
         self.object = form.save(commit=False)
         self.object.cliente = self.request.user
@@ -285,36 +295,40 @@ class NecessidadeDetailView(DetailView):
 
         return context
 
-class NecessidadeUpdateView(UpdateView):
+class NecessidadeUpdateView(OwnerRequiredMixin, UpdateView):
     model = Necessidade
     form_class = AdsForms
     template_name = 'necessidade_update.html'
-    # fields = ['categoria', 'titulo', 'descricao', 'quantidade', 'unidade']
     success_url = reverse_lazy('necessidade_list')
+    owner_field = 'cliente'  # Especifica que o campo de propriedade é 'cliente'
+    
+    def form_valid(self, form):
+        # Validação adicional usando o sistema de permissões
+        can_edit, message = PermissionValidator.can_edit_ad(self.request.user, self.object)
+        if not can_edit:
+            messages.error(self.request, message)
+            return redirect('necessidade_list')
+        
+        return super().form_valid(form)
 
-class NecessidadeDeleteView(DeleteView):
+class NecessidadeDeleteView(OwnerRequiredMixin, DeleteView):
     model = Necessidade
     template_name = 'necessidade_delete.html'
     success_url = reverse_lazy('necessidade_list')
+    owner_field = 'cliente'  # Especifica que o campo de propriedade é 'cliente'
 
 class FinalizarAnuncioView(LoginRequiredMixin, View):
     """ View para finalizar um anúncio """
 
     def post(self, request, *args, **kwargs):
         try:
-            # Obter o anúncio associado ao cliente logado
-            anuncio = get_object_or_404(
-                Necessidade, pk=self.kwargs['pk'], cliente=request.user)
+            # Obter o anúncio
+            anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'])
 
-            # Verificar se o status do anúncio é "em atendimento"
-            if anuncio.status != 'em_atendimento':
-                return JsonResponse({'success': False, 'error': 'O anúncio só pode ser finalizado quando está em atendimento.'}, status=400)
-
-            # Verificar se há pelo menos um orçamento com status "aceito"
-            orcamento_aceito = anuncio.orcamentos.filter(
-                status='aceito').exists()
-            if not orcamento_aceito:
-                return JsonResponse({'success': False, 'error': 'Não há orçamentos aceitos para este anúncio.'}, status=400)
+            # Usar o sistema de permissões centralizado
+            can_finalize, message = PermissionValidator.can_finalize_ad(request.user, anuncio)
+            if not can_finalize:
+                return JsonResponse({'success': False, 'error': message}, status=403)
 
             # Alterar o status do anúncio para "finalizado"
             anuncio.status = 'finalizado'
@@ -351,11 +365,18 @@ class AnunciosPorCategoriaListView(ListView):
     
 from ads.metrics import get_ads_metrics, get_anuncios_criados_vs_finalizados, get_quantidade_anuncios_finalizados_por_categoria, get_quantidade_usuarios_por_tipo, get_valores_metrics, get_valores_por_mes
     
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(AdminRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Validação adicional usando o sistema de permissões
+        can_access, message = PermissionValidator.can_access_dashboard(self.request.user)
+        if not can_access:
+            messages.error(self.request, message)
+            return redirect('home')
+        
         context['ads_metrics'] = get_ads_metrics()
         context['valores_metrics'] = get_valores_metrics()
         context['grafico_valores_por_mes'] = get_valores_por_mes()
@@ -435,7 +456,7 @@ def enviar_mensagem(request, pk):
         necessidade = Necessidade.objects.get(pk=pk)
         destinatario = necessidade.cliente.email
         
-        assunto = f"Contato sobre o anúncio '{necessidade.titulo}' no Necessito.com"
+        assunto = f"Contato sobre o anúncio '{necessidade.titulo}' no Indicai.com"
         mensagem_completa = f"De: {nome}\nTelefone: {telefone}\nEmail: {email}\n\n{mensagem}"
         
         send_mail(

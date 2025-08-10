@@ -1,0 +1,21 @@
+# Production requirements
+-r requirements_base.txt
+
+# Monitoring & Logging
+sentry-sdk==2.19.2
+django-prometheus==2.3.1
+
+# Cache
+django-redis==5.4.0
+redis==5.2.1
+
+# Database Connection Pooling
+django-db-pool==2.0.1
+
+# Security
+django-csp==4.0b1
+django-ratelimit==4.1.0
+
+# Performance
+django-cachalot==2.6.3
+django-compressor==5.0

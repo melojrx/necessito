@@ -1,0 +1,46 @@
+# Core Django
+Django==5.1.10  # Updated from 5.1.4 to fix security vulnerabilities
+djangorestframework==3.15.2  # Updated to fix security vulnerability
+djangorestframework-simplejwt==5.3.2  # Updated to fix security vulnerability
+
+# Database
+psycopg2-binary==2.9.10
+
+# Security & Authentication
+django-cors-headers==4.6.0
+python-dotenv==1.0.1
+PyJWT==2.10.1
+
+# Forms & Validation
+django-crispy-forms==2.3
+crispy-bootstrap5==2024.10
+django-recaptcha==4.0.0
+
+# File Processing
+Pillow==11.0.0
+reportlab==4.2.5
+xhtml2pdf==0.2.16
+
+# HTTP & API
+requests==2.32.4  # Updated to fix security vulnerability
+urllib3==2.5.0  # Updated to fix security vulnerabilities
+
+# WebSocket Support
+python-socketio==5.13.2
+eventlet==0.37.0
+
+# Email
+django-anymail==12.0
+
+# Development & Testing
+django-debug-toolbar==5.0.0
+ipython==8.31.0
+
+# Production
+gunicorn==23.0.0
+whitenoise==6.8.2
+
+# Utilities
+python-decouple==3.8
+django-extensions==3.2.3
+django-filter==24.3

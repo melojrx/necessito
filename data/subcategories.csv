@@ -1,0 +1,251 @@
+id,nome,categoria_id
+1,Concreto (usinado, pré-moldado, concreto armado),1
+2,Aço (vergalhões, barras, perfis),1
+3,Madeiramento (tábuas, vigas, caibros),1
+4,Tijolos e Blocos (cerâmicos, de concreto, ecológicos),1
+5,Cimento e Cal (cimento Portland, cal hidratada, cal virgem),1
+6,Fundções rasas (sapatas, radier, bloco),2
+7,Fundções profundas (estacas, tubulões),2
+8,Estrutura de concreto armado,2
+9,Estrutura metálica (aço, alumínio, ferro),2
+10,Estrutura de madeira,2
+11,Revestimentos cerâmicos (azulejos, porcelanato, pastilhas),3
+12,Revestimentos de madeira (piso de madeira, laminados, painéis),3
+13,Revestimentos de gesso (drywall, molduras, forros),3
+14,Pinturas (em superfície externa e interna, tipo de tinta),3
+15,Revestimentos de pedras (granito, mármore, quartzito),3
+16,Redes de distribuição de água,4
+17,Redes de esgoto e drenagem,4
+18,Equipamentos sanitários (vasos, pias, chuveiros),4
+19,Bombas e pressurizadores,4
+20,Sistemas de aquecimento de água (boilers, aquecedores solares),4
+21,Distribuição de energia (circuitos, quadros de distribuição),5
+22,Iluminação (luminárias, lâmpadas, spotlights),5
+23,Sistemas de automação residencial,5
+24,Cabeamento e fios elétricos,5
+25,Geradores e sistemas de backup (no-break, geradores a diesel),5
+26,Sistemas de ar condicionado (split, VRF, central),6
+27,Ventilação mecânica (exaustores, ventiladores),6
+28,Sistemas de calefação (radiadores, aquecimento por piso),6
+29,Isolamento térmico (lã de vidro, poliuretano),6
+30,Refrigeração evaporativa,6
+31,Pisos (cerâmica, porcelanato, madeira, vinílico),7
+32,Revestimentos de paredes (papel de parede, pintura, azulejos),7
+33,Forros e tetos (gesso acartonado, PVC, madeira),7
+34,Rodapés e molduras (em madeira, PVC, MDF),7
+35,Janelas e portas (alumínio, madeira, vidro temperado),7
+36,Máquinas pesadas (escavadeiras, retroescavadeiras, guindastes),8
+37,Equipamentos de perfuração (brocas, marteletes),8
+38,Ferramentas manuais (martelos, chaves, alicates),8
+39,Ferramentas elétricas (serras, furadeiras, lixadeiras),8
+40,Equipamentos para concreto (betoneiras, bombas de concreto),8
+41,Equipamentos de proteção individual (EPIs),9
+42,Sinalização de segurança (placas, cones, fitas),9
+43,Equipamentos de resgate (cordas, cintos de segurança),9
+44,Sistemas de combate a incêndios (extintores, sprinklers),9
+45,Treinamento e conscientização,9
+46,Projetos arquitetônicos (casas, prédios comerciais),10
+47,Projetos estruturais (concreto, aço, madeira),10
+48,Projetos de instalações elétricas e hidráulicas,10
+49,Projetos paisagísticos (jardins, áreas externas),10
+50,Consultoria ambiental (impacto ambiental, sustentabilidade),10
+51,Rodovias e pavimentação,11
+52,Drenagem pluvial (bueiros, galerias),11
+53,Saneamento básico (esgoto, abastecimento de água),11
+54,Pontes e viadutos,11
+55,Obras de drenagem e contenção de encostas,11
+56,Estacas (pré-moldadas, hélice contínua),12
+57,Tubulões (convencionais, trados),12
+58,Radier e sapatas,12
+59,Fundos impermeabilizados,12
+60,Obras subterrâneas (túneis, garagens),12
+61,Reformas residenciais,13
+62,Manutenção de fachadas,13
+63,Reparos de telhados e coberturas,13
+64,Manutenção de sistemas elétricos e hidráulicos,13
+65,Restauro de patrimônio histórico,13
+66,Planejamento e cronograma,14
+67,Controle de qualidade,14
+68,Gestão de equipe e mão de obra,14
+69,Acompanhamento de obras,14
+70,Custos e orçamento de obras,14
+71,Transporte de materiais pesados,15
+72,Logística de entrega (armazenamento, distribuição),15
+73,Frota de caminhões e veículos pesados,15
+74,Planejamento logístico de obras,15
+75,Locção de guindastes e plataformas,15
+76,Materiais reciclados (tijolos ecológicos, pisos reciclados),16
+77,Concreto de baixo carbono,16
+78,Telhas solares e vidros fotovoltaicos,16
+79,Isolamento térmico ecológico (lã de PET, cortiça),16
+80,Produtos com certificação verde (LEED, Aqua),16
+81,Construção modular e pré-fabricada,17
+82,Impressão 3D de estruturas,17
+83,Drones e tecnologias de monitoramento,17
+84,Modelagem 3D e BIM (Building Information Modeling),17
+85,IoT (Internet das Coisas) em construções inteligentes,17
+86,Painéis solares fotovoltaicos,18
+87,Sistemas de aquecimento solar,18
+88,Energia eólica (microturbinas),18
+89,Biomassa e biocombustíveis,18
+90,Geotermia (aquecimento e resfriamento do solo),18
+91,Jardinagem (plantio, manutenção),19
+92,Áreas de lazer (praças, parques),19
+93,Paisagismo urbano (calçadões, áreas verdes),19
+94,Irrigação automática,19
+95,Instalação de sistemas de drenagem e impermeabilização,19
+96,Janelas e portas de vidro temperado,20
+97,Esquadrias de alumínio, PVC e madeira,20
+98,Vidros reflexivos, acústicos e de segurança,20
+99,Cortinas de vidro e sistemas de fachada,20
+100,Envidraçamento de sacadas,20
+101,Piscinas (alvenaria, fibra, vinil),21
+102,Churrasqueiras e áreas gourmet,21
+103,Playground e áreas recreativas,21
+104,Espaços para academias e fitness,21
+105,Áreas de convivência e lounges,21
+106,Rampas e elevadores para deficientes,22
+107,Banheiros adaptados,22
+108,Sinalização tátil e em braille,22
+109,Portas e corredores amplos,22
+110,Equipamentos adaptados (cadeiras de rodas, cadeiras elevatórias),22
+111,Automação predial (controle de luz, temperatura, segurança),23
+112,Sistemas de alarme e câmeras de segurança,23
+113,Controle de acesso (biometria, cartões),23
+114,Sensores de movimento e presença,23
+115,Gerenciamento remoto (via aplicativo ou computador),23
+116,Isolamento acústico (lãs minerais, espumas),24
+117,Isolamento térmico (isolantes de poliuretão, EPS),24
+118,Isolamento de som (painéis acústicos, carpetes),24
+119,Isolamento contra umidade (membranas, filmes),24
+120,Revestimentos antichama,24
+121,Demolição manual e mecanizada,25
+122,Desmonte de estruturas de concreto,25
+123,Recuperação de materiais recicláveis,25
+124,Descontaminação de terrenos,25
+125,Gestão de resíduos de construção e demolição,25
+126,Lojas e estabelecimentos comerciais,26
+127,Centros comerciais e shoppings,26
+128,Escritórios e andares corporativos,26
+129,Hotéis e pousadas,26
+130,Restaurantes e praças de alimentação,26
+131,Casas unifamiliares,27
+132,Edifícios multifamiliares,27
+133,Casas de luxo e personalizadas,27
+134,Loteamentos e condomínios,27
+135,Casas de baixo custo (habitação popular),27
+136,Rodovias e pavimentação,28
+137,Ferrovias e metrôs,28
+138,Aeroportos e heliportos,28
+139,Portos e marinas,28
+140,Ciclovias e calçadas,28
+141,Planejamento urbano (zonas residenciais, comerciais, industriais),29
+142,Infraestrutura urbana (água, esgoto, pavimentação),29
+143,Mobilidade urbana (transporte público, acessibilidade),29
+144,Parques urbanos e praças,29
+145,Requalificação de áreas deterioradas,29
+146,Análise de impacto ambiental,30
+147,Licenciamento ambiental de obras,30
+148,Soluções de gestão de resíduos,30
+149,Recuperação de áreas degradadas,30
+150,Gestão de recursos hídricos e energéticos,30
+151,Manutenção de vias públicas,31
+152,Manutenção de sistemas hidráulicos e de esgoto,31
+153,Manutenção de prédios comerciais e residenciais,31
+154,Manutenção de redes elétricas,31
+155,Manutenção de sistemas de drenagem,31
+156,Pintura e revestimento externo,32
+157,Fachadas ventiladas,32
+158,Sistemas de proteções solares (brises, persianas),32
+159,Coberturas de fachada (vidros, painéis metálicos),32
+160,Revestimentos em pedras naturais,32
+161,Reutilização de água (cisternas, sistemas de captação de águas pluviais),33
+162,Reaproveitamento de resíduos de construção,33
+163,Sistemas de compostagem e reciclagem,33
+164,Energias renováveis (solar, eólica),33
+165,Reciclagem de materiais (papel, plástico, vidro),33
+166,Separação de resíduos,34
+167,Transporte de resíduos de construção,34
+168,Reciclagem de materiais (concreto, metais, plásticos),34
+169,Gestão de resíduos perigosos,34
+170,Armazenamento e destinação final,34
+171,Instalação de sistemas de fibra ótica,35
+172,Redes de telefonia e internet,35
+173,Cabeamento estruturado,35
+174,Sistemas de antenas e transmissão,35
+175,Redes de comunicação para automação predial,35
+176,Membranas asfálticas,36
+177,Impermeabilização líquida,36
+178,Sistemas de barreira contra umidade,36
+179,Sistemas para telhados e lajes,36
+180,Impermeabilização de fundações,36
+181,Jardins verticais internos,37
+182,Sistemas de irrigação vertical,37
+183,Plantas e vegetação para fachadas,37
+184,Estruturas de suporte para plantas (treliças, suportes),37
+185,Iluminação de jardins verticais,37
+186,Sistemas de aquecimento a gás e elétrico,38
+187,Ventiladores industriais,38
+188,Aquecimento solar de água,38
+189,Sistemas de ventilação natural,38
+190,Ar condicionado central e split,38
+191,Recuperação de concreto,39
+192,Reforço estrutural,39
+193,Reparo de fundações e estacas,39
+194,Reabilitação de estruturas metálicas,39
+195,Proteção contra corrosão,39
+196,Fábricas e instalações industriais,40
+197,Galpões comerciais e logísticos,40
+198,Armazéns e centros de distribuição,40
+199,Construção de usinas,40
+200,Construção de instalações de mineração,40
+201,Planejamento de projetos,41
+202,Cronograma de obras,41
+203,Gestão de risco em obras,41
+204,Monitoramento de andamento,41
+205,Análise de custo-benefício,41
+206,Estudos de viabilidade,42
+207,Análise de impacto urbano,42
+208,Planejamento estratégico de obras,42
+209,Elaboração de cronogramas,42
+210,Gerenciamento de recursos,42
+211,Casinhas modulares,43
+212,Estruturas modulares,43
+213,Painéis pré-fabricados,43
+214,Construção de casas temporárias,43
+215,Unidades habitacionais modulares,43
+216,Infraestrutura conectada,44
+217,Monitoramento urbano (sensores),44
+218,Gestão de resíduos inteligente,44
+219,Iluminação pública eficiente,44
+220,Mobilidade urbana inteligente,44
+221,Sistemas de sprinklers,45
+222,Extintores e mangueiras,45
+223,Sinalização de emergência,45
+224,Treinamento de brigadistas,45
+225,Sistemas de alarme e detecção,45
+226,Instalação de painéis solares,46
+227,Gerenciamento de energia,46
+228,Armazenamento de energia (baterias),46
+229,Aquecimento solar de água,46
+230,Energia solar fotovoltaica,46
+231,Lojas e franquias,47
+232,Escritórios comerciais,47
+233,Salas comerciais,47
+234,Galerias e centros comerciais,47
+235,Showrooms e estúdios,47
+236,Hospitais e clínicas,48
+237,Unidades de pronto atendimento (UPAs),48
+238,Laboratórios e farmácias,48
+239,Ambulatórios e consultórios,48
+240,Centros de reabilitação,48
+241,Escolas públicas e privadas,49
+242,Universidades e campi,49
+243,Centros de educação infantil,49
+244,Quadras e ginásios,49
+245,Instalações de recreação escolar,49
+246,Planejamento de redes de transporte,50
+247,Gestão de sistemas urbanos,50
+248,Desenvolvimento de infraestrutura,50
+249,Operação e manutenção de redes públicas,50
+250,Monitoramento e controle de infraestrutura,50

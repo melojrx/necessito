@@ -6,10 +6,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import requests
 from ads.forms import AdsForms
+from django.core.mail import send_mail
 from budgets.models import Orcamento
 from notifications.models import Notification
 from rankings.forms import AvaliacaoForm
@@ -20,75 +21,98 @@ from itertools import islice
 from django.views.generic import TemplateView
 from categories.models import Categoria
 from .models import Necessidade
+import os
+from django.conf import settings
+from django.core.files.base import ContentFile
+
+# Importar os novos mixins e validadores de permissão
+from core.mixins import ClientRequiredMixin, EmailVerifiedRequiredMixin, AdminRequiredMixin, OwnerRequiredMixin
+from core.permissions import PermissionValidator
 
 class HomeView(TemplateView):
-    template_name = 'home.html'  # Diretamente o nome do arquivo
+    template_name = "home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 1) Categorias populares
-        categorias_populares = Categoria.objects.order_by('-id')[:24]  # Limita a 24 categorias (2 slides de 12)
-        context['categorias_populares'] = [list(islice(categorias_populares, i, i + 12)) for i in range(0, len(categorias_populares), 12)]
+        # ──────────────────────────────────────────────
+        # 1) Categorias populares (24 → 2 slides de 12)
+        # ──────────────────────────────────────────────
+        categorias_populares = Categoria.objects.order_by("-id")[:24]
+        context["categorias_populares"] = [
+            list(islice(categorias_populares, i, i + 12))
+            for i in range(0, len(categorias_populares), 12)
+        ]
 
-        # 2) Anúncios populares (já existente)
-        anuncios_populares = Necessidade.objects.exclude(
-            status__in=['finalizado', 'cancelado']
-        ).order_by('-id')[:8]  # Limita a 8 anúncios para exemplo
+        # 👇 Adicionado: lista simples para versão mobile adaptada
+        context["categorias"] = categorias_populares
 
-        # Divide os anúncios em grupos de 4
-        anuncios_grouped = [list(islice(anuncios_populares, i, i + 4)) for i in range(0, len(anuncios_populares), 4)]
-        context['anuncios_populares'] = anuncios_grouped
+        # ──────────────────────────────────────────────
+        # 2) Anúncios populares (8 → 2 slides de 4)
+        # ──────────────────────────────────────────────
+        anuncios_populares = (
+            Necessidade.objects.exclude(status__in=["finalizado", "cancelado"])
+            .order_by("-id")[:8]
+        )
+        context["anuncios_populares"] = [
+            list(islice(anuncios_populares, i, i + 4))
+            for i in range(0, len(anuncios_populares), 4)
+        ]
 
-        # 3) Lógica para anúncios com base nas categorias preferidas
+        # ──────────────────────────────────────────────
+        # 3) Anúncios "baseados nas suas categorias"
+        #    → agora NUNCA fica vazio
+        # ──────────────────────────────────────────────
         user = self.request.user
+        qs_preferidos = Necessidade.objects.none()
+
         if user.is_authenticated:
-            # Verifica se o usuário possui categorias preferidas
             preferred_cats = user.preferred_categories.all()
             if preferred_cats.exists():
-                # Se tiver categorias, filtra anúncios ativos nessas categorias, em ordem crescente
-                anuncios_preferidos = Necessidade.objects.filter(
+                qs_preferidos = Necessidade.objects.filter(
                     categoria__in=preferred_cats,
-                    status='ativo'
-                ).order_by('data_criacao')[:8]  # ou .order_by('titulo'), .order_by('data_criacao'), etc.
-            else:
-                # Não há categorias preferidas: pega anúncios ativos de forma aleatória
-                anuncios_preferidos = Necessidade.objects.filter(
-                    status='ativo'
-                ).order_by('data_criacao')[:8]  # limite de 4, por exemplo
-        else:
-            # Usuário não autenticado: exibe também anúncios ativos aleatórios
-            anuncios_preferidos = Necessidade.objects.filter(
-                status='ativo'
-            ).order_by('data_criacao')[:8]
+                    status="ativo",
+                ).order_by("-data_criacao")[:8]
 
-        # Divide os anúncios em grupos de 4
-        anuncios_preferidos_grouped = [list(islice(anuncios_preferidos, i, i + 4)) for i in range(0, len(anuncios_preferidos), 4)]
-        context['anuncios_preferidos'] = anuncios_preferidos_grouped
-        
-        # 4) Anúncios próximos (cidade do usuário)
+        if not qs_preferidos.exists():
+            qs_preferidos = (
+                Necessidade.objects.filter(status="ativo")
+                .order_by("data_criacao")[:8]
+            )
+
+        context["anuncios_preferidos"] = [
+            list(islice(qs_preferidos, i, i + 4))
+            for i in range(0, len(qs_preferidos), 4)
+        ]
+
+        # ──────────────────────────────────────────────
+        # 4) Anúncios próximos (cidade ou estado)
+        # ──────────────────────────────────────────────
         anuncios_proximos = Necessidade.objects.none()
         anuncios_estado = Necessidade.objects.none()
 
-        if user.is_authenticated and hasattr(user, 'cidade') and user.cidade:
+        if user.is_authenticated and getattr(user, "cidade", None):
             anuncios_proximos = Necessidade.objects.filter(
-                status__in=['ativo', 'em_andamento'],
-                cliente__cidade=user.cidade
-            ).order_by('-data_criacao')[:5]  # Limite de 5 anúncios
+                status__in=["ativo", "em_andamento"],
+                cliente__cidade=user.cidade,
+            ).order_by("-data_criacao")[:5]
 
-            # Se não houver anúncios na cidade, buscar no estado
-            if not anuncios_proximos.exists() and hasattr(user, 'estado') and user.estado:
+            if not anuncios_proximos.exists() and getattr(user, "estado", None):
                 anuncios_estado = Necessidade.objects.filter(
-                    status__in=['ativo', 'em_andamento'],
-                    cliente__estado=user.estado
-                ).order_by('-data_criacao')[:5]
+                    status__in=["ativo", "em_andamento"],
+                    cliente__estado=user.estado,
+                ).order_by("-data_criacao")[:5]
 
-        # Divide os anúncios em grupos de 4
-        anuncios_proximos_final = anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
-        anuncios_proximos_grouped = [list(islice(anuncios_proximos_final, i, i + 4)) for i in range(0, len(anuncios_proximos_final), 4)]
-        context['anuncios_proximos'] = anuncios_proximos_grouped
+        anuncios_final = (
+            anuncios_proximos if anuncios_proximos.exists() else anuncios_estado
+        )
+        context["anuncios_proximos"] = [
+            list(islice(anuncios_final, i, i + 4))
+            for i in range(0, len(anuncios_final), 4)
+        ]
 
         return context
+
 
 class NecessidadeListView(ListView):
     model = Necessidade
@@ -97,6 +121,8 @@ class NecessidadeListView(ListView):
 
     def get_queryset(self):
         # Filtra as necessidades pelo cliente logado
+        if not self.request.user.is_authenticated:
+            return Necessidade.objects.none()
         queryset = Necessidade.objects.filter(
             cliente=self.request.user).order_by('-data_criacao')
 
@@ -112,13 +138,19 @@ class NecessidadeListView(ListView):
 
         return queryset
 
-class NecessidadeCreateView(LoginRequiredMixin, CreateView):
+class NecessidadeCreateView(ClientRequiredMixin, EmailVerifiedRequiredMixin, CreateView):
     model = Necessidade
     form_class = AdsForms
-    template_name = 'necessidade_create.html'
+    template_name = 'necessidade_create_modern.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
+        # Validação adicional usando o sistema de permissões
+        can_create, message = PermissionValidator.can_create_ad(self.request.user)
+        if not can_create:
+            messages.error(self.request, message)
+            return redirect('home')
+        
         # Salvar a instância principal primeiro
         self.object = form.save(commit=False)
         self.object.cliente = self.request.user
@@ -128,21 +160,27 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
 
         # Processar imagens
         imagens = self.request.FILES.getlist('imagens')
-        for img in imagens[:3]:  # Garante o limite máximo
-            AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+        
+        # Se há imagens enviadas pelo usuário, adicioná-las
+        if imagens:
+            for img in imagens[:3]:  # Garante o limite máximo de 3 imagens
+                AnuncioImagem.objects.create(anuncio=self.object, imagem=img)
+        else:
+            # Se não há imagens, adicionar a imagem padrão do Indicaai
+            self.adicionar_imagem_padrao()
         
         # Calcula a diferença de dias
         # Usamos data_criacao (DateTimeField, auto_now_add=True) que você tem no model Necessidade
         time_diff = timezone.now() - self.object.data_criacao
         # days_diff = time_diff.days  # Quantos dias inteiros passaram
 
-        # Formata “Há 0 dias” ou “Há 1 dia” ou “Há 2 dias” etc.
+        # Formata "Há 0 dias" ou "Há 1 dia" ou "Há 2 dias" etc.
         # if days_diff == 0:
         #     dias_str = "Hoje"  # ou "Há menos de 1 dia"
         # elif days_diff == 1:
         #     dias_str = "Há 1 dia"
         # else:
-        #     dias_str = f"Há {days_diff} dias"
+        #     dias_str = f"Há {dias_diff} dias"
 
         # Cria a notificação com HTML embutido
         Notification.objects.create(
@@ -158,6 +196,35 @@ class NecessidadeCreateView(LoginRequiredMixin, CreateView):
 
         messages.success(self.request, "Anúncio criado com sucesso!")
         return super().form_valid(form)
+
+    def adicionar_imagem_padrao(self):
+        """Adiciona a imagem padrão do Indicaai quando nenhuma imagem é enviada"""
+        try:
+            # Caminho para a imagem padrão
+            imagem_padrao_path = os.path.join(settings.STATIC_ROOT or 'static', 'img', 'logo_Indicaai_anuncio.png')
+            
+            # Se STATIC_ROOT não estiver definido, usar o diretório static local
+            if not os.path.exists(imagem_padrao_path):
+                imagem_padrao_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo_Indicaai_anuncio.png')
+            
+            if os.path.exists(imagem_padrao_path):
+                with open(imagem_padrao_path, 'rb') as f:
+                    imagem_content = f.read()
+                
+                # Criar uma instância AnuncioImagem com a imagem padrão
+                imagem_padrao = AnuncioImagem(anuncio=self.object)
+                imagem_padrao.imagem.save(
+                    f'anuncio_{self.object.id}_padrao.png',
+                    ContentFile(imagem_content),
+                    save=True
+                )
+                
+                messages.info(self.request, "Como nenhuma imagem foi enviada, adicionamos uma imagem padrão ao seu anúncio. Você pode editá-lo depois para adicionar suas próprias fotos.")
+            
+        except Exception as e:
+            # Em caso de erro, registrar no log mas não interromper o processo
+            print(f"Erro ao adicionar imagem padrão: {e}")
+            # O anúncio continua sendo criado mesmo sem imagem
 
     def get_client_ip(self):
         try:
@@ -175,6 +242,7 @@ class NecessidadeDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         necessidade = self.get_object()
+        context['show_modal'] = self.request.GET.get('show_modal') == 'True'
 
         # Buscar o orçamento aceito relacionado ao anúncio
         orcamento_aceito = Orcamento.objects.filter(
@@ -182,6 +250,16 @@ class NecessidadeDetailView(DetailView):
 
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
         context['fornecedor'] = fornecedor
+
+        # Verificar se o usuário autenticado tem orçamento para esta necessidade
+        if self.request.user.is_authenticated:
+            usuario_tem_orcamento = Orcamento.objects.filter(
+                anuncio=necessidade,
+                fornecedor=self.request.user
+            ).exists()
+            context['usuario_tem_orcamento'] = usuario_tem_orcamento
+        else:
+            context['usuario_tem_orcamento'] = False
 
         # Verificar se cliente já avaliou
         avaliacao_cliente = Avaliacao.objects.filter(
@@ -195,53 +273,62 @@ class NecessidadeDetailView(DetailView):
             usuario=fornecedor
         ).exists() if fornecedor else False
 
-        # Verificar se o usuário atual já avaliou
-        ja_avaliou_usuario_atual = Avaliacao.objects.filter(
-            anuncio=necessidade,
-            usuario=self.request.user
-        ).exists()
+        # Verificar se o usuário atual já avaliou (só se estiver autenticado)
+        if self.request.user.is_authenticated:
+            ja_avaliou_usuario_atual = Avaliacao.objects.filter(
+                anuncio=necessidade,
+                usuario=self.request.user
+            ).exists()
+            avaliacao_form = AvaliacaoForm(user=self.request.user, anuncio=necessidade)
+        else:
+            ja_avaliou_usuario_atual = False
+            avaliacao_form = None
 
         # Passar flags no contexto
         context.update({
             'avaliacao_cliente': avaliacao_cliente,
             'avaliacao_fornecedor': avaliacao_fornecedor,
             'ja_avaliou_usuario_atual': ja_avaliou_usuario_atual,
-            'avaliacao_form': AvaliacaoForm(user=self.request.user, anuncio=necessidade),
+            'avaliacao_form': avaliacao_form,
             'orcamento_aceito': orcamento_aceito
         })
 
         return context
 
-class NecessidadeUpdateView(UpdateView):
+class NecessidadeUpdateView(OwnerRequiredMixin, UpdateView):
     model = Necessidade
     form_class = AdsForms
     template_name = 'necessidade_update.html'
-    # fields = ['categoria', 'titulo', 'descricao', 'quantidade', 'unidade']
     success_url = reverse_lazy('necessidade_list')
+    owner_field = 'cliente'  # Especifica que o campo de propriedade é 'cliente'
+    
+    def form_valid(self, form):
+        # Validação adicional usando o sistema de permissões
+        can_edit, message = PermissionValidator.can_edit_ad(self.request.user, self.object)
+        if not can_edit:
+            messages.error(self.request, message)
+            return redirect('necessidade_list')
+        
+        return super().form_valid(form)
 
-class NecessidadeDeleteView(DeleteView):
+class NecessidadeDeleteView(OwnerRequiredMixin, DeleteView):
     model = Necessidade
     template_name = 'necessidade_delete.html'
     success_url = reverse_lazy('necessidade_list')
+    owner_field = 'cliente'  # Especifica que o campo de propriedade é 'cliente'
 
 class FinalizarAnuncioView(LoginRequiredMixin, View):
     """ View para finalizar um anúncio """
 
     def post(self, request, *args, **kwargs):
         try:
-            # Obter o anúncio associado ao cliente logado
-            anuncio = get_object_or_404(
-                Necessidade, pk=self.kwargs['pk'], cliente=request.user)
+            # Obter o anúncio
+            anuncio = get_object_or_404(Necessidade, pk=self.kwargs['pk'])
 
-            # Verificar se o status do anúncio é "em atendimento"
-            if anuncio.status != 'em_atendimento':
-                return JsonResponse({'success': False, 'error': 'O anúncio só pode ser finalizado quando está em atendimento.'}, status=400)
-
-            # Verificar se há pelo menos um orçamento com status "aceito"
-            orcamento_aceito = anuncio.orcamentos.filter(
-                status='aceito').exists()
-            if not orcamento_aceito:
-                return JsonResponse({'success': False, 'error': 'Não há orçamentos aceitos para este anúncio.'}, status=400)
+            # Usar o sistema de permissões centralizado
+            can_finalize, message = PermissionValidator.can_finalize_ad(request.user, anuncio)
+            if not can_finalize:
+                return JsonResponse({'success': False, 'error': message}, status=403)
 
             # Alterar o status do anúncio para "finalizado"
             anuncio.status = 'finalizado'
@@ -278,11 +365,18 @@ class AnunciosPorCategoriaListView(ListView):
     
 from ads.metrics import get_ads_metrics, get_anuncios_criados_vs_finalizados, get_quantidade_anuncios_finalizados_por_categoria, get_quantidade_usuarios_por_tipo, get_valores_metrics, get_valores_por_mes
     
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(AdminRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Validação adicional usando o sistema de permissões
+        can_access, message = PermissionValidator.can_access_dashboard(self.request.user)
+        if not can_access:
+            messages.error(self.request, message)
+            return redirect('home')
+        
         context['ads_metrics'] = get_ads_metrics()
         context['valores_metrics'] = get_valores_metrics()
         context['grafico_valores_por_mes'] = get_valores_por_mes()
@@ -310,7 +404,6 @@ def anuncios_geolocalizados(request):
         'cliente_id': anuncio.cliente.id  
     } for anuncio in anuncios]
 
-    print(data)  # 🔍 debug
     return JsonResponse(data, safe=False)
 
 from django.http import JsonResponse
@@ -353,3 +446,74 @@ def geolocalizar_usuario(request):
     except Exception as e:
         return JsonResponse({'erro': str(e)}, status=500)
 
+def enviar_mensagem(request, pk):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        telefone = request.POST.get('telefone')
+        email = request.POST.get('email')
+        mensagem = request.POST.get('mensagem')
+        
+        necessidade = Necessidade.objects.get(pk=pk)
+        destinatario = necessidade.cliente.email
+        
+        assunto = f"Contato sobre o anúncio '{necessidade.titulo}' no Indicai.com"
+        mensagem_completa = f"De: {nome}\nTelefone: {telefone}\nEmail: {email}\n\n{mensagem}"
+        
+        send_mail(
+            assunto,
+            mensagem_completa,
+            email,  # Remetente
+            [destinatario],  # Destinatário
+            fail_silently=False
+        )
+        
+        messages.success(request, 'Mensagem enviada com sucesso!')
+        return redirect('necessidade_detail', pk=pk)
+
+
+def dados_compartilhamento(request, pk):
+    """
+    View para fornecer dados estruturados de compartilhamento do anúncio.
+    Pode ser usada para APIs ou para gerar links personalizados.
+    """
+    necessidade = get_object_or_404(Necessidade, pk=pk)
+    
+    # Construir URL completa
+    url_completa = request.build_absolute_uri(
+        reverse('necessidade_detail', kwargs={'pk': pk})
+    )
+    
+    # Texto estruturado para compartilhamento
+    texto_compartilhamento = f"""🔍 Procuro: {necessidade.titulo}
+
+📋 {necessidade.descricao[:150]}{'...' if len(necessidade.descricao) > 150 else ''}
+📍 {necessidade.cliente.cidade}, {necessidade.cliente.estado}
+💰 Categoria: {necessidade.categoria.nome}
+📦 Quantidade: {necessidade.quantidade} {necessidade.unidade}
+
+👆 Acesse o anúncio completo no link:
+{url_completa}
+
+#Indicaai #{necessidade.categoria.nome.replace(' ', '')}"""
+
+    dados = {
+        'id': necessidade.id,
+        'titulo': necessidade.titulo,
+        'descricao': necessidade.descricao,
+        'categoria': necessidade.categoria.nome,
+        'quantidade': necessidade.quantidade,
+        'unidade': necessidade.unidade,
+        'cidade': necessidade.cliente.cidade,
+        'estado': necessidade.cliente.estado,
+        'url': url_completa,
+        'texto_formatado': texto_compartilhamento,
+        'imagem_principal': necessidade.imagens.first().imagem.url if necessidade.imagens.exists() else None,
+        'data_criacao': necessidade.data_criacao.strftime('%d/%m/%Y'),
+        'status': necessidade.get_status_display()
+    }
+    
+    if request.headers.get('Accept') == 'application/json':
+        return JsonResponse(dados)
+    
+    # Para requisições normais, retorna contexto para template
+    return render(request, 'compartilhamento_preview.html', {'dados': dados})

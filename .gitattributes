@@ -1,0 +1,26 @@
+# Força line endings Unix para scripts shell
+entrypoint.sh text eol=lf
+*.sh text eol=lf
+
+# Arquivos de texto devem ter line endings nativos
+*.py text
+*.html text
+*.css text
+*.js text
+*.md text
+*.txt text
+*.yml text
+*.yaml text
+*.json text
+*.conf text
+*.cfg text
+
+# Arquivos binários
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary 

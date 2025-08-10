@@ -1,49 +1,500 @@
 {% extends 'base.html' %}
+
 {% block content %}
+<style>
+    /* ===== PÁGINA DE DETALHES DA CATEGORIA - DESIGN PROFISSIONAL ===== */
+    
+    .categoria-detail-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        padding: 2rem 0 4rem;
+    }
+    
+    /* Header da categoria */
+    .categoria-header {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .categoria-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--categoria-color, #0d6efd);
+    }
+    
+    .categoria-icon-hero {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--categoria-color, #0d6efd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .categoria-icon-hero i {
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .categoria-titulo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .categoria-descricao {
+        text-align: center;
+        color: #6c757d;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .categoria-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(255,255,255,0.8);
+        border-radius: 16px;
+        border: 2px solid var(--categoria-color, #0d6efd);
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--categoria-color, #0d6efd);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    /* Botões de ação */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-categoria {
+        padding: 0.875rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-categoria-primary {
+        background: var(--categoria-color, #0d6efd);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .btn-categoria-primary:hover {
+        background: var(--categoria-color, #0d6efd);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-categoria-secondary {
+        background: white;
+        color: var(--categoria-color, #0d6efd);
+        border: 2px solid var(--categoria-color, #0d6efd);
+    }
+    
+    .btn-categoria-secondary:hover {
+        background: var(--categoria-color, #0d6efd);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Seção de subcategorias */
+    .subcategorias-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        position: relative;
+        text-align: center;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--categoria-color, #0d6efd);
+        border-radius: 2px;
+    }
+    
+    .subcategorias-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .subcategoria-card {
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .subcategoria-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--categoria-color, #0d6efd);
+        opacity: 0.7;
+    }
+    
+    .subcategoria-card:hover {
+        border-color: var(--categoria-color, #0d6efd);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .subcategoria-nome {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+    }
+    
+    .subcategoria-descricao {
+        color: #6c757d;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    /* Navegação breadcrumb */
+    .categoria-breadcrumb {
+        background: white;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        max-width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .breadcrumb-item {
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .breadcrumb-item:hover {
+        color: var(--categoria-color, #0d6efd);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--categoria-color, #0d6efd);
+        font-weight: 600;
+    }
+    
+    .breadcrumb-separator {
+        color: #dee2e6;
+    }
+    
+    /* Mensagem quando não há subcategorias */
+    .no-subcategorias {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .no-subcategorias-icon {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    /* Cores dinâmicas baseadas no ID */
+    .categoria-color-1 { --categoria-color: #0d6efd; }
+    .categoria-color-2 { --categoria-color: #6f42c1; }
+    .categoria-color-3 { --categoria-color: #20c997; }
+    .categoria-color-4 { --categoria-color: #fd7e14; }
+    .categoria-color-5 { --categoria-color: #dc3545; }
+    .categoria-color-6 { --categoria-color: #0dcaf0; }
+    .categoria-color-7 { --categoria-color: #198754; }
+    .categoria-color-8 { --categoria-color: #ffc107; }
+    .categoria-color-9 { --categoria-color: #e91e63; }
+    .categoria-color-10 { --categoria-color: #9c27b0; }
+    .categoria-color-11 { --categoria-color: #ff5722; }
+    .categoria-color-12 { --categoria-color: #607d8b; }
+    .categoria-color-default { --categoria-color: #0d6efd; }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .categoria-detail-page {
+            padding: 1rem 0 3rem;
+        }
+        
+        .categoria-header {
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0;
+        }
+        
+        .categoria-icon-hero {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .categoria-icon-hero i {
+            font-size: 2rem;
+        }
+        
+        .categoria-titulo {
+            font-size: 1.8rem;
+        }
+        
+        .categoria-descricao {
+            font-size: 1rem;
+        }
+        
+        .categoria-stats {
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .action-buttons {
+            gap: 0.5rem;
+        }
+        
+        .btn-categoria {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .subcategorias-section {
+            padding: 1.5rem;
+        }
+        
+        .subcategorias-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+        }
+        
+        .categoria-breadcrumb {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Animações de entrada */
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 
-<div class="container">
-  <div class="card shadow-sm">
-    <div class="card-header bg-light d-flex ">
-      <div class="col-6">
-        <h3 class="mb-0">Detalhes da Categoria</h3>
-      </div>
-      <div class="col-6 d-flex justify-content-end gap-2">
-        <a href="{% url 'anuncios_por_categoria' categoria.id %}" class="btn btn-primary">
-          <i class="fas fa-list"></i> Ver Anúncios nesta Categoria</a>
-        <!-- <a href="#" class="btn btn-danger btn-sm">
-          <i class="fas fa-trash-alt"></i> </a> -->
-      </div>
+<div class="categoria-detail-page categoria-color-{{ categoria.id|add:0|divisibleby:12|yesno:"12,"|default:categoria.id }}">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="categoria-breadcrumb animate-fade-in">
+            <a href="{% url 'home' %}" class="breadcrumb-item">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{% url 'category_list' %}" class="breadcrumb-item">Categorias</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item active">{{ categoria.nome }}</span>
+        </nav>
+
+        <!-- Header da categoria -->
+        <div class="categoria-header animate-fade-in animate-delay-1">
+            <div class="categoria-icon-hero">
+                <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+            </div>
+            <h1 class="categoria-titulo">{{ categoria.nome }}</h1>
+            {% if categoria.descricao %}
+            <p class="categoria-descricao">{{ categoria.descricao }}</p>
+            {% endif %}
+            
+            <!-- Estatísticas -->
+            <div class="categoria-stats">
+                <div class="stat-card">
+                    <span class="stat-number">{{ categoria.necessidade_set.count }}</span>
+                    <span class="stat-label">Anúncio{{ categoria.necessidade_set.count|pluralize:"s" }}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">{{ subcategorias.count }}</span>
+                    <span class="stat-label">Subcategoria{{ subcategorias.count|pluralize:"s" }}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">{{ categoria.criado_em|date:"Y" }}</span>
+                    <span class="stat-label">Criado em</span>
+                </div>
+            </div>
+            
+            <!-- Botões de ação -->
+            <div class="action-buttons">
+                <a href="{% url 'anuncios_por_categoria' categoria.id %}" class="btn-categoria btn-categoria-primary">
+                    <i class="fas fa-bullhorn"></i>
+                    Ver Anúncios ({{ categoria.necessidade_set.count }})
+                </a>
+                <a href="{% url 'category_list' %}" class="btn-categoria btn-categoria-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar às Categorias
+                </a>
+            </div>
+        </div>
+
+        <!-- Subcategorias -->
+        <div class="subcategorias-section animate-fade-in animate-delay-2">
+            <h2 class="section-title">
+                <i class="fas fa-sitemap me-2"></i>
+                Subcategorias
+            </h2>
+            
+            {% if subcategorias %}
+            <div class="subcategorias-grid">
+                {% for subcategoria in subcategorias %}
+                <div class="subcategoria-card">
+                    <h4 class="subcategoria-nome">
+                        <i class="fas fa-tag me-2" style="color: var(--categoria-color);"></i>
+                        {{ subcategoria.nome }}
+                    </h4>
+                    {% if subcategoria.descricao %}
+                    <p class="subcategoria-descricao">{{ subcategoria.descricao }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-subcategorias">
+                <i class="fas fa-folder-open no-subcategorias-icon"></i>
+                <h4>Nenhuma subcategoria cadastrada</h4>
+                <p>Esta categoria ainda não possui subcategorias específicas.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="card-body">
-      {% if object.nome %}
-      <h4 class="card-title">Nome: {{ categoria.nome }}</h4>
-      {% endif %}
-      
-      {% if object.descricao %}
-      <p class="card-text">Descrição: <strong>{{ categoria.descricao|capfirst }}</strong></p>
-      {% endif %}
-      
-      {% if object.criado_em %}
-      <p class="card-text">Criado em: <strong>{{ categoria.criado_em }}</strong></p>
-      {% endif %}
-
-      <hr class="my-4">
-
-      <h4 class="card-title">Subcategorias Relacionadas</h4>
-        <ul class="list-group">
-            {% for subcategoria in subcategorias %}
-                <li class="list-group-item">
-                    <strong>{{ subcategoria.nome }}</strong> - {{ subcategoria.descricao }}
-                </li>
-            {% empty %}
-                <li class="list-group-item text-muted">Nenhuma subcategoria cadastrada.</li>
-            {% endfor %}
-        </ul>
-    </div>
-  </div>
-  <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Voltar para a Lista de Categorias</a>
 </div>
 
-
-  
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar animações aos elementos
+    const animatedElements = document.querySelectorAll('.animate-fade-in');
+    animatedElements.forEach((element, index) => {
+        setTimeout(() => {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animação suave nos botões
+    const buttons = document.querySelectorAll('.btn-categoria');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Analytics de cliques
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.textContent.trim();
+            console.log(`Ação realizada: ${action} - Categoria: {{ categoria.nome }}`);
+        });
+    });
+});
+</script>
 {% endblock %}

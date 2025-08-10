@@ -22,7 +22,7 @@ Eixo X → Tipo de usuário (Cliente ou Fornecedor).
 Gráfico 4: Anúncios Criados vs Finalizados
 Eixo X → Meses (últimos 12 meses).
 
-Gráfico 4: Mapa de Anúncios por Localidade”
+Gráfico 4: Mapa de Anúncios por Localidade"
 1. Estrutura recomendada:
 ✅ O mapa vai substituir um dos gráficos ou entrar abaixo dos 4 gráficos (como sugerimos antes).
 ✅ Exibe bolhas (circleMarkers) com:
@@ -52,9 +52,9 @@ Tooltip ao passar o mouse
 {% include "components/_metrics_anuncios.html" %}
 {% include "components/_metrics_valores.html" %}
 
-<div class="row mt-4">
-    <div class="col-md-6 mb-4">
-      <div class="card">
+<div class="row g-4 mt-4">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">Valores Movimentados por Mês</h5>
           <canvas id="graficoValoresPorMes"></canvas>
@@ -63,30 +63,37 @@ Tooltip ao passar o mouse
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
-        <div class="card-body">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
           <h5 class="card-title">Anúncios Finalizados por Categoria</h5>
-          <canvas id="graficoCategorias"></canvas>
-          <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoCategorias')">Exportar PNG</button>
-          <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoCategorias')">Exportar PDF</button>
+          <div class="flex-grow-1" style="position: relative; height: 350px;">
+            <canvas id="graficoCategorias"></canvas>
+          </div>
+          <div class="mt-auto text-center">
+            <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoCategorias')">Exportar PNG</button>
+            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoCategorias')">Exportar PDF</button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Perfil de usuarios do Sistema</h5>
-          <div style="height: 300px;">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Perfil de usuários do Sistema</h5>
+          <div id="resumoUsuarios" class="mb-3"></div>
+          <div class="flex-grow-1" style="position: relative; height: 300px;">
             <canvas id="graficoUsuarios"></canvas>
           </div>
-          <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoUsuarios')">Exportar PNG</button>
-          <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoUsuarios')">Exportar PDF</button>
+          <div class="mt-auto text-center">
+            <button class="btn btn-sm btn-outline-primary mt-2" onclick="exportChartAsImage('graficoUsuarios')">Exportar PNG</button>
+            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="exportChartAsPDF('graficoUsuarios')">Exportar PDF</button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card">
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">Anúncios Criados vs Finalizados</h5>
           <canvas id="graficoAnuncios"></canvas>
@@ -110,187 +117,434 @@ Tooltip ao passar o mouse
         </div>
       </div>
     </div>
-  </div>
+</div>
   
-  <!-- Botão para abrir o modal -->
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMapa">
-    <i class="fas fa-map-marked-alt"></i> Ver Mapa de Anúncios
-  </button>
+<!-- Botão para abrir o modal -->
+<div class="mb-4 mt-4">
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMapa">
+  <i class="fas fa-map-marked-alt"></i> Ver Mapa de Anúncios
+</button>
+</div>
   
+
+<!-- Dados do Django para JavaScript usando json_script -->
+{{ grafico_valores_por_mes|json_script:"grafico-valores-data" }}
+{{ grafico_categorias|json_script:"grafico-categorias-data" }}
+{{ grafico_usuarios|json_script:"grafico-usuarios-data" }}
+{{ grafico_anuncios|json_script:"grafico-anuncios-data" }}
 
 <!-- IMPORTA O jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- Leaflet   -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- IMPORTA O Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> <!-- Garante que Chart.js seja carregado primeiro -->
+<!-- IMPORTA O plugin de datalabels para Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<!-- Leaflet CSS já está importado no base.html -->
 
-<!-- Gráfico 1 -->
 <script>
-    const ctxValoresPorMes = document.getElementById('graficoValoresPorMes').getContext('2d');
-    const graficoValoresPorMes = new Chart(ctxValoresPorMes, {
-      type: 'bar',
-      data: {
-        labels: {{ grafico_valores_por_mes.labels|safe }},
-        datasets: [{
-          label: 'Valores Movimentados',
-          data: {{ grafico_valores_por_mes.valores|safe }},
-          backgroundColor: 'rgba(54, 162, 235, 0.7)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
-</script>
-  
-<!-- Gráfico 2 -->
-<script>
-    const categoriasLabels = {{ grafico_categorias.labels|safe }};
-    const categoriasData = {
-        labels: categoriasLabels,
-        datasets: [{
-            label: 'Anúncios Finalizados por Categoria',
-            backgroundColor: ['rgba(255, 99, 132, 0.6)','rgba(54, 162, 235, 0.6)','rgba(255, 206, 86, 0.6)','rgba(75, 192, 192, 0.6)','rgba(153, 102, 255, 0.6)','rgba(255, 159, 64, 0.6)'],
-            borderColor: ['rgba(255,99,132,1)','rgba(54, 162, 235, 1)','rgba(255, 206, 86, 1)','rgba(75, 192, 192, 1)','rgba(153, 102, 255, 1)','rgba(255, 159, 64, 1)'],
-            borderWidth: 1,
-            data: {{ grafico_categorias.valores|safe }},
-        }]
-    };
-    const configCategorias = { type: 'bar', data: categoriasData, options: { indexAxis: 'x', scales: { y: { beginAtZero: true } } } };
-    new Chart(document.getElementById('graficoCategorias'), configCategorias);
-</script>
+document.addEventListener('DOMContentLoaded', function () {
+  // O plugin datalabels deve se auto-registrar com Chart.js v4 se carregado corretamente após o Chart.js
+  // Remover o Chart.register(ChartDataLabels) explícito pode resolver conflitos em alguns casos.
 
-<!-- Gráfico 3 -->
-<script>
-    const usuariosData = {
-        labels: {{ grafico_usuarios.labels|safe }},
-        datasets: [{
-            label: 'Usuários por Tipo',
-            data: {{ grafico_usuarios.valores|safe }},
-            backgroundColor: ['rgba(54, 162, 235, 0.7)','rgba(255, 99, 132, 0.7)'],
-            borderColor: ['rgba(54, 162, 235, 1)','rgba(255, 99, 132, 1)'],
+  console.log('Dashboard - Iniciando carregamento dos gráficos e mapa...');
+
+  // Recuperar dados do Django de forma segura
+  const valoresData = JSON.parse(document.getElementById('grafico-valores-data').textContent);
+  const categoriasData = JSON.parse(document.getElementById('grafico-categorias-data').textContent);
+  const usuariosData = JSON.parse(document.getElementById('grafico-usuarios-data').textContent);
+  const anunciosData = JSON.parse(document.getElementById('grafico-anuncios-data').textContent);
+
+  // GRÁFICOS
+  try {
+    // Gráfico 1 - Valores por Mês
+    const ctxValoresPorMes = document.getElementById('graficoValoresPorMes');
+    if (ctxValoresPorMes && valoresData.labels && valoresData.labels.length > 0) {
+      const graficoValoresPorMes = new Chart(ctxValoresPorMes.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: valoresData.labels,
+          datasets: [{
+            label: 'Valores Movimentados',
+            data: valoresData.valores,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1
-        }]
-    };
-    const configUsuarios = { type: 'pie', data: usuariosData, options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { position: 'bottom' } } } };
-    new Chart(document.getElementById('graficoUsuarios'), configUsuarios);
-</script>
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      console.log('Gráfico 1 carregado com sucesso');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar Gráfico 1:', error);
+  }
 
-<!-- Gráfico 4 -->
-<script>
-    const anunciosData = {
-        labels: {{ grafico_anuncios.labels|safe }},
-        datasets: [
-            { label: 'Criados', data: {{ grafico_anuncios.criados|safe }}, backgroundColor: 'rgba(54, 162, 235, 0.7)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 },
-            { label: 'Finalizados', data: {{ grafico_anuncios.finalizados|safe }}, backgroundColor: 'rgba(255, 99, 132, 0.7)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }
-        ]
-    };
-    const configAnuncios = { type: 'bar', data: anunciosData, options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Anúncios Criados vs Finalizados' } }, scales: { x: { stacked: false }, y: { beginAtZero: true } } } };
-    new Chart(document.getElementById('graficoAnuncios'), configAnuncios);
-</script>
+  try {
+    // Gráfico 2 - Categorias (Barras horizontais)
+    const ctxCategorias = document.getElementById('graficoCategorias');
+    console.log('Dados para Gráfico Categorias:', categoriasData); // Log para depuração
 
-<script>
-    // Torna a variável mapa global
-    let mapa;
+    if (ctxCategorias) { // Verifica se o canvas existe
+      if (categoriasData && categoriasData.labels && categoriasData.labels.length > 0 && categoriasData.valores && categoriasData.valores.length > 0) {
+        // Cálculo dos percentuais
+        const total = categoriasData.valores.reduce((a, b) => a + b, 0);
+        const percentuais = categoriasData.valores.map(v => total > 0 ? (v / total * 100) : 0);
 
-    document.addEventListener('DOMContentLoaded', function () {
-        mapa = L.map('mapaAnuncios').setView([-5.203, -39.301], 7); // centro Ceará
+        // Paleta de cores acessível
+        const cores = [
+          '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
+          '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'
+        ];
 
-        // Tile layer tema claro
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a> contributors',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(mapa);
+        const graficoCategorias = new Chart(ctxCategorias.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: categoriasData.labels,
+            datasets: [{
+              label: 'Anúncios Finalizados',
+              data: categoriasData.valores,
+              backgroundColor: cores,
+              borderColor: cores,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y', // Barras horizontais
+            responsive: true,
+            maintainAspectRatio: false, // Importante para controlar a altura via div container
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const value = context.parsed.x;
+                    const percent = percentuais[context.dataIndex];
+                    return `${context.label}: ${value} (${percent.toFixed(1)}%)`;
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: 'Anúncios Finalizados por Categoria'
+              },
+              datalabels: { // Configuração do plugin datalabels
+                anchor: 'end',
+                align: 'end',
+                color: '#333',
+                font: { 
+                  weight: 'bold',
+                  size: 10
+                },
+                formatter: function(value, context) {
+                  return `${value} (${percentuais[context.dataIndex].toFixed(1)}%)`;
+                }
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                title: { display: true, text: 'Quantidade' }
+              },
+              y: {
+                title: { display: false }
+              }
+            }
+          }
+        });
+        console.log('Gráfico 2 carregado com sucesso');
+      } else {
+        // Exibir mensagem de "sem dados"
+        const context = ctxCategorias.getContext('2d');
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.font = "16px Arial";
+        context.fillText('Nenhum dado para exibir neste gráfico.', ctxCategorias.width / 2, ctxCategorias.height / 2);
+        console.log('Gráfico 2: Nenhum dado para exibir.');
+      }
+    } else {
+      console.error('Elemento canvas #graficoCategorias não encontrado.');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar Gráfico 2:', error);
+  }
 
-        const statusColors = {
-            'ativo': '#28a745',        // verde
-            'em_andamento': '#fd7e14', // laranja
-            'em_atendimento': '#007bff', // azul
-            'finalizado': '#6c757d',   // cinza
-            'cancelado': '#dc3545'     // vermelho
-        };
+  try {
+    // Gráfico 3 - Usuários (Pizza)
+    const ctxUsuarios = document.getElementById('graficoUsuarios');
+    if (ctxUsuarios && usuariosData.labels && usuariosData.labels.length > 0) {
+      // Cálculo dos percentuais
+      const totalUsuarios = usuariosData.total || usuariosData.valores.reduce((a, b) => a + b, 0);
+      const percentuais = usuariosData.valores.map(v => totalUsuarios > 0 ? (v / totalUsuarios * 100) : 0);
+      // Resumo visual acima do gráfico
+      let resumoHTML = `<div class='d-flex flex-wrap gap-3 align-items-center justify-content-center'>`;
+      resumoHTML += `<span class='badge bg-primary fs-6'>Total: <strong>${totalUsuarios}</strong> usuários</span>`;
+      usuariosData.labels.forEach((label, idx) => {
+        const cor = [
+          'bg-info',
+          'bg-danger',
+          'bg-success',
+          'bg-secondary'
+        ][idx] || 'bg-secondary';
+        resumoHTML += `<span class='badge ${cor} fs-6'>${label}: <strong>${usuariosData.valores[idx]}</strong> (${percentuais[idx].toFixed(1)}%)</span>`;
+      });
+      resumoHTML += `</div>`;
+      document.getElementById('resumoUsuarios').innerHTML = resumoHTML;
 
-        // Fetch JSON dos anúncios
-        fetch("{% url 'anuncios_geolocalizados' %}")
-    .then(response => response.json())
-    .then(async anuncios => {
-        for (const anuncio of anuncios) {
+      // Cores acessíveis e distintas
+      const cores = [
+        'rgba(54, 162, 235, 0.7)', // Só Clientes
+        'rgba(255, 99, 132, 0.7)', // Só Fornecedores
+        'rgba(75, 192, 192, 0.7)', // Ambos
+        'rgba(201, 203, 207, 0.7)' // Nenhum
+      ];
+      const bordas = [
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(201, 203, 207, 1)'
+      ];
+      const graficoUsuarios = new Chart(ctxUsuarios.getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: usuariosData.labels,
+          datasets: [{
+            label: 'Usuários por Tipo',
+            data: usuariosData.valores,
+            backgroundColor: cores,
+            borderColor: bordas,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: { size: 14 },
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  return data.labels.map((label, i) => {
+                    const value = data.datasets[0].data[i];
+                    const percent = total > 0 ? (value / total * 100) : 0;
+                    return {
+                      text: `${label} (${percent.toFixed(1)}%)`,
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      strokeStyle: data.datasets[0].borderColor[i],
+                      lineWidth: 1,
+                      hidden: isNaN(data.datasets[0].data[i]) || chart.getDataVisibility(i) === false,
+                      index: i
+                    };
+                  });
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed;
+                  const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percent = total > 0 ? (value / total * 100) : 0;
+                  return `${label}: ${value} (${percent.toFixed(1)}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+      console.log('Gráfico 3 carregado com sucesso');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar Gráfico 3:', error);
+  }
+
+  try {
+    // Gráfico 4 - Anúncios Criados vs Finalizados
+    const ctxAnuncios = document.getElementById('graficoAnuncios');
+    if (ctxAnuncios && anunciosData.labels && anunciosData.labels.length > 0) {
+      const graficoAnuncios = new Chart(ctxAnuncios.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: anunciosData.labels,
+          datasets: [
+            {
+              label: 'Criados',
+              data: anunciosData.criados,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Finalizados',
+              data: anunciosData.finalizados,
+              backgroundColor: 'rgba(255, 99, 132, 0.7)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            title: {
+              display: true,
+              text: 'Anúncios Criados vs Finalizados'
+            }
+          },
+          scales: {
+            x: {
+              stacked: false
+            },
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      console.log('Gráfico 4 carregado com sucesso');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar Gráfico 4:', error);
+  }
+
+  // MAPA
+  let mapa;
+  
+  // Função para inicializar o mapa quando o modal for aberto
+  function initializeMapa() {
+    if (mapa) {
+      // Se o mapa já existe, apenas redimensiona
+      mapa.invalidateSize();
+      return;
+    }
+
+    try {
+      const mapaContainer = document.getElementById('mapaAnuncios');
+      if (!mapaContainer) {
+        console.error('Container do mapa não encontrado');
+        return;
+      }
+
+      mapa = L.map('mapaAnuncios').setView([-5.203, -39.301], 7);
+      
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> contributors',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }).addTo(mapa);
+
+      const statusColors = {
+        'ativo': '#28a745',
+        'em_andamento': '#fd7e14',
+        'em_atendimento': '#007bff',
+        'finalizado': '#6c757d',
+        'cancelado': '#dc3545'
+      };
+
+      // Buscar anúncios geolocalizados
+      fetch("{% url 'anuncios_geolocalizados' %}")
+        .then(response => response.json())
+        .then(async anuncios => {
+          console.log(`Carregando ${anuncios.length} anúncios no mapa...`);
+          
+          for (const anuncio of anuncios) {
             let lat = anuncio.lat;
             let lon = anuncio.lon;
-
-            // Se não tiver lat/lon → pedir geolocalização via API interna
+            
             if (lat === null || lon === null) {
-                try {
-                    const responseGeo = await fetch(`/api/geolocalizar-usuario/?user_id=${anuncio.cliente_id}`);
-                    const dataGeo = await responseGeo.json();
-                    if (dataGeo.lat && dataGeo.lon) {
-                        lat = dataGeo.lat;
-                        lon = dataGeo.lon;
-                    } else {
-                        // fallback
-                        lat = -5.203;
-                        lon = -39.301;
-                    }
-                } catch (error) {
-                    console.error("Erro ao geocodificar:", error);
-                    lat = -5.203;
-                    lon = -39.301;
+              try {
+                const responseGeo = await fetch(`/api/geolocalizar-usuario/?user_id=${anuncio.cliente_id}`);
+                const dataGeo = await responseGeo.json();
+                if (dataGeo.lat && dataGeo.lon) {
+                  lat = dataGeo.lat;
+                  lon = dataGeo.lon;
+                } else {
+                  lat = -5.203;
+                  lon = -39.301;
                 }
+              } catch (error) {
+                console.error("Erro ao geocodificar:", error);
+                lat = -5.203;
+                lon = -39.301;
+              }
             }
-
+            
             const marker = L.circleMarker([lat, lon], {
-                radius: 8,
-                fillColor: statusColors[anuncio.status] || '#ffffff',
-                color: '#000000',
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
+              radius: 8,
+              fillColor: statusColors[anuncio.status] || '#ffffff',
+              color: '#000000',
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
             }).addTo(mapa);
-
+            
             marker.bindPopup(`
-                <strong>${anuncio.titulo}</strong><br>
-                ${anuncio.cidade}/${anuncio.estado}<br>
-                Contato: <a href="mailto:${anuncio.email}">${anuncio.email}</a><br>
-                Status: <span style="color:${statusColors[anuncio.status]}">${anuncio.status}</span><br>
-                <a href="/necessidades/${anuncio.id}/" target="_blank">Ver detalhes</a>
+              <strong>${anuncio.titulo}</strong><br>
+              ${anuncio.cidade}/${anuncio.estado}<br>
+              Status: <span style="color:${statusColors[anuncio.status]}">${anuncio.status}</span><br>
+              <a href="/necessidades/${anuncio.id}/" target="_blank">Ver detalhes</a>
             `);
-        }
-    });
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao carregar anúncios:', error);
+        });
 
-        // Legenda
-        const legenda = L.control({ position: 'bottomright' });
-        legenda.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'info legend');
-            const estados = Object.keys(statusColors);
-            let legendaHTML = '<h6>Status</h6>';
-            estados.forEach(status => {
-                legendaHTML += `
-                    <i style="background:${statusColors[status]}; width: 15px; height: 15px; display:inline-block; margin-right: 5px; border:1px solid #000;"></i> 
-                    ${status}<br>
-                `;
-            });
-            div.innerHTML = legendaHTML;
-            return div;
-        };
-        legenda.addTo(mapa);
-    });
-
-    // Corrige o problema de tamanho ao abrir o modal
-    const modalMapa = document.getElementById('modalMapa');
-    modalMapa.addEventListener('shown.bs.modal', function () {
-        mapa.invalidateSize();
-    });
-</script>
-
-    
-<script>
-    const modalMapa = document.getElementById('modalMapa');
-    modalMapa.addEventListener('shown.bs.modal', function () {
-      mapa.invalidateSize();  // ← Aqui assume que a variável do mapa se chama 'mapa'
-    });
-</script>
+      // Adicionar legenda
+      const legenda = L.control({ position: 'bottomright' });
+      legenda.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        const estados = Object.keys(statusColors);
+        let legendaHTML = '<h6>Status</h6>';
+        estados.forEach(status => {
+          legendaHTML += `
+            <i style="background:${statusColors[status]}; width: 15px; height: 15px; display:inline-block; margin-right: 5px; border:1px solid #000;"></i> 
+            ${status}<br>
+          `;
+        });
+        div.innerHTML = legendaHTML;
+        
+        // Estilo da legenda
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
+        
+        return div;
+      };
+      legenda.addTo(mapa);
       
+      console.log('Mapa carregado com sucesso');
+    } catch (error) {
+      console.error('Erro ao carregar mapa:', error);
+    }
+  }
+
+  // Configurar o modal do mapa
+  const modalMapa = document.getElementById('modalMapa');
+  if (modalMapa) {
+    modalMapa.addEventListener('shown.bs.modal', function () {
+      console.log('Modal do mapa aberto, inicializando mapa...');
+      initializeMapa();
+    });
+  }
+});
+</script>
+
 <!-- FUNÇÕES DE EXPORTAÇÃO -->
 <script>
 function exportChartAsImage(chartId) {
@@ -316,93 +570,5 @@ function exportChartAsPDF(chartId) {
     pdf.save(`${chartId}.pdf`);
 }
 </script>
-
-<script>
-    // Torna a variável mapa global
-    let mapa;
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // Inicializa o mapa no centro do Ceará
-        mapa = L.map('mapaAnuncios').setView([-5.203, -39.301], 7);
-
-        // Adiciona o tile layer tema claro
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a> contributors',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(mapa);
-
-        // Define as cores por status
-        const statusColors = {
-            'ativo': '#28a745',        // verde
-            'em_andamento': '#fd7e14', // laranja
-            'em_atendimento': '#007bff', // azul
-            'finalizado': '#6c757d',   // cinza
-            'cancelado': '#dc3545'     // vermelho
-        };
-
-        // Cria o grupo de clusters
-        const clusterGroup = L.markerClusterGroup();
-
-        // Busca os anúncios via JSON
-        fetch("{% url 'anuncios_geolocalizados' %}")
-            .then(response => response.json())
-            .then(anuncios => {
-                anuncios.forEach(anuncio => {
-                    // Adiciona um pequeno deslocamento para não sobrepor pontos idênticos
-                    const offsetLat = (Math.random() - 0.5) * 0.002;
-                    const offsetLon = (Math.random() - 0.5) * 0.002;
-
-                    // Cria o marcador
-                    const marker = L.circleMarker([anuncio.lat + offsetLat, anuncio.lon + offsetLon], {
-                        radius: 8,
-                        fillColor: statusColors[anuncio.status] || '#ffffff',
-                        color: '#000000',
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.8
-                    });
-
-                    // Popup com os dados
-                    marker.bindPopup(`
-                        <strong>${anuncio.titulo}</strong><br>
-                        ${anuncio.cidade}/${anuncio.estado}<br>
-                        Status: <span style="color:${statusColors[anuncio.status]}">${anuncio.status}</span><br>
-                        <a href="/necessidades/${anuncio.id}/" target="_blank">Ver detalhes</a>
-                    `);
-
-                    // Adiciona o marcador ao cluster
-                    clusterGroup.addLayer(marker);
-                });
-
-                // Adiciona o cluster no mapa
-                mapa.addLayer(clusterGroup);
-            });
-
-        // Cria a legenda
-        const legenda = L.control({ position: 'bottomright' });
-        legenda.onAdd = function () {
-            const div = L.DomUtil.create('div', 'info legend');
-            const statusKeys = Object.keys(statusColors);
-            let legendaHTML = '<h6>Status</h6>';
-            statusKeys.forEach(status => {
-                legendaHTML += `
-                    <i style="background:${statusColors[status]}; width: 15px; height: 15px; display:inline-block; margin-right: 5px; border:1px solid #000;"></i> 
-                    ${status}<br>
-                `;
-            });
-            div.innerHTML = legendaHTML;
-            return div;
-        };
-        legenda.addTo(mapa);
-    });
-
-    // Corrige o tamanho do mapa ao abrir o modal
-    const modalMapa = document.getElementById('modalMapa');
-    modalMapa.addEventListener('shown.bs.modal', function () {
-        mapa.invalidateSize();
-    });
-</script>
-
 
 {% endblock %}

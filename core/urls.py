@@ -2,8 +2,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
-from core import settings
+from core.views import (
+    HelpView, 
+    HelpStartView, 
+    HelpAnnounceView, 
+    HelpBudgetView, 
+    HelpCommunicationView, 
+    HelpRatingsView, 
+    HelpSupportView,
+    SecurityTipsView
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -14,6 +24,27 @@ urlpatterns = [
     path('rankings/', include('rankings.urls')),
     path('notifications/', include('notifications.urls')),
     path('buscar/', include('search.urls')),
+    path('chat/', include('chat.urls')),
+    
+    # API com versionamento
+    path('api/', include('api.urls')),
+    
+    # Redirecionamento para corrigir logout do DRF
+    path('accounts/logout/', RedirectView.as_view(url='/api/logout-redirect/', permanent=False), name='account_logout'),
+    
+    # Páginas institucionais
+    path('dicas-de-seguranca/', SecurityTipsView.as_view(), name='security_tips'),
+    
+    # Central de Ajuda - Página Principal
+    path('ajuda/', HelpView.as_view(), name='help'),
+    
+    # Central de Ajuda - Seções Específicas
+    path('ajuda/comecar/', HelpStartView.as_view(), name='help_start'),
+    path('ajuda/anunciar/', HelpAnnounceView.as_view(), name='help_announce'),
+    path('ajuda/orcamentos/', HelpBudgetView.as_view(), name='help_budget'),
+    path('ajuda/comunicacao/', HelpCommunicationView.as_view(), name='help_communication'),
+    path('ajuda/avaliacoes/', HelpRatingsView.as_view(), name='help_ratings'),
+    path('ajuda/suporte/', HelpSupportView.as_view(), name='help_support'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

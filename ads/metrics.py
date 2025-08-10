@@ -1,13 +1,13 @@
 import calendar
 import datetime
 from django.utils import timezone
-from django.db.models import Sum, Value, DecimalField, Count
+from django.db.models import Sum, Value, DecimalField, Count, F
 from django.utils.timezone import now
 from django.db.models.functions import Coalesce, TruncMonth
 from collections import OrderedDict
 from django.utils.formats import number_format
 from ads.models import Necessidade
-from budgets.models import Orcamento
+from budgets.models import Orcamento, OrcamentoItem
 from users.models import User
 
 def get_ads_metrics():
@@ -25,21 +25,36 @@ def get_ads_metrics():
 
 def get_valores_metrics():
     # 1️⃣ Valor Total de Anúncios Finalizados: soma dos valores de orçamentos aceitos em anúncios finalizados
-    valor_total_transacoes_concluidas = Orcamento.objects.filter(
-        status='aceito',
-        anuncio__status='finalizado'
-    ).aggregate(total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())))['total']
+    # Calculando através dos itens dos orçamentos
+    valor_total_transacoes_concluidas = OrcamentoItem.objects.filter(
+        orcamento__status='aceito',
+        orcamento__anuncio__status='finalizado'
+    ).aggregate(
+        total=Coalesce(
+            Sum(F('quantidade') * F('valor_unitario')), 
+            Value(0, output_field=DecimalField())
+        )
+    )['total']
 
     # 2️⃣ Valor Total de Orçamentos Enviados: soma de todos os valores enviados, independente de aceitação
-    valor_total_orcamentos_enviados = Orcamento.objects.aggregate(
-        total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField()))
+    valor_total_orcamentos_enviados = OrcamentoItem.objects.aggregate(
+        total=Coalesce(
+            Sum(F('quantidade') * F('valor_unitario')), 
+            Value(0, output_field=DecimalField())
+        )
     )['total']
     
 
     # 3️⃣ Valor Total de Transações em Andamento: orçamentos aceitos vinculados a anúncios NÃO finalizados
-    valor_total_transacoes_andamento = Orcamento.objects.filter(
-        anuncio__status__in=['em_andamento', 'em_atendimento']
-    ).aggregate(total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())))['total']
+    valor_total_transacoes_andamento = OrcamentoItem.objects.filter(
+        orcamento__status='aceito',
+        orcamento__anuncio__status__in=['em_andamento', 'em_atendimento']
+    ).aggregate(
+        total=Coalesce(
+            Sum(F('quantidade') * F('valor_unitario')), 
+            Value(0, output_field=DecimalField())
+        )
+    )['total']
    
 
     # 4️⃣ Taxa de Conversão de Anúncios (%): (anúncios finalizados ÷ total anúncios criados) * 100
@@ -64,18 +79,18 @@ def get_valores_por_mes():
         primeiro_dia = mes_ref.replace(day=1)
         meses.append(primeiro_dia)
 
-    # 2️⃣ Consultar o banco
-    qs = Orcamento.objects.filter(
-        status='aceito',
-        anuncio__status='finalizado'
+    # 2️⃣ Consultar o banco - usando OrcamentoItem ao invés de campo valor direto
+    qs = OrcamentoItem.objects.filter(
+        orcamento__status='aceito',
+        orcamento__anuncio__status='finalizado'
     ).annotate(
-        mes=TruncMonth('data_criacao')
+        mes=TruncMonth('orcamento__data_criacao')
     ).values('mes').annotate(
-        total=Sum('valor')
+        total=Sum(F('quantidade') * F('valor_unitario'))
     )
 
     # 3️⃣ Criar dicionário com meses e valores encontrados
-    dados_db = {registro['mes'].date(): float(registro['total']) for registro in qs}
+    dados_db = {registro['mes'].date(): float(registro['total']) for registro in qs if registro['total']}
 
     # 4️⃣ Garantir todos os meses (preencher zero onde faltar)
     labels = []
@@ -111,12 +126,21 @@ def get_quantidade_anuncios_finalizados_por_categoria():
     }
 
 def get_quantidade_usuarios_por_tipo():
-    total_clientes = User.objects.filter(is_client=True).count()
-    total_fornecedores = User.objects.filter(is_supplier=True).count()
+    # Usuários que são só clientes
+    so_clientes = User.objects.filter(is_client=True, is_supplier=False).count()
+    # Usuários que são só fornecedores
+    so_fornecedores = User.objects.filter(is_client=False, is_supplier=True).count()
+    # Usuários que são ambos
+    ambos = User.objects.filter(is_client=True, is_supplier=True).count()
+    # Usuários que não são nem clientes nem fornecedores
+    nenhum = User.objects.filter(is_client=False, is_supplier=False).count()
+    # Total geral
+    total = so_clientes + so_fornecedores + ambos + nenhum
 
     return {
-        'labels': ['Clientes', 'Fornecedores'],
-        'valores': [total_clientes, total_fornecedores]
+        'labels': ['Só Clientes', 'Só Fornecedores', 'Clientes e Fornecedores', 'Nenhum dos dois'],
+        'valores': [so_clientes, so_fornecedores, ambos, nenhum],
+        'total': total
     }
 
 def get_anuncios_criados_vs_finalizados():

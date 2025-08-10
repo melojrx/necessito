@@ -1,13 +1,524 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>Lista de Categorias</h2>
-  <ul>
-  {% for cat in categorias %}
-    <li>
-      <a href="{% url 'category_detail' cat.pk %}">{{ cat.nome }}</a>
-      <!-- Você pode exibir a descrição resumida, datas, etc. -->
-    </li>
-  {% endfor %}
-  </ul>
+<style>
+    /* ===== PÁGINA DE CATEGORIAS - DESIGN PROFISSIONAL ===== */
+    
+    .categorias-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        padding: 2rem 0 4rem;
+    }
+    
+    /* Header da página */
+    .categorias-header {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .categorias-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #0d6efd 0%, #6f42c1 25%, #20c997 50%, #fd7e14 75%, #dc3545 100%);
+    }
+    
+    .categorias-page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .categorias-subtitle {
+        text-align: center;
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Campo de busca moderno */
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 50px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 4px 20px rgba(13,110,253,0.15);
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+    
+    /* Contador de resultados */
+    .results-counter {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    .results-number {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    
+    /* Grid de categorias */
+    .categorias-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    /* Card de categoria - Reutilizando estilos */
+    .categoria-card-full {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .categoria-card-full::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--categoria-color, #0d6efd);
+        transition: height 0.3s ease;
+    }
+    
+    .categoria-card-full:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        border-color: var(--categoria-color, #0d6efd);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .categoria-card-full:hover::before {
+        height: 8px;
+    }
+    
+    /* Ícone da categoria */
+    .categoria-icon-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--categoria-color, #0d6efd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .categoria-card-full:hover .categoria-icon-large {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    .categoria-icon-large i {
+        font-size: 2.2rem;
+        color: white;
+    }
+    
+    .categoria-nome-full {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+    }
+    
+    .categoria-descricao-full {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-align: center;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+    
+    .categoria-stats {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+        width: 100%;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .categoria-stats i {
+        color: var(--categoria-color, #0d6efd);
+    }
+    
+    /* Cores específicas para diferentes categorias */
+    .categoria-color-1 { --categoria-color: #0d6efd; }
+    .categoria-color-2 { --categoria-color: #6f42c1; }
+    .categoria-color-3 { --categoria-color: #20c997; }
+    .categoria-color-4 { --categoria-color: #fd7e14; }
+    .categoria-color-5 { --categoria-color: #dc3545; }
+    .categoria-color-6 { --categoria-color: #0dcaf0; }
+    .categoria-color-7 { --categoria-color: #198754; }
+    .categoria-color-8 { --categoria-color: #ffc107; }
+    .categoria-color-9 { --categoria-color: #e91e63; }
+    .categoria-color-10 { --categoria-color: #9c27b0; }
+    .categoria-color-11 { --categoria-color: #ff5722; }
+    .categoria-color-12 { --categoria-color: #607d8b; }
+    
+    /* Mensagem quando não há resultados */
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .no-results-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .no-results-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-results-text {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+    
+    /* Animações */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .categoria-card-full {
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+    
+    .categoria-card-full:nth-child(1) { animation-delay: 0.05s; }
+    .categoria-card-full:nth-child(2) { animation-delay: 0.1s; }
+    .categoria-card-full:nth-child(3) { animation-delay: 0.15s; }
+    .categoria-card-full:nth-child(4) { animation-delay: 0.2s; }
+    .categoria-card-full:nth-child(5) { animation-delay: 0.25s; }
+    .categoria-card-full:nth-child(6) { animation-delay: 0.3s; }
+    .categoria-card-full:nth-child(7) { animation-delay: 0.35s; }
+    .categoria-card-full:nth-child(8) { animation-delay: 0.4s; }
+    .categoria-card-full:nth-child(9) { animation-delay: 0.45s; }
+    .categoria-card-full:nth-child(10) { animation-delay: 0.5s; }
+    .categoria-card-full:nth-child(11) { animation-delay: 0.55s; }
+    .categoria-card-full:nth-child(12) { animation-delay: 0.6s; }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .categorias-page {
+            padding: 1rem 0 3rem;
+        }
+        
+        .categorias-header {
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0;
+        }
+        
+        .categorias-page-title {
+            font-size: 1.8rem;
+        }
+        
+        .categorias-subtitle {
+            font-size: 1rem;
+        }
+        
+        .categorias-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+        
+        .categoria-card-full {
+            padding: 1.5rem 1rem;
+        }
+        
+        .categoria-icon-large {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+        
+        .categoria-icon-large i {
+            font-size: 1.8rem;
+        }
+        
+        .categoria-nome-full {
+            font-size: 1rem;
+        }
+        
+        .categoria-descricao-full {
+            display: none;
+        }
+        
+        .categoria-stats {
+            font-size: 0.75rem;
+        }
+        
+        .search-input {
+            padding: 0.875rem 3rem 0.875rem 1.25rem;
+            font-size: 0.95rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .categorias-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+    }
+    
+    /* Loader de busca */
+    .search-loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .search-loading.active {
+        display: block;
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(0,0,0,.1);
+        border-radius: 50%;
+        border-top-color: #0d6efd;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="categorias-page">
+    <div class="container">
+        <!-- Header da página -->
+        <div class="categorias-header">
+            <h1 class="categorias-page-title">
+                <i class="fas fa-th-large me-2"></i>
+                Todas as Categorias
+            </h1>
+            <p class="categorias-subtitle">
+                Explore nossas {{ categorias.count }} categorias de serviços disponíveis
+            </p>
+            
+            <!-- Campo de busca -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchCategories" 
+                    placeholder="Buscar categorias..."
+                    autocomplete="off"
+                >
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+        
+        <!-- Contador de resultados -->
+        <div class="results-counter" id="resultsCounter">
+            Mostrando <span class="results-number">{{ categorias.count }}</span> categoria{{ categorias.count|pluralize:"s" }}
+        </div>
+        
+        <!-- Loading -->
+        <div class="search-loading" id="searchLoading">
+            <div class="spinner"></div>
+            <p class="mt-2">Buscando categorias...</p>
+        </div>
+        
+        <!-- Grid de categorias -->
+        <div class="categorias-grid" id="categoriasGrid">
+            {% for categoria in categorias %}
+            <a href="{% url 'category_detail' categoria.pk %}" 
+               class="categoria-card-full categoria-color-{{ forloop.counter|add:0|divisibleby:12|yesno:"12,"|default:forloop.counter }}"
+               data-categoria-nome="{{ categoria.nome|lower }}"
+               data-categoria-descricao="{{ categoria.descricao|lower|default:'' }}">
+                <div class="categoria-icon-large">
+                    <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
+                </div>
+                <h3 class="categoria-nome-full">{{ categoria.nome }}</h3>
+                {% if categoria.descricao %}
+                <p class="categoria-descricao-full">{{ categoria.descricao|truncatewords:15 }}</p>
+                {% endif %}
+                <div class="categoria-stats">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>{{ categoria.necessidade_set.count }} anúncio{{ categoria.necessidade_set.count|pluralize:"s" }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Mensagem quando não há resultados -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-search no-results-icon"></i>
+            <h3 class="no-results-title">Nenhuma categoria encontrada</h3>
+            <p class="no-results-text">Tente buscar com outros termos</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchCategories');
+    const categoriasGrid = document.getElementById('categoriasGrid');
+    const categoriaCards = document.querySelectorAll('.categoria-card-full');
+    const resultsCounter = document.getElementById('resultsCounter');
+    const noResults = document.getElementById('noResults');
+    const searchLoading = document.getElementById('searchLoading');
+    
+    let searchTimeout;
+    
+    // Função de busca
+    function searchCategories(searchTerm) {
+        searchTerm = searchTerm.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        // Mostrar loading apenas se houver termo de busca
+        if (searchTerm) {
+            searchLoading.classList.add('active');
+        }
+        
+        // Simular pequeno delay para melhor UX
+        setTimeout(() => {
+            categoriaCards.forEach((card, index) => {
+                const nome = card.getAttribute('data-categoria-nome');
+                const descricao = card.getAttribute('data-categoria-descricao');
+                
+                if (!searchTerm || nome.includes(searchTerm) || descricao.includes(searchTerm)) {
+                    card.style.display = '';
+                    card.style.animation = `fadeInUp 0.5s ease forwards`;
+                    card.style.animationDelay = `${visibleCount * 0.05}s`;
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Esconder loading
+            searchLoading.classList.remove('active');
+            
+            // Atualizar contador
+            const pluralS = visibleCount !== 1 ? 's' : '';
+            resultsCounter.innerHTML = `Mostrando <span class="results-number">${visibleCount}</span> categoria${pluralS}`;
+            
+            // Mostrar/esconder mensagem de "sem resultados"
+            if (visibleCount === 0) {
+                categoriasGrid.style.display = 'none';
+                noResults.style.display = 'block';
+            } else {
+                categoriasGrid.style.display = '';
+                noResults.style.display = 'none';
+            }
+        }, 300);
+    }
+    
+    // Event listener para busca com debounce
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchCategories(e.target.value);
+        }, 300);
+    });
+    
+    // Limpar busca ao pressionar Escape
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            searchCategories('');
+            this.blur();
+        }
+    });
+    
+    // Analytics de cliques
+    categoriaCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const categoriaNome = this.querySelector('.categoria-nome-full').textContent.trim();
+            console.log('Categoria selecionada:', categoriaNome);
+            // Aqui você pode adicionar integração com Google Analytics
+        });
+    });
+    
+    // Focus visual no campo de busca
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+    });
+});
+</script>
 {% endblock %}

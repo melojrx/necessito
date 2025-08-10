@@ -1,0 +1,756 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar Orçamento - {{ anuncio.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Criar Orçamento</h2>
+            
+            <!-- Informações do Anúncio -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Anúncio: {{ anuncio.titulo }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Cliente:</strong> {{ anuncio.cliente.get_full_name }}</p>
+                    <p class="mb-2"><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
+                    <p class="mb-0"><strong>Descrição:</strong> {{ anuncio.descricao }}</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" novalidate id="orcamento-form">
+                {% csrf_token %}
+                
+                <!-- Dados do Orçamento -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Dados do Orçamento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.prazo_validade.id_for_label }}" class="form-label">
+                                    {{ form.prazo_validade.label }}
+                                </label>
+                                {{ form.prazo_validade }}
+                                {% if form.prazo_validade.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_validade.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.prazo_entrega.id_for_label }}" class="form-label">
+                                    {{ form.prazo_entrega.label }}
+                                </label>
+                                {{ form.prazo_entrega }}
+                                {% if form.prazo_entrega.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prazo_entrega.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.arquivo_anexo.id_for_label }}" class="form-label">
+                                    {{ form.arquivo_anexo.label }}
+                                </label>
+                                {{ form.arquivo_anexo }}
+                                {% if form.arquivo_anexo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.arquivo_anexo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.observacao.id_for_label }}" class="form-label">
+                                    {{ form.observacao.label }}
+                                </label>
+                                {{ form.observacao }}
+                                {% if form.observacao.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.observacao.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Termos Comerciais -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Termos Comerciais</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Tipo de Frete -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.tipo_frete.id_for_label }}" class="form-label">
+                                    {{ form.tipo_frete.label }}
+                                </label>
+                                {{ form.tipo_frete }}
+                                {% if form.tipo_frete.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tipo_frete.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Valor do Frete -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.valor_frete.id_for_label }}" class="form-label">
+                                    {{ form.valor_frete.label }}
+                                </label>
+                                {{ form.valor_frete }}
+                                {% if form.valor_frete.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.valor_frete.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Tipo de Venda -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.tipo_venda.id_for_label }}" class="form-label">
+                                    {{ form.tipo_venda.label }}
+                                </label>
+                                {{ form.tipo_venda }}
+                                {% if form.tipo_venda.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tipo_venda.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Forma de Pagamento -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.forma_pagamento.id_for_label }}" class="form-label">
+                                    {{ form.forma_pagamento.label }}
+                                </label>
+                                {{ form.forma_pagamento }}
+                                {% if form.forma_pagamento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.forma_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Condição de Pagamento -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.condicao_pagamento.id_for_label }}" class="form-label">
+                                    {{ form.condicao_pagamento.label }}
+                                </label>
+                                {{ form.condicao_pagamento }}
+                                {% if form.condicao_pagamento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.condicao_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Condição Personalizada -->
+                            <div class="col-md-12 mb-3" id="condicao-personalizada-div" style="display: none;">
+                                <label for="{{ form.condicao_pagamento_personalizada.id_for_label }}" class="form-label">
+                                    {{ form.condicao_pagamento_personalizada.label }}
+                                </label>
+                                {{ form.condicao_pagamento_personalizada }}
+                                {% if form.condicao_pagamento_personalizada.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.condicao_pagamento_personalizada.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Itens do Orçamento -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Itens do Orçamento</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ formset.management_form }}
+                        
+                        {% if formset.non_form_errors %}
+                            <div class="alert alert-danger">
+                                {{ formset.non_form_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="15%">Tipo</th>
+                                        <th width="30%">Descrição</th>
+                                        <th width="10%">Qtd.</th>
+                                        <th width="10%">Unid.</th>
+                                        <th width="15%">Vlr. Unit.</th>
+                                        <th width="15%">Subtotal</th>
+                                        <th width="5%">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itens-tbody">
+                                    {% for form in formset %}
+                                        <tr class="formset-row">
+                                            <td>
+                                                {{ form.tipo }}
+                                                {% if form.tipo.errors %}
+                                                    <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.descricao }}
+                                                {% if form.descricao.errors %}
+                                                    <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.quantidade }}
+                                                {% if form.quantidade.errors %}
+                                                    <div class="text-danger small">{{ form.quantidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.unidade }}
+                                                {% if form.unidade.errors %}
+                                                    <div class="text-danger small">{{ form.unidade.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{ form.valor_unitario }}
+                                                {% if form.valor_unitario.errors %}
+                                                    <div class="text-danger small">{{ form.valor_unitario.errors.0 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="subtotal text-end">R$ 0,00</td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger remove-item" 
+                                                        {% if forloop.first and forloop.last %}style="display:none;"{% endif %}>
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                {% if form.DELETE %}
+                                                    {{ form.DELETE }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Campos específicos em linha separada -->
+                                        <tr class="campos-especificos" style="display: none;">
+                                            <td colspan="7" class="bg-light p-3">
+                                                <!-- Campos de Material -->
+                                                <div class="campos-material" style="display: none;">
+                                                    <h6 class="text-info mb-3">Informações do Material</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">NCM</label>
+                                                            {{ form.ncm }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">ICMS (%)</label>
+                                                            {{ form.icms_percentual }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">IPI (%)</label>
+                                                            {{ form.ipi_percentual }}
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">ST (%)</label>
+                                                            {{ form.st_percentual }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mt-2">
+                                                        <div class="col-md-3">
+                                                            <label class="form-label small">DIFAL (%)</label>
+                                                            {{ form.difal_percentual }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Campos de Serviço -->
+                                                <div class="campos-servico" style="display: none;">
+                                                    <h6 class="text-warning mb-3">Informações do Serviço</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small">CNAE</label>
+                                                            {{ form.cnae }}
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label small">ISS (%)</label>
+                                                            {{ form.aliquota_iss }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="text-end"><strong>Total Geral:</strong></td>
+                                        <td class="text-end"><strong id="total-geral">R$ 0,00</strong></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <button type="button" id="add-item" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Adicionar Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+                    <a href="{{ anuncio.get_absolute_url }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Orçamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript do Formset -->
+<script>
+// ============================================================
+//  Código do formset de orçamento – incorporado inline
+//  (Conteúdo original de static/js/orcamento-formset.js)
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+    
+    // Elementos principais
+    const addButton = document.getElementById('add-item');
+    const tbody = document.getElementById('itens-tbody');
+    const totalFormsInput = document.getElementById('id_itens-TOTAL_FORMS');
+    const maxFormsInput = document.getElementById('id_itens-MAX_NUM_FORMS');
+
+    // Verificações de segurança
+    if (!addButton || !tbody || !totalFormsInput) {
+        console.error('Elementos essenciais do formset não encontrados');
+        return;
+    }
+
+    // Variáveis de controle
+    const maxForms = parseInt(maxFormsInput?.value || '1000');
+
+    /**
+     * Atualiza todos os índices do formset após adicionar/remover itens
+     */
+    function updateFormsetIndices() {
+        const rows = tbody.querySelectorAll('.formset-row');
+        let formIndex = 0;
+
+        rows.forEach((row) => {
+            // Pula linhas marcadas para exclusão
+            const deleteInput = row.querySelector('input[name*="DELETE"]');
+            if (deleteInput && deleteInput.checked) return;
+
+            // Atualiza a linha principal
+            row.querySelectorAll('input, select, textarea').forEach(element => {
+                // Atualiza name
+                if (element.name) {
+                    element.name = element.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
+                }
+                // Atualiza id
+                if (element.id) {
+                    element.id = element.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                }
+            });
+
+            // Atualiza labels da linha principal
+            row.querySelectorAll('label').forEach(label => {
+                if (label.htmlFor) {
+                    label.htmlFor = label.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                }
+            });
+
+            // Atualiza a linha de campos específicos (próxima linha)
+            const camposEspecificosRow = row.nextElementSibling;
+            if (camposEspecificosRow && camposEspecificosRow.classList.contains('campos-especificos')) {
+                camposEspecificosRow.querySelectorAll('input, select, textarea').forEach(element => {
+                    if (element.name) {
+                        element.name = element.name.replace(/itens-\d+-/, `itens-${formIndex}-`);
+                    }
+                    if (element.id) {
+                        element.id = element.id.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                    }
+                });
+
+                camposEspecificosRow.querySelectorAll('label').forEach(label => {
+                    if (label.htmlFor) {
+                        label.htmlFor = label.htmlFor.replace(/id_itens-\d+-/, `id_itens-${formIndex}-`);
+                    }
+                });
+            }
+
+            formIndex++;
+        });
+
+        // Atualiza o total de formulários (conta apenas linhas principais não deletadas)
+        totalFormsInput.value = formIndex;
+    }
+
+    /**
+     * Atualiza visibilidade dos botões de remover
+     */
+    function updateRemoveButtons() {
+        const rows = tbody.querySelectorAll('.formset-row');
+        const showRemove = rows.length > 1;
+
+        rows.forEach(row => {
+            const removeBtn = row.querySelector('.remove-item');
+            if (removeBtn) {
+                removeBtn.style.display = showRemove ? 'inline-block' : 'none';
+            }
+        });
+    }
+
+    /**
+     * Mostra/oculta campos específicos baseado no tipo selecionado
+     */
+    function toggleSpecificFields(row) {
+        const tipoSelect = row.querySelector('select[name*="tipo"]');
+        if (!tipoSelect) return;
+
+        // Campos específicos estão na próxima linha (tr)
+        const camposEspecificosRow = row.nextElementSibling;
+        if (!camposEspecificosRow || !camposEspecificosRow.classList.contains('campos-especificos')) return;
+
+        const tipo = tipoSelect.value;
+        const camposMaterial = camposEspecificosRow.querySelector('.campos-material');
+        const camposServico = camposEspecificosRow.querySelector('.campos-servico');
+
+        if (tipo === 'MAT') {
+            camposEspecificosRow.style.display = 'table-row';
+            if (camposMaterial) camposMaterial.style.display = 'block';
+            if (camposServico) camposServico.style.display = 'none';
+        } else if (tipo === 'SRV') {
+            camposEspecificosRow.style.display = 'table-row';
+            if (camposMaterial) camposMaterial.style.display = 'none';
+            if (camposServico) camposServico.style.display = 'block';
+        } else {
+            camposEspecificosRow.style.display = 'none';
+        }
+
+        updateSubtotal(row);
+    }
+
+    /**
+     * Calcula o subtotal de uma linha
+     */
+    function updateSubtotal(row) {
+        const quantidade = parseFloat(row.querySelector('input[name*="quantidade"]')?.value) || 0;
+        const valorUnitario = parseFloat(row.querySelector('input[name*="valor_unitario"]')?.value) || 0;
+        const subtotalCell = row.querySelector('.subtotal');
+
+        if (subtotalCell) {
+            const subtotal = quantidade * valorUnitario;
+            subtotalCell.textContent = `R$ ${subtotal.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+
+        updateTotal();
+    }
+
+    /**
+     * Calcula o total geral
+     */
+    function updateTotal() {
+        let total = 0;
+
+        tbody.querySelectorAll('.formset-row').forEach(row => {
+            // Ignora linhas marcadas para exclusão
+            const deleteCheckbox = row.querySelector('input[name*="DELETE"]');
+            if (deleteCheckbox?.checked) return;
+
+            const subtotalText = row.querySelector('.subtotal')?.textContent || 'R$ 0,00';
+            const subtotal = parseFloat(
+                subtotalText.replace('R$', '').replace(/\./g, '').replace(',', '.')
+            ) || 0;
+
+            total += subtotal;
+        });
+
+        const totalElement = document.getElementById('total-geral');
+        if (totalElement) {
+            totalElement.textContent = `R$ ${total.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+    }
+
+    /**
+     * Adiciona uma nova linha de item
+     */
+    function addItem() {
+        const currentForms = parseInt(totalFormsInput.value);
+
+        if (currentForms >= maxForms) {
+            alert('Número máximo de itens atingido.');
+            return;
+        }
+
+        // Encontra a primeira linha para clonar
+        const templateRow = tbody.querySelector('.formset-row');
+        if (!templateRow) {
+            console.error('Nenhuma linha modelo encontrada');
+            return;
+        }
+
+        // Clona a linha principal
+        const newRow = templateRow.cloneNode(true);
+
+        // Clona a linha de campos específicos
+        const templateSpecificRow = templateRow.nextElementSibling;
+        let newSpecificRow = null;
+        if (templateSpecificRow && templateSpecificRow.classList.contains('campos-especificos')) {
+            newSpecificRow = templateSpecificRow.cloneNode(true);
+        }
+
+        // Limpa os valores da linha principal
+        newRow.querySelectorAll('input, select, textarea').forEach(element => {
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                element.checked = false;
+            } else {
+                element.value = '';
+            }
+
+            // Remove classes de erro
+            element.classList.remove('is-invalid');
+        });
+
+        // Limpa os valores da linha de campos específicos
+        if (newSpecificRow) {
+            newSpecificRow.querySelectorAll('input, select, textarea').forEach(element => {
+                if (element.type === 'checkbox' || element.type === 'radio') {
+                    element.checked = false;
+                } else {
+                    element.value = '';
+                }
+                element.classList.remove('is-invalid');
+            });
+
+            // Oculta a linha de campos específicos
+            newSpecificRow.style.display = 'none';
+            newSpecificRow.querySelector('.campos-material').style.display = 'none';
+            newSpecificRow.querySelector('.campos-servico').style.display = 'none';
+        }
+
+        // Remove mensagens de erro
+        newRow.querySelectorAll('.text-danger').forEach(error => error.remove());
+        if (newSpecificRow) {
+            newSpecificRow.querySelectorAll('.text-danger').forEach(error => error.remove());
+        }
+
+        // Reset subtotal
+        const subtotalCell = newRow.querySelector('.subtotal');
+        if (subtotalCell) {
+            subtotalCell.textContent = 'R$ 0,00';
+        }
+
+        // Adiciona as novas linhas
+        tbody.appendChild(newRow);
+        if (newSpecificRow) {
+            tbody.appendChild(newSpecificRow);
+        }
+
+        // Atualiza todos os índices
+        updateFormsetIndices();
+        updateRemoveButtons();
+
+        // Foca no primeiro campo da nova linha
+        const firstInput = newRow.querySelector('input, select');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    /**
+     * Remove uma linha de item
+     */
+    function removeItem(button) {
+        const row = button.closest('.formset-row');
+        const deleteInput = row.querySelector('input[name*="DELETE"]');
+        const camposEspecificosRow = row.nextElementSibling;
+
+        if (deleteInput) {
+            // Se existe campo DELETE, apenas marca para exclusão
+            deleteInput.checked = true;
+            row.style.display = 'none';
+
+            // Oculta também a linha de campos específicos
+            if (camposEspecificosRow && camposEspecificosRow.classList.contains('campos-especificos')) {
+                camposEspecificosRow.style.display = 'none';
+            }
+        } else {
+            // Remove fisicamente as linhas
+            if (camposEspecificosRow && camposEspecificosRow.classList.contains('campos-especificos')) {
+                camposEspecificosRow.remove();
+            }
+            row.remove();
+        }
+
+        updateFormsetIndices();
+        updateRemoveButtons();
+        updateTotal();
+    }
+
+    // Event Listeners
+
+    // Botão adicionar
+    addButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        addItem();
+    });
+
+    // Delegação de eventos para o tbody
+    tbody.addEventListener('click', function(e) {
+        // Botão remover
+        if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
+            e.preventDefault();
+            const button = e.target.classList.contains('remove-item') ? 
+                           e.target : e.target.closest('.remove-item');
+            removeItem(button);
+        }
+    });
+
+    tbody.addEventListener('change', function(e) {
+        const target = e.target;
+        const row = target.closest('.formset-row');
+
+        if (!row) return;
+
+        // Mudança no tipo
+        if (target.name && target.name.includes('tipo')) {
+            toggleSpecificFields(row);
+        }
+
+        // Mudança em quantidade ou valor
+        if (target.name && (target.name.includes('quantidade') || 
+                           target.name.includes('valor_unitario'))) {
+            updateSubtotal(row);
+        }
+    });
+
+    tbody.addEventListener('input', function(e) {
+        const target = e.target;
+        const row = target.closest('.formset-row');
+
+        if (!row) return;
+
+        // Atualização em tempo real para quantidade e valor
+        if (target.name && (target.name.includes('quantidade') || 
+                           target.name.includes('valor_unitario'))) {
+            updateSubtotal(row);
+        }
+    });
+
+    // Inicialização
+    tbody.querySelectorAll('.formset-row').forEach(row => {
+        toggleSpecificFields(row);
+        updateSubtotal(row);
+    });
+
+    updateRemoveButtons();
+    updateTotal();
+
+    console.log('Formset de orçamento inicializado com sucesso');
+
+    // Marca para que o fallback saiba que carregou
+    addButton.setAttribute('data-formset-loaded', 'true');
+});
+</script>
+<!-- ================================================================= -->
+<!-- Removido: bloco de fallback JS externo, pois o script agora é inline -->
+<!-- ================================================================= -->
+
+<script>
+// Debug simplificado do formulário
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== SCRIPT ORÇAMENTO CARREGADO ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('URL atual:', window.location.href);
+    
+    const form = document.getElementById('orcamento-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const addItemBtn = document.getElementById('add-item');
+    
+    console.log('=== DEBUG ORÇAMENTO ===');
+    console.log('Form encontrado:', !!form);
+    console.log('Submit button encontrado:', !!submitBtn);
+    console.log('Add item button encontrado:', !!addItemBtn);
+    
+    if (form) {
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
+        
+        // Verifica CSRF token
+        const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]');
+        console.log('CSRF token encontrado:', !!csrfToken);
+        
+        // Event listener para submit
+        form.addEventListener('submit', function(e) {
+            console.log('=== SUBMIT DISPARADO ===');
+            
+            // Conta quantos itens válidos existem
+            const rows = document.querySelectorAll('.formset-row');
+            let validItems = 0;
+            
+            rows.forEach((row, index) => {
+                const deleteInput = row.querySelector('input[name*="DELETE"]');
+                const isDeleted = deleteInput && deleteInput.checked;
+                const descricao = row.querySelector('input[name*="descricao"]')?.value;
+                
+                if (!isDeleted && descricao && descricao.trim()) {
+                    validItems++;
+                }
+            });
+            
+            console.log('Itens válidos encontrados:', validItems);
+            
+            if (validItems === 0) {
+                e.preventDefault();
+                alert('Adicione pelo menos um item ao orçamento antes de enviar.');
+                return false;
+            }
+            
+            console.log('Enviando formulário...');
+        });
+    }
+    
+    // Controle do campo de condição personalizada
+    const condicaoPagamento = document.getElementById('id_condicao_pagamento');
+    const condicaoPersonalizadaDiv = document.getElementById('condicao-personalizada-div');
+    
+    if (condicaoPagamento && condicaoPersonalizadaDiv) {
+        function toggleCondicaoPersonalizada() {
+            if (condicaoPagamento.value === 'personalizado') {
+                condicaoPersonalizadaDiv.style.display = 'block';
+            } else {
+                condicaoPersonalizadaDiv.style.display = 'none';
+            }
+        }
+        
+        condicaoPagamento.addEventListener('change', toggleCondicaoPersonalizada);
+        toggleCondicaoPersonalizada(); // Verificar estado inicial
+    }
+});
+</script>
+{% endblock %} 

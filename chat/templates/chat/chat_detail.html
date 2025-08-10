@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat: {{ chat_room.necessidade.titulo }} - Marketplace</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    {% load chat_tags %}
+    {% load currency_filters %}
+    
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <!-- Sidebar com informações -->
+            <div class="col-md-3 bg-light border-end p-3 sidebar-info">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Detalhes</h6>
+                    <a href="{% url 'chat:lista_chats' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+                
+                <!-- Informações do Anúncio -->
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white py-2">
+                        <h6 class="mb-0"><i class="fas fa-bullhorn"></i> Anúncio</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <h6 class="card-title">{{ chat_room.necessidade.titulo }}</h6>
+                        <p class="card-text small text-muted">{{ chat_room.necessidade.descricao|truncatechars:150 }}</p>
+                        
+                        <div class="row g-2 small">
+                            <div class="col-6">
+                                <strong>Quantidade:</strong><br>
+                                {{ chat_room.necessidade.quantidade }} {{ chat_room.necessidade.get_unidade_display }}
+                            </div>
+                            <div class="col-6">
+                                <strong>Status:</strong><br>
+                                <span class="badge bg-{{ chat_room.necessidade.status|default:'secondary' }}">
+                                    {{ chat_room.necessidade.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if chat_room.necessidade.categoria %}
+                        <div class="mt-2 small">
+                            <strong>Categoria:</strong><br>
+                            {{ chat_room.necessidade.categoria.nome }}
+                            {% if chat_room.necessidade.subcategoria %}
+                                > {{ chat_room.necessidade.subcategoria.nome }}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Informações dos Participantes -->
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white py-2">
+                        <h6 class="mb-0"><i class="fas fa-users"></i> Participantes</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-tie me-2 text-primary"></i>
+                                <div>
+                                    <strong>Cliente:</strong><br>
+                                    <small>{{ chat_room.cliente.get_full_name }}</small>
+                                    {% if chat_room.cliente.cidade %}
+                                        <br><small class="text-muted">{{ chat_room.cliente.cidade }}, {{ chat_room.cliente.estado }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tools me-2 text-success"></i>
+                                <div>
+                                    <strong>Fornecedor:</strong><br>
+                                    <small>{{ chat_room.fornecedor.get_full_name }}</small>
+                                    {% if chat_room.fornecedor.cidade %}
+                                        <br><small class="text-muted">{{ chat_room.fornecedor.cidade }}, {{ chat_room.fornecedor.estado }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informações do Orçamento -->
+                {% if chat_room.orcamento %}
+                <div class="card mb-3">
+                    <div class="card-header bg-warning text-dark py-2">
+                        <h6 class="mb-0"><i class="fas fa-file-invoice-dollar"></i> Orçamento</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-2 small">
+                            <div class="col-12">
+                                <strong>Valor:</strong><br>
+                                <span class="text-success fw-bold fs-5">{{ chat_room.orcamento.valor_total|currency_br }}</span>
+                            </div>
+                            <div class="col-6">
+                                <strong>Validade:</strong><br>
+                                {{ chat_room.orcamento.prazo_validade|date:"d/m/Y" }}
+                            </div>
+                            <div class="col-6">
+                                <strong>Entrega:</strong><br>
+                                {{ chat_room.orcamento.prazo_entrega|date:"d/m/Y" }}
+                            </div>
+                            <div class="col-12">
+                                <strong>Status:</strong><br>
+                                <span class="badge bg-{{ chat_room.orcamento.status|default:'secondary' }}">
+                                    {{ chat_room.orcamento.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if chat_room.orcamento.observacao %}
+                        <div class="mt-2 small">
+                            <strong>Observações:</strong><br>
+                            {{ chat_room.orcamento.observacao|truncatechars:100 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Botões de ação -->
+                <div class="mt-3">
+                    {% if is_cliente %}
+                        <a href="{% url 'necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-primary w-100 mb-2">
+                            <i class="fas fa-eye"></i> Ver Necessidade
+                        </a>
+                        {% if chat_room.orcamento %}
+                        <a href="{% url 'budget_detail' chat_room.orcamento.pk %}" class="btn btn-sm btn-info w-100">
+                            <i class="fas fa-file-invoice"></i> Ver Orçamento
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-success w-100 mb-2">
+                            <i class="fas fa-eye"></i> Ver Anúncio
+                        </a>
+                        {% if chat_room.orcamento %}
+                        <a href="{% url 'budget_list' %}" class="btn btn-sm btn-warning w-100">
+                            <i class="fas fa-edit"></i> Meus Orçamentos
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Área principal do chat -->
+            <div class="col-md-9 d-flex flex-column h-100">
+                <!-- Header do chat -->
+                <div class="border-bottom p-3 bg-white chat-header">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            {% if outro_usuario.foto %}
+                                <img src="{{ outro_usuario.foto.url }}" alt="Foto" class="rounded-circle" width="40" height="40">
+                            {% else %}
+                                <i class="fas fa-user-circle fa-2x text-muted"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-0">{{ outro_usuario.get_full_name }}</h5>
+                            <small class="text-muted">
+                                {% if is_cliente %}Fornecedor{% else %}Cliente{% endif %}
+                                {% if outro_usuario.cidade %} • {{ outro_usuario.cidade }}, {{ outro_usuario.estado }}{% endif %}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success" id="status-indicator">
+                                <i class="fas fa-circle"></i> Online
+                            </span>
+                            <br>
+                            <small class="text-muted">Chat iniciado em {{ chat_room.criado_em|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Área das mensagens -->
+                <div class="flex-grow-1 overflow-auto p-3 chat-messages" id="chat-messages">
+                    {% for mensagem in mensagens %}
+                        <div class="message mb-3 {% if mensagem.remetente == user %}message-own{% else %}message-other{% endif %}" data-message-id="{{ mensagem.id }}">
+                            <div class="d-flex {% if mensagem.remetente == user %}justify-content-end{% endif %}">
+                                <div class="message-bubble {% if mensagem.remetente == user %}bg-primary text-white{% else %}bg-white border text-dark{% endif %} p-3 rounded-3 shadow-sm" style="max-width: 75%;">
+                                    
+                                    <!-- Conteúdo da mensagem -->
+                                    {% if mensagem.conteudo %}
+                                    <div class="message-content" style="color: {% if mensagem.remetente == user %}#ffffff{% else %}#212529{% endif %} !important;">{{ mensagem.conteudo|linebreaks }}</div>
+                                    {% endif %}
+                                    
+                                    <!-- Anexo se houver -->
+                                    {% if mensagem.arquivo_anexo %}
+                                    <div class="message-attachment mt-2 pt-2 border-top">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-{% if mensagem.tipo_arquivo == 'imagem' %}image{% elif mensagem.tipo_arquivo == 'documento' %}file-alt{% else %}paperclip{% endif %} me-2"></i>
+                                            <div class="flex-grow-1">
+                                                <a href="{{ mensagem.arquivo_anexo.url }}" target="_blank" class="text-decoration-none {% if mensagem.remetente == user %}text-white{% else %}text-primary{% endif %}">
+                                                    {{ mensagem.arquivo_anexo.name|cut:"chat_anexos/" }}
+                                                </a>
+                                                <br><small class="{% if mensagem.remetente == user %}text-white-50{% else %}text-muted{% endif %}">
+                                                    {{ mensagem.arquivo_anexo.size|filesizeformat }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Preview de imagem -->
+                                        {% if mensagem.tipo_arquivo == 'imagem' %}
+                                        <div class="mt-2">
+                                            <img src="{{ mensagem.arquivo_anexo.url }}" alt="Anexo" class="img-fluid rounded" style="max-height: 200px;">
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Apenas data, sem nome do remetente -->
+                                    <div class="message-meta small {% if mensagem.remetente == user %}text-white-50{% else %}text-muted{% endif %} mt-2 text-end">
+                                        {{ mensagem.data_envio|date:"d/m H:i" }}
+                                        {% if mensagem.remetente == user and mensagem.lida %}
+                                            <i class="fas fa-check-double ms-1" title="Lida"></i>
+                                        {% elif mensagem.remetente == user %}
+                                            <i class="fas fa-check ms-1" title="Enviada"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comments fa-4x mb-3"></i>
+                            <h5>Início da conversa</h5>
+                            <p>Esta é uma conversa privada entre você e {{ outro_usuario.get_short_name }}.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Área de digitação -->
+                <div class="border-top p-3 bg-white chat-input">
+                    <form id="message-form" enctype="multipart/form-data">
+                        <div class="row g-2">
+                            <div class="col">
+                                <textarea 
+                                    id="message-input" 
+                                    class="form-control" 
+                                    placeholder="Digite sua mensagem..." 
+                                    rows="2"
+                                    maxlength="2000"
+                                ></textarea>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div>
+                                        <input type="file" id="file-input" class="form-control-file d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('file-input').click()">
+                                            <i class="fas fa-paperclip"></i> Anexar
+                                        </button>
+                                        <span id="file-selected" class="small text-muted ms-2"></span>
+                                    </div>
+                                    <small class="text-muted">
+                                        <span id="char-counter">0</span>/2000
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-auto align-self-end">
+                                <button type="submit" class="btn btn-primary" id="send-button">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class ChatManager {
+            constructor() {
+                this.chatId = {{ chat_room.id }};
+                this.lastMessageId = this.getLastMessageId();
+                this.messageForm = document.getElementById('message-form');
+                this.messageInput = document.getElementById('message-input');
+                this.fileInput = document.getElementById('file-input');
+                this.chatMessages = document.getElementById('chat-messages');
+                this.sendButton = document.getElementById('send-button');
+                this.charCounter = document.getElementById('char-counter');
+                this.fileSelected = document.getElementById('file-selected');
+                
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.scrollToBottom();
+                this.startPolling();
+                this.updateCharCounter();
+            }
+            
+            bindEvents() {
+                // Enviar mensagem
+                this.messageForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.sendMessage();
+                });
+                
+                // Ctrl+Enter para enviar
+                this.messageInput.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                
+                // Contador de caracteres
+                this.messageInput.addEventListener('input', () => {
+                    this.updateCharCounter();
+                    this.autoResize();
+                });
+                
+                // Arquivo selecionado
+                this.fileInput.addEventListener('change', () => {
+                    this.updateFileSelection();
+                });
+            }
+            
+            updateCharCounter() {
+                const length = this.messageInput.value.length;
+                this.charCounter.textContent = length;
+                
+                if (length > 1800) {
+                    this.charCounter.style.color = 'red';
+                } else if (length > 1500) {
+                    this.charCounter.style.color = 'orange';
+                } else {
+                    this.charCounter.style.color = '';
+                }
+            }
+            
+            updateFileSelection() {
+                const file = this.fileInput.files[0];
+                if (file) {
+                    this.fileSelected.textContent = `📎 ${file.name} (${this.formatFileSize(file.size)})`;
+                } else {
+                    this.fileSelected.textContent = '';
+                }
+            }
+            
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            autoResize() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+            }
+            
+            async sendMessage() {
+                const content = this.messageInput.value.trim();
+                const file = this.fileInput.files[0];
+                
+                console.log('=== DEBUG SEND MESSAGE ===');
+                console.log('Content:', content);
+                console.log('File:', file);
+                console.log('Content length:', content.length);
+                
+                if (!content && !file) {
+                    console.log('Nenhum conteúdo ou arquivo - retornando');
+                    return;
+                }
+                
+                this.sendButton.disabled = true;
+                this.sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                try {
+                    const formData = new FormData();
+                    if (content) {
+                        formData.append('conteudo', content);
+                        console.log('Adicionando conteúdo ao FormData:', content);
+                    }
+                    if (file) {
+                        formData.append('arquivo_anexo', file);
+                        console.log('Adicionando arquivo ao FormData:', file.name);
+                    }
+                    
+                    console.log('Enviando para:', `/chat/${this.chatId}/enviar/`);
+                    
+                    const response = await fetch(`/chat/${this.chatId}/enviar/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    console.log('Resposta do servidor:', data);
+                    
+                    if (data.success) {
+                        this.messageInput.value = '';
+                        this.fileInput.value = '';
+                        this.updateCharCounter();
+                        this.updateFileSelection();
+                        this.autoResize();
+                        this.addMessageToChat(data.mensagem);
+                        this.lastMessageId = data.mensagem.id;
+                        this.scrollToBottom();
+                    } else {
+                        console.error('Erro na resposta:', data.error);
+                        alert('Erro ao enviar mensagem: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Erro no fetch:', error);
+                    alert('Erro ao enviar mensagem. Tente novamente.');
+                } finally {
+                    this.sendButton.disabled = false;
+                    this.sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                    this.messageInput.focus();
+                }
+            }
+            
+            addMessageToChat(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message mb-3 ${message.is_own_message ? 'message-own' : 'message-other'}`;
+                messageDiv.setAttribute('data-message-id', message.id);
+                
+                let attachmentHtml = '';
+                if (message.tem_anexo) {
+                    const iconClass = message.tipo_arquivo === 'imagem' ? 'image' : 
+                                     message.tipo_arquivo === 'documento' ? 'file-alt' : 'paperclip';
+                    
+                    attachmentHtml = `
+                        <div class="message-attachment mt-2 pt-2 border-top">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-${iconClass} me-2"></i>
+                                <a href="${message.arquivo_url}" target="_blank" class="text-decoration-none ${message.is_own_message ? 'text-white' : 'text-primary'}">
+                                    Arquivo anexado
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                messageDiv.innerHTML = `
+                    <div class="d-flex ${message.is_own_message ? 'justify-content-end' : ''}">
+                        <div class="message-bubble ${message.is_own_message ? 'bg-primary text-white' : 'bg-white border text-dark'} p-3 rounded-3 shadow-sm" style="max-width: 75%;">
+                            ${message.conteudo ? `<div class="message-content" style="color: ${message.is_own_message ? '#ffffff' : '#212529'} !important;">${message.conteudo.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${attachmentHtml}
+                            <div class="message-meta small ${message.is_own_message ? 'text-white-50' : 'text-muted'} mt-2 text-end">
+                                ${message.data_envio}
+                                ${message.is_own_message ? '<i class="fas fa-check ms-1"></i>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                this.chatMessages.appendChild(messageDiv);
+            }
+            
+            async checkNewMessages() {
+                try {
+                    const response = await fetch(`/chat/${this.chatId}/buscar-novas/?ultima_mensagem_id=${this.lastMessageId}`);
+                    const data = await response.json();
+                    
+                    if (data.mensagens && data.mensagens.length > 0) {
+                        console.log('=== DEBUG NOVAS MENSAGENS ===');
+                        console.log('Mensagens recebidas:', data.mensagens);
+                        
+                        data.mensagens.forEach(message => {
+                            console.log(`Mensagem ID ${message.id}:`);
+                            console.log(`  - Remetente: ${message.remetente}`);
+                            console.log(`  - Is own message: ${message.is_own_message}`);
+                            console.log(`  - Conteudo: ${message.conteudo}`);
+                            
+                            this.addMessageToChat(message);
+                            this.lastMessageId = Math.max(this.lastMessageId, message.id);
+                        });
+                        this.scrollToBottom();
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar novas mensagens:', error);
+                }
+            }
+            
+            startPolling() {
+                setInterval(() => {
+                    this.checkNewMessages();
+                }, 3000);
+            }
+            
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }, 100);
+            }
+            
+            getLastMessageId() {
+                const messages = document.querySelectorAll('.message[data-message-id]');
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    return parseInt(lastMessage.getAttribute('data-message-id'));
+                }
+                return 0;
+            }
+        }
+        
+        // Inicializar quando página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChatManager();
+        });
+    </script>
+
+    <style>
+        .h-100 { height: 100vh !important; }
+        
+        .chat-messages {
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            max-height: calc(100vh - 200px);
+        }
+        
+        .message-bubble {
+            border-radius: 18px !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Mensagens próprias - fundo azul, texto branco */
+        .message-own .message-bubble {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+            color: #ffffff !important;
+        }
+        
+        .message-own .message-content {
+            color: #ffffff !important;
+        }
+        
+        .message-own .message-bubble * {
+            color: inherit !important;
+        }
+        
+        /* Mensagens de outros - fundo branco, texto escuro */
+        .message-other .message-bubble {
+            background: #ffffff !important;
+            border: 1px solid #dee2e6 !important;
+            color: #212529 !important;
+        }
+        
+        .message-other .message-content {
+            color: #212529 !important;
+        }
+        
+        .message-other .message-bubble p {
+            color: #212529 !important;
+            margin: 0 !important;
+        }
+        
+        /* Garantir que todo texto seja visível */
+        .message-content {
+            color: inherit !important;
+        }
+        
+        .message-content p {
+            margin: 0 !important;
+            color: inherit !important;
+        }
+        
+        #message-input {
+            resize: none;
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+        }
+        
+        #message-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .sidebar-info {
+            background-color: #f8f9fa !important;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .chat-header {
+            background: linear-gradient(90deg, #ffffff, #f8f9fa) !important;
+        }
+        
+        .chat-input {
+            background-color: #ffffff !important;
+            border-top: 2px solid #dee2e6 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar-info {
+                display: none;
+            }
+            .col-md-9 {
+                flex: 1;
+            }
+        }
+        
+        .message-attachment img {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .message-attachment img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</body>
+</html>

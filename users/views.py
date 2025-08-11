@@ -19,7 +19,7 @@ from django.db.models import Avg
 @csrf_exempt
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('ads:home')
 
     form = UserLoginForm()  # Form vazio para GET
 
@@ -29,7 +29,7 @@ def login_view(request):
             user = form.cleaned_data['user']
             login(request, user)
             messages.success(request, "Login realizado com sucesso!")
-            return redirect('home')  
+            return redirect('ads:home')  
         else:
              # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
             messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
@@ -45,7 +45,7 @@ def register_view(request):
             usuario.is_supplier = form.cleaned_data.get('is_supplier', False)
             usuario.save()
             messages.success(request, "Registrado com sucesso! Faça login para começar.")
-            return redirect('login')
+            return redirect('users:login')
         else:
            # A validação do reCAPTCHA falhará aqui também caso o token seja inválido
             messages.error(request, "Verifique seus dados. Email, senha ou reCAPTCHA inválidos.")
@@ -56,13 +56,13 @@ def register_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('home')
+    return redirect('ads:home')
 
 class UserDetailView(DetailView):
     model = User
     template_name = 'minha-conta-detail.html'
     context_object_name = 'user'
-    success_url = reverse_lazy('minha_conta_detail')
+    success_url = reverse_lazy('users:minha_conta_detail')
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -93,7 +93,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         # Aqui, 'self.object' é o usuário atualizado
-        return reverse('minha_conta_detail', kwargs={'pk': self.object.pk})
+        return reverse('users:minha_conta_detail', kwargs={'pk': self.object.pk})
     
 import datetime
 from django.utils import timezone
@@ -178,19 +178,32 @@ class UserProfileDetailView(LoginRequiredMixin, DetailView):
         return context
 
 from django.contrib.auth import views as auth_views
+from django.conf import settings
 
 class MyPasswordResetView(auth_views.PasswordResetView):
-    # Força o domínio a ser "necessito.br" no link enviado
-    domain_override = "necessito.br"
+    # Usar domínio dinâmico obtido do request
+    domain_override = None
 
-    # Altera o remetente
-    from_email = "Necessito <no-reply@necessito.br>"
+    # Altera o remetente para usar a configuração padrão
+    from_email = settings.DEFAULT_FROM_EMAIL
 
     # Personaliza o assunto
     subject_template_name = "password_reset_subject.txt"
 
     # Personaliza o corpo do e-mail (formato texto)
     email_template_name = "password_reset_email.html"
+
+    def form_valid(self, form):
+        # Garante domínio dinâmico com base no host atual
+        form.save(
+            domain_override=self.request.get_host(),
+            use_https=self.request.is_secure(),
+            from_email=self.from_email,
+            email_template_name=self.email_template_name,
+            subject_template_name=self.subject_template_name,
+            request=self.request,
+        )
+        return redirect(self.get_success_url())
 
 @csrf_exempt
 def complete_profile_view(request):
@@ -199,12 +212,12 @@ def complete_profile_view(request):
     Permite escolher se é cliente, fornecedor ou ambos.
     """
     if not request.user.is_authenticated:
-        return redirect('login')
+        return redirect('users:login')
     
     # Se o perfil já está completo, redireciona para home
     if request.user.is_client or request.user.is_supplier:
         messages.info(request, "Seu perfil já está completo!")
-        return redirect('home')
+        return redirect('ads:home')
     
     if request.method == 'POST':
         form = UserCompletionForm(request.POST, instance=request.user)
@@ -214,7 +227,7 @@ def complete_profile_view(request):
                 request, 
                 "Perfil completado com sucesso! Agora você tem acesso completo à plataforma."
             )
-            return redirect('home')
+            return redirect('ads:home')
         else:
             messages.error(request, "Verifique os dados informados.")
     else:

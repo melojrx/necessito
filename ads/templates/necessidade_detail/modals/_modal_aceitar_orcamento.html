@@ -1,0 +1,53 @@
+<!-- Modal: Aceitar Orçamento -->
+<div class="modal fade" id="aceitarOrcamentoModal" tabindex="-1" aria-labelledby="aceitarOrcamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aceitarOrcamentoLabel"><i class="fas fa-check-circle me-2 text-success"></i>Confirmar Aceite do Orçamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Você está prestes a aceitar este orçamento.</p>
+                <p>Ao confirmar, o fornecedor será notificado para que ele também aprove o acordo. O negócio só será fechado após a confirmação dele.</p>
+                <strong>Tem certeza que deseja continuar?</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarAceiteBtn">Sim, Aceitar Orçamento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let aceitarUrl = null;
+    const aceitarOrcamentoModal = document.getElementById('aceitarOrcamentoModal');
+    
+    if (aceitarOrcamentoModal) {
+        aceitarOrcamentoModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            aceitarUrl = button.getAttribute('data-url');
+        });
+
+        const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
+        confirmarAceiteBtn.addEventListener('click', () => {
+            if (!aceitarUrl) return;
+
+            fetch(aceitarUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Ocorreu um erro ao tentar aceitar o orçamento.');
+                }
+            })
+            .catch(err => alert('Erro de comunicação com o servidor. Tente novamente.'));
+        });
+    }
+});
+</script>

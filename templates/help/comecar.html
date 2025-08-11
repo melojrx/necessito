@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block meta_description %}{{ page_description }}{% endblock %}
+{% block meta_keywords %}{{ page_keywords }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+/* Estilo específico para páginas de ajuda */
+.help-section-header {
+    background: linear-gradient(135deg, #28a745 0%, #20893e 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-breadcrumb a:hover {
+    color: #f8f9fa;
+    text-decoration: underline;
+}
+
+.help-section-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.password-tip ul {
+    padding-left: 1.2rem;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <div class="help-section-icon">
+                <i class="fas fa-{{ section_icon }} text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <h1 class="display-5 fw-bold mb-3">🚀 {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <!-- Lista de tópicos -->
+        <div class="list-group">
+            <!-- Como criar sua conta -->
+            <a class="list-group-item list-group-item-action" 
+               data-bs-toggle="collapse" 
+               href="#ajudaCriarConta" 
+               role="button" 
+               aria-expanded="false" 
+               aria-controls="ajudaCriarConta">
+                <i class="fas fa-user-plus me-2 text-success"></i>
+                Como criar sua conta
+            </a>
+            <div class="collapse mt-4" id="ajudaCriarConta">
+                <div class="card card-body">
+                    <h3 class="mb-3">👤 Como criar sua conta</h3>
+                    <p>Siga este passo a passo para criar sua conta e começar a usar a plataforma com segurança.</p>
+
+                    <h5 class="mt-4">1. Acesse a página de registro de usuário</h5>
+                    <p>No topo do site, clique no botão <strong>"Registrar"</strong>. Você será redirecionado para a tela onde poderá criar sua conta.</p>
+
+                    <img src="{% static 'img/help/comecar/Button-Geristrar.png' %}" alt="Botão Registrar" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <h5>2. Preencha seus dados</h5>
+                    <p>Informe seu <strong>nome</strong>, <strong>sobrenome</strong>, <strong>email</strong> e crie uma <strong>senha segura</strong>.</p>
+
+                    <div class="password-tip">
+                        <p>Sua senha deve conter:</p>
+                        <ul>
+                            <li>Mínimo 8 caracteres</li>
+                            <li>Letras maiúsculas</li>
+                            <li>Números</li>
+                            <li>Caracteres especiais (!, @, # etc.)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning small mb-4">
+                        <strong>Atenção:</strong> Evite usar informações pessoais na senha, como seu nome, sobrenome, data de nascimento ou email. Isso torna a senha mais fácil de ser descoberta.
+                    </div>
+                    
+                    <h5>3. Confirme sua senha</h5>
+                    <p>Digite a mesma senha no campo "Confirmar senha".</p>
+                    
+                    <h5>4. Finalize o cadastro</h5>
+                    <p>Clique no botão <strong>"Criar conta"</strong>. Se todas as informações estiverem corretas, você será redirecionado para a página de complementação do perfil, onde poderá adicionar mais detalhes sobre você.</p>
+
+                    <img src="{% static 'img/help/comecar/Formulario_Cadastro.png' %}" alt="Formulário de cadastro" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <div class="alert alert-info mt-4">
+                        <strong>Dica:</strong> Já tem uma conta? Basta clicar em "Fazer login" na tela inicial.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completando seu perfil -->
+            <a class="list-group-item list-group-item-action" 
+               data-bs-toggle="collapse" 
+               href="#ajudaCompletarPerfil" 
+               role="button" 
+               aria-expanded="false" 
+               aria-controls="ajudaCompletarPerfil">
+                <i class="fas fa-user-edit me-2 text-primary"></i>
+                Completando seu perfil
+            </a>
+            <div class="collapse mt-4" id="ajudaCompletarPerfil">
+                <div class="card card-body">
+                    <h3 class="mb-3">📝 Completando seu Perfil</h3>
+                    <p>Completar seu perfil ajuda a personalizar sua experiência e aumenta suas chances de sucesso na plataforma.</p>
+
+                    <h5>Progresso do Perfil</h5>
+                    <p>Seu perfil está <strong>70% completo</strong> – quase lá!</p>
+
+                    <h5>Como você quer usar a plataforma?</h5>
+                    <p>Escolha uma opção para personalizar sua experiência:</p>
+                    <ul>
+                        <li><strong>Anunciante:</strong> Publica necessidades.</li>
+                        <li><strong>Fornecedor:</strong> Oferece produtos/serviços.</li>
+                        <li><strong>Ambos:</strong> Anuncia e fornece produtos/serviços.</li>
+                    </ul>
+
+                    <h5>Informações Pessoais</h5>
+                    <p><strong>Telefone (Opcional):</strong> Informe um telefone para facilitar contato.</p>
+                    <p><strong>Foto de Perfil (Opcional):</strong> Ajuda outros usuários a identificá-lo.</p>
+
+                    <h5>Localização</h5>
+                    <p>Complete seus dados de localização para melhorar as conexões:</p>
+                    <ul>
+                        <li><strong>Endereço (Opcional):</strong> Rua, número e complemento.</li>
+                        <li><strong>Bairro (Opcional):</strong> Nome do bairro.</li>
+                        <li><strong>CEP (Opcional):</strong> Código postal.</li>
+                        <li><strong>Cidade (Opcional):</strong> Nome da cidade.</li>
+                        <li><strong>Estado (Opcional):</strong> Exemplo: SP, RJ, MG...</li>
+                    </ul>
+
+                    <h5>Categorias de Interesse (Opcional)</h5>
+                    <p>Selecione categorias que você tem interesse para receber conteúdos e oportunidades relevantes, como:</p>
+                    <ul>
+                        <li>Acabamentos de Fachadas</li>
+                        <li>Acessibilidade</li>
+                        <li>Aquecimento e Ventilação</li>
+                        <li>Áreas de Lazer e Entretenimento</li>
+                        <li>Cidades Inteligentes</li>
+                        <li>Climatização e Ventilação</li>
+                        <li>Construção de Edificações Comerciais</li>
+                        <li>...e muitas outras</li>
+                    </ul>
+
+                    <h5>Botões ao final da página</h5>
+                    <p>Existem dois botões no final da página:</p>
+                    <ul>
+                        <li><strong>"Pular por Agora":</strong> não salva as informações preenchidas e direciona você para a tela inicial.</li>
+                        <li><strong>"Finalizar Cadastro":</strong> salva as informações preenchidas e direciona você para a tela inicial.</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/comecar/Complemento_perfil.png' %}" alt="Complemento do perfil" class="img-fluid rounded shadow-sm mb-4" style="max-width: 900px">
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Perfis completos têm <strong>3x mais chances</strong> de sucesso na plataforma!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação básica -->
+            <a class="list-group-item list-group-item-action" 
+               data-bs-toggle="collapse" 
+               href="#ajudaNavegacaoBasica" 
+               role="button" 
+               aria-expanded="false" 
+               aria-controls="ajudaNavegacaoBasica">
+                <i class="fas fa-compass me-2 text-info"></i>
+                Navegação básica
+            </a>
+            <div class="collapse mt-4" id="ajudaNavegacaoBasica">
+                <div class="card card-body">
+                    <h3 class="mb-3">🧭 Navegação básica</h3>
+                    <p>Conheça os principais elementos da plataforma para navegar com facilidade.</p>
+
+                    <h5>Menu Principal</h5>
+                    <p>Localizado no topo ou lateral da tela, o menu principal permite acessar as áreas principais, como:</p>
+                    <ul>
+                        <li><strong>Dashboard:</strong> Visão geral da sua conta e atividades recentes.</li>
+                        <li><strong>Perfil:</strong> Para editar suas informações pessoais e preferências.</li>
+                        <li><strong>Mensagens:</strong> Comunicação com outros usuários.</li>
+                        <li><strong>Configurações:</strong> Ajustes da sua conta e notificações.</li>
+                    </ul>
+
+                    <h5>Categorias Populares</h5>
+                    <p>Explore as categorias mais buscadas na plataforma para facilitar sua navegação:</p>
+                    
+                    <img src="{% static 'img/help/comecar/Categorias_Populares.png' %}" alt="Categorias Populares" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <h5>Anúncios Populares</h5>
+                    <p>Veja alguns anúncios populares com suas informações básicas:</p>
+                    
+                    <img src="{% static 'img/help/comecar/Anuncios_Populares.png' %}" alt="Anúncios Populares" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <h5>Baseado nas suas Categorias Preferidas</h5>
+                    <p>Conteúdos e anúncios alinhados às suas preferências:</p>
+                    
+                    <img src="{% static 'img/help/comecar/Categorias_Preferidas.png' %}" alt="Categorias Preferidas" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1400px">
+
+                    <h5>Para quem Precisa</h5>
+                    <ol>
+                        <li><strong>Anuncie:</strong> Descreva sua necessidade com clareza de escopo, prazo e orçamento estimado.</li>
+                        <li><strong>Compare:</strong> Receba orçamentos personalizados de fornecedores qualificados.</li>
+                        <li><strong>Negocie:</strong> Converse diretamente no chat integrado para ajustar detalhes.</li>
+                        <li><strong>Conquiste:</strong> Escolha a melhor proposta com total transparência e segurança.</li>
+                    </ol>
+
+                    <h5>Para Fornecedores</h5>
+                    <ol>
+                        <li><strong>Encontre:</strong> Busque oportunidades na sua área com filtros avançados.</li>
+                        <li><strong>Orce:</strong> Envie propostas personalizadas com preços competitivos.</li>
+                        <li><strong>Negocie:</strong> Ajuste detalhes com o cliente no chat integrado.</li>
+                        <li><strong>Conquiste:</strong> Ganhe novos contratos e aumente seu faturamento.</li>
+                    </ol>
+
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                        <img src="{% static 'img/help/comecar/Quem_precisa.png' %}" alt="Quem precisa" class="img-fluid rounded shadow-sm mb-4" style="max-width: 600px; width: 100%;">
+                        <img src="{% static 'img/help/comecar/Para_Fornecedores.png' %}" alt="Para fornecedores" class="img-fluid rounded shadow-sm mb-4" style="max-width: 600px; width: 100%;">
+                    </div>
+
+                    <div class="alert alert-success mt-4">
+                        <strong>Pronto para encontrar os melhores fornecedores?</strong> Publique sua primeira necessidade gratuitamente e receba propostas competitivas.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações iniciais -->
+            <a class="list-group-item list-group-item-action" 
+               data-bs-toggle="collapse" 
+               href="#ajudaConfiguracoesIniciais" 
+               role="button" 
+               aria-expanded="false" 
+               aria-controls="ajudaConfiguracoesIniciais">
+                <i class="fas fa-cog me-2 text-warning"></i>
+                Configurações iniciais
+            </a>
+            <div class="collapse mt-4" id="ajudaConfiguracoesIniciais">
+                <div class="card card-body">
+                    <h3 class="mb-3">⚙️ Configurações Iniciais</h3>
+                    <p>Mantenha suas informações pessoais e preferências sempre atualizadas para aproveitar ao máximo a plataforma.</p>
+
+                    <h5>Como atualizar ou adicionar seus dados:</h5>
+                    <ol>
+                        <li><strong>Nome e Sobrenome:</strong> Edite seu nome completo para que seus contatos o reconheçam facilmente.</li>
+                        <li><strong>E-mail:</strong> Utilize um endereço válido para receber notificações importantes.</li>
+                        <li><strong>Telefone:</strong> Informe um número para facilitar contato direto, especialmente para negociações.</li>
+                        <li><strong>Data de nascimento:</strong> Usada para verificação e personalização da experiência.</li>
+                        <li><strong>Endereço, Bairro, CEP, Cidade e Estado:</strong> Completar esses dados ajuda a encontrar oportunidades próximas a você.</li>
+                        <li><strong>CPF e CNPJ:</strong> Informe conforme sua categoria (pessoa física ou jurídica) para validação de cadastro.</li>
+                        <li><strong>Categorias Preferidas:</strong> São suas áreas de interesse na plataforma, influenciando quais anúncios e oportunidades você verá.</li>
+                        <li><strong>Comprovante de Endereço:</strong> Faça upload para validar sua localização, se solicitado.</li>
+                        <li><strong>Foto de Perfil:</strong> Adicione uma foto para tornar seu perfil mais confiável e reconhecível.</li>
+                        <li><strong>Tipo de cliente:</strong> Marque se você é Cliente, Fornecedor ou ambos para personalizar as funcionalidades disponíveis.</li>
+                    </ol>
+
+                    <h5>Salvar alterações</h5>
+                    <p>Depois de atualizar as informações, clique em <strong>"Salvar Informações"</strong> para garantir que suas alterações sejam registradas.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Mantenha seus dados atualizados para facilitar negociações, receber oportunidades relevantes e aumentar sua credibilidade na plataforma.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-success btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

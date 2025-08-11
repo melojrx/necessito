@@ -9,4 +9,4 @@ def mark_notification_read(request, notif_id):
     notification = get_object_or_404(Notification, id=notif_id, user=request.user)
     notification.is_read = True
     notification.save()
-    return redirect('home')  # ou redirecionar para onde você quiser
+    return redirect('ads:home')  # ou redirecionar para onde você quiser

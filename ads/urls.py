@@ -4,6 +4,8 @@ from .views import (
     NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView, DashboardView, anuncios_geolocalizados, enviar_mensagem, geolocalizar_usuario, dados_compartilhamento
 )
 
+app_name = 'ads'
+
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('necessidades/', NecessidadeListView.as_view(), name='necessidade_list'),

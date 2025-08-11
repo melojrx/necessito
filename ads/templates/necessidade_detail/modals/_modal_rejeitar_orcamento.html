@@ -1,0 +1,52 @@
+<!-- Modal: Rejeitar Orçamento -->
+<div class="modal fade" id="rejeitarOrcamentoModal" tabindex="-1" aria-labelledby="rejeitarOrcamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejeitarOrcamentoLabel"><i class="fas fa-times-circle me-2 text-danger"></i>Confirmar Rejeição do Orçamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Esta ação não pode ser desfeita. O fornecedor será notificado que sua proposta não foi aceita.</p>
+                <strong>Tem certeza que deseja rejeitar este orçamento?</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarRejeicaoBtn">Sim, Rejeitar Orçamento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let rejeitarUrl = null;
+    const rejeitarOrcamentoModal = document.getElementById('rejeitarOrcamentoModal');
+
+    if (rejeitarOrcamentoModal) {
+        rejeitarOrcamentoModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            rejeitarUrl = button.getAttribute('data-url');
+        });
+
+        const confirmarRejeicaoBtn = document.getElementById('confirmarRejeicaoBtn');
+        confirmarRejeicaoBtn.addEventListener('click', () => {
+            if (!rejeitarUrl) return;
+
+            fetch(rejeitarUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Ocorreu um erro ao tentar rejeitar o orçamento.');
+                }
+            })
+            .catch(err => alert('Erro de comunicação com o servidor. Tente novamente.'));
+        });
+    }
+});
+</script>

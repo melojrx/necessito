@@ -1,0 +1,29 @@
+{% if necessidade.imagens.all %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-images me-2"></i>Galeria de Imagens</h5>
+    </div>
+    <div class="card-body p-0">
+        <div id="galeriaCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for imagem in necessidade.imagens.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <img src="{{ imagem.imagem.url }}" class="d-block w-100" style="max-height: 450px; object-fit: cover;" alt="Imagem {{ forloop.counter }} do anúncio {{ necessidade.titulo }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if necessidade.imagens.count > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Próximo</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

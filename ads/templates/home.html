@@ -656,7 +656,7 @@
                             <div class="row g-2 justify-content-center">
                                 {% for categoria in categoria_group %}
                                 <div class="col-lg-2 col-md-3 col-sm-4 d-flex">
-                                    <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-modern categoria-color-{{ forloop.counter }} w-100">
+                                    <a href="{% url 'categories:category_detail' categoria.id %}" class="categoria-card-modern categoria-color-{{ forloop.counter }} w-100">
                                         <div class="categoria-icon-circle">
                                             <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
                                         </div>
@@ -678,7 +678,7 @@
         <!-- MOBILE: Cards otimizados -->
         <div class="d-block d-md-none">
             {% for categoria in categorias|slice:":8" %}
-            <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-mobile categoria-color-{{ forloop.counter }}">
+            <a href="{% url 'categories:category_detail' categoria.id %}" class="categoria-card-mobile categoria-color-{{ forloop.counter }}">
                 <div class="categoria-icon-mobile">
                     <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
                 </div>
@@ -690,7 +690,7 @@
             
             <!-- Botão Ver Todas no Mobile -->
             <div class="text-center mt-3">
-                <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                <a href="{% url 'categories:category_list' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
                     <i class="fas fa-th me-2"></i>
                     Ver Todas as Categorias
                 </a>
@@ -713,7 +713,7 @@
                 <div class="row d-flex align-items-stretch">
                     {% for anuncio in anuncio_group %}
                     <div class="col-lg-3 col-md-4 col-sm-6 d-flex mb-4">
-                        <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
+                        <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
                             <div class="card-container">
                                 <div class="card flex-fill app-card">
                                     <div class="card-img-wrapper">
@@ -759,7 +759,7 @@
 <!-- Mobile: Feed vertical moderno -->
 <div class="d-block d-md-none mobile-feed">
     {% for anuncio in anuncios_populares.0|slice:":4" %}
-    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none">
+    <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none">
         <div class="card-container">
             <div class="app-card">
                 <div class="card-img-wrapper">
@@ -803,7 +803,7 @@
                 <div class="row d-flex align-items-stretch">
                     {% for anuncio in anuncio_group %}
                     <div class="col-lg-3 col-md-4 col-sm-6 d-flex mb-4">
-                        <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
+                        <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
                             <div class="card-container">
                                 <div class="card flex-fill app-card">
                                     <div class="card-img-wrapper">
@@ -847,7 +847,7 @@
 <!-- Mobile: Feed vertical moderno -->
 <div class="d-block d-md-none mobile-feed">
     {% for anuncio in anuncios_preferidos.0|slice:":3" %}
-    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none">
+    <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none">
         <div class="card-container">
             <div class="app-card">
                 <div class="card-img-wrapper">
@@ -889,7 +889,7 @@
                 <div class="row d-flex align-items-stretch">
                     {% for anuncio in anuncio_group %}
                     <div class="col-lg-3 col-md-4 col-sm-6 d-flex mb-4">
-                        <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
+                        <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
                             <div class="card-container">
                                 <div class="card flex-fill app-card">
                                     <div class="card-img-wrapper">
@@ -933,7 +933,7 @@
 <!-- Mobile: Feed vertical moderno -->
 <div class="d-block d-md-none mobile-feed">
     {% for anuncio in anuncios_proximos.0|slice:":3" %}
-    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none">
+    <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none">
         <div class="card-container">
             <div class="app-card">
                 <div class="card-img-wrapper">

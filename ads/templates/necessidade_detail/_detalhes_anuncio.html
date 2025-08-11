@@ -1,0 +1,19 @@
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title">{{ necessidade.titulo }}</h2>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong><i class="fas fa-sitemap me-2 text-primary"></i>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
+                <p><strong><i class="fas fa-tags me-2 text-primary"></i>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong><i class="fas fa-box me-2 text-primary"></i>Quantidade:</strong> {{ necessidade.quantidade }} {{ necessidade.unidade }}</p>
+                <p><strong><i class="far fa-calendar-alt me-2 text-primary"></i>Publicado em:</strong> {{ necessidade.data_criacao|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        <hr>
+        <p><strong><i class="fas fa-align-left me-2 text-primary"></i>Descrição:</strong></p>
+        <p>{{ necessidade.descricao|linebreaksbr }}</p>
+    </div>
+</div>

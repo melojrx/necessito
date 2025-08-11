@@ -37,7 +37,7 @@ class ProfileCompleteMiddleware:
             # Marcar que já sugerimos o perfil para este usuário nesta sessão
             request.session['profile_completion_suggested'] = True
             
-            return redirect('complete_profile')
+            return redirect('users:complete_profile')
         
         response = self.get_response(request)
         return response
@@ -138,4 +138,4 @@ class ProfileCompleteMiddleware:
             '/search/',
         ]
         
-        return any(path.startswith(page) for page in main_pages) or path == '/' 
+        return any(path.startswith(page) for page in main_pages) or path == '/'

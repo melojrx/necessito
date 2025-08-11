@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import (CategoryListView, CategoryDetailView, SubCategoryListView, SubCategoryDetailView, subcategorias_json)
 
+app_name = 'categories'
+
 urlpatterns = [
     path('<int:category_id>/subcats-json/', subcategorias_json, name='subcats_json'),
     path('', CategoryListView.as_view(), name='category_list'),

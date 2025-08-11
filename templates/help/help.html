@@ -1,0 +1,682 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block meta_description %}{{ page_description }}{% endblock %}
+{% block meta_keywords %}{{ page_keywords }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+/* Central de Ajuda - Estilos Padronizados */
+.help-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.help-hero {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 4rem 0 3rem;
+    margin-bottom: 3rem;
+    border-radius: 15px;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.help-breadcrumb a:hover {
+    color: #f8f9fa;
+    text-decoration: underline;
+}
+
+.help-section-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 2rem;
+    height: 100%;
+}
+
+.help-section-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.help-section-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    flex-shrink: 0;
+}
+
+.help-card-title {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.help-card-text {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.btn-help {
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.search-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.search-input {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    width: 100%;
+    box-shadow: none;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.search-results {
+    display: none;
+    margin-top: 1.5rem;
+}
+
+.search-result-item {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: #e9ecef;
+}
+
+.quick-actions {
+    background: linear-gradient(135deg, #28a745 0%, #20893e 100%);
+    color: white;
+    padding: 3rem 0;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.quick-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.faq-item {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.faq-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-header:hover {
+    background: #e9ecef;
+}
+
+.faq-header:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.faq-content {
+    padding: 1.5rem;
+    background: white;
+    line-height: 1.6;
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+    .help-hero {
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .help-section-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .help-card-title {
+        font-size: 1.1rem;
+    }
+    
+    .search-container {
+        padding: 1.5rem;
+    }
+    
+    .search-input {
+        font-size: 1rem;
+        padding: 0.875rem;
+    }
+    
+    .quick-actions {
+        padding: 2rem 0;
+    }
+    
+    .quick-action-btn {
+        display: block;
+        margin: 0.5rem auto;
+        max-width: 280px;
+    }
+}
+
+@media (max-width: 576px) {
+    .help-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .help-hero {
+        border-radius: 10px;
+        padding: 1.5rem 0;
+    }
+    
+    .search-container {
+        border-radius: 10px;
+        padding: 1rem;
+    }
+}
+
+/* Acessibilidade */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .help-section-card,
+    .btn-help,
+    .quick-action-btn,
+    .faq-header,
+    .search-input {
+        transition: none;
+    }
+}
+</style>
+
+<div class="help-page">
+    <!-- Hero Section -->
+    <div class="help-hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-life-ring me-3"></i>
+                    Central de Ajuda
+                </h1>
+                <p class="lead mb-4 opacity-75">
+                    Encontre respostas rápidas e aprenda a aproveitar ao máximo a plataforma Indicaai
+                </p>
+                
+                <!-- Barra de Busca -->
+                <div class="position-relative mx-auto" style="max-width: 500px;">
+                    <i class="fas fa-search help-search-icon"></i>
+                    <input type="text" class="form-control help-search-input" 
+                           placeholder="Busque por tutoriais, dúvidas frequentes..." 
+                           id="helpSearchInput">
+                    <div class="search-results" id="searchResults" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <!-- Cards de Categorias -->
+        <div class="row g-4 mb-5">
+            <!-- Card 1: Começar -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_start' %}" class="text-decoration-none">
+                    <div class="help-category-card card-start h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-rocket text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">🚀 Começar</h3>
+                        <p class="text-muted mb-3">
+                            Primeiros passos na plataforma e configuração inicial da conta
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Como criar sua conta</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Completando seu perfil</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Navegação básica</li>
+                            <li class="mb-2"><span class="text-success me-2">▸</span>Configurações iniciais</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 2: Anunciar -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_announce' %}" class="text-decoration-none">
+                    <div class="help-category-card card-announce h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-bullhorn text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💼 Anunciar</h3>
+                        <p class="text-muted mb-3">
+                            Aprenda a criar anúncios eficazes e atrair fornecedores qualificados
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Criando anúncios eficazes</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Melhores práticas para fotos</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Escolhendo categorias</li>
+                            <li class="mb-2"><span class="text-primary me-2">▸</span>Gerenciando anúncios</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 3: Orçamentos -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_budget' %}" class="text-decoration-none">
+                    <div class="help-category-card card-budget h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-calculator text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💰 Orçamentos</h3>
+                        <p class="text-muted mb-3">
+                            Solicite, envie e gerencie orçamentos de forma profissional
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Solicitando orçamentos</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Enviando propostas</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Negociação de valores</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de aprovação</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 4: Comunicação -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_communication' %}" class="text-decoration-none">
+                    <div class="help-category-card card-chat h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-comments text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">💬 Comunicação</h3>
+                        <p class="text-muted mb-3">
+                            Use o chat integrado para negociar e esclarecer dúvidas
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Iniciando conversas</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Compartilhando arquivos</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Etiqueta de comunicação</li>
+                            <li class="mb-2"><span class="text-info me-2">▸</span>Denúncias e bloqueios</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 5: Avaliações -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_ratings' %}" class="text-decoration-none">
+                    <div class="help-category-card card-rating h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-star text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">⭐ Avaliações</h3>
+                        <p class="text-muted mb-3">
+                            Sistema de reputação e como avaliar experiências
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Como avaliar fornecedores</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Recebendo avaliações</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Sistema de reputação</li>
+                            <li class="mb-2"><span class="text-warning me-2">▸</span>Construindo credibilidade</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 6: Suporte -->
+            <div class="col-lg-4 col-md-6">
+                <a href="{% url 'help_support' %}" class="text-decoration-none">
+                    <div class="help-category-card card-support h-100">
+                        <div class="help-category-icon">
+                            <i class="fas fa-headset text-white" style="font-size: 1.75rem;"></i>
+                        </div>
+                        <h3 class="h5 fw-bold text-dark mb-3">🔧 Suporte</h3>
+                        <p class="text-muted mb-3">
+                            Problemas técnicos, políticas e contato direto
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Problemas técnicos</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Políticas da plataforma</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Segurança e privacidade</li>
+                            <li class="mb-2"><span class="text-dark me-2">▸</span>Contato direto</li>
+                        </ul>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="bg-white rounded-4 p-4 shadow-sm mb-5">
+            <h2 class="text-center fw-bold mb-4">Perguntas Frequentes</h2>
+            
+            <div class="accordion" id="helpAccordion">
+                <!-- FAQ 1 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq1">
+                            <i class="fas fa-info-circle text-primary me-3"></i>
+                            O que é a plataforma Indicaai?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <p>A <strong>Indicaai</strong> é uma plataforma digital que conecta pessoas e empresas que precisam de produtos ou serviços com fornecedores qualificados em todo o Brasil.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary"><i class="fas fa-bullseye me-2"></i>Clientes</h6>
+                                    <p class="small">Publicam necessidades e recebem orçamentos</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success"><i class="fas fa-tools me-2"></i>Fornecedores</h6>
+                                    <p class="small">Encontram oportunidades e enviam propostas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq2">
+                            <i class="fas fa-play-circle text-success me-3"></i>
+                            Como começar a usar a plataforma?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">1</span>
+                                        <strong>Criar sua conta</strong>
+                                    </div>
+                                    <p class="small ms-5">Clique em "Registrar" e preencha seus dados básicos</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">2</span>
+                                        <strong>Completar perfil</strong>
+                                    </div>
+                                    <p class="small ms-5">Adicione informações e defina seu tipo de usuário</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">3</span>
+                                        <strong>Explorar oportunidades</strong>
+                                    </div>
+                                    <p class="small ms-5">Publique anúncios ou busque necessidades</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">4</span>
+                                        <strong>Negociar e fechar</strong>
+                                    </div>
+                                    <p class="small ms-5">Use o chat para negociar e finalizar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq3">
+                            <i class="fas fa-shield-alt text-success me-3"></i>
+                            A plataforma é segura?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-shield-check me-2"></i>Sim! Múltiplas camadas de segurança</h6>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Criptografia SSL</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>LGPD compliance</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Validação de e-mail</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Sistema de avaliações</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Denúncias e moderação</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Dados protegidos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="accordion-item border-0 mb-3 rounded-3 shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-semibold" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#faq4">
+                            <i class="fas fa-gift text-warning me-3"></i>
+                            Quanto custa usar a plataforma?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="alert alert-success text-center">
+                                <h5><i class="fas fa-gift me-2"></i>100% Gratuito!</h5>
+                                <p class="mb-0">Não cobramos nenhuma taxa para usar a plataforma</p>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <i class="fas fa-user-plus fa-2x text-success mb-2"></i>
+                                    <h6 class="small">Criar conta grátis</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-bullhorn fa-2x text-primary mb-2"></i>
+                                    <h6 class="small">Anúncios ilimitados</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <i class="fas fa-comments fa-2x text-info mb-2"></i>
+                                    <h6 class="small">Chat integrado</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="bg-light rounded-4 p-4 text-center">
+            <h3 class="fw-bold mb-3"><i class="fas fa-rocket me-2"></i>Pronto para começar?</h3>
+            <p class="mb-4">Escolha a ação que melhor se adequa ao seu perfil</p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{% url 'ads:necessidade_create' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-bullhorn me-2"></i>
+                    Criar Anúncio
+                </a>
+                <a href="{% url 'search:necessidade_search_all' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-search me-2"></i>
+                    Buscar Oportunidades
+                </a>
+                <a href="{% url 'users:register' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Criar Conta
+                </a>
+                <a href="{% url 'ads:home' %}" class="help-action-btn d-inline-flex align-items-center">
+                    <i class="fas fa-home me-2"></i>
+                    Voltar ao Início
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Busca inteligente
+    const searchInput = document.getElementById('helpSearchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    const searchData = [
+        { title: 'Como criar uma conta', category: 'Começar' },
+        { title: 'Publicar primeiro anúncio', category: 'Anunciar' },
+        { title: 'Enviar orçamento', category: 'Orçamentos' },
+        { title: 'Como usar o chat', category: 'Comunicação' },
+        { title: 'Sistema de avaliações', category: 'Avaliações' },
+        { title: 'Problemas técnicos', category: 'Suporte' }
+    ];
+    
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim().toLowerCase();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            const results = searchData.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.category.toLowerCase().includes(query)
+            ).slice(0, 5);
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="p-3 text-center text-muted">Nenhum resultado encontrado</div>';
+            } else {
+                searchResults.innerHTML = results.map(result => 
+                    `<div class="p-3 border-bottom">
+                        <strong>${result.title}</strong><br>
+                        <small class="text-muted">${result.category}</small>
+                    </div>`
+                ).join('');
+            }
+            
+            searchResults.style.display = 'block';
+            searchResults.style.position = 'absolute';
+            searchResults.style.top = '100%';
+            searchResults.style.left = '0';
+            searchResults.style.right = '0';
+            searchResults.style.background = 'white';
+            searchResults.style.borderRadius = '12px';
+            searchResults.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+            searchResults.style.zIndex = '1000';
+            searchResults.style.marginTop = '0.5rem';
+        }, 300);
+    });
+    
+    // Fechar resultados ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.position-relative')) {
+            searchResults.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
+
+<section class="hero-section bg-primary text-white">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="hero-icon mb-4">
+                    <i class="fas fa-life-ring display-1 text-white opacity-75"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-3">Central de Ajuda</h1>
+                <p class="lead mb-4 opacity-90">
+                    Encontre respostas, tutoriais e dicas para aproveitar ao máximo nossa plataforma
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

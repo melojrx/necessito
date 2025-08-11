@@ -5,6 +5,8 @@ from .views import (
     budgetDeleteView, export_orcamento_pdf
 )
 
+app_name = 'budgets'
+
 urlpatterns = [
     path('submeter/<int:pk>/', submeter_orcamento, name='submeter_orcamento'),
     path('budgets/<int:pk>/aceitar/', OrcamentoAceitarView.as_view(), name='aceitar_orcamento'),

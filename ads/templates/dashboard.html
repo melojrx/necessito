@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
       };
 
       // Buscar anúncios geolocalizados
-      fetch("{% url 'anuncios_geolocalizados' %}")
+      fetch("{% url 'ads:anuncios_geolocalizados' %}")
         .then(response => response.json())
         .then(async anuncios => {
           console.log(`Carregando ${anuncios.length} anúncios no mapa...`);

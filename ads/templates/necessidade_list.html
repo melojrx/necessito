@@ -8,7 +8,7 @@
     <div class="row align-items-center mb-4">
       <!-- Formulário de busca -->
       <div class="col-lg-8 col-md-8 col-sm-12">
-          <form method="get" action="{% url 'necessidade_list' %}">
+          <form method="get" action="{% url 'ads:necessidade_list' %}">
               <div class="row g-2">
                   <!-- Campo de busca -->
                   <div class="col-lg-5 col-md-6 col-sm-12">
@@ -38,7 +38,7 @@
       </div>
       <!-- Botão "Novo Anúncio" -->
       <div class="col-lg-4 col-md-4 col-sm-12 text-end">
-          <a href="{% url 'necessidade_create' %}" class="btn btn-success">
+          <a href="{% url 'ads:necessidade_create' %}" class="btn btn-success">
               <i class="bi bi-plus"></i> Novo Anúncio
           </a>
       </div>
@@ -70,10 +70,10 @@
                 </div>
                 
                 <div class="card-footer d-flex justify-content-between">
-                    <a href="{% url 'necessidade_detail' necessidade.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                    <a href="{% url 'ads:necessidade_detail' necessidade.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
                     <div>
-                        <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+                        <a href="{% url 'ads:necessidade_update' necessidade.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" class="btn btn-danger btn-sm">Excluir</a>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,87 @@
+<div class="d-flex flex-column gap-4">
+    <!-- Card do Anunciante -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Anunciante</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Nome:</strong> {{ necessidade.cliente.get_full_name|capfirst }}</p>
+            <p><strong>Membro desde:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</p>
+            <a href="{% url 'users:user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
+                <i class="fas fa-user me-2"></i> Ver Perfil
+            </a>
+        </div>
+    </div>
+
+    <!-- Card de Ações Rápidas (Chat e Compartilhar) -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-grid gap-2">
+                {% if pode_ver_chat %}
+                    <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary">
+                        <i class="fas fa-comments me-1"></i> Conversar com {{ user_is_owner|yesno:"Fornecedor,Cliente" }}
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-primary" disabled data-bs-toggle="tooltip" title="O chat é liberado quando o negócio está 'Em Atendimento'.">
+                        <i class="fas fa-comments me-1"></i> Chat Indisponível
+                    </button>
+                {% endif %}
+                
+                <button type="button" class="btn btn-success" id="btnCompartilhar" data-bs-toggle="modal" data-bs-target="#compartilharModal">
+                    <i class="fa-solid fa-share-nodes me-1"></i> Compartilhar Anúncio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Localização com Mapa -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Localização Aproximada</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Cidade:</strong> {{ necessidade.cliente.cidade }}</p>
+            <p><strong>Estado:</strong> {{ necessidade.cliente.estado }}</p>
+            <div id="map" 
+                 style="height: 250px; width: 100%; border-radius: 0.25rem;"
+                 data-lat="{{ necessidade.cliente.lat }}"
+                 data-lon="{{ necessidade.cliente.lon }}">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        const mapElement = document.getElementById('map');
+        if (mapElement && typeof L !== 'undefined') {
+            const lat = mapElement.dataset.lat;
+            const lon = mapElement.dataset.lon;
+            
+            if (lat && lon) {
+                const map = L.map('map').setView([parseFloat(lat), parseFloat(lon)], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                L.marker([parseFloat(lat), parseFloat(lon)]).addTo(map)
+                    .bindPopup('Localização aproximada do anunciante.')
+                    .openPopup();
+            } else {
+                // Fallback se não houver coordenadas
+                mapElement.innerHTML = '<div class="alert alert-light text-center">Localização não disponível.</div>';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao inicializar o mapa Leaflet:', error);
+        const mapElement = document.getElementById('map');
+        if(mapElement) {
+            mapElement.innerHTML = '<div class="alert alert-danger text-center">Não foi possível carregar o mapa.</div>';
+        }
+    }
+});
+</script>

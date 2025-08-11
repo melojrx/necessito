@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+.help-section-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0856b3 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <h1 class="display-5 fw-bold mb-3">💼 {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <div class="list-group">
+            <!-- Criando anúncios eficazes -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaCriarAnuncio"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaCriarAnuncio">
+                <i class="fas fa-bullhorn me-2 text-primary"></i>
+                Criando anúncios eficazes
+            </a>
+            <div class="collapse mt-4" id="ajudaCriarAnuncio">
+                <div class="card card-body">
+                    <h3 class="mb-3">📝 Criando Anúncios Eficazes</h3>
+                    <p>Um bom anúncio aumenta significativamente suas chances de receber propostas relevantes. Veja como preencher corretamente cada campo:</p>
+
+                    <h5>Título e Descrição</h5>
+                    <p>Escolha um <strong>título objetivo</strong> que resuma o que você precisa (ex.: "Instalação de telhado com manta térmica"). Na descrição, <strong>detalhe ao máximo</strong> o serviço ou produto desejado.</p>
+
+                    <h5>Categoria e Subcategoria</h5>
+                    <p>Escolha a <strong>categoria principal</strong> e, em seguida, a subcategoria correspondente. Isso ajuda a direcionar seu anúncio para os fornecedores certos.</p>
+
+                    <h5>Quantidade e Unidade</h5>
+                    <p>Informe a <strong>quantidade</strong> desejada e a <strong>unidade de medida</strong>, como m², unidades, kg, etc. Esses dados são fundamentais para orçamentos precisos.</p>
+
+                    <h5>Especificações Técnicas</h5>
+                    <ul>
+                        <li><strong>Medir no Local:</strong> Marque se será necessário uma visita técnica para medição.</li>
+                        <li><strong>Marca:</strong> Caso deseje uma marca específica, informe neste campo.</li>
+                        <li><strong>Tipo:</strong> Use este campo para indicar o tipo do item desejado.</li>
+                        <li><strong>Bitola (mm):</strong> Medida da espessura ou diâmetro em milímetros (ex.: 0,8 mm).</li>
+                        <li><strong>Comprimento (m):</strong> Ex.: 2,5 metros.</li>
+                        <li><strong>Peso (Kg):</strong> Ex.: 50 kg.</li>
+                        <li><strong>Altura (m):</strong> Ex.: 2,10 metros.</li>
+                        <li><strong>Duração:</strong> Tempo estimado de execução ou validade do serviço (ex.: 7 dias, 3:00:00).</li>
+                    </ul>
+
+                    <h5>Fotos do Anúncio</h5>
+                    <p>Faça o upload de até 3 imagens em formato JPEG ou PNG (máximo 5MB cada). As fotos ajudam a ilustrar melhor sua necessidade.</p>
+                    
+                    <img src="{% static 'img/help/anunciar/criarAnuncio.png' %}" alt="Como criar anúncio" class="img-fluid rounded shadow-sm mb-4" style="max-width: 1000px">
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Preencha o máximo de informações possíveis. Quanto mais completo o anúncio, mais rápido e preciso será o retorno dos fornecedores.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Melhores práticas para fotos -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaFotos"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaFotos">
+                <i class="fas fa-camera me-2 text-success"></i>
+                Melhores práticas para fotos
+            </a>
+            <div class="collapse mt-4" id="ajudaFotos">
+                <div class="card card-body">
+                    <h3 class="mb-3">📸 Melhores Práticas para Fotos</h3>
+                    <p>As imagens são essenciais para ajudar os fornecedores a compreenderem melhor sua necessidade.</p>
+
+                    <ul>
+                        <li>Use fotos nítidas, com boa iluminação.</li>
+                        <li>Mostre o local onde o serviço será realizado ou o item desejado.</li>
+                        <li>Evite imagens desfocadas ou com muitos elementos irrelevantes.</li>
+                        <li>Use até 3 imagens no formato JPEG ou PNG com até 5MB cada.</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Boas imagens aumentam o interesse e ajudam os fornecedores a enviarem propostas mais adequadas.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escolhendo categorias -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaCategorias"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaCategorias">
+                <i class="fas fa-tags me-2 text-warning"></i>
+                Escolhendo categorias
+            </a>
+            <div class="collapse mt-4" id="ajudaCategorias">
+                <div class="card card-body">
+                    <h3 class="mb-3">📂 Escolhendo Categorias</h3>
+                    <p>A escolha correta da <strong>categoria</strong> e <strong>subcategoria</strong> é essencial para que seu anúncio seja exibido para os fornecedores mais qualificados.</p>
+
+                    <h5>Categoria</h5>
+                    <p>Representa o grupo principal do serviço ou produto. Exemplo: <strong>"Construção e Reforma"</strong>, <strong>"Equipamentos Industriais"</strong>, etc.</p>
+
+                    <h5>Subcategoria</h5>
+                    <p>É uma especificação dentro da categoria escolhida. Exemplo: <strong>"Impermeabilização de Lajes"</strong>, <strong>"Geradores"</strong>, etc.</p>
+
+                    <h5>Como escolher corretamente?</h5>
+                    <ul>
+                        <li>Pense no serviço ou produto principal que você precisa.</li>
+                        <li>Evite escolher categorias genéricas se houver uma opção mais específica.</li>
+                        <li>Observe exemplos de outros anúncios similares para se inspirar.</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Um anúncio com categoria bem definida aparece para mais fornecedores qualificados e evita confusão.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gerenciando anúncios -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaGerenciar"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaGerenciar">
+                <i class="fas fa-cogs me-2 text-info"></i>
+                Gerenciando anúncios
+            </a>
+            <div class="collapse mt-4" id="ajudaGerenciar">
+                <div class="card card-body">
+                    <h3 class="mb-3">⚙️ Gerenciando Anúncios</h3>
+                    <p>Após criar um anúncio, você pode gerenciar tudo pela área do usuário, mantendo controle total sobre suas publicações.</p>
+
+                    <h5>Ações disponíveis</h5>
+                    <ul>
+                        <li><strong>Ver Detalhes:</strong> Acesse todas as informações do seu anúncio. Nesta área, você pode:
+                            <ul>
+                                <li>Visualizar a descrição completa, especificações e fotos.</li>
+                                <li>Acompanhar os orçamentos recebidos.</li>
+                                <li>Editar ou excluir o anúncio diretamente.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Editar:</strong> Altere título, descrição, fotos e especificações técnicas.</li>
+                        <li><strong>Excluir:</strong> Remova o anúncio de forma permanente.</li>
+                    </ul>
+                    
+                    <img src="{% static 'img/help/anunciar/EditarAnuncios.png' %}" alt="Como editar anúncios" class="img-fluid rounded shadow-sm mb-4" style="max-width: 800px">
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Acompanhar os orçamentos recebidos e manter seu anúncio atualizado aumenta suas chances de fechar negócio mais rápido.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

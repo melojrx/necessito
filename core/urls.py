@@ -38,6 +38,8 @@ urlpatterns = [
     
     # Central de Ajuda - Página Principal
     path('ajuda/', HelpView.as_view(), name='help'),
+    # Alias /help/ -> /ajuda/
+    path('help/', RedirectView.as_view(url='/ajuda/', permanent=True), name='help_alias'),
     
     # Central de Ajuda - Seções Específicas
     path('ajuda/comecar/', HelpStartView.as_view(), name='help_start'),

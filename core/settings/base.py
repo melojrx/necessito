@@ -3,7 +3,7 @@ from django.contrib.messages import constants as messages
 import os
 from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Diretórios base
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 STATIC_DIR=os.path.join(BASE_DIR,'static')
@@ -11,21 +11,20 @@ STATIC_DIR=os.path.join(BASE_DIR,'static')
 # Tag para o Django encontrar o arquivo .env
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# Segurança e chaves
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-temporary-key-for-development")
 
+# reCAPTCHA
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Modo Debug
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
+# Hosts permitidos
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-# Configurações CSRF para resolver problemas com origens confiáveis
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
@@ -35,12 +34,11 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+# Usuário customizado
 AUTH_USER_MODEL = 'users.User'
 
-# ID do site (necessário para django.contrib.sites)
+# Sites
 SITE_ID = 1
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -62,8 +60,6 @@ INSTALLED_APPS = [
     "search",
     "chat",
     "admin_panel",
-    
-    # API e documentação
     "rest_framework",
     "rest_framework.authtoken", # Necessário para dj-rest-auth
     "dj_rest_auth",
@@ -119,10 +115,7 @@ TEMPLATES[0]["OPTIONS"]["context_processors"] += [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+# Banco de dados
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -134,10 +127,7 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
+# Validadores de senha
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -153,53 +143,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
+# Localização
 LANGUAGE_CODE = 'pt-br'
-
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-# Settings.py
-
+# Arquivos estáticos e mídia
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),  # pasta para desenvolvimento
 ]
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/home'
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'ads:home'
 LOGOUT_REDIRECT_URL = '/'
 
-# Configurações relacionadas a proxies e balanceadores de carga
-# USE_X_FORWARDED_HOST = True  # Comentado temporariamente para debug
-
-# Indica que o Django deve respeitar o cabeçalho X-Forwarded-Proto
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-# Opcional: Personalizar os níveis de mensagens
+# Personalização dos níveis de mensagens
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
     messages.INFO: 'info',
@@ -208,13 +178,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# Se quiser ver os e-mails diretamente no console (modo dev):
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-DEFAULT_FROM_EMAIL = "Indicai <no-reply@indicai.com.br>"
-EMAIL_SUBJECT_PREFIX = "[Indicai]"
-
-# Backend de e-mail
+# Configurações de e-mail via variáveis de ambiente
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
@@ -224,13 +188,11 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Indicai <no-reply@indicai.com.br>")
 EMAIL_SUBJECT_PREFIX = os.environ.get("EMAIL_SUBJECT_PREFIX", "[Indicai]")
 
-# Tamanho máximo de upload (10MB)
+# Uploads
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
-# Configurações de segurança
-# Em desenvolvimento (DEBUG=True), permitir HTTP
-# Em produção (DEBUG=False), forçar HTTPS
+# Segurança
 SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
@@ -238,13 +200,12 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # Alterado de DENY para SAMEORIGIN para permitir reCAPTCHA
 
-# HSTS apenas em produção
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# Configurações REST Framework
+# DRF
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -263,14 +224,12 @@ REST_FRAMEWORK = {
     'URL_FIELD_NAME': 'url',
 }
 
-# Configurações removidas - usando apenas drf_spectacular
-
-# Configurações DRF Spectacular
+# SPECTACULAR
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API Indicai',
     'DESCRIPTION': '''
     API de integração do sistema Indicai.
-    
+
     Esta API fornece acesso às principais funcionalidades do sistema, incluindo:
     - Autenticação JWT (dj-rest-auth)
     - Gerenciamento de usuários
@@ -278,159 +237,30 @@ SPECTACULAR_SETTINGS = {
     - Necessidades (anúncios)
     - Orçamentos
     - Avaliações
-    
-    ## Como usar a API
-    
+
     1. **Faça login** no endpoint `/api/v1/auth/login/` com email e senha
     2. **Copie o access token** da resposta
     3. **Clique em "Authorize"** no topo da página
     4. **Cole o token** no campo "Value" (apenas o token, sem "Bearer")
     5. **Clique em "Authorize"** novamente
     6. **Use os endpoints** normalmente por 1 hora (duração do token)
-    
-    ## Versionamento
-    
+
     A API utiliza versionamento via URL. A versão atual é **v1**.
-    
-    ## Autenticação
-    
+
     A API utiliza autenticação JWT. O token de acesso tem duração de 1 hora.
     ''',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SORT_OPERATIONS': False,
-    'COMPONENTS': {
-        'securitySchemes': {
-            'bearerAuth': {
-                'type': 'http',
-                'scheme': 'bearer',
-                'bearerFormat': 'JWT',
-                'description': 'Token JWT obtido através do endpoint de login'
-            }
-        }
-    },
-    'SECURITY': [{'bearerAuth': []}],
-    'TAGS': [
-        {'name': '00 - SISTEMA - INFORMAÇÕES GERAIS', 'description': 'Informações sobre versões e sistema'},
-        {'name': '01 - USUÁRIOS - GESTÃO DE PERFIS', 'description': 'Gerenciamento de usuários do sistema'},
-        {'name': '02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS', 'description': 'Categorias de produtos e serviços'},
-        {'name': '03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS', 'description': 'Subcategorias especializadas'},
-        {'name': '04 - NECESSIDADES - ANÚNCIOS DE DEMANDA', 'description': 'Anúncios de necessidades dos clientes'},
-        {'name': '05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES', 'description': 'Propostas de fornecedores'},
-        {'name': '06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO', 'description': 'Sistema de avaliações entre usuários'},
-        {'name': '07 - AUTENTICAÇÃO - ACESSO AO SISTEMA', 'description': 'Endpoints de autenticação e acesso'},
-    ],
-    'CONTACT': {
-        'email': 'contato@indicai.com.br',
-    },
-    'LICENSE': {
-        'name': 'Licença Proprietária',
-    },
-    'TERMS_OF_SERVICE': 'https://indicai.com.br/termos/',
 }
 
-# Configurações removidas - usando apenas drf_spectacular
-
-# Configurações de logging
-# Criar diretório de logs se não existir
-LOGS_DIR = os.path.join(BASE_DIR, 'logs')
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'django.log'),
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
-
-# Configurações SimpleJWT
-from datetime import timedelta
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Token de acesso válido por 1 hora
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Token de refresh válido por 7 dias
-    'ROTATE_REFRESH_TOKENS': True,  # Gera novo refresh token a cada uso
-    'BLACKLIST_AFTER_ROTATION': True,  # Invalida o refresh token anterior
-    'UPDATE_LAST_LOGIN': True,  # Atualiza last_login do usuário
-    
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': 'Indicai',
-    'JSON_ENCODER': None,
-    'JWK_URL': None,
-    'LEEWAY': 0,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
-
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
-    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
-
-    'JTI_CLAIM': 'jti',
-
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(hours=1),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
-}
-
-# Configurações DJ-REST-AUTH
-REST_AUTH = {
-    'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth-token',
-    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
-    'USER_DETAILS_SERIALIZER': 'api.serializers.UserDetailSerializer',
-    'LOGIN_SERIALIZER': 'api.serializers.CustomLoginSerializer',
-    'LOGOUT_ON_PASSWORD_CHANGE': False,
-    'OLD_PASSWORD_FIELD_ENABLED': True,
-    'LOGOUT_URL': '/api/v1/auth/logout/',
-    'LOGIN_URL': '/api/v1/auth/login/',
-    'SESSION_LOGIN': False,  # Desabilitar login de sessão
-}
-
-# Configurações Allauth
+# Allauth
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional' # ou 'mandatory' ou 'none'
 
-
 SITE_ID = 1 # dj-rest-auth requer isso
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Para testes de email
 
-# Configurações CORS
+# CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",

@@ -1,0 +1,22 @@
+<!-- templates/403.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <i class="fas fa-lock text-danger fa-5x mb-4"></i>
+                    <h1 class="display-4 mb-4">Acesso Negado</h1>
+                    <p class="lead mb-4">Você não tem permissão para acessar esta página.</p>
+                    <p class="text-muted mb-4">Esta área é restrita a administradores do sistema.</p>
+                    <a href="{% url 'ads:home' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i> Voltar para a página inicial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

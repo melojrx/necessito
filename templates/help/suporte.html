@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<style>
+.help-section-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a2d91 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.help-breadcrumb {
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.help-breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.help-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+</style>
+
+<div class="help-section-header">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="help-breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'help' %}">
+                        <i class="fas fa-life-ring me-1"></i>Central de Ajuda
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ section_name }}
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="text-center">
+            <h1 class="display-5 fw-bold mb-3">🔧 {{ section_name }}</h1>
+            <p class="lead mb-0 opacity-75">{{ page_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="help-content">
+        <div class="list-group">
+            <!-- Problemas técnicos -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaProblemasTecnicos"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaProblemasTecnicos">
+                <i class="fas fa-cog me-2 text-danger"></i>
+                Problemas técnicos
+            </a>
+            <div class="collapse mt-4" id="ajudaProblemasTecnicos">
+                <div class="card card-body">
+                    <h3 class="mb-3">⚙️ Problemas Técnicos</h3>
+                    <p>Caso encontre erros no funcionamento do site, lentidão ou falhas no carregamento, siga os passos abaixo:</p>
+
+                    <h5>O que fazer?</h5>
+                    <ul>
+                        <li>Atualize a página ou tente acessar por outro navegador.</li>
+                        <li>Limpe o cache do seu navegador e tente novamente.</li>
+                        <li>Verifique sua conexão com a internet.</li>
+                        <li>Caso o problema persista, entre em contato pelo canal de suporte (ver seção <strong>Contato direto</strong>).</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Ao relatar um erro, envie uma captura de tela e descreva o que estava fazendo no momento.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Políticas da plataforma -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaPoliticas"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaPoliticas">
+                <i class="fas fa-file-contract me-2 text-warning"></i>
+                Políticas da plataforma
+            </a>
+            <div class="collapse mt-4" id="ajudaPoliticas">
+                <div class="card card-body">
+                    <h3 class="mb-3">📃 Políticas da Plataforma</h3>
+                    <p>Para garantir a segurança e o bom funcionamento da plataforma, todos os usuários devem seguir as regras e termos estabelecidos.</p>
+
+                    <h5>Regras gerais</h5>
+                    <ul>
+                        <li>É proibido o uso de linguagem ofensiva, spam ou qualquer tipo de assédio.</li>
+                        <li>Os anúncios devem ser verdadeiros, com informações claras e sem enganos.</li>
+                        <li>É vedada qualquer tentativa de negociação fora da plataforma para evitar fraudes.</li>
+                    </ul>
+
+                    <p>Para mais detalhes, consulte a página <a href="/politicas.html" target="_blank"><strong>Termos e Políticas</strong></a>.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Conhecer e respeitar as políticas reduz riscos e garante uma boa experiência para todos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segurança e privacidade -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaSeguranca"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaSeguranca">
+                <i class="fas fa-shield-alt me-2 text-success"></i>
+                Segurança e privacidade
+            </a>
+            <div class="collapse mt-4" id="ajudaSeguranca">
+                <div class="card card-body">
+                    <h3 class="mb-3">🔒 Segurança e Privacidade</h3>
+                    <p>Seus dados são tratados com responsabilidade e utilizados apenas conforme previsto nos Termos de Uso.</p>
+
+                    <h5>Práticas de segurança</h5>
+                    <ul>
+                        <li>Utilizamos criptografia SSL para proteger sua navegação.</li>
+                        <li>Seus dados de contato só são compartilhados após interações com orçamentos ou chat.</li>
+                        <li>Você pode editar ou excluir suas informações no painel do usuário.</li>
+                    </ul>
+
+                    <p>Se notar uso indevido de dados, entre em contato imediatamente com o suporte.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Nunca compartilhe suas senhas ou dados pessoais fora da plataforma.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contato direto -->
+            <a class="list-group-item list-group-item-action"
+               data-bs-toggle="collapse"
+               href="#ajudaContato"
+               role="button"
+               aria-expanded="false"
+               aria-controls="ajudaContato">
+                <i class="fas fa-phone me-2 text-primary"></i>
+                Contato direto
+            </a>
+            <div class="collapse mt-4" id="ajudaContato">
+                <div class="card card-body">
+                    <h3 class="mb-3">📞 Contato Direto</h3>
+                    <p>Se você precisar de atendimento individual, nossa equipe de suporte está disponível para te ajudar.</p>
+
+                    <h5>Canais de atendimento</h5>
+                    <ul>
+                        <li><strong>E-mail:</strong> suporte@seudominio.com.br</li>
+                        <li><strong>WhatsApp:</strong> (00) 00000-0000</li>
+                        <li><strong>Horário de atendimento:</strong> Segunda a sexta, das 08h às 18h</li>
+                    </ul>
+
+                    <p>Envie sua dúvida com o máximo de detalhes para agilizar o atendimento.</p>
+
+                    <div class="alert alert-info mt-4">
+                        💡 <strong>Dica:</strong> Tenha em mãos prints, links ou IDs que possam ajudar a entender o problema.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão de voltar -->
+        <div class="text-center mt-5">
+            <a href="{% url 'help' %}" class="btn btn-secondary btn-lg" style="background: #6f42c1; border-color: #6f42c1;">
+                <i class="fas fa-arrow-left me-2"></i>
+                Voltar à Central de Ajuda
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

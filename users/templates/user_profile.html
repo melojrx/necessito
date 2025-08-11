@@ -167,7 +167,7 @@
                     <p class="card-text text-muted">{{ anuncio.descricao|truncatechars:100 }}</p>
                     <p class="card-text"><strong>Publicado em:</strong> {{ anuncio.data_criacao|date:"d/m/Y" }}</p>
                     <p class="card-text"><strong>Categoria:</strong> {{ anuncio.categoria.nome }}</p>
-                    <a href="{% url 'necessidade_detail' anuncio.pk %}" class="btn btn-primary btn-sm">Ver detalhes</a>
+                    <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="btn btn-primary btn-sm">Ver detalhes</a>
                 </div>
             </div>
         </div>

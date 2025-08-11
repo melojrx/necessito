@@ -26,7 +26,7 @@ class AvaliacaoCreateView(View):
         # ------------------------------------------------------------
         if necessidade.status != "finalizado":
             messages.error(request, "Apenas anúncios finalizados podem ser avaliados.")
-            return redirect("necessidade_detail", pk=necessidade.pk)
+            return redirect("ads:necessidade_detail", pk=necessidade.pk)
 
         orcamento_aceito = Orcamento.objects.filter(
             anuncio=necessidade, status="aceito"
@@ -35,13 +35,13 @@ class AvaliacaoCreateView(View):
 
         if request.user not in (necessidade.cliente, fornecedor):
             messages.error(request, "Você não tem permissão para avaliar este anúncio.")
-            return redirect("necessidade_detail", pk=necessidade.pk)
+            return redirect("ads:necessidade_detail", pk=necessidade.pk)
 
         if Avaliacao.objects.filter(
             usuario=request.user, anuncio=necessidade
         ).exists():
             messages.error(request, "Você já avaliou este anúncio.")
-            return redirect("necessidade_detail", pk=necessidade.pk)
+            return redirect("ads:necessidade_detail", pk=necessidade.pk)
 
         # ------------------------------------------------------------
         # 2) Tipo (cliente ↔ fornecedor) e criação do formulário
@@ -86,7 +86,7 @@ class AvaliacaoCreateView(View):
 
         if request.user != necessidade.cliente and request.user != fornecedor:
             messages.error(request, 'Você não tem permissão para avaliar este anúncio.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
+            return redirect('ads:necessidade_detail', pk=necessidade.pk)
 
         # Define o tipo de avaliação e quem será avaliado
         if request.user == necessidade.cliente:
@@ -129,7 +129,7 @@ class AvaliacaoCreateView(View):
             avaliacao.calcular_media()
 
             messages.success(request, 'Sua avaliação foi registrada com sucesso.')
-            return redirect('necessidade_detail', pk=necessidade.pk)
+            return redirect('ads:necessidade_detail', pk=necessidade.pk)
 
         # Se o formulário for inválido, exibe novamente com os erros
         context = {

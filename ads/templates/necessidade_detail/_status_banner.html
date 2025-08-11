@@ -1,0 +1,9 @@
+{% if status_info %}
+<div class="alert alert-{{ status_info.badge }} d-flex align-items-center" role="alert">
+    <i class="fas fa-info-circle fa-2x me-3"></i>
+    <div>
+        <h5 class="alert-heading mb-0">Status: {{ necessidade.get_status_display }}</h5>
+        <p class="mb-0">{{ status_info.texto }}</p>
+    </div>
+</div>
+{% endif %}

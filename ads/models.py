@@ -66,7 +66,7 @@ class Necessidade(models.Model):
     modificado_em = models.DateTimeField(blank=True, null=True, auto_now=True)
 
     def get_absolute_url(self):
-        return reverse('necessidade_detail', args=[str(self.pk)])
+        return reverse('ads:necessidade_detail', args=[str(self.pk)])
     
     @property
     def result_type(self):

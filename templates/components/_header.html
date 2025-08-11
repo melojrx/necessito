@@ -34,7 +34,7 @@
 </style>
     <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'ads:home' %}">
                 <img src="{% static 'img/logo2.png' %}" alt="Indicaai" height="50" class="d-inline-block align-top me-2">
                 <span class="fs-3 fw-semibold" style="color: #545b62;">Indicaai</span>
             </a>
@@ -134,17 +134,17 @@
                             Olá, {{ user.first_name|capfirst }}!
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'minha_conta_detail' user.pk %}">
+                            <li><a class="dropdown-item" href="{% url 'users:minha_conta_detail' user.pk %}">
                                     <i class="fas fa-user"></i> Minha Conta
                                 </a></li>
-                            <li><a class="dropdown-item" href="{% url 'necessidade_list' %}">
+                            <li><a class="dropdown-item" href="{% url 'ads:necessidade_list' %}">
                                     <i class="fas fa-bullhorn"></i> Meus Anúncios
                                 </a></li>
-                            <li><a class="dropdown-item" href="{% url 'budget_list' %}">
+                            <li><a class="dropdown-item" href="{% url 'budgets:budget_list' %}">
                                     <i class="far fa-list-alt"></i> Meus Orçamentos
                                 </a></li>
                             <li>
-                                <li><a class="dropdown-item" href="{% url 'dashboard' %}">
+                                <li><a class="dropdown-item" href="{% url 'ads:dashboard' %}">
                                     <i class="fas fa-tachometer-alt"></i> Dashboard
                                 </a></li>
                             <li>
@@ -156,7 +156,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                            <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
                                     <i class="fas fa-sign-out-alt"></i> Sair
                                 </a></li>
                         </ul>
@@ -165,13 +165,13 @@
                     {% else %}
                     <!-- Links de Login e Registro -->
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'login' %}"
+                        <a class="nav-link d-flex align-items-center" href="{% url 'users:login' %}"
                             style="font-size: 14px; white-space: nowrap;">
                             <i class="fas fa-sign-in-alt me-2"></i> Login
                         </a>
                     </li>
                     <li class="nav-item ms-lg-3">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'register' %}"
+                        <a class="nav-link d-flex align-items-center" href="{% url 'users:register' %}"
                             style="font-size: 14px; white-space: nowrap;">
                             <i class="fas fa-user-plus me-2"></i> Registrar
                         </a>
@@ -180,7 +180,7 @@
 
                     <!-- Botão "Anunciar grátis" -->
                     <li class="nav-item ms-lg-3">
-                        <a href="{% url 'necessidade_create' %}"
+                        <a href="{% url 'ads:necessidade_create' %}"
                             class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center"
                             style="font-size: 14px; height: 45px; min-width: 180px; white-space: nowrap;">
                             <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
@@ -233,7 +233,7 @@
                                 </div>
                                 <div class="d-flex w-100 justify-content-between">
                                 {% if notificacao.necessidade %}
-                                    <a href="{% url 'necessidade_detail' notificacao.necessidade.id %}" class="btn btn-sm btn-primary mt-2">
+                                    <a href="{% url 'ads:necessidade_detail' notificacao.necessidade.id %}" class="btn btn-sm btn-primary mt-2">
                                         <i class="fas fa-bullhorn me-2"></i> Visualizar Anúncio
                                     </a>
                                 {% endif %}

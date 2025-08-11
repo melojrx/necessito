@@ -3,7 +3,7 @@
   <ul class="list-group sticky-top" style="top:80px;">
     {% for cat in menu_categorias %}
     <li class="list-group-item border-0 py-2">
-      <a href="{% url 'category_detail' cat.pk %}" class="d-flex align-items-center text-decoration-none text-dark small">
+      <a href="{% url 'categories:category_detail' cat.pk %}" class="d-flex align-items-center text-decoration-none text-dark small">
         {% if cat.icone %}
           <i class="{{ cat.icone }} me-2 text-secondary"></i>
         {% else %}

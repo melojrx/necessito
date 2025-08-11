@@ -256,7 +256,7 @@ def iniciar_chat(request, necessidade_id):
     # Verificar se não é o próprio cliente
     if request.user == necessidade.cliente:
         messages.error(request, "Você não pode iniciar um chat com sua própria necessidade.")
-        return redirect('necessidade_detail', pk=necessidade.id)
+        return redirect('ads:necessidade_detail', pk=necessidade.id)
     
     # Verificar se o fornecedor tem orçamento para esta necessidade
     orcamento = Orcamento.objects.filter(
@@ -266,7 +266,7 @@ def iniciar_chat(request, necessidade_id):
     
     if not orcamento:
         messages.error(request, f"Você precisa enviar um orçamento antes de iniciar o chat. (Usuário: {request.user.email})")
-        return redirect('necessidade_detail', pk=necessidade.id)
+        return redirect('ads:necessidade_detail', pk=necessidade.id)
     
     # Buscar ou criar chat room
     chat_room, created = ChatRoom.objects.get_or_create(

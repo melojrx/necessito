@@ -1,0 +1,733 @@
+<style>
+/* ===== SIDEBAR MODERNA ===== */
+
+.sidebar-modern .sidebar-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e8ecf0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barra colorida no topo de cada card */
+.sidebar-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--card-color, linear-gradient(90deg, #0d6efd 0%, #6f42c1 100%));
+}
+
+/* Cores específicas para cada tipo de card */
+.anunciante-card { --card-color: linear-gradient(90deg, #0d6efd 0%, #6f42c1 100%); }
+.acoes-card { --card-color: linear-gradient(90deg, #20c997 0%, #0dcaf0 100%); }
+.mapa-card { --card-color: linear-gradient(90deg, #fd7e14 0%, #ffc107 100%); }
+.stats-card { --card-color: linear-gradient(90deg, #dc3545 0%, #e91e63 100%); }
+
+.sidebar-card-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-card-title i {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card-color, #0d6efd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.anunciante-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.anunciante-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    border: 3px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.anunciante-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.anunciante-details h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.anunciante-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.anunciante-meta i {
+    color: #0d6efd;
+    margin-right: 0.5rem;
+    width: 16px;
+}
+
+.anunciante-rating {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.anunciante-rating i {
+    color: #ffc107;
+    margin-right: 0.25rem;
+}
+
+.sidebar-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.sidebar-btn:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-btn.primary {
+    background: linear-gradient(135deg, #0d6efd, #6f42c1);
+    color: white;
+    border-color: transparent;
+}
+
+.sidebar-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+    color: white;
+}
+
+.sidebar-btn.success {
+    background: linear-gradient(135deg, #20c997, #198754);
+    color: white;
+    border-color: transparent;
+}
+
+.sidebar-btn.success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(32, 201, 151, 0.3);
+    color: white;
+}
+
+.sidebar-btn.outline {
+    background: transparent;
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+.sidebar-btn.outline:hover {
+    background: #f8f9fa;
+    color: #495057;
+    border-color: #adb5bd;
+}
+
+.sidebar-btn:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.mapa-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    height: 250px;
+    position: relative;
+}
+
+.mapa-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0fe 100%);
+    color: #6c757d;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mapa-loading i {
+    font-size: 2rem;
+    color: #fd7e14;
+}
+
+.localizacao-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-item {
+    background: #f8f9ff;
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 3px solid #fd7e14;
+    text-align: center;
+}
+
+.info-item i {
+    color: #fd7e14;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-item h6 {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e8ecf0;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--stat-color, #dc3545);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto 1rem;
+    font-size: 1.2rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cores para diferentes stats */
+.stat-views { --stat-color: #0dcaf0; }
+.stat-orcamentos { --stat-color: #198754; }
+.stat-tempo { --stat-color: #fd7e14; }
+.stat-categoria { --stat-color: #6f42c1; }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .sidebar-modern {
+        margin-top: 2rem;
+    }
+    
+    .sidebar-card {
+        padding: 1.5rem;
+    }
+    
+    .anunciante-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .anunciante-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .localizacao-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+.sidebar-card {
+    opacity: 0;
+    animation: fadeInRight 0.5s ease forwards;
+}
+
+.sidebar-card:nth-child(1) { animation-delay: 0.1s; }
+.sidebar-card:nth-child(2) { animation-delay: 0.2s; }
+.sidebar-card:nth-child(3) { animation-delay: 0.3s; }
+.sidebar-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
+
+<div class="sidebar-modern">
+    <!-- Card do Anunciante -->
+    <div class="sidebar-card anunciante-card">
+        <h3 class="sidebar-card-title">
+            <i class="fas fa-user"></i>
+            Anunciante
+        </h3>
+        
+        <div class="anunciante-info">
+            <div class="anunciante-avatar">
+                {% if necessidade.cliente.foto %}
+                    <img src="{{ necessidade.cliente.foto.url }}" alt="{{ necessidade.cliente.get_full_name }}">
+                {% else %}
+                    {{ necessidade.cliente.get_full_name|first|upper }}
+                {% endif %}
+            </div>
+            
+            <div class="anunciante-details">
+                <h4>{{ necessidade.cliente.get_full_name|capfirst }}</h4>
+                
+                <div class="anunciante-meta">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Membro desde {{ necessidade.cliente.date_joined|date:"M/Y" }}</span>
+                </div>
+                
+                <div class="anunciante-meta">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ necessidade.cliente.cidade|default:"Localização não informada" }}</span>
+                </div>
+                
+                <div class="anunciante-rating">
+                    <i class="fas fa-star"></i>
+                    <span>{{ necessidade.cliente.get_rating|default:"Novo usuário" }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <a href="{% url 'users:user_profile' necessidade.cliente.pk %}" class="sidebar-btn primary">
+            <i class="fas fa-eye"></i>
+            <span>Ver Perfil Completo</span>
+        </a>
+    </div>
+
+    <!-- Card de Ações Rápidas -->
+    <div class="sidebar-card acoes-card">
+        <h3 class="sidebar-card-title">
+            <i class="fas fa-bolt"></i>
+            Ações Rápidas
+        </h3>
+        
+        {% if pode_ver_chat %}
+            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="sidebar-btn success">
+                <i class="fas fa-comments"></i>
+                <span>Conversar com {{ user_is_owner|yesno:"Fornecedor,Cliente" }}</span>
+            </a>
+        {% else %}
+            <button class="sidebar-btn outline" disabled data-bs-toggle="tooltip" 
+                    title="O chat é liberado quando o negócio está 'Em Atendimento'.">
+                <i class="fas fa-comments"></i>
+                <span>Chat Indisponível</span>
+            </button>
+        {% endif %}
+        
+        <button type="button" class="sidebar-btn success" data-bs-toggle="modal" data-bs-target="#compartilharModal">
+            <i class="fas fa-share-nodes"></i>
+            <span>Compartilhar Anúncio</span>
+        </button>
+        
+        {% if user.is_authenticated and user != necessidade.cliente %}
+            <button type="button" class="sidebar-btn outline" data-bs-toggle="modal" data-bs-target="#reportarModal">
+                <i class="fas fa-flag"></i>
+                <span>Reportar Problema</span>
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Card de Localização com Mapa -->
+    <div class="sidebar-card mapa-card">
+        <h3 class="sidebar-card-title">
+            <i class="fas fa-map-marker-alt"></i>
+            Localização
+        </h3>
+        
+        <div class="localizacao-info">
+            <div class="info-item">
+                <i class="fas fa-city"></i>
+                <h6>Cidade</h6>
+                <p>{{ necessidade.cliente.cidade|default:"N/I" }}</p>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-map"></i>
+                <h6>Estado</h6>
+                <p>{{ necessidade.cliente.estado|default:"N/I" }}</p>
+            </div>
+        </div>
+        
+        <div id="map" 
+             class="mapa-container"
+             data-lat="{{ necessidade.cliente.lat }}"
+             data-lon="{{ necessidade.cliente.lon }}">
+            <div class="mapa-loading">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Carregando mapa...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Estatísticas -->
+    <div class="sidebar-card stats-card">
+        <h3 class="sidebar-card-title">
+            <i class="fas fa-chart-bar"></i>
+            Estatísticas
+        </h3>
+        
+        <div class="stats-grid">
+            <div class="stat-card stat-views">
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-number">{{ necessidade.views|default:0 }}</div>
+                <div class="stat-label">Visualizações</div>
+            </div>
+            
+            <div class="stat-card stat-orcamentos">
+                <div class="stat-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="stat-number">{{ necessidade.orcamentos.count }}</div>
+                <div class="stat-label">Orçamentos</div>
+            </div>
+            
+            <div class="stat-card stat-tempo">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">{{ necessidade.data_criacao|timesince|truncatechars:10 }}</div>
+                <div class="stat-label">Publicado</div>
+            </div>
+            
+            <div class="stat-card stat-categoria">
+                <div class="stat-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-number">{{ necessidade.categoria.necessidade_set.count }}</div>
+                <div class="stat-label">Na Categoria</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script do Mapa Melhorado com Fallbacks -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    initializeMapWithFallbacks();
+    
+    // Escutar evento de reinicialização do mapa
+    document.addEventListener('reinitializeMap', function() {
+        console.log('Reinicializando mapa...');
+        initializeMapWithFallbacks();
+    });
+    
+    function initializeMapWithFallbacks() {
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error('Elemento do mapa não encontrado');
+            return;
+        }
+        
+        // Verificar se Leaflet está carregado
+        if (typeof L === 'undefined') {
+            console.error('Leaflet não carregado. Tentando carregar...');
+            loadLeafletAndInitialize();
+            return;
+        }
+        
+        // Obter coordenadas do elemento
+        const lat = mapElement.dataset.lat;
+        const lon = mapElement.dataset.lon;
+        
+        console.log('Dados do mapa:', { lat, lon });
+        
+        // Verificar se as coordenadas são válidas
+        if (hasValidCoordinates(lat, lon)) {
+            renderMapWithCoordinates(parseFloat(lat), parseFloat(lon));
+        } else {
+            // Tentar geolocalização por cidade/estado como fallback
+            attemptFallbackGeolocation();
+        }
+    }
+    
+    function hasValidCoordinates(lat, lon) {
+        return lat && lon && 
+               lat !== 'None' && lon !== 'None' && 
+               lat !== 'null' && lon !== 'null' &&
+               !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lon)) &&
+               parseFloat(lat) !== 0 && parseFloat(lon) !== 0;
+    }
+    
+    function renderMapWithCoordinates(lat, lon) {
+        try {
+            const mapElement = document.getElementById('map');
+            
+            // Limpar conteúdo de loading
+            mapElement.innerHTML = '';
+            
+            // Criar mapa
+            const map = L.map('map', {
+                center: [lat, lon],
+                zoom: 13,
+                zoomControl: true,
+                scrollWheelZoom: true,
+                attributionControl: true
+            });
+            
+            // Adicionar tiles com fallback
+            const tileUrls = [
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+                'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
+            ];
+            
+            let currentTileIndex = 0;
+            
+            function addTileLayer() {
+                if (currentTileIndex >= tileUrls.length) {
+                    console.error('Todos os serviços de mapas falharam');
+                    showMapError('Erro ao carregar tiles do mapa');
+                    return;
+                }
+                
+                const tileLayer = L.tileLayer(tileUrls[currentTileIndex], {
+                    attribution: currentTileIndex === 0 ? 
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' :
+                        '&copy; OpenStreetMap &copy; CartoDB',
+                    maxZoom: 18
+                });
+                
+                tileLayer.on('tileerror', function() {
+                    currentTileIndex++;
+                    map.removeLayer(tileLayer);
+                    addTileLayer();
+                });
+                
+                tileLayer.addTo(map);
+            }
+            
+            addTileLayer();
+            
+            // Adicionar marcador
+            const marker = L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <div style="text-align: center;">
+                    <strong>📍 Localização Aproximada</strong><br>
+                    <small>Anunciante desta região</small>
+                </div>
+            `).openPopup();
+            
+            // Evento para redimensionar o mapa quando necessário
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+            
+            console.log('Mapa inicializado com sucesso nas coordenadas:', lat, lon);
+            
+        } catch (error) {
+            console.error('Erro ao renderizar mapa:', error);
+            showMapError('Erro ao inicializar mapa');
+        }
+    }
+    
+    function attemptFallbackGeolocation() {
+        console.log('Tentando geolocalização por cidade/estado...');
+        
+        // Obter cidade e estado do HTML (se disponível)
+        const cidadeElement = document.querySelector('.info-item p');
+        const estadoElements = document.querySelectorAll('.info-item p');
+        
+        let cidade = null;
+        let estado = null;
+        
+        if (cidadeElement) {
+            cidade = cidadeElement.textContent.trim();
+        }
+        
+        if (estadoElements.length > 1) {
+            estado = estadoElements[1].textContent.trim();
+        }
+        
+        if (cidade && cidade !== 'N/I' && estado && estado !== 'N/I') {
+            geocodeByLocation(cidade, estado);
+        } else {
+            // Fallback para localização padrão do Brasil
+            showMapWithDefaultLocation();
+        }
+    }
+    
+    async function geocodeByLocation(cidade, estado) {
+        try {
+            const query = encodeURIComponent(`${cidade}, ${estado}, Brazil`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                
+                console.log('Geolocalização bem-sucedida:', { lat, lon, cidade, estado });
+                renderMapWithCoordinates(lat, lon);
+            } else {
+                throw new Error('Nenhum resultado encontrado');
+            }
+        } catch (error) {
+            console.error('Erro na geolocalização por cidade/estado:', error);
+            showMapWithDefaultLocation();
+        }
+    }
+    
+    function showMapWithDefaultLocation() {
+        console.log('Usando localização padrão do Brasil');
+        // Coordenadas do centro do Brasil (Brasília)
+        renderMapWithCoordinates(-15.7939, -47.8829);
+    }
+    
+    function loadLeafletAndInitialize() {
+        // Carregar Leaflet dinamicamente se não estiver disponível
+        const leafletCSS = document.createElement('link');
+        leafletCSS.rel = 'stylesheet';
+        leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(leafletCSS);
+        
+        const leafletJS = document.createElement('script');
+        leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        leafletJS.onload = function() {
+            setTimeout(initializeMapWithFallbacks, 100);
+        };
+        leafletJS.onerror = function() {
+            showMapError('Erro ao carregar Leaflet');
+        };
+        document.head.appendChild(leafletJS);
+    }
+    
+    function showMapError(message) {
+        const mapElement = document.getElementById('map');
+        if (mapElement) {
+            mapElement.innerHTML = `
+                <div class="mapa-loading">
+                    <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                    <span>${message}</span>
+                    <button onclick="location.reload()" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-refresh"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // Função para mostrar localização não disponível
+    function showLocationUnavailable() {
+        const mapElement = document.getElementById('map');
+        if (mapElement) {
+            mapElement.innerHTML = `
+                <div class="mapa-loading">
+                    <i class="fas fa-map-marker-alt" style="color: #6c757d;"></i>
+                    <span>Localização não disponível</span>
+                    <small class="d-block mt-2 text-muted">
+                        O anunciante não forneceu coordenadas precisas
+                    </small>
+                </div>
+            `;
+        }
+    }
+});
+</script>

@@ -132,7 +132,7 @@
                 <!-- Botões de ação -->
                 <div class="mt-3">
                     {% if is_cliente %}
-                        <a href="{% url 'necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-primary w-100 mb-2">
+                        <a href="{% url 'ads:necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-primary w-100 mb-2">
                             <i class="fas fa-eye"></i> Ver Necessidade
                         </a>
                         {% if chat_room.orcamento %}
@@ -141,11 +141,11 @@
                         </a>
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-success w-100 mb-2">
+                        <a href="{% url 'ads:necessidade_detail' chat_room.necessidade.pk %}" class="btn btn-sm btn-success w-100 mb-2">
                             <i class="fas fa-eye"></i> Ver Anúncio
                         </a>
                         {% if chat_room.orcamento %}
-                        <a href="{% url 'budget_list' %}" class="btn btn-sm btn-warning w-100">
+                        <a href="{% url 'budgets:budget_list' %}" class="btn btn-sm btn-warning w-100">
                             <i class="fas fa-edit"></i> Meus Orçamentos
                         </a>
                         {% endif %}

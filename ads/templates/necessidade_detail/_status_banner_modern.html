@@ -1,0 +1,400 @@
+{% load custom_filters %}
+
+<style>
+/* ===== STATUS BANNER MODERNO - BASEADO EM CATEGORY_LIST ===== */
+
+.status-banner-modern {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e8ecf0;
+}
+
+/* Barra de gradiente no topo - igual category_list */
+.status-gradient-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, 
+        var(--status-color-primary) 0%, 
+        var(--status-color-secondary) 50%, 
+        var(--status-color-tertiary) 100%
+    );
+}
+
+/* Cores específicas por status */
+.status-ativo {
+    --status-color-primary: #ffc107;
+    --status-color-secondary: #fd7e14;
+    --status-color-tertiary: #ff6b35;
+}
+
+.status-analisando_orcamentos {
+    --status-color-primary: #0dcaf0;
+    --status-color-secondary: #0d6efd;
+    --status-color-tertiary: #6f42c1;
+}
+
+.status-aguardando_confirmacao {
+    --status-color-primary: #fd7e14;
+    --status-color-secondary: #ffc107;
+    --status-color-tertiary: #ffca2c;
+}
+
+.status-em_atendimento {
+    --status-color-primary: #20c997;
+    --status-color-secondary: #198754;
+    --status-color-tertiary: #0f5132;
+}
+
+.status-finalizado {
+    --status-color-primary: #198754;
+    --status-color-secondary: #20c997;
+    --status-color-tertiary: #0f5132;
+}
+
+.status-cancelado {
+    --status-color-primary: #dc3545;
+    --status-color-secondary: #c82333;
+    --status-color-tertiary: #721c24;
+}
+
+.status-expirado {
+    --status-color-primary: #6c757d;
+    --status-color-secondary: #495057;
+    --status-color-tertiary: #343a40;
+}
+
+.status-em_disputa {
+    --status-color-primary: #e91e63;
+    --status-color-secondary: #ad1457;
+    --status-color-tertiary: #880e4f;
+}
+
+.status-banner-content {
+    padding: 2.5rem 2rem;
+}
+
+/* Ícone do status - igual ao category_list */
+.status-icon-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--status-color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.status-icon-large i {
+    font-size: 2.2rem;
+    color: white;
+}
+
+.status-banner-modern:hover .status-icon-large {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Informações do status */
+.status-info {
+    flex: 1;
+}
+
+.status-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.status-description {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Timeline de progresso */
+.status-timeline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.timeline-step {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+    position: relative;
+}
+
+.timeline-step.active {
+    color: var(--status-color-primary);
+    font-weight: 600;
+}
+
+.timeline-step::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dee2e6;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.timeline-step.active::before {
+    background: var(--status-color-primary);
+    box-shadow: 0 0 0 3px var(--status-color-primary)33;
+}
+
+.timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 21px;
+    top: 50%;
+    width: 2rem;
+    height: 2px;
+    background: #dee2e6;
+    transform: translateY(-50%);
+}
+
+.timeline-step.active:not(:last-child)::after {
+    background: var(--status-color-primary);
+}
+
+/* Barra de progresso */
+.progress-bar-custom {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--status-color-primary), var(--status-color-secondary));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Botões de ação no banner */
+.status-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.status-action-btn {
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: 2px solid var(--status-color-primary);
+    background: var(--status-color-primary);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-action-btn:hover {
+    background: transparent;
+    color: var(--status-color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.status-action-btn.outline {
+    background: transparent;
+    color: var(--status-color-primary);
+}
+
+.status-action-btn.outline:hover {
+    background: var(--status-color-primary);
+    color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .status-banner-content {
+        padding: 2rem 1.5rem;
+    }
+    
+    .status-main-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .status-icon-large {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .status-icon-large i {
+        font-size: 1.8rem;
+    }
+    
+    .status-title {
+        font-size: 1.5rem;
+    }
+    
+    .status-description {
+        font-size: 1rem;
+    }
+    
+    .timeline-step {
+        font-size: 0.8rem;
+    }
+    
+    .status-actions {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .status-action-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .timeline-step span {
+        display: none;
+    }
+    
+    .timeline-step::before {
+        margin-right: 0;
+    }
+    
+    .status-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .status-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<!-- Status Banner Moderno -->
+<div class="status-banner-modern status-{{ necessidade.status }}">
+    <div class="status-gradient-bar"></div>
+    
+    <div class="status-banner-content">
+        <div class="row align-items-center">
+            <!-- Coluna principal com informações -->
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center status-main-info">
+                    <!-- Ícone do status -->
+                    <div class="status-icon-large">
+                        <i class="{{ necessidade.status|status_icon }}"></i>
+                    </div>
+                    
+                    <!-- Informações do status -->
+                    <div class="status-info">
+                        <h3 class="status-title">{{ necessidade.status|status_title }}</h3>
+                        <p class="status-description">{{ necessidade.status|status_description }}</p>
+                        
+                        <!-- Timeline de progresso -->
+                        <div class="status-timeline">
+                            <div class="timeline-step {% if necessidade.status|status_level >= 1 %}active{% endif %}">
+                                <span>Criado</span>
+                            </div>
+                            <div class="timeline-step {% if necessidade.status|status_level >= 2 %}active{% endif %}">
+                                <span>Orçamentos</span>
+                            </div>
+                            <div class="timeline-step {% if necessidade.status|status_level >= 3 %}active{% endif %}">
+                                <span>Negócio</span>
+                            </div>
+                            <div class="timeline-step {% if necessidade.status|status_level >= 4 %}active{% endif %}">
+                                <span>Finalizado</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progresso -->
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: {{ necessidade.status|status_progress }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Coluna de ações -->
+            <div class="col-lg-4">
+                <div class="status-actions">
+                    <!-- Ações específicas por status -->
+                    {% if user == necessidade.cliente %}
+                        {% if necessidade.status == 'ativo' %}
+                            <a href="{% url 'ads:necessidade_update' necessidade.pk %}" class="status-action-btn">
+                                <i class="fas fa-edit"></i>
+                                <span>Editar</span>
+                            </a>
+                            <button class="status-action-btn outline" data-bs-toggle="modal" data-bs-target="#cancelarAnuncioModal">
+                                <i class="fas fa-times"></i>
+                                <span>Cancelar</span>
+                            </button>
+                        {% elif necessidade.status == 'analisando_orcamentos' %}
+                            <a href="#orcamentos-section" class="status-action-btn">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Ver Propostas</span>
+                            </a>
+                        {% elif necessidade.status == 'em_atendimento' %}
+                            <button class="status-action-btn" data-bs-toggle="modal" data-bs-target="#finalizarAnuncioModal">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Finalizar</span>
+                            </button>
+                        {% elif necessidade.status == 'finalizado' %}
+                            <a href="{% url 'rankings:avaliacao_create' necessidade.pk %}" class="status-action-btn">
+                                <i class="fas fa-star"></i>
+                                <span>Avaliar</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Ação universal de compartilhar -->
+                    <button class="status-action-btn outline" data-bs-toggle="modal" data-bs-target="#compartilharModal">
+                        <i class="fas fa-share"></i>
+                        <span>Compartilhar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,100 @@
+<!-- Modal: Compartilhar Anúncio -->
+<div class="modal fade" id="compartilharModal" tabindex="-1" aria-labelledby="compartilharModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="compartilharModalLabel"><i class="fas fa-share-nodes me-2"></i>Compartilhar Anúncio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <h6 class="fw-bold">{{ necessidade.titulo }}</h6>
+                    <p class="text-muted small">Compartilhe este anúncio e ajude a encontrar o que é preciso!</p>
+                </div>
+
+                <div class="row g-3" id="share-buttons-fallback">
+                    <!-- Botões de compartilhamento serão inseridos aqui pelo JS se a API nativa falhar -->
+                </div>
+
+                <div class="input-group mt-4">
+                    <input type="text" class="form-control" value="{{ request.build_absolute_uri }}" id="share-link-input" readonly>
+                    <button class="btn btn-outline-secondary" type="button" id="btnCopiarLink" data-bs-toggle="tooltip" title="Copiar Link">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btnCompartilharPrincipal = document.getElementById('btnCompartilhar');
+    const btnCopiarLink = document.getElementById('btnCopiarLink');
+    const shareLinkInput = document.getElementById('share-link-input');
+    const fallbackContainer = document.getElementById('share-buttons-fallback');
+
+    const shareData = {
+        title: `Procuro: {{ necessidade.titulo|escapejs }}`,
+        text: `Confira este anúncio no Indicaai: "{{ necessidade.titulo|escapejs }}". Saiba mais em:`,
+        url: '{{ request.build_absolute_uri }}'
+    };
+
+    const socialPlatforms = {
+        whatsapp: { name: 'WhatsApp', icon: 'fab fa-whatsapp', color: 'text-success', url: `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}` },
+        facebook: { name: 'Facebook', icon: 'fab fa-facebook', color: 'text-primary', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareData.url)}` },
+        twitter: { name: 'Twitter', icon: 'fab fa-twitter', color: 'text-info', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareData.url)}&text=${encodeURIComponent(shareData.text)}` },
+        linkedin: { name: 'LinkedIn', icon: 'fab fa-linkedin', color: 'text-primary', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareData.url)}` },
+        telegram: { name: 'Telegram', icon: 'fab fa-telegram', color: 'text-info', url: `https://t.me/share/url?url=${encodeURIComponent(shareData.url)}&text=${encodeURIComponent(shareData.text)}` }
+    };
+
+    function showFallback() {
+        fallbackContainer.innerHTML = '';
+        for (const [key, platform] of Object.entries(socialPlatforms)) {
+            const button = `
+                <div class="col-6">
+                    <a href="${platform.url}" target="_blank" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="${platform.icon} fa-2x mb-2 ${platform.color}"></i>
+                        <div class="small fw-bold">${platform.name}</div>
+                    </a>
+                </div>`;
+            fallbackContainer.innerHTML += button;
+        }
+    }
+
+    if (btnCompartilharPrincipal) {
+        btnCompartilharPrincipal.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    // O usuário cancelou o compartilhamento, não faz nada ou mostra o modal de fallback
+                    showFallback();
+                    new bootstrap.Modal(document.getElementById('compartilharModal')).show();
+                }
+            } else {
+                // Navegador não suporta a API, mostra o modal com os botões de fallback
+                showFallback();
+            }
+        });
+    }
+
+    if (btnCopiarLink && shareLinkInput) {
+        btnCopiarLink.addEventListener('click', () => {
+            navigator.clipboard.writeText(shareLinkInput.value).then(() => {
+                const originalIcon = btnCopiarLink.innerHTML;
+                btnCopiarLink.innerHTML = '<i class="fas fa-check text-success"></i>';
+                btnCopiarLink.setAttribute('data-bs-original-title', 'Copiado!');
+                const tooltip = bootstrap.Tooltip.getInstance(btnCopiarLink);
+                tooltip.show();
+
+                setTimeout(() => {
+                    btnCopiarLink.innerHTML = originalIcon;
+                    btnCopiarLink.setAttribute('data-bs-original-title', 'Copiar Link');
+                    tooltip.hide();
+                }, 2000);
+            });
+        });
+    }
+});
+</script>

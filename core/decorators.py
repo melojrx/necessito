@@ -29,14 +29,14 @@ def client_required(function=None, redirect_url=None):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('users:login')
             
             if not request.user.is_client:
                 messages.warning(
                     request, 
                     "Para acessar esta funcionalidade, você precisa completar seu perfil como cliente."
                 )
-                return redirect(redirect_url or 'complete_profile')
+                return redirect(redirect_url or 'users:complete_profile')
             
             return view_func(request, *args, **kwargs)
         return wrapper
@@ -54,14 +54,14 @@ def supplier_required(function=None, redirect_url=None):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('users:login')
             
             if not request.user.is_supplier:
                 messages.warning(
                     request, 
                     "Para acessar esta funcionalidade, você precisa completar seu perfil como fornecedor."
                 )
-                return redirect(redirect_url or 'complete_profile')
+                return redirect(redirect_url or 'users:complete_profile')
             
             return view_func(request, *args, **kwargs)
         return wrapper
@@ -78,14 +78,14 @@ def profile_complete_required(function=None, redirect_url=None):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('users:login')
             
             if not (request.user.is_client or request.user.is_supplier):
                 messages.info(
                     request, 
                     "Complete seu perfil para acessar esta funcionalidade."
                 )
-                return redirect(redirect_url or 'complete_profile')
+                return redirect(redirect_url or 'users:complete_profile')
             
             return view_func(request, *args, **kwargs)
         return wrapper
@@ -105,7 +105,7 @@ def owner_required(owner_field='cliente'):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('users:login')
             
             # Assumindo que a view tem um método get_object() ou similar
             # Esta lógica pode ser refinada conforme necessário
@@ -121,7 +121,7 @@ def email_verified_required(function=None, redirect_url=None):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('users:login')
             
             if not request.user.email_verified:
                 messages.warning(

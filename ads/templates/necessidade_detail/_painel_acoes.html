@@ -1,0 +1,54 @@
+<div class="d-flex flex-wrap gap-2 action-buttons-group">
+
+    <!-- Ações do Dono do Anúncio -->
+    {% if user_is_owner %}
+        {% if pode_editar %}
+            <a href="{% url 'ads:necessidade_update' necessidade.pk %}" class="btn btn-warning">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+            </a>
+        {% endif %}
+        {% if pode_cancelar %}
+            <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" class="btn btn-danger">
+                <i class="fa-solid fa-trash-can me-1"></i> Cancelar
+            </a>
+        {% endif %}
+        {% if pode_finalizar %}
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#finalizarAnuncioModal">
+                <i class="fas fa-check-circle me-1"></i> Finalizar Anúncio
+            </button>
+        {% endif %}
+    {% endif %}
+
+    <!-- Ações do Fornecedor -->
+    {% if user_is_supplier %}
+        {% if pode_enviar_orcamento %}
+            <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-success">
+                <i class="fas fa-file-invoice-dollar me-1"></i> Enviar Meu Orçamento
+            </a>
+        {% endif %}
+
+        {% if pode_confirmar_ou_recusar_acordo %}
+            <a href="{% url 'budgets:fornecedor_aceitar_orcamento' orcamento_aguardando_confirmacao.pk %}" class="btn btn-success">
+                <i class="fas fa-thumbs-up me-1"></i> Confirmar Acordo
+            </a>
+            <a href="{% url 'budgets:fornecedor_recusar_orcamento' orcamento_aguardando_confirmacao.pk %}" class="btn btn-danger">
+                <i class="fas fa-thumbs-down me-1"></i> Recusar Acordo
+            </a>
+        {% endif %}
+    {% endif %}
+
+    <!-- Ação de Avaliação (para ambos) -->
+    {% if pode_avaliar %}
+        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#avaliacaoModal">
+            <i class="fas fa-star me-1"></i> Avaliar Negociação
+        </button>
+    {% endif %}
+    
+    <!-- Ação de Disputa (para ambos) -->
+    {% if pode_iniciar_disputa %}
+        <a href="{% url 'disputes:iniciar_disputa' anuncio_id=necessidade.pk orcamento_id=orcamento_confirmado.pk %}" class="btn btn-outline-danger">
+            <i class="fas fa-gavel me-1"></i> Abrir Disputa
+        </a>
+    {% endif %}
+    
+</div>

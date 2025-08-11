@@ -385,11 +385,11 @@
     <div class="container">
         <!-- Breadcrumb -->
         <nav class="categoria-breadcrumb animate-fade-in">
-            <a href="{% url 'home' %}" class="breadcrumb-item">
+            <a href="{% url 'ads:home' %}" class="breadcrumb-item">
                 <i class="fas fa-home"></i> Home
             </a>
             <span class="breadcrumb-separator">/</span>
-            <a href="{% url 'category_list' %}" class="breadcrumb-item">Categorias</a>
+            <a href="{% url 'categories:category_list' %}" class="breadcrumb-item">Categorias</a>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-item active">{{ categoria.nome }}</span>
         </nav>
@@ -422,11 +422,11 @@
             
             <!-- Botões de ação -->
             <div class="action-buttons">
-                <a href="{% url 'anuncios_por_categoria' categoria.id %}" class="btn-categoria btn-categoria-primary">
+                <a href="{% url 'ads:anuncios_por_categoria' categoria.id %}" class="btn-categoria btn-categoria-primary">
                     <i class="fas fa-bullhorn"></i>
                     Ver Anúncios ({{ categoria.necessidade_set.count }})
                 </a>
-                <a href="{% url 'category_list' %}" class="btn-categoria btn-categoria-secondary">
+                <a href="{% url 'categories:category_list' %}" class="btn-categoria btn-categoria-secondary">
                     <i class="fas fa-arrow-left"></i>
                     Voltar às Categorias
                 </a>

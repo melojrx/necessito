@@ -299,7 +299,7 @@
                         <div class="row g-4">
                             {% for categoria in categoria_group %}
                             <div class="col-lg-2 col-md-3 col-sm-4">
-                                <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-modern categoria-color-{{ forloop.counter }}">
+                                <a href="{% url 'categories:category_detail' categoria.id %}" class="categoria-card-modern categoria-color-{{ forloop.counter }}">
                                     <div class="categoria-icon-circle">
                                         <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
                                     </div>
@@ -330,7 +330,7 @@
         <!-- MOBILE: Cards otimizados -->
         <div class="d-block d-md-none">
             {% for categoria in categorias|slice:":8" %}
-            <a href="{% url 'category_detail' categoria.id %}" class="categoria-card-mobile categoria-color-{{ forloop.counter }}">
+            <a href="{% url 'categories:category_detail' categoria.id %}" class="categoria-card-mobile categoria-color-{{ forloop.counter }}">
                 <div class="categoria-icon-mobile">
                     <i class="{{ categoria.icone|default:'fas fa-tag' }}"></i>
                 </div>

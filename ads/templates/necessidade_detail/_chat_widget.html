@@ -1,0 +1,427 @@
+{% load chat_tags %}
+
+<style>
+/* ===== WIDGET DE CHAT INTEGRADO ===== */
+
+.chat-widget-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e8ecf0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barra colorida no topo */
+.chat-widget-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #20c997 0%, #0dcaf0 50%, #0d6efd 100%);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chat-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.chat-title i {
+    color: #20c997;
+    margin-right: 0.75rem;
+}
+
+.chat-status {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.online-indicator {
+    width: 8px;
+    height: 8px;
+    background: #198754;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+}
+
+.chat-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.chat-action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 2px solid #20c997;
+    background: transparent;
+    color: #20c997;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.chat-action-btn:hover {
+    background: #20c997;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+}
+
+.chat-action-btn.primary {
+    background: #20c997;
+    color: white;
+}
+
+.chat-action-btn.primary:hover {
+    background: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.chat-preview {
+    background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #d4edda;
+    margin-bottom: 1.5rem;
+}
+
+.chat-preview-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.chat-preview-title i {
+    color: #198754;
+    margin-right: 0.5rem;
+}
+
+.message-preview {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #20c997;
+    font-size: 0.9rem;
+    color: #495057;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.message-preview:last-child {
+    margin-bottom: 0;
+}
+
+.message-preview.empty {
+    color: #6c757d;
+    font-style: italic;
+    border-left-color: #dee2e6;
+    background: #f8f9fa;
+}
+
+.chat-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    color: #20c997;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.no-chat {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.no-chat-icon {
+    font-size: 2.5rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.no-chat-text {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.enable-chat-btn {
+    background: linear-gradient(135deg, #20c997, #0dcaf0);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    border: none;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.enable-chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(32, 201, 151, 0.3);
+    color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .chat-widget-container {
+        padding: 1.5rem;
+    }
+    
+    .chat-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .chat-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .chat-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .chat-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .chat-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+.chat-widget-container {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.message-preview {
+    opacity: 0;
+    animation: fadeInLeft 0.5s ease forwards;
+}
+
+.message-preview:nth-child(1) { animation-delay: 0.1s; }
+.message-preview:nth-child(2) { animation-delay: 0.2s; }
+.message-preview:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
+
+<!-- Widget de Chat (aparece apenas quando em_atendimento) -->
+{% if necessidade.status == 'em_atendimento' %}
+    {% comment %}
+    Buscar informações do chat para este anúncio
+    Neste caso, precisaríamos do fornecedor vencedor (orçamento confirmado)
+    {% endcomment %}
+    
+    {% with orcamento_vencedor=necessidade.orcamentos.confirmados.first %}
+        {% if orcamento_vencedor %}
+            <div class="chat-widget-container">
+                <!-- Header do chat -->
+                <div class="chat-header">
+                    <div>
+                        <h3 class="chat-title">
+                            <i class="fas fa-comments"></i>
+                            Chat com {{ orcamento_vencedor.fornecedor.get_full_name }}
+                        </h3>
+                        <div class="chat-status">
+                            <span class="online-indicator"></span>
+                            <span>Conversa ativa - Serviço em andamento</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-actions">
+                        <a href="{% url 'chat:lista_chats' %}" class="chat-action-btn">
+                            <i class="fas fa-list"></i>
+                            <span>Todos os Chats</span>
+                        </a>
+                        <a href="{% url 'chat:chat_detail' necessidade.pk %}" class="chat-action-btn primary">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>Abrir Chat Completo</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Preview das mensagens recentes -->
+                <div class="chat-preview">
+                    <h4 class="chat-preview-title">
+                        <i class="fas fa-clock"></i>
+                        Últimas Mensagens
+                    </h4>
+                    
+                    {% comment %}
+                    Aqui seria ideal buscar as mensagens mais recentes do chat
+                    Por enquanto, vamos simular com uma estrutura padrão
+                    {% endcomment %}
+                    
+                    <div class="message-preview">
+                        <strong>{{ orcamento_vencedor.fornecedor.get_full_name }}:</strong>
+                        Olá! Vou começar o trabalho conforme combinado.
+                    </div>
+                    
+                    <div class="message-preview">
+                        <strong>Você:</strong>
+                        Perfeito! Estou aguardando o andamento.
+                    </div>
+                    
+                    <div class="message-preview empty">
+                        Início da conversa - Use o chat para se comunicar diretamente com o fornecedor
+                    </div>
+                </div>
+                
+                <!-- Estatísticas do chat -->
+                <div class="chat-stats">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Mensagens</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="stat-number">{{ orcamento_vencedor.fornecedor.get_full_name|truncatechars:10 }}</div>
+                        <div class="stat-label">Fornecedor</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number">{{ necessidade.modificado_em|timesince|truncatechars:10 }}</div>
+                        <div class="stat-label">Último Update</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="stat-number">{{ orcamento_vencedor.get_total_geral|floatformat:0 }}</div>
+                        <div class="stat-label">Valor (R$)</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+{% elif necessidade.status == 'finalizado' %}
+    <!-- Mensagem quando já finalizado -->
+    <div class="chat-widget-container">
+        <div class="no-chat">
+            <i class="fas fa-check-circle no-chat-icon"></i>
+            <h4>Serviço Finalizado</h4>
+            <p class="no-chat-text">
+                O chat foi arquivado após a finalização do serviço.
+                Você ainda pode acessar o histórico de conversas.
+            </p>
+            <a href="{% url 'chat:lista_chats' %}" class="enable-chat-btn">
+                <i class="fas fa-history"></i>
+                <span>Ver Histórico de Chats</span>
+            </a>
+        </div>
+    </div>
+    
+{% else %}
+    <!-- Mensagem para outros status -->
+    <div class="chat-widget-container">
+        <div class="no-chat">
+            <i class="fas fa-comments-slash no-chat-icon"></i>
+            <h4>Chat Indisponível</h4>
+            <p class="no-chat-text">
+                O chat será habilitado automaticamente quando um fornecedor confirmar o serviço.
+            </p>
+            {% if necessidade.status == 'analisando_orcamentos' %}
+                <a href="#orcamentos-section" class="enable-chat-btn">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ver Orçamentos Recebidos</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

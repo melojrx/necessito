@@ -106,10 +106,10 @@
         {% if user.is_authenticated %}
         {# Editar / Excluir – apenas para o cliente dono #}
         {% if user == necessidade.cliente %}
-        <a href="{% url 'necessidade_update' necessidade.pk %}" class="btn btn-warning">
+        <a href="{% url 'ads:necessidade_update' necessidade.pk %}" class="btn btn-warning">
           <i class="fa-solid fa-pen-to-square"></i> Editar
         </a>
-        <a href="{% url 'necessidade_delete' necessidade.pk %}" class="btn btn-danger">
+        <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" class="btn btn-danger">
           <i class="fa-solid fa-trash-can"></i> Excluir
         </a>
         {% endif %}
@@ -118,7 +118,7 @@
         {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
         {% for orcamento in necessidade.orcamentos.all %}
         {% if orcamento.status == 'aceito' %}
-        <button class="btn btn-primary btn-finalizar" data-url="{% url 'finalizar_anuncio' necessidade.pk %}"
+        <button class="btn btn-primary btn-finalizar" data-url="{% url 'ads:finalizar_anuncio' necessidade.pk %}"
           data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" title="Finalizar Anúncio">
           <i class="fas fa-check-circle"></i> Finalizar Anúncio
         </button>
@@ -143,7 +143,7 @@
         {% endif %}
         {% endif %}
         {% else %}
-        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+        <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
           Faça login para interagir
         </a>
         {% endif %}
@@ -328,7 +328,7 @@
             </p>
             {% if user != necessidade.cliente and necessidade.status in 'ativo,em_andamento' %}
             <div class="mt-3">
-              <a href="{% url 'submeter_orcamento' necessidade.id %}" class="btn btn-primary">
+              <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-primary">
                 <i class="fas fa-file-invoice-dollar me-2"></i>
                 Enviar Meu Orçamento
               </a>
@@ -346,11 +346,11 @@
               Entre na sua conta para ter acesso a mais informações sobre este anúncio.
             </p>
             <div class="mt-3">
-              <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-info">
+              <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-info">
                 <i class="fas fa-sign-in-alt me-2"></i>
                 Entrar
               </a>
-              <a href="{% url 'register' %}" class="btn btn-outline-info ms-2">
+              <a href="{% url 'users:register' %}" class="btn btn-outline-info ms-2">
                 <i class="fas fa-user-plus me-2"></i>
                 Cadastrar
               </a>
@@ -381,7 +381,7 @@
               <span>Contato</span>
             </a>
             <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
-                                 {% url 'submeter_orcamento' necessidade.id %}
+                                 {% url 'budgets:submeter_orcamento' necessidade.id %}
                              {% else %}#{% endif %}"
               class="btn btn-warning btn-sm d-flex align-items-center justify-content-center flex-fill
                                 {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
@@ -423,7 +423,7 @@
                   <i class="fas fa-comments"></i> Conversar com Cliente
                 </a>
 
-                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary w-100">
+                <a href="{% url 'budgets:budget_list' %}" class="btn btn-outline-secondary w-100">
                   <i class="fas fa-edit"></i> Ver Meu Orçamento
                 </a>
               {% else %}
@@ -433,7 +433,7 @@
                   Para conversar com o cliente, você precisa primeiro enviar um orçamento.
                 </p>
 
-                <a href="{% url 'submeter_orcamento' necessidade.id %}" class="btn btn-success w-100 mb-2">
+                <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-success w-100 mb-2">
                   <i class="fas fa-file-invoice-dollar"></i> Enviar Orçamento
                 </a>
 
@@ -458,7 +458,7 @@
               <p class="text-muted small mb-3">
                 Atualize seu perfil marcando a opção "Fornecedor" para poder enviar orçamentos e participar de negócios.
               </p>
-              <a href="{% url 'minha_conta_update' user.pk %}" class="btn btn-warning">
+              <a href="{% url 'users:minha_conta_update' user.pk %}" class="btn btn-warning">
                 <i class="fas fa-user-edit me-1"></i> Atualizar Perfil
               </a>
             </div>
@@ -495,7 +495,7 @@
               <p><strong>Nome:</strong> {{ necessidade.cliente.get_full_name|capfirst }}</p>
               <p><strong>Último Acesso:</strong> {{ necessidade.cliente.last_login|date:"d/m/Y H:i" }}</p>
               <p><strong>Data de Cadastro:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</p>
-              <a href="{% url 'user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
+              <a href="{% url 'users:user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
                 <i class="fas fa-user me-2"></i> Ver Perfil
               </a>
             </div>
@@ -561,7 +561,7 @@
 
         <!-- LADO DIREITO: FORMULÁRIO -->
         <div class="col-md-8 p-4">
-          <form method="post" action="{% url 'enviar_mensagem' necessidade.pk %}">
+          <form method="post" action="{% url 'ads:enviar_mensagem' necessidade.pk %}">
             {% csrf_token %}
 
             <div class="mb-3">

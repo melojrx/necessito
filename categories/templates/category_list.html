@@ -402,7 +402,7 @@
         <!-- Grid de categorias -->
         <div class="categorias-grid" id="categoriasGrid">
             {% for categoria in categorias %}
-            <a href="{% url 'category_detail' categoria.pk %}" 
+            <a href="{% url 'categories:category_detail' categoria.pk %}" 
                class="categoria-card-full categoria-color-{{ forloop.counter|add:0|divisibleby:12|yesno:"12,"|default:forloop.counter }}"
                data-categoria-nome="{{ categoria.nome|lower }}"
                data-categoria-descricao="{{ categoria.descricao|lower|default:'' }}">

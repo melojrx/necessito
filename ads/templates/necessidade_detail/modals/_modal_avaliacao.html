@@ -1,0 +1,62 @@
+<!-- Modal: Avaliação -->
+<div class="modal fade" id="avaliacaoModal" tabindex="-1" aria-labelledby="avaliacaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="avaliacaoModalLabel"><i class="fas fa-star-half-alt me-2"></i>Avaliar Negociação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="avaliacao-form-container" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando formulário de avaliação...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const avaliacaoModal = document.getElementById('avaliacaoModal');
+    const formContainer = document.getElementById('avaliacao-form-container');
+
+    if (avaliacaoModal && formContainer) {
+        avaliacaoModal.addEventListener('show.bs.modal', function () {
+            // Mostra o spinner sempre que o modal for aberto
+            formContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando formulário de avaliação...</p>
+                </div>`;
+
+            // Busca o formulário via AJAX
+            fetch("{% url 'rankings:avaliar_negociacao' necessidade.pk %}", {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao carregar o formulário.');
+                return response.text();
+            })
+            .then(html => {
+                formContainer.innerHTML = html;
+                // O script para submissão do formulário de avaliação
+                // e para o sistema de estrelas deve estar no template do formulário
+                // para garantir que ele seja executado após o carregamento do conteúdo.
+            })
+            .catch(error => {
+                console.error('Erro ao carregar formulário de avaliação:', error);
+                formContainer.innerHTML = `
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Não foi possível carregar o formulário. Por favor, tente novamente mais tarde.
+                    </div>`;
+            });
+        });
+    }
+});
+</script>

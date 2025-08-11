@@ -142,14 +142,14 @@ class NecessidadeCreateView(ClientRequiredMixin, EmailVerifiedRequiredMixin, Cre
     model = Necessidade
     form_class = AdsForms
     template_name = 'necessidade_create_modern.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('ads:home')
 
     def form_valid(self, form):
         # Validação adicional usando o sistema de permissões
         can_create, message = PermissionValidator.can_create_ad(self.request.user)
         if not can_create:
             messages.error(self.request, message)
-            return redirect('home')
+            return redirect('ads:home')
         
         # Salvar a instância principal primeiro
         self.object = form.save(commit=False)
@@ -237,7 +237,7 @@ class NecessidadeDetailView(DetailView):
     model = Necessidade
     template_name = 'necessidade_detail.html'
     context_object_name = 'necessidade'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('ads:home')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -375,7 +375,7 @@ class DashboardView(AdminRequiredMixin, TemplateView):
         can_access, message = PermissionValidator.can_access_dashboard(self.request.user)
         if not can_access:
             messages.error(self.request, message)
-            return redirect('home')
+            return redirect('ads:home')
         
         context['ads_metrics'] = get_ads_metrics()
         context['valores_metrics'] = get_valores_metrics()
@@ -468,7 +468,7 @@ def enviar_mensagem(request, pk):
         )
         
         messages.success(request, 'Mensagem enviada com sucesso!')
-        return redirect('necessidade_detail', pk=pk)
+        return redirect('ads:necessidade_detail', pk=pk)
 
 
 def dados_compartilhamento(request, pk):
@@ -480,7 +480,7 @@ def dados_compartilhamento(request, pk):
     
     # Construir URL completa
     url_completa = request.build_absolute_uri(
-        reverse('necessidade_detail', kwargs={'pk': pk})
+        reverse('ads:necessidade_detail', kwargs={'pk': pk})
     )
     
     # Texto estruturado para compartilhamento

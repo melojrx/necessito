@@ -18,7 +18,7 @@ class ClientRequiredMixin(LoginRequiredMixin):
                 request, 
                 "Para acessar esta funcionalidade, você precisa completar seu perfil como cliente."
             )
-            return redirect('complete_profile')
+            return redirect('users:complete_profile')
         
         return super().dispatch(request, *args, **kwargs)
 
@@ -35,7 +35,7 @@ class SupplierRequiredMixin(LoginRequiredMixin):
                 request, 
                 "Para acessar esta funcionalidade, você precisa completar seu perfil como fornecedor."
             )
-            return redirect('complete_profile')
+            return redirect('users:complete_profile')
         
         return super().dispatch(request, *args, **kwargs)
 
@@ -52,7 +52,7 @@ class ProfileCompleteRequiredMixin(LoginRequiredMixin):
                 request, 
                 "Complete seu perfil para acessar esta funcionalidade."
             )
-            return redirect('complete_profile')
+            return redirect('users:complete_profile')
         
         return super().dispatch(request, *args, **kwargs)
 
@@ -119,7 +119,7 @@ class ClientOrSupplierRequiredMixin(LoginRequiredMixin):
                 request, 
                 "Complete seu perfil para acessar esta funcionalidade."
             )
-            return redirect('complete_profile')
+            return redirect('users:complete_profile')
         
         return super().dispatch(request, *args, **kwargs)
 
@@ -139,4 +139,4 @@ class BudgetOwnerMixin(LoginRequiredMixin):
             request.user != obj.anuncio.cliente):
             raise PermissionDenied("Você não tem permissão para acessar este orçamento.")
         
-        return super().dispatch(request, *args, **kwargs) 
+        return super().dispatch(request, *args, **kwargs)

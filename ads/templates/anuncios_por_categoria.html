@@ -160,8 +160,8 @@
         <h1>Anúncios em {{ categoria.nome }}</h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'home' %}">Início</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categorias</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'ads:home' %}">Início</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'categories:category_list' %}">Categorias</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ categoria.nome }}</li>
             </ol>
         </nav>
@@ -171,7 +171,7 @@
         <div class="row">
             {% for anuncio in anuncios %}
             <div class="col-lg-3 col-md-4 col-sm-6 d-flex mb-4">
-                <a href="{% url 'necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
+                <a href="{% url 'ads:necessidade_detail' anuncio.pk %}" class="text-decoration-none text-dark w-100">
                     {% include 'components/_anuncio_card.html' with anuncio=anuncio show_status=True %}
                 </a>
             </div>
@@ -214,7 +214,7 @@
     {% endif %}
 
     <div class="text-center mt-4">
-        <a href="{% url 'category_list' %}" class="btn btn-secondary">
+        <a href="{% url 'categories:category_list' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-2"></i>Voltar para Categorias
         </a>
     </div>

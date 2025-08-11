@@ -1,9 +1,12 @@
 from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "web"]
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Silenciar warning do reCAPTCHA para chaves de teste em desenvolvimento
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 # Configuração de logging para debug
 LOGGING = {

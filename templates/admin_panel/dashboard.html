@@ -1,0 +1,216 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block title %}Dashboard - Área Administrativa{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Estatísticas -->
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-layer-group fa-2x mb-2"></i>
+                <h3>{{ total_categorias }}</h3>
+                <p class="mb-0">Categorias</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-list fa-2x mb-2"></i>
+                <h3>{{ total_subcategorias }}</h3>
+                <p class="mb-0">Subcategorias</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h3>{{ total_usuarios }}</h3>
+                <p class="mb-0">Usuários</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                <h3>{{ usuarios_sem_geolocalizacao }}</h3>
+                <p class="mb-0">Sem Geolocalização</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ações Rápidas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Ações Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                                <h6>Importar Categorias</h6>
+                                <p class="text-muted small">Importe categorias e subcategorias via CSV</p>
+                                <a href="{% url 'admin_panel:import_categories' %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-edit fa-3x text-success mb-3"></i>
+                                <h6>Atualizar Descrições</h6>
+                                <p class="text-muted small">Atualize descrições das subcategorias</p>
+                                <a href="{% url 'admin_panel:update_descriptions' %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-icons fa-3x text-warning mb-3"></i>
+                                <h6>Popular Ícones</h6>
+                                <p class="text-muted small">Adicione ícones às categorias</p>
+                                <a href="{% url 'admin_panel:populate_icons' %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-3x text-info mb-3"></i>
+                                <h6>Importar Usuários</h6>
+                                <p class="text-muted small">Importe usuários de teste via JSON</p>
+                                <a href="{% url 'admin_panel:import_users' %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                                <h6>Geolocalização</h6>
+                                <p class="text-muted small">Geolocalizar usuários do sistema</p>
+                                <a href="{% url 'admin_panel:geolocalize_users' %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-cog fa-3x text-secondary mb-3"></i>
+                                <h6>Admin Django</h6>
+                                <p class="text-muted small">Acesse o painel administrativo do Django</p>
+                                <a href="/admin/" target="_blank" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Acessar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações do Sistema -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações do Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <strong>Total de Categorias:</strong> {{ total_categorias }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Total de Subcategorias:</strong> {{ total_subcategorias }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Total de Usuários:</strong> {{ total_usuarios }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Usuários sem Geolocalização:</strong> {{ usuarios_sem_geolocalizacao }}
+                    </li>
+                    <li class="mb-0">
+                        <strong>Usuários com CEP sem Geo:</strong> {{ usuarios_com_cep_sem_geo }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Avisos Importantes
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Atenção:</strong> As operações de importação e geolocalização podem demorar alguns minutos para serem concluídas.
+                </div>
+                
+                {% if usuarios_sem_geolocalizacao > 0 %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    <strong>Recomendação:</strong> Existem {{ usuarios_sem_geolocalizacao }} usuários sem geolocalização. 
+                    <a href="{% url 'admin_panel:geolocalize_users' %}" class="alert-link">Clique aqui para geolocalizar</a>.
+                </div>
+                {% endif %}
+                
+                {% if usuarios_com_cep_sem_geo > 0 %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-location-arrow me-2"></i>
+                    <strong>Dica:</strong> {{ usuarios_com_cep_sem_geo }} usuários têm CEP mas não têm coordenadas. 
+                    Use a opção "Atualizar por CEP" na geolocalização.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

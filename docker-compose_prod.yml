@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: necessito-db_prod-1
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-necessito_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - necessito_app_network_prod
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: necessito-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - necessito_app_network_prod
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build: .
+    container_name: necessito-web_prod-1
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - media_data_prod:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
+    expose:
+      - "8000"
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+    depends_on:
+      - db
+      - redis
+    networks:
+      - necessito_app_network_prod
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  celery:
+    build: .
+    container_name: necessito-celery-prod
+    command: celery -A core worker -l info --concurrency=2
+    volumes:
+      - media_data_prod:/app/media
+      - ./logs:/app/logs
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+    depends_on:
+      - db
+      - redis
+    networks:
+      - necessito_app_network_prod
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  celery-beat:
+    build: .
+    container_name: necessito-celery-beat-prod
+    command: celery -A core beat -l info
+    volumes:
+      - ./logs:/app/logs
+    env_file:
+      - .env.prod
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.prod
+    depends_on:
+      - db
+      - redis
+    networks:
+      - necessito_app_network_prod
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-necessito
+    expose:
+      - "80"
+    volumes:
+      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf
+      - ./staticfiles:/app/staticfiles
+      - media_data_prod:/app/media
+    depends_on:
+      - web
+    networks:
+      - necessito_app_network_prod
+      - nginx-global_global-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  media_data_prod:
+
+networks:
+  necessito_app_network_prod:
+    driver: bridge
+  nginx-global_global-network:
+    external: true

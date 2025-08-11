@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete seu Perfil{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold text-primary mb-3">
+                    <i class="fas fa-user-check me-3"></i>
+                    Complete seu Perfil
+                </h2>
+                <p class="lead text-muted">
+                    Escolha como você pretende usar o <strong>Indicaai</strong> e tenha acesso completo à plataforma!
+                </p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Campo hidden para user_type -->
+                <input type="hidden" name="user_type" id="id_user_type" value="">
+                
+                <div class="row g-4 mb-5">
+                    <!-- Card Cliente -->
+                    <div class="col-md-4">
+                        <div class="user-type-card h-100 d-flex flex-column" data-user-type="client">
+                            <div class="card-icon text-center">
+                                <i class="fas fa-search fa-3x text-primary"></i>
+                            </div>
+                            <h4 class="card-title text-center">Cliente</h4>
+                            <p class="card-description text-center">Quero contratar serviços e encontrar fornecedores</p>
+                            <ul class="card-features">
+                                <li><i class="fas fa-check text-success me-2"></i>Publicar necessidades</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Receber orçamentos</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Avaliar fornecedores</li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                    <!-- Card Fornecedor -->
+                    <div class="col-md-4">
+                        <div class="user-type-card h-100 d-flex flex-column" data-user-type="supplier">
+                            <div class="card-icon text-center">
+                                <i class="fas fa-tools fa-3x text-warning"></i>
+                            </div>
+                            <h4 class="card-title text-center">Fornecedor</h4>
+                            <p class="card-description text-center">Quero oferecer meus serviços e encontrar clientes</p>
+                            <ul class="card-features">
+                                <li><i class="fas fa-check text-success me-2"></i>Enviar orçamentos</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Mostrar portfólio</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Receber avaliações</li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                    <!-- Card Ambos -->
+                    <div class="col-md-4">
+                        <div class="user-type-card h-100 d-flex flex-column" data-user-type="both">
+                            <div class="card-icon text-center">
+                                <i class="fas fa-handshake fa-3x text-success"></i>
+                            </div>
+                            <h4 class="card-title text-center">Ambos</h4>
+                            <p class="card-description text-center">Quero contratar e oferecer serviços</p>
+                            <ul class="card-features">
+                                <li><i class="fas fa-check text-success me-2"></i>Todas as funcionalidades</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Máxima flexibilidade</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Networking completo</li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.user_type.errors %}
+                    <div class="alert alert-danger text-center mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Por favor, escolha uma opção acima.
+                    </div>
+                {% endif %}
+
+                <!-- Seção de Informações Opcionais -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2 text-info"></i>
+                            Informações Opcionais
+                        </h5>
+                        <small class="text-muted">Você pode preencher agora ou depois em "Minha Conta"</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
+                                {{ form.telefone }}
+                                {% if form.telefone.errors %}
+                                    <div class="text-danger mt-1">{{ form.telefone.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <!-- Substituição dos campos de texto por selects dinâmicos (IBGE) -->
+                            <div class="col-md-4 mb-3">
+                                <label for="select_estado" class="form-label">Estado (UF)</label>
+                                <input type="hidden" name="estado" id="id_estado_hidden" value="">
+                                <select id="select_estado" class="form-select">
+                                    <option value="" selected disabled>Selecione o estado…</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="select_cidade" class="form-label">Cidade</label>
+                                <input type="hidden" name="cidade" id="id_cidade_hidden" value="">
+                                <select id="select_cidade" class="form-select" disabled>
+                                    <option value="" selected>Selecione o estado primeiro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 me-3">
+                        <i class="fas fa-check me-2"></i>
+                        Completar Perfil
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fas fa-clock me-2"></i>
+                        Pular por agora
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-type-card {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.user-type-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.user-type-card.selected {
+    border-color: #007bff;
+    border-width: 3px;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.user-type-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    color: #007bff;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.card-description {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.card-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+    text-align: left;
+    width: 100%;
+}
+
+.card-features li {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.user-type-card.selected .user-type-icon {
+    transform: scale(1.1);
+}
+
+.user-type-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s;
+    opacity: 0;
+}
+
+.user-type-card:hover::before {
+    animation: shine 0.6s ease-in-out;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.card {
+    border-radius: 12px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.user-type-card');
+    const userTypeInput = document.querySelector('input[name="user_type"]');
+    
+    // Seleção de tipo de usuário
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove seleção de todos os cards
+            cards.forEach(c => c.classList.remove('selected'));
+            
+            // Adiciona seleção ao card clicado
+            this.classList.add('selected');
+            
+            // Atualiza o valor do input hidden
+            const userType = this.dataset.userType;
+            if (userTypeInput) {
+                userTypeInput.value = userType;
+            }
+        });
+    });
+    
+    // Validação do formulário (exige apenas user_type)
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!userTypeInput || !userTypeInput.value) {
+            e.preventDefault();
+            alert('Por favor, selecione um tipo de usuário.');
+            return false;
+        }
+    });
+
+    // Estado/Cidade via API do IBGE
+    const estadoHidden = document.getElementById('id_estado_hidden');
+    const cidadeHidden = document.getElementById('id_cidade_hidden');
+    const estadoSelect = document.getElementById('select_estado');
+    const cidadeSelect = document.getElementById('select_cidade');
+
+    if (estadoSelect && cidadeSelect) {
+        // Carrega estados (ordenados por nome)
+        fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
+            .then(r => r.json())
+            .then(estados => {
+                estados.forEach(uf => {
+                    const opt = document.createElement('option');
+                    opt.value = uf.id; // id numérico para buscar municípios
+                    opt.textContent = `${uf.nome} (${uf.sigla})`;
+                    opt.dataset.sigla = uf.sigla;
+                    estadoSelect.appendChild(opt);
+                });
+
+                // Pré-seleciona se houver valor existente (opcional)
+                if (estadoHidden && estadoHidden.value) {
+                    const toSelect = Array.from(estadoSelect.options).find(o => o.dataset.sigla === estadoHidden.value);
+                    if (toSelect) {
+                        estadoSelect.value = toSelect.value;
+                        loadCitiesForState(toSelect.value, toSelect.dataset.sigla);
+                    }
+                }
+            })
+            .catch(() => {
+                // Poderíamos exibir uma mensagem amigável, mas como é opcional, apenas mantemos o select como está
+            });
+
+        function clearCidadeSelect(placeholder) {
+            cidadeSelect.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = placeholder || 'Selecione o estado primeiro';
+            opt.selected = true;
+            opt.disabled = false;
+            cidadeSelect.appendChild(opt);
+        }
+
+        function loadCitiesForState(stateId, stateSigla) {
+            clearCidadeSelect('Carregando cidades…');
+            cidadeSelect.disabled = true;
+            if (estadoHidden) estadoHidden.value = stateSigla || '';
+
+            fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios?orderBy=nome`)
+                .then(r => r.json())
+                .then(municipios => {
+                    cidadeSelect.innerHTML = '';
+                    const ph = document.createElement('option');
+                    ph.value = '';
+                    ph.textContent = 'Selecione a cidade…';
+                    ph.selected = true;
+                    ph.disabled = true;
+                    cidadeSelect.appendChild(ph);
+
+                    municipios.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.nome; // enviamos o nome da cidade para o backend
+                        opt.textContent = m.nome;
+                        cidadeSelect.appendChild(opt);
+                    });
+
+                    cidadeSelect.disabled = false;
+
+                    // Pré-seleciona cidade se já houver valor (opcional)
+                    if (cidadeHidden && cidadeHidden.value) {
+                        cidadeSelect.value = cidadeHidden.value;
+                    }
+                })
+                .catch(() => {
+                    clearCidadeSelect('Falha ao carregar cidades');
+                });
+        }
+
+        estadoSelect.addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+            const stateId = this.value;
+            const sigla = selected && selected.dataset ? selected.dataset.sigla : '';
+            if (cidadeHidden) cidadeHidden.value = '';
+            loadCitiesForState(stateId, sigla);
+        });
+
+        cidadeSelect.addEventListener('change', function() {
+            if (cidadeHidden) cidadeHidden.value = this.value;
+        });
+    }
+});
+</script>
+
+{% endblock %}

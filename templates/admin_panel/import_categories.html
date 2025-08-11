@@ -1,0 +1,210 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block title %}Importar Categorias - Área Administrativa{% endblock %}
+{% block page_title %}Importar Categorias{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-upload me-2"></i>
+                    Importar Categorias e Subcategorias
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="categorias_file" class="form-label">
+                            <i class="fas fa-file-csv me-1"></i>
+                            Arquivo de Categorias (CSV)
+                        </label>
+                        <input type="file" class="form-control" id="categorias_file" name="categorias_file" 
+                               accept=".csv" required>
+                        <div class="form-text">
+                            Arquivo CSV com as colunas: id, nome
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="subcategorias_file" class="form-label">
+                            <i class="fas fa-file-csv me-1"></i>
+                            Arquivo de Subcategorias (CSV)
+                        </label>
+                        <input type="file" class="form-control" id="subcategorias_file" name="subcategorias_file" 
+                               accept=".csv" required>
+                        <div class="form-text">
+                            Arquivo CSV com as colunas: categoria_id, nome
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-upload me-2"></i>
+                            Iniciar Importação
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-4" style="display: none;">
+                    <h6>Progresso da Importação</h6>
+                    <div class="progress mb-2">
+                        <div id="progressBar" class="progress-bar bg-primary" role="progressbar" 
+                             style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <p id="progressStatus" class="text-muted">Aguardando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Instruções
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6>Formato dos Arquivos CSV:</h6>
+                
+                <div class="mb-3">
+                    <strong>Categorias.csv:</strong>
+                    <pre class="bg-light p-2 rounded small">id,nome
+1,"Construção Civil"
+2,"Elétrica"
+3,"Hidráulica"</pre>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Subcategorias.csv:</strong>
+                    <pre class="bg-light p-2 rounded small">categoria_id,nome
+1,"Alvenaria"
+1,"Fundações"
+2,"Instalações Elétricas"</pre>
+                </div>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Importante:</strong> Certifique-se de que os arquivos estão no formato UTF-8 e seguem exatamente a estrutura mostrada acima.
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Tempo:</strong> A importação pode levar alguns minutos dependendo do tamanho dos arquivos.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-download me-2"></i>
+                    Modelos de Arquivo
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Baixe os modelos de arquivo para facilitar a importação:</p>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadTemplate('categorias')">
+                        <i class="fas fa-download me-1"></i>
+                        Modelo Categorias
+                    </button>
+                    
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadTemplate('subcategorias')">
+                        <i class="fas fa-download me-1"></i>
+                        Modelo Subcategorias
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        
+        // Mostrar seção de progresso
+        progressSection.style.display = 'block';
+        showLoading('Iniciando importação...');
+        
+        // Reset progress
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        progressBar.className = 'progress-bar bg-primary';
+        progressStatus.textContent = 'Iniciando...';
+        
+        fetch('{% url "admin_panel:import_categories" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Monitorar progresso
+                monitorProgress(data.command_id, 'progressBar', 'progressStatus', function(result) {
+                    if (result.status === 'completed') {
+                        showAlert('Importação concluída com sucesso!', 'success');
+                        // Reset form
+                        document.getElementById('importForm').reset();
+                    } else if (result.status === 'error') {
+                        showAlert('Erro na importação: ' + result.message, 'danger');
+                    }
+                });
+            } else {
+                hideLoading();
+                showAlert('Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Erro:', error);
+            showAlert('Erro na comunicação com o servidor', 'danger');
+        });
+    });
+    
+    function downloadTemplate(type) {
+        let content, filename;
+        
+        if (type === 'categorias') {
+            content = 'id,nome\n1,"Exemplo Categoria 1"\n2,"Exemplo Categoria 2"';
+            filename = 'modelo_categorias.csv';
+        } else {
+            content = 'categoria_id,nome\n1,"Exemplo Subcategoria 1"\n1,"Exemplo Subcategoria 2"\n2,"Exemplo Subcategoria 3"';
+            filename = 'modelo_subcategorias.csv';
+        }
+        
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+</script>
+{% endblock %}

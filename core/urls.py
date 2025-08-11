@@ -28,6 +28,7 @@ urlpatterns = [
     
     # API com versionamento
     path('api/', include('api.urls')),
+    path('admin-panel/', include('admin_panel.urls')),
     
     # Redirecionamento para corrigir logout do DRF
     path('accounts/logout/', RedirectView.as_view(url='/api/logout-redirect/', permanent=False), name='account_logout'),

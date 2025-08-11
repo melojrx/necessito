@@ -69,7 +69,7 @@ def imagem_principal_url(anuncio):
     if anuncio and hasattr(anuncio, 'get_imagem_principal_url'):
         return anuncio.get_imagem_principal_url()
     # Fallback para imagem padrão
-    return '/static/img/logo_Indicaai_anuncio.png'
+    return '/static/img/logo_Indicaai_anuncio.svg'
 
 @register.filter
 def tem_imagens_proprias(anuncio):
@@ -93,11 +93,11 @@ def tem_imagens_proprias(anuncio):
 def imagem_anuncio_url(anuncio, index=0):
     """Retorna a URL da imagem do anúncio no índice especificado ou imagem padrão"""
     if not anuncio or not hasattr(anuncio, 'imagens'):
-        return '/static/img/logo_Indicaai_anuncio.png'
+        return '/static/img/logo_Indicaai_anuncio.svg'
     
     imagens = anuncio.imagens.all()
     if index < len(imagens) and imagens[index].imagem:
         return imagens[index].imagem.url
     
     # Se não há imagem no índice especificado, retornar imagem padrão
-    return '/static/img/logo_Indicaai_anuncio.png'
+    return '/static/img/logo_Indicaai_anuncio.svg'

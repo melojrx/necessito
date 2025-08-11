@@ -218,3 +218,49 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             'class': 'form-control',
             'placeholder': 'Confirme a nova senha'
         })
+
+class UserCompletionForm(forms.ModelForm):
+    USER_TYPE_CHOICES = [
+        ('client', 'Cliente - Quero contratar serviços'),
+        ('supplier', 'Fornecedor - Quero oferecer serviços'),
+        ('both', 'Ambos - Quero contratar e oferecer serviços'),
+    ]
+    
+    user_type = forms.ChoiceField(
+        label="Tipo de usuário",
+        choices=USER_TYPE_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        required=True
+    )
+    
+    class Meta:
+        model = User
+        fields = ['user_type', 'telefone', 'cidade', 'estado']
+        widgets = {
+            'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 99999-9999'}),
+            'cidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Sua cidade'}),
+            'estado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Seu estado'}),
+        }
+        labels = {
+            'telefone': 'Telefone (opcional)',
+            'cidade': 'Cidade (opcional)',
+            'estado': 'Estado (opcional)',
+        }
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user_type = self.cleaned_data.get('user_type')
+        
+        if user_type == 'client':
+            user.is_client = True
+            user.is_supplier = False
+        elif user_type == 'supplier':
+            user.is_client = False
+            user.is_supplier = True
+        elif user_type == 'both':
+            user.is_client = True
+            user.is_supplier = True
+        
+        if commit:
+            user.save()
+        return user

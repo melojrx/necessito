@@ -15,21 +15,26 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar dependências Python
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements_base.txt .
+RUN pip install --no-cache-dir -r requirements_base.txt
 
 # Copiar o projeto
 COPY . .
 
-# Criar diretórios necessários
-RUN mkdir -p /app/logs /app/staticfiles /app/media
-
 # Criar usuário não-root
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN useradd -m appuser
+
+# Criar diretórios necessários
+RUN mkdir -p /app/logs /app/staticfiles /app/media \
+    && mkdir -p /app/media/fotos_usuarios \
+    && mkdir -p /app/media/anuncios \
+    && mkdir -p /app/media/categorias \
+    && chown -R appuser:appuser /app
+
 USER appuser
 
 # Expor porta
 EXPOSE 8000
 
 # Comando para iniciar a aplicação
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"] 
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]

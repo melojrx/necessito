@@ -1,0 +1,242 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block title %}Importar Usuários - Área Administrativa{% endblock %}
+{% block page_title %}Importar Usuários{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Importar Usuários de Teste
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="users_file" class="form-label">
+                            <i class="fas fa-file-code me-1"></i>
+                            Arquivo de Usuários (JSON)
+                        </label>
+                        <input type="file" class="form-control" id="users_file" name="users_file" 
+                               accept=".json" required>
+                        <div class="form-text">
+                            Arquivo JSON com a estrutura de usuários para importação
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skip_existing" name="skip_existing" checked>
+                            <label class="form-check-label" for="skip_existing">
+                                Pular usuários que já existem (recomendado)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-upload me-2"></i>
+                            Iniciar Importação
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-4" style="display: none;">
+                    <h6>Progresso da Importação</h6>
+                    <div class="progress mb-2">
+                        <div id="progressBar" class="progress-bar bg-primary" role="progressbar" 
+                             style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <p id="progressStatus" class="text-muted">Aguardando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Instruções
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6>Formato do Arquivo JSON:</h6>
+                
+                <pre class="bg-light p-2 rounded small">[
+  {
+    "email": "usuario@exemplo.com",
+    "first_name": "Nome",
+    "last_name": "Sobrenome",
+    "password": "senha123",
+    "user_type": "client",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "cep": "01234-567"
+  }
+]</pre>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Importante:</strong> O arquivo deve estar no formato JSON válido e conter todos os campos obrigatórios.
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Tempo:</strong> A importação pode levar alguns minutos dependendo da quantidade de usuários.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-list-check me-2"></i>
+                    Campos Obrigatórios
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i><strong>email:</strong> E-mail único do usuário</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>first_name:</strong> Primeiro nome</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>last_name:</strong> Sobrenome</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>password:</strong> Senha do usuário</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>user_type:</strong> "client" ou "supplier"</li>
+                </ul>
+                
+                <h6 class="mt-3">Campos Opcionais:</h6>
+                <ul class="list-unstyled text-muted small">
+                    <li>• cidade, estado, cep</li>
+                    <li>• telefone, whatsapp</li>
+                    <li>• descricao, especialidades</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-download me-2"></i>
+                    Modelo de Arquivo
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Baixe um modelo de arquivo para facilitar a importação:</p>
+                
+                <div class="d-grid">
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadTemplate()">
+                        <i class="fas fa-download me-1"></i>
+                        Baixar Modelo JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('importForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        
+        // Mostrar seção de progresso
+        progressSection.style.display = 'block';
+        showLoading('Iniciando importação...');
+        
+        // Reset progress
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        progressBar.className = 'progress-bar bg-primary';
+        progressStatus.textContent = 'Iniciando...';
+        
+        fetch('{% url "admin_panel:import_users" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Monitorar progresso
+                monitorProgress(data.command_id, 'progressBar', 'progressStatus', function(result) {
+                    if (result.status === 'completed') {
+                        showAlert('Importação de usuários concluída com sucesso!', 'success');
+                        // Reset form
+                        document.getElementById('importForm').reset();
+                    } else if (result.status === 'error') {
+                        showAlert('Erro na importação: ' + result.message, 'danger');
+                    }
+                });
+            } else {
+                hideLoading();
+                showAlert('Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Erro:', error);
+            showAlert('Erro na comunicação com o servidor', 'danger');
+        });
+    });
+    
+    function downloadTemplate() {
+        const template = [
+            {
+                "email": "cliente1@exemplo.com",
+                "first_name": "João",
+                "last_name": "Silva",
+                "password": "senha123",
+                "user_type": "client",
+                "cidade": "São Paulo",
+                "estado": "SP",
+                "cep": "01234-567",
+                "telefone": "(11) 99999-9999"
+            },
+            {
+                "email": "fornecedor1@exemplo.com",
+                "first_name": "Maria",
+                "last_name": "Santos",
+                "password": "senha123",
+                "user_type": "supplier",
+                "cidade": "Rio de Janeiro",
+                "estado": "RJ",
+                "cep": "20000-000",
+                "telefone": "(21) 88888-8888",
+                "descricao": "Especialista em construção civil",
+                "especialidades": "Alvenaria, Fundações"
+            }
+        ];
+        
+        const content = JSON.stringify(template, null, 2);
+        const blob = new Blob([content], { type: 'application/json;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'modelo_usuarios.json');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+</script>
+{% endblock %}

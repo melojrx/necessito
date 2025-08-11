@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, render, redirect
 from ads.models import Necessidade
 from rankings.models import Avaliacao
-from users.forms import CustomUserCreationForm, UserUpdateForm, UserLoginForm
+from users.forms import CustomUserCreationForm, UserUpdateForm, UserLoginForm, UserCompletionForm
 from users.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -191,6 +191,36 @@ class MyPasswordResetView(auth_views.PasswordResetView):
 
     # Personaliza o corpo do e-mail (formato texto)
     email_template_name = "password_reset_email.html"
+
+@csrf_exempt
+def complete_profile_view(request):
+    """
+    View para completar o perfil do usuário.
+    Permite escolher se é cliente, fornecedor ou ambos.
+    """
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Se o perfil já está completo, redireciona para home
+    if request.user.is_client or request.user.is_supplier:
+        messages.info(request, "Seu perfil já está completo!")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = UserCompletionForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save()
+            messages.success(
+                request, 
+                "Perfil completado com sucesso! Agora você tem acesso completo à plataforma."
+            )
+            return redirect('home')
+        else:
+            messages.error(request, "Verifique os dados informados.")
+    else:
+        form = UserCompletionForm(instance=request.user)
+    
+    return render(request, "complete_profile.html", {"form": form})
 
     # Caso queira adicionar um template HTML:
     # html_email_template_name = "password_reset_email_html.html"

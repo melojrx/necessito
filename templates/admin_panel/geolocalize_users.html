@@ -1,0 +1,238 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block title %}Geolocalizar Usuários - Área Administrativa{% endblock %}
+{% block page_title %}Geolocalizar Usuários{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Geolocalizar Usuários
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Escolha o tipo de geolocalização que deseja executar:
+                </div>
+                
+                <form id="geolocateForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h6>Tipo de Operação:</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="operation_type" 
+                                   id="geolocalize_new" value="geolocalize_new" checked>
+                            <label class="form-check-label" for="geolocalize_new">
+                                <strong>Geolocalizar Novos Usuários</strong>
+                                <br><small class="text-muted">Adiciona coordenadas para usuários que ainda não possuem latitude/longitude</small>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="operation_type" 
+                                   id="update_existing" value="update_existing">
+                            <label class="form-check-label" for="update_existing">
+                                <strong>Atualizar Geolocalização Existente</strong>
+                                <br><small class="text-muted">Atualiza coordenadas baseadas no CEP para usuários que já possuem lat/lon</small>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmGeolocate" required>
+                            <label class="form-check-label" for="confirmGeolocate">
+                                Confirmo que desejo executar a operação de geolocalização selecionada
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info btn-lg">
+                            <i class="fas fa-globe me-2"></i>
+                            Iniciar Geolocalização
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-4" style="display: none;">
+                    <h6>Progresso da Geolocalização</h6>
+                    <div class="progress mb-2">
+                        <div id="progressBar" class="progress-bar bg-info" role="progressbar" 
+                             style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <p id="progressStatus" class="text-muted">Aguardando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estatísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-0">{{ total_usuarios }}</h4>
+                            <small class="text-muted">Total de Usuários</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning mb-0">{{ usuarios_sem_geolocalizacao }}</h4>
+                        <small class="text-muted">Sem Geolocalização</small>
+                    </div>
+                </div>
+                
+                {% if usuarios_sem_geolocalizacao > 0 %}
+                {% widthratio usuarios_com_geolocalizacao total_usuarios 100 as porcentagem_geolocalizados %}
+                <div class="progress mb-2" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ porcentagem_geolocalizados }}%">
+                    </div>
+                </div>
+                <small class="text-muted">{{ porcentagem_geolocalizados }}% dos usuários geolocalizados</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6>Geolocalizar Novos:</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success me-2"></i>Processa usuários sem lat/lon</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Usa cidade e estado</li>
+                    <li><i class="fas fa-check text-success me-2"></i>API Nominatim (OpenStreetMap)</li>
+                </ul>
+                
+                <h6 class="mt-3">Atualizar Existente:</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check text-success me-2"></i>Processa usuários com lat/lon</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Usa CEP para precisão</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Atualiza coordenadas existentes</li>
+                </ul>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> A operação pode demorar devido às consultas à API externa.
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Tempo:</strong> Aproximadamente 1-2 segundos por usuário processado.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-cog me-2"></i>
+                    API Utilizada
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-globe text-primary me-2"></i>
+                    <strong>Nominatim (OpenStreetMap)</strong>
+                </div>
+                <p class="text-muted small mb-0">
+                    Serviço gratuito de geocodificação que converte endereços em coordenadas geográficas.
+                </p>
+                
+                <div class="mt-2">
+                    <span class="badge bg-success">Gratuito</span>
+                    <span class="badge bg-info">Sem API Key</span>
+                    <span class="badge bg-warning">Rate Limited</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('geolocateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        const operationType = document.querySelector('input[name="operation_type"]:checked').value;
+        
+        // Mostrar seção de progresso
+        progressSection.style.display = 'block';
+        showLoading('Iniciando geolocalização...');
+        
+        // Reset progress
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        progressBar.className = 'progress-bar bg-info';
+        progressStatus.textContent = 'Iniciando...';
+        
+        const url = operationType === 'geolocalize_new' ? 
+            '{% url "admin_panel:geolocalize_users" %}' : 
+            '{% url "admin_panel:update_geolocalization" %}';
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Monitorar progresso
+                monitorProgress(data.command_id, 'progressBar', 'progressStatus', function(result) {
+                    if (result.status === 'completed') {
+                        const message = operationType === 'geolocalize_new' ? 
+                            'Geolocalização de novos usuários concluída!' : 
+                            'Atualização de geolocalização concluída!';
+                        showAlert(message, 'success');
+                        // Reset form
+                        document.getElementById('geolocateForm').reset();
+                        document.getElementById('geolocalize_new').checked = true;
+                        // Recarregar página para atualizar estatísticas
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else if (result.status === 'error') {
+                        showAlert('Erro na geolocalização: ' + result.message, 'danger');
+                    }
+                });
+            } else {
+                hideLoading();
+                showAlert('Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Erro:', error);
+            showAlert('Erro na comunicação com o servidor', 'danger');
+        });
+    });
+</script>
+{% endblock %}

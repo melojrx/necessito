@@ -1,0 +1,168 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block title %}Atualizar Descrições - Área Administrativa{% endblock %}
+{% block page_title %}Atualizar Descrições de Subcategorias{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Atualizar Descrições de Subcategorias
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Esta operação irá atualizar as descrições das subcategorias com base em um dicionário pré-definido no sistema.
+                </div>
+                
+                <form id="updateForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmUpdate" required>
+                            <label class="form-check-label" for="confirmUpdate">
+                                Confirmo que desejo atualizar as descrições das subcategorias
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-sync-alt me-2"></i>
+                            Atualizar Descrições
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Progress Section -->
+                <div id="progressSection" class="mt-4" style="display: none;">
+                    <h6>Progresso da Atualização</h6>
+                    <div class="progress mb-2">
+                        <div id="progressBar" class="progress-bar bg-warning" role="progressbar" 
+                             style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <p id="progressStatus" class="text-muted">Aguardando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informações
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6>O que esta operação faz:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Atualiza descrições das subcategorias</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Utiliza dicionário pré-definido</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Não remove subcategorias existentes</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Operação segura e reversível</li>
+                </ul>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Esta operação irá sobrescrever as descrições existentes das subcategorias.
+                </div>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Tempo:</strong> A atualização geralmente é rápida, levando apenas alguns segundos.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estatísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-0">{{ total_subcategorias }}</h4>
+                            <small class="text-muted">Subcategorias</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning mb-0">{{ subcategorias_sem_descricao }}</h4>
+                        <small class="text-muted">Sem Descrição</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('updateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        
+        // Mostrar seção de progresso
+        progressSection.style.display = 'block';
+        showLoading('Iniciando atualização...');
+        
+        // Reset progress
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+        progressBar.className = 'progress-bar bg-warning';
+        progressStatus.textContent = 'Iniciando...';
+        
+        fetch('{% url "admin_panel:update_descriptions" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Monitorar progresso
+                monitorProgress(data.command_id, 'progressBar', 'progressStatus', function(result) {
+                    if (result.status === 'completed') {
+                        showAlert('Descrições atualizadas com sucesso!', 'success');
+                        // Reset form
+                        document.getElementById('updateForm').reset();
+                        // Recarregar página para atualizar estatísticas
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else if (result.status === 'error') {
+                        showAlert('Erro na atualização: ' + result.message, 'danger');
+                    }
+                });
+            } else {
+                hideLoading();
+                showAlert('Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Erro:', error);
+            showAlert('Erro na comunicação com o servidor', 'danger');
+        });
+    });
+</script>
+{% endblock %}

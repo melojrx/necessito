@@ -17,22 +17,21 @@ models/
 # Variáveis de ambiente e configurações
 .env
 .env.local
-.env_dev
+.env.dev
 .env_hlm
-.env_prod
+.env.prod
 env/
 core/settings/__init__.py
-nginx/prod.conf
 
 # Docker local config
 docker-compose.override.yml
 docker-compose.yml
-docker-compose_prod.yml
 # ----------------------------------
 # Arquivos exclusivos do servidor
 # ----------------------------------
-docker-compose_prod.yml
-nginx/prod.conf.backup*
+# Backup files
+*.backup
+backups/
 # Credenciais e chaves de API
 *.pem
 *.key

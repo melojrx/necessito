@@ -147,6 +147,10 @@ class User(AbstractUser):
         help_text="Envie uma imagem quadrada (recomendado 400×400 px)",
     )
 
+    # Verificação de e-mail
+    email_verified = models.BooleanField("E-mail verificado", default=True)
+    email_verification_token = models.CharField("Token de verificação", max_length=100, blank=True, null=True)
+
     # Metadados
     date_joined = models.DateTimeField("Data de cadastro", auto_now_add=True)
 

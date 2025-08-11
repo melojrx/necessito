@@ -17,8 +17,8 @@
             <select class="form-select" name="status">
               <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
               <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
-              <option value="aguardando" {% if request.GET.status == 'aguardando' %}selected{% endif %}>Aguardando aceite do fornecedor</option>
-              <option value="aceito" {% if request.GET.status == 'aceito' %}selected{% endif %}>Aceito</option>
+              <option value="aceito_pelo_cliente" {% if request.GET.status == 'aceito_pelo_cliente' %}selected{% endif %}>Aceito pelo cliente</option>
+<option value="confirmado" {% if request.GET.status == 'confirmado' %}selected{% endif %}>Confirmado</option>
               <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
             </select>
           </div>
@@ -44,8 +44,8 @@
             </p>
             <span class="badge 
               {% if orcamento.status == 'pendente' %} text-bg-secondary
-              {% elif orcamento.status == 'aguardando' %} text-bg-warning
-              {% elif orcamento.status == 'aceito' %} text-bg-success
+              {% elif orcamento.status == 'aceito_pelo_cliente' %} text-bg-warning
+{% elif orcamento.status == 'confirmado' %} text-bg-success
               {% elif orcamento.status == 'rejeitado' %} text-bg-danger
               {% endif %}">
               Status: {{ orcamento.get_status_display }}
@@ -55,17 +55,14 @@
             <a href="{% url 'budget_detail' orcamento.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
             <div>
               {% if user == orcamento.fornecedor %}
-                {% if orcamento.status == 'aguardando' %}
-                    <button class="btn btn-success btn-sm btn-aceitar-fornecedor"
-                        data-url="{% url 'aceitar_orcamento_fornecedor' orcamento.id %}"
-                        data-bs-toggle="modal"
-                        data-bs-target="#confirmarAceiteFornecedorModal">
-                        Aceitar
-                    </button>
+                {% if orcamento.status == 'aceito_pelo_cliente' %}
+                    <form method="post" action="{% url 'budget_vendor_accept' orcamento.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </form>
                 {% endif %}
-                <a href="{% url 'budget_update' orcamento.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                {% if orcamento.status != 'aguardando' %}
-                    <a href="{% url 'budget_delete' orcamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+                {% if orcamento.status == 'pendente' %}
+                    <a href="{% url 'budget_update' orcamento.id %}" class="btn btn-warning btn-sm">Editar</a>
                 {% endif %}
               {% endif %}
           </div>          

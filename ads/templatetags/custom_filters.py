@@ -49,9 +49,9 @@ def count_pendentes(orcamentos):
     return orcamentos.filter(status='pendente').count()
 
 @register.filter
-def count_aceitos(orcamentos):
-    """Contar orçamentos aceitos"""
-    return orcamentos.filter(status='aceito').count()
+def count_aceitos_pelo_cliente(orcamentos):
+    """Contar orçamentos aceitos pelo cliente"""
+    return orcamentos.filter(status='aceito_pelo_cliente').count()
 
 @register.filter
 def count_rejeitados(orcamentos):
@@ -59,9 +59,9 @@ def count_rejeitados(orcamentos):
     return orcamentos.filter(status='rejeitado').count()
 
 @register.filter
-def count_aguardando(orcamentos):
-    """Contar orçamentos aguardando"""
-    return orcamentos.filter(status='aguardando').count()
+def count_confirmados(orcamentos):
+    """Contar orçamentos confirmados (aceitos pelo fornecedor)"""
+    return orcamentos.filter(status='confirmado').count()
 
 @register.filter
 def imagem_principal_url(anuncio):

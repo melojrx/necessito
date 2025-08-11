@@ -58,8 +58,8 @@ class PermissionValidator:
         if user != ad.cliente:
             return False, "Você só pode editar seus próprios anúncios."
         
-        if ad.status in ['finalizado', 'cancelado']:
-            return False, "Não é possível editar anúncios finalizados ou cancelados."
+        if ad.status in ['analisando_orcamentos', 'aguardando_confirmacao', 'em_atendimento', 'finalizado', 'cancelado']:
+            return False, "Não é possível editar anúncios que possuem orçamentos ou já foram finalizados."
         
         return True, ""
     
@@ -75,7 +75,7 @@ class PermissionValidator:
         if user != budget.fornecedor:
             return False, "Você só pode editar seus próprios orçamentos."
         
-        if budget.status in ['aceito', 'rejeitado']:
+        if budget.status in ['aceito_pelo_cliente', 'confirmado', 'rejeitado']:
             return False, "Não é possível editar orçamentos já processados."
         
         return True, ""
@@ -130,7 +130,7 @@ class PermissionValidator:
             return False, "O anúncio deve estar em atendimento para ser finalizado."
         
         # Verificar se há orçamento aceito
-        has_accepted_budget = ad.orcamentos.filter(status='aceito').exists()
+        has_accepted_budget = ad.orcamentos.filter(status='confirmado').exists()
         if not has_accepted_budget:
             return False, "Não há orçamentos aceitos para este anúncio."
         
@@ -153,7 +153,7 @@ class PermissionValidator:
             return True, ""
         
         # Verificar se é o fornecedor de algum orçamento aceito
-        accepted_budget = ad.orcamentos.filter(status='aceito').first()
+        accepted_budget = ad.orcamentos.filter(status='confirmado').first()
         if accepted_budget and user == accepted_budget.fornecedor:
             return True, ""
         
@@ -198,4 +198,4 @@ def require_permission(permission_func, *args, **kwargs):
                 raise PermissionDenied(message)
             return view_func(request, *view_args, **view_kwargs)
         return wrapper
-    return decorator 
+    return decorator

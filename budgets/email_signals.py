@@ -1,8 +1,9 @@
 # budgets/email_signals.py
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import transaction
 from .models import Orcamento
 
 @receiver(post_save, sender=Orcamento)
@@ -20,7 +21,7 @@ def enviar_email_novo_orcamento(sender, instance, created, **kwargs):
             f"Olá, {cliente.first_name}!\n\n"
             f"Você recebeu um novo orçamento para seu anúncio '{anuncio.titulo}'.\n"
             "Acesse a plataforma para visualizar os detalhes e responder.\n\n"
-            "Atenciosamente,\Indicaai"
+            "Atenciosamente,\nIndicaai"
         )
         send_mail(
             subject=assunto,
@@ -30,28 +31,43 @@ def enviar_email_novo_orcamento(sender, instance, created, **kwargs):
             fail_silently=False
         )
 
-@receiver(post_save, sender=Orcamento)
-def enviar_email_orcamento_aceito(sender, instance, **kwargs):
+@receiver(pre_save, sender=Orcamento)
+def enviar_email_orcamento_aceito_pelo_cliente(sender, instance, **kwargs):
     """
-    Envia e-mail quando um orçamento é aceito
+    Envia e-mail quando um orçamento é aceito pelo cliente (aguardando confirmação do fornecedor),
+    garantindo envio apenas quando houver transição de status.
     """
-    # Verificar se o status mudou para aceito
-    if instance.status == 'aceito':
+    # Somente para updates (não no create)
+    if not instance.pk:
+        return
+
+    # Busca o valor anterior do status para detectar transição
+    try:
+        previous = Orcamento.objects.get(pk=instance.pk)
+    except Orcamento.DoesNotExist:
+        return
+
+    mudou_para_aceito_pelo_cliente = (
+        previous.status != 'aceito_pelo_cliente' and instance.status == 'aceito_pelo_cliente'
+    )
+
+    if mudou_para_aceito_pelo_cliente:
         fornecedor = instance.fornecedor
         anuncio = instance.anuncio
 
-        # Enviar e-mail
-        assunto = "Orçamento Aceito"
+        assunto = "Orçamento aceito pelo cliente"
         corpo = (
             f"Olá, {fornecedor.first_name}!\n\n"
-            f"Seu orçamento para o anúncio '{anuncio.titulo}' foi aceito pelo cliente.\n"
-            "Acesse a plataforma para mais detalhes e iniciar o atendimento.\n\n"
-            "Atenciosamente,\Indicaai"
+            f"Seu orçamento para o anúncio '{anuncio.titulo}' foi aceito pelo cliente e aguarda sua confirmação.\n"
+            "Acesse a plataforma para mais detalhes e confirmar o atendimento.\n\n"
+            "Atenciosamente,\nIndicaai"
         )
-        send_mail(
+
+        # Garante que o e-mail será enviado somente após o commit da transação
+        transaction.on_commit(lambda: send_mail(
             subject=assunto,
             message=corpo,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[fornecedor.email],
             fail_silently=False
-        )
+        ))

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 @transaction.atomic
 def submeter_orcamento(request, pk):
     """View para submeter orçamento com múltiplos itens"""
-    anuncio = get_object_or_404(Necessidade, pk=pk, status__in=['ativo', 'em_andamento'])
+    anuncio = get_object_or_404(Necessidade, pk=pk, status__in=['ativo', 'analisando_orcamentos'])
     
     # Validação adicional usando o sistema de permissões
     can_create, message = PermissionValidator.can_create_budget(request.user)
@@ -76,10 +76,10 @@ def submeter_orcamento(request, pk):
 
             # Alterar o status do anúncio SOMENTE se ele ainda estiver "ativo"
             if anuncio.status == 'ativo':
-                anuncio.status = 'em_andamento'
+                anuncio.status = 'analisando_orcamentos'
                 anuncio.save(update_fields=['status'])
-                logger.info("Status do anúncio alterado para em_andamento")
-
+                logger.info("Status do anúncio alterado para analisando_orcamentos")
+            
             messages.success(request, 'Orçamento submetido com sucesso!')
             logger.info("Redirecionando para detalhes do anúncio")
             return redirect(anuncio.get_absolute_url())
@@ -109,11 +109,11 @@ class OrcamentoAceitarView(LoginRequiredMixin, View):
         if not can_accept:
             return JsonResponse({'error': message}, status=403)
 
-        # Atualiza o status do orçamento e mantém o status do anúncio
-        orcamento.status = 'aguardando'
+        # Atualiza o status do orçamento e do anúncio
+        orcamento.status = 'aceito_pelo_cliente'
         orcamento.save()
 
-        orcamento.anuncio.status = 'em_andamento'
+        orcamento.anuncio.status = 'aguardando_confirmacao'
         orcamento.anuncio.save(update_fields=['status'])
 
         messages.success(request, "Orçamento aceito com sucesso!")
@@ -130,11 +130,11 @@ class OrcamentoFornecedorAceitarView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
 
         # Verificar se o orçamento está no status correto
-        if orcamento.status != 'aguardando':
+        if orcamento.status != 'aceito_pelo_cliente':
             return JsonResponse({'error': 'Este orçamento não está aguardando confirmação!'}, status=400)
 
-        # Atualiza o status do orçamento para "aceito"
-        orcamento.status = 'aceito'
+        # Atualiza o status do orçamento e do anúncio
+        orcamento.status = 'confirmado'
         orcamento.save()
 
         # Atualiza o status do anúncio para "em_atendimento"
@@ -258,12 +258,9 @@ class budgetDeleteView(SupplierRequiredMixin, DeleteView):
 # budgets/views.py
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.contrib.auth.decorators import login_required
 from xhtml2pdf import pisa
 from io import BytesIO
-from django.conf import settings
 import os
-from .models import Orcamento
 
 @login_required
 def export_orcamento_pdf(request, pk):
@@ -292,13 +289,11 @@ def export_orcamento_pdf(request, pk):
         pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
         if not pdf.err:
-            # Se a geração do PDF for bem-sucedida, retornar o PDF como resposta
             response = HttpResponse(result.getvalue(), content_type='application/pdf')
-            filename = f"orcamento_{orcamento.id}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Content-Disposition'] = f'attachment; filename="orcamento_{orcamento.id}.pdf"'
             return response
         else:
-            return HttpResponse(f"Erro ao gerar PDF: {pdf.err}", status=500)
+            return HttpResponse("Erro ao gerar o PDF", status=500)
 
     except Exception as e:
         return HttpResponse(f"Erro ao gerar PDF: {str(e)}", status=500)

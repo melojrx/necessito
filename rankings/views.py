@@ -29,7 +29,7 @@ class AvaliacaoCreateView(View):
             return redirect("ads:necessidade_detail", pk=necessidade.pk)
 
         orcamento_aceito = Orcamento.objects.filter(
-            anuncio=necessidade, status="aceito"
+            anuncio=necessidade, status="confirmado"
         ).first()
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
 
@@ -81,7 +81,7 @@ class AvaliacaoCreateView(View):
         necessidade = get_object_or_404(Necessidade, pk=pk)
 
         # Verifica permissões novamente (mesma lógica do método GET)
-        orcamento_aceito = Orcamento.objects.filter(anuncio=necessidade, status='aceito').first()
+        orcamento_aceito = Orcamento.objects.filter(anuncio=necessidade, status='confirmado').first()
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
 
         if request.user != necessidade.cliente and request.user != fornecedor:

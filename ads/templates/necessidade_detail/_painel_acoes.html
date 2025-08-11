@@ -28,10 +28,10 @@
         {% endif %}
 
         {% if pode_confirmar_ou_recusar_acordo %}
-            <a href="{% url 'budgets:fornecedor_aceitar_orcamento' orcamento_aguardando_confirmacao.pk %}" class="btn btn-success">
+            <a href="{% url 'budgets:aceitar_orcamento_fornecedor' orcamento_aguardando_confirmacao.pk %}" class="btn btn-success">
                 <i class="fas fa-thumbs-up me-1"></i> Confirmar Acordo
             </a>
-            <a href="{% url 'budgets:fornecedor_recusar_orcamento' orcamento_aguardando_confirmacao.pk %}" class="btn btn-danger">
+            <a href="{% url 'budgets:rejeitar_orcamento' orcamento_aguardando_confirmacao.pk %}" class="btn btn-danger">
                 <i class="fas fa-thumbs-down me-1"></i> Recusar Acordo
             </a>
         {% endif %}

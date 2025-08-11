@@ -52,7 +52,7 @@ class HomeView(TemplateView):
         # ──────────────────────────────────────────────
         anuncios_populares = (
             Necessidade.objects.exclude(status__in=["finalizado", "cancelado"])
-            .order_by("-id")[:8]
+            .order_by("-data_criacao")[:8]
         )
         context["anuncios_populares"] = [
             list(islice(anuncios_populares, i, i + 4))
@@ -93,13 +93,13 @@ class HomeView(TemplateView):
 
         if user.is_authenticated and getattr(user, "cidade", None):
             anuncios_proximos = Necessidade.objects.filter(
-                status__in=["ativo", "em_andamento"],
+                status__in=["ativo", "analisando_orcamentos", "em_andamento"],
                 cliente__cidade=user.cidade,
             ).order_by("-data_criacao")[:5]
 
             if not anuncios_proximos.exists() and getattr(user, "estado", None):
                 anuncios_estado = Necessidade.objects.filter(
-                    status__in=["ativo", "em_andamento"],
+                    status__in=["ativo", "analisando_orcamentos", "em_andamento"],
                     cliente__estado=user.estado,
                 ).order_by("-data_criacao")[:5]
 
@@ -244,9 +244,9 @@ class NecessidadeDetailView(DetailView):
         necessidade = self.get_object()
         context['show_modal'] = self.request.GET.get('show_modal') == 'True'
 
-        # Buscar o orçamento aceito relacionado ao anúncio
+        # Buscar o orçamento confirmado (aceito pelo fornecedor) relacionado ao anúncio
         orcamento_aceito = Orcamento.objects.filter(
-            anuncio=necessidade, status='aceito').first()
+            anuncio=necessidade, status='confirmado').first()
 
         fornecedor = orcamento_aceito.fornecedor if orcamento_aceito else None
         context['fornecedor'] = fornecedor
@@ -354,7 +354,7 @@ class AnunciosPorCategoriaListView(ListView):
         
         return Necessidade.objects.filter(
             categoria=self.categoria,
-            status__in=['ativo', 'em_andamento']
+            status__in=['ativo', 'analisando_orcamentos', 'em_andamento']
         ).order_by('-data_criacao')  # Ordena pelos mais recentes
 
     def get_context_data(self, **kwargs):

@@ -114,10 +114,10 @@
         </a>
         {% endif %}
 
-        {# Finalizar anúncio – aparece se há orçamento aceito em atendimento #}
+        {# Finalizar anúncio – aparece se há orçamento confirmado em atendimento #}
         {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
         {% for orcamento in necessidade.orcamentos.all %}
-        {% if orcamento.status == 'aceito' %}
+        {% if orcamento.status == 'confirmado' %}
         <button class="btn btn-primary btn-finalizar" data-url="{% url 'ads:finalizar_anuncio' necessidade.pk %}"
           data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" title="Finalizar Anúncio">
           <i class="fas fa-check-circle"></i> Finalizar Anúncio
@@ -209,11 +209,11 @@
                 <td class="align-middle">
                   <span class="badge
                                       {% if orcamento.status == 'pendente' %}text-bg-secondary
-                                      {% elif orcamento.status == 'aguardando_aceite_fornecedor' %}text-bg-warning
-                                      {% elif orcamento.status == 'aceito' %}text-bg-success
+                                      {% elif orcamento.status == 'aceito_pelo_cliente' %}text-bg-warning
+                                      {% elif orcamento.status == 'confirmado' %}text-bg-success
                                       {% elif orcamento.status == 'rejeitado' %}text-bg-danger{% endif %}">
-                    {% if orcamento.status == 'aguardando_aceite_fornecedor' %}
-                    Aguardando aceite
+                    {% if orcamento.status == 'aceito_pelo_cliente' %}
+                    Aguardando confirmação do fornecedor
                     {% else %}
                     {{ orcamento.get_status_display }}
                     {% endif %}
@@ -236,7 +236,7 @@
                     {% endif %}
 
                     {% if orcamento.status == "pendente" %}
-                    <button class="btn btn-success btn-sm btn-aceitar" data-url="{% url 'aceitar_orcamento' orcamento.id %}"
+                    <button class="btn btn-success btn-sm btn-aceitar" data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}"
                       data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal" title="Aceitar Orçamento">
                       <i class="fas fa-thumbs-up"></i>
                     </button>
@@ -247,7 +247,7 @@
                     {% endif %}
 
                     {% if necessidade.status == "em_andamento" and orcamento.status == "pendente" %}
-                    <button class="btn btn-danger btn-sm btn-rejeitar" data-url="{% url 'rejeitar_orcamento' orcamento.id %}"
+                    <button class="btn btn-danger btn-sm btn-rejeitar" data-url="{% url 'budgets:rejeitar_orcamento' orcamento.id %}"
                       data-bs-toggle="modal" data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
                       <i class="fas fa-thumbs-down"></i>
                     </button>
@@ -259,7 +259,7 @@
                   </div>
                 </td>
                 <td class="align-middle">
-                  <a href="{% url 'budget_detail' orcamento.id %}" class="btn btn-info btn-sm">
+                  <a href="{% url 'budgets:budget_detail' orcamento.id %}" class="btn btn-info btn-sm">
                     <i class="fas fa-eye me-1"></i>Detalhes
                   </a>
                 </td>
@@ -301,8 +301,8 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-success mb-1">{{ necessidade.orcamentos.all|count_aceitos }}</h5>
-                <p class="card-text small text-muted mb-0">Aceitos</p>
+                <h5 class="card-title text-success mb-1">{{ necessidade.orcamentos.all|count_confirmados }}</h5>
+                <p class="card-text small text-muted mb-0">Confirmados</p>
               </div>
             </div>
           </div>

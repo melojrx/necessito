@@ -11,14 +11,17 @@ class OrcamentoManager(models.Manager):
     def pendentes(self):
         return self.filter(status='pendente')
     
-    def aceitos(self):
-        return self.filter(status='aceito')
+    def aceitos_pelo_cliente(self):
+        return self.filter(status='aceito_pelo_cliente')
+        
+    def aceitos_pelo_fornecedor(self):
+        return self.filter(status='aceito_pelo_fornecedor')
+        
+    def confirmados(self):
+        return self.filter(status='confirmado')
     
     def rejeitados(self):
         return self.filter(status='rejeitado')
-    
-    def aguardando(self):
-        return self.filter(status='aguardando')
 
 
 class Orcamento(models.Model):
@@ -75,8 +78,9 @@ class Orcamento(models.Model):
 
     STATUS = [
         ('pendente', 'Pendente'),
-        ('aguardando', 'Aguardando aceite do fornecedor'),
-        ('aceito', 'Aceito'),
+        ('aceito_pelo_cliente', 'Aceito pelo cliente'),
+        ('aceito_pelo_fornecedor', 'Aceito pelo fornecedor'),
+        ('confirmado', 'Confirmado'),
         ('rejeitado', 'Rejeitado'),
     ]
     status = models.CharField(max_length=50, choices=STATUS, default='pendente')

@@ -53,8 +53,10 @@ class Necessidade(models.Model):
     peso = models.DecimalField(max_digits=10, decimal_places=2, blank=True, default=0.00, help_text="Ex.: Kilogramas")
     altura = models.FloatField(blank=True, default=0.0, help_text="Ex.: Metros")
     # Status e Rastreamento.
-    status = models.CharField(max_length=20, choices=[
+    status = models.CharField(max_length=30, choices=[
         ('ativo', 'Ativo'), # Anúncio ativo e disponível para orçamentos
+        ('analisando_orcamentos', 'Analisando orçamentos'), # Já recebeu pelo menos um orçamento. O cliente está analisando as propostas.
+        ('aguardando_confirmacao', 'Aguardando confirmação'), # Cliente aceitou um orçamento. Aguardando a confirmação do fornecedor.
         ('em_andamento', 'Em andamento'), # Anúncio com orçamento em andamento disparado após o aceite pelo anunciate.
         ('em_atendimento', 'Em atendimento'), # Anúncio com orçamento aceito pelo anunciante e pelo fornecedor. 
         ('finalizado', 'Finalizado'), # Após a entrega do serviço ou produto, o anúncio é finalizado manualmente pelo anunciante.

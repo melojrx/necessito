@@ -27,7 +27,7 @@ def get_valores_metrics():
     # 1️⃣ Valor Total de Anúncios Finalizados: soma dos valores de orçamentos aceitos em anúncios finalizados
     # Calculando através dos itens dos orçamentos
     valor_total_transacoes_concluidas = OrcamentoItem.objects.filter(
-        orcamento__status='aceito',
+        orcamento__status='confirmado',
         orcamento__anuncio__status='finalizado'
     ).aggregate(
         total=Coalesce(
@@ -47,7 +47,7 @@ def get_valores_metrics():
 
     # 3️⃣ Valor Total de Transações em Andamento: orçamentos aceitos vinculados a anúncios NÃO finalizados
     valor_total_transacoes_andamento = OrcamentoItem.objects.filter(
-        orcamento__status='aceito',
+        orcamento__status='confirmado',
         orcamento__anuncio__status__in=['em_andamento', 'em_atendimento']
     ).aggregate(
         total=Coalesce(
@@ -81,7 +81,7 @@ def get_valores_por_mes():
 
     # 2️⃣ Consultar o banco - usando OrcamentoItem ao invés de campo valor direto
     qs = OrcamentoItem.objects.filter(
-        orcamento__status='aceito',
+        orcamento__status='confirmado',
         orcamento__anuncio__status='finalizado'
     ).annotate(
         mes=TruncMonth('orcamento__data_criacao')

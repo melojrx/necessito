@@ -1,5 +1,9 @@
 # 🏪 Indicai - Marketplace de Necessidades
 
+<div align="center">
+  <img src="static/img/logo1.png" alt="Indicai Logo" width="300" />
+</div>
+
 [![Django](https://img.shields.io/badge/Django-5.1.10-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)

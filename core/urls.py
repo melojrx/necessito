@@ -12,7 +12,11 @@ from core.views import (
     HelpCommunicationView, 
     HelpRatingsView, 
     HelpSupportView,
-    SecurityTipsView
+    SecurityTipsView,
+    TermsOfServiceView,
+    PrivacyPolicyView,
+    IntellectualPropertyView,
+    SitemapView
 )
 
 urlpatterns = [
@@ -35,6 +39,12 @@ urlpatterns = [
     
     # Páginas institucionais
     path('dicas-de-seguranca/', SecurityTipsView.as_view(), name='security_tips'),
+    path('mapa-do-site/', SitemapView.as_view(), name='sitemap'),
+    
+    # Páginas legais
+    path('termos-de-uso/', TermsOfServiceView.as_view(), name='terms_of_service'),
+    path('politica-de-privacidade/', PrivacyPolicyView.as_view(), name='privacy_policy'),
+    path('propriedade-intelectual/', IntellectualPropertyView.as_view(), name='intellectual_property'),
     
     # Central de Ajuda - Página Principal
     path('ajuda/', HelpView.as_view(), name='help'),

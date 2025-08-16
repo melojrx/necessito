@@ -1,224 +1,729 @@
 {% load static %}
 
-<header>
 <style>
-    /* ---------- Estilização específica ---------- */
-    .search-bar{
-        border:1px solid #dadce0;          /* cor bem suave */
-        background:#fff;
-        transition:border-color .2s;
-    }
-    .search-bar:focus-within{
-        border-color:#0d6efd;              /* azul Bootstrap quando focado */
+:root {
+    /* Design System 2025 Variables */
+    --primary-color: #007BFF;
+    --primary-gradient: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+    
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    
+    --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --shadow-medium: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+    --shadow-strong: 0 16px 48px 0 rgba(31, 38, 135, 0.55);
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-elastic: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    --text-dark: #2d3748;
+    --text-light: #718096;
+    --text-accent: #007BFF;
+}
+
+/* Modern Header Styles */
+.modern-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+}
+
+.modern-header.scrolled {
+    background: #ffffff;
+    box-shadow: var(--shadow-medium);
+}
+
+/* Logo modernizado */
+.modern-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+}
+
+.modern-logo:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+.modern-logo img {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    transition: var(--transition-smooth);
+}
+
+.modern-logo-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin-left: 0.5rem;
+}
+
+/* Search Bar Premium */
+.search-container {
+    position: relative;
+    flex-grow: 1;
+    max-width: 600px;
+    z-index: 1020;
+}
+
+.modern-search-bar {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-search-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    z-index: -1;
+}
+
+.modern-search-bar:focus-within {
+    border-color: #007BFF;
+    box-shadow: 0 8px 30px rgba(0, 123, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.modern-search-bar:focus-within::before {
+    opacity: 0.05;
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: var(--text-dark);
+    flex-grow: 1;
+    padding: 0;
+}
+
+.search-input::placeholder {
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Estilos removidos - seletor de estados não é mais usado */
+
+.search-btn {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: var(--transition-elastic);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.search-btn:hover {
+    background: #0056b3;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Navigation Items */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notification-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 50%;
+    transition: var(--transition-smooth);
+    color: var(--text-light);
+}
+
+.notification-btn:hover {
+    background: rgba(0, 123, 255, 0.1);
+    color: var(--text-accent);
+    transform: scale(1.1);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: var(--secondary-gradient);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.user-dropdown {
+    position: relative;
+    z-index: 1040;
+}
+
+.user-dropdown .dropdown-menu {
+    z-index: 1055;
+}
+
+.user-btn {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-btn:hover {
+    background: #f8f9fa;
+    border-color: #007BFF;
+    color: var(--text-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auth-link {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    transition: var(--transition-smooth);
+    font-weight: 500;
+}
+
+.auth-link:hover {
+    color: var(--text-accent);
+    background: rgba(0, 123, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.cta-button {
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: var(--transition-elastic);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+}
+
+.cta-button:hover::before {
+    left: 100%;
+}
+
+.cta-button:hover {
+    background: #0056b3;
+    color: white;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+/* Mobile Menu Modernizado */
+.mobile-menu-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: var(--transition-smooth);
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.hamburger {
+    width: 24px;
+    height: 18px;
+    position: relative;
+    cursor: pointer;
+}
+
+.hamburger span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: var(--text-dark);
+    border-radius: 2px;
+    transition: var(--transition-smooth);
+}
+
+.hamburger span:nth-child(1) { top: 0; }
+.hamburger span:nth-child(2) { top: 8px; }
+.hamburger span:nth-child(3) { top: 16px; }
+
+.mobile-menu-btn.active .hamburger span:nth-child(1) {
+    transform: rotate(45deg);
+    top: 8px;
+}
+
+.mobile-menu-btn.active .hamburger span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active .hamburger span:nth-child(3) {
+    transform: rotate(-45deg);
+    top: 8px;
+}
+
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1025;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition-smooth);
+}
+
+.mobile-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 320px;
+    height: 100vh;
+    background: #ffffff;
+    padding: 2rem;
+    z-index: 1026;
+    transition: var(--transition-elastic);
+    box-shadow: var(--shadow-strong);
+}
+
+.mobile-menu.show {
+    right: 0;
+}
+
+.mobile-search {
+    margin-bottom: 2rem;
+}
+
+.mobile-nav-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-link {
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: var(--transition-smooth);
+}
+
+.mobile-nav-link:hover {
+    color: var(--text-accent);
+    transform: translateX(5px);
+}
+
+/* Dropdown moderno */
+.dropdown-menu {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    box-shadow: var(--shadow-medium);
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    z-index: 1050;
+    position: absolute;
+}
+
+.dropdown-item {
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 123, 255, 0.1);
+    color: var(--text-accent);
+    transform: translateX(3px);
+}
+
+.dropdown-item.active {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+/* Offcanvas moderno */
+.offcanvas {
+    background: #ffffff;
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.notification-item {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    transition: var(--transition-smooth);
+}
+
+.notification-item:hover {
+    background: rgba(0, 123, 255, 0.05);
+    transform: translateX(3px);
+}
+
+.notification-item.unread {
+    background: rgba(0, 123, 255, 0.1);
+    border-left: 4px solid #007BFF;
+}
+
+/* Responsividade */
+@media (max-width: 991.98px) {
+    .modern-search-bar {
+        margin: 1rem 0;
     }
     
-    /* remove bordas/resets */
-    .search-bar input:focus{
-        outline:none;
-        box-shadow:none;
+    .nav-actions {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 1rem;
     }
-    .search-bar .dropdown-toggle::after{
-        display:none;                      /* usamos o ícone chevron manualmente se quiser */
+}
+
+@media (max-width: 576px) {
+    .modern-logo-text {
+        font-size: 1.5rem;
     }
-    /* divisor fino */
-    .search-bar .vr{
-        width:1px;
-        min-height:24px;
-        background:#dadce0;
+    
+    .search-container {
+        max-width: 100%;
     }
-    /* hover states sutis */
-    .search-bar button:hover,
-    .search-bar .dropdown-toggle:hover{
-        color:#0d6efd;
+}
+
+/* Animações de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modern-header * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Body offset para header fixo - já definido no base.html */
 </style>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
+
+<header class="modern-header" id="modernHeader">
+    <nav class="navbar navbar-expand-lg py-3">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'ads:home' %}">
-                <img src="{% static 'img/logo2.png' %}" alt="Indicaai" height="50" class="d-inline-block align-top me-2">
-                <span class="fs-3 fw-semibold" style="color: #545b62;">Indicaai</span>
+            <!-- Logo modernizado -->
+            <a class="modern-logo" href="{% url 'ads:home' %}">
+                <img src="{% static 'img/logo2.png' %}" alt="Indicaai" height="50" class="d-inline-block align-top">
+                <span class="modern-logo-text">Indicaai</span>
             </a>
 
-            <!-- Botão do menu mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <!-- Botão mobile menu -->
+            <button class="mobile-menu-btn d-lg-none" type="button" id="mobileMenuBtn">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </button>
 
-            <!-- Menu principal -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto align-items-start">
-                    <!-- Barra de pesquisa (base_header.html, por ex.) -->
-                    <li class="nav-item flex-grow-1 mt-2 mt-lg-0 me-auto">
-                        <form method="get"
-                              action="{% url 'search:necessidade_search_all' %}"
-                              class="w-100">
-                      
-                          <!-- sigla escolhida (enviada no submit) -->
-                          <input type="hidden" name="state" id="stateInput" value="{{ selected_state|default:'todos' }}">
-                      
-                          <div class="search-bar d-flex align-items-center rounded-5 px-3 py-1">
-                      
-                            <!-- campo de busca -->
+            <!-- Menu principal desktop -->
+            <div class="d-none d-lg-flex flex-grow-1 align-items-center justify-content-between ms-4">
+                
+                <!-- Barra de pesquisa premium -->
+                <div class="search-container">
+                    <form method="get" action="{% url 'search:necessidade_search_all' %}">
+                        <div class="modern-search-bar d-flex align-items-center">
                             <input type="text"
                                    name="q"
-                                   class="form-control flex-grow-1 border-0 shadow-none px-0"
-                                   placeholder='Buscar "Apartamento"'
+                                   class="search-input"
+                                   id="dynamicSearchInput"
+                                   placeholder="Buscar Apartamento"
                                    value="{{ request.GET.q|default:'' }}"
                                    autocomplete="off">
-                      
-                            <!-- divisor -->
-                            <div class="vr mx-3"></div>
-                      
-                            <!-- seletor de estados -->
-                            <div class="dropdown d-flex align-items-center me-2">
-                              <i class="fas fa-map-marker-alt me-1 text-secondary"></i>
-                      
-                              <button class="btn btn-sm dropdown-toggle border-0 bg-transparent px-1"
-                                      type="button"
-                                      data-bs-toggle="dropdown"
-                                      aria-expanded="false"
-                                      id="stateButton">
-                                {{ selected_state }}
-                              </button>
-                      
-                              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="stateButton">
-                                <li>
-                                  <a class="dropdown-item {% if selected_state == 'todos' %}active{% endif %}" href="#" data-state="todos">
-                                    Todos os estados
-                                  </a>
-                                </li>
-                                {% for st in states %}
-                                  <li>
-                                    <a class="dropdown-item {% if selected_state == st.abbreviation %}active{% endif %}"
-                                       href="#"
-                                       data-state="{{ st.abbreviation }}">
-                                      {{ st.abbreviation }}
-                                    </a>
-                                  </li>
-                                {% endfor %}
-                              </ul>
-                              
-                            </div>
-                      
-                            <!-- lupa -->
-                            <button class="btn p-0 border-0 bg-transparent" type="submit" aria-label="Pesquisar">
-                              <i class="fas fa-search fs-5"></i>
+                            
+                            <button class="search-btn" type="submit" aria-label="Pesquisar">
+                                <i class="fas fa-search"></i>
                             </button>
-                          </div>
-                        </form>
-                      </li>
-                </ul>
-                <ul class="navbar-nav ms-auto align-items-start justify-content-end">
-                    <!-- Ícone de Notificações -->
-                    <li class="nav-item position-relative">
-                        <button class="btn btn-link nav-link" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasNotifications" aria-controls="offcanvasNotifications">
-                            <i class="fas fa-bell me-2"></i>
-                            <span>Notificações</span>
+                        </div>
+                    </form>
+                </div>
 
-                            <!-- Badge se houver notificações não lidas -->
-                            {% if unread_notifications_count > 0 %}
-                            <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ unread_notifications_count }}
-                            </span>
-                            {% endif %}
-                        </button>
-                    </li>
+                <!-- Ações de navegação -->
+                <div class="nav-actions">
+                    
+                    <!-- Notificações -->
+                    <button class="notification-btn" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasNotifications">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </button>
+
                     {% if user.is_authenticated %}
-                    <!-- Dropdown do Usuário -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Olá, {{ user.first_name|capfirst }}!
-                        </a>
+                    <!-- Dropdown do usuário -->
+                    <div class="user-dropdown dropdown">
+                        <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                            <span>Olá, {{ user.first_name|capfirst }}!</span>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'users:minha_conta_detail' user.pk %}">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'users:minha_conta_detail' user.pk %}">
                                     <i class="fas fa-user"></i> Minha Conta
-                                </a></li>
-                            <li><a class="dropdown-item" href="{% url 'ads:necessidade_list' %}">
-                                    <i class="fas fa-bullhorn"></i> Meus Anúncios
-                                </a></li>
-                            <li><a class="dropdown-item" href="{% url 'budgets:budget_list' %}">
-                                    <i class="far fa-list-alt"></i> Meus Orçamentos
-                                </a></li>
-                            <li>
-                                <li><a class="dropdown-item" href="{% url 'ads:dashboard' %}">
-                                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                                </a></li>
-                            <li>
-                            {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="{% url 'admin_panel:dashboard' %}">
-                                    <i class="fas fa-cogs"></i> Configurações
-                                </a></li>
-                            {% endif %}
-                            <li>
-                                <hr class="dropdown-divider">
+                                </a>
                             </li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'ads:necessidade_list' %}">
+                                    <i class="fas fa-bullhorn"></i> Meus Anúncios
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'budgets:budget_list' %}">
+                                    <i class="far fa-list-alt"></i> Meus Orçamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'ads:dashboard' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                            </li>
+                            {% if user.is_staff %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'admin_panel:dashboard' %}">
+                                    <i class="fas fa-cogs"></i> Configurações
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
                                     <i class="fas fa-sign-out-alt"></i> Sair
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
-                    </li>
-
+                    </div>
                     {% else %}
-                    <!-- Links de Login e Registro -->
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'users:login' %}"
-                            style="font-size: 14px; white-space: nowrap;">
-                            <i class="fas fa-sign-in-alt me-2"></i> Login
+                    <!-- Links de autenticação -->
+                    <div class="auth-links">
+                        <a class="auth-link" href="{% url 'users:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
                         </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'users:register' %}"
-                            style="font-size: 14px; white-space: nowrap;">
-                            <i class="fas fa-user-plus me-2"></i> Registrar
+                        <a class="auth-link" href="{% url 'users:register' %}">
+                            <i class="fas fa-user-plus"></i> Registrar
                         </a>
-                    </li>
+                    </div>
                     {% endif %}
 
-                    <!-- Botão "Anunciar grátis" -->
-                    <li class="nav-item ms-lg-3">
-                        <a href="{% url 'ads:necessidade_create' %}"
-                            class="btn btn-primary text-white px-4 py-2 rounded-pill d-flex align-items-center justify-content-center"
-                            style="font-size: 14px; height: 45px; min-width: 180px; white-space: nowrap;">
-                            <i class="fas fa-bullhorn me-2"></i> Anunciar grátis
-                        </a>
-                    </li>
-
-                </ul>
+                    <!-- CTA Button -->
+                    <a href="{% url 'ads:necessidade_create' %}" class="cta-button">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Anunciar grátis</span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-<style>
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #e9ecef;
-        padding: 1rem;
-    }
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+    <!-- Barra de pesquisa mobile -->
+    <div class="mobile-search">
+        <form method="get" action="{% url 'search:necessidade_search_all' %}">
+            <div class="modern-search-bar d-flex align-items-center">
+                <input type="text"
+                       name="q"
+                       class="search-input"
+                       id="dynamicSearchInputMobile"
+                       placeholder="Buscar Apartamento"
+                       value="{{ request.GET.q|default:'' }}"
+                       autocomplete="off">
+                <button class="search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Menu items mobile -->
+    <div class="mobile-nav-item">
+        <button class="mobile-nav-link" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifications">
+            <i class="fas fa-bell"></i>
+            <span>Notificações</span>
+            {% if unread_notifications_count > 0 %}
+            <span class="notification-badge">{{ unread_notifications_count }}</span>
+            {% endif %}
+        </button>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'users:minha_conta_detail' user.pk %}">
+            <i class="fas fa-user"></i>
+            <span>Minha Conta</span>
+        </a>
+    </div>
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'ads:necessidade_list' %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Meus Anúncios</span>
+        </a>
+    </div>
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'budgets:budget_list' %}">
+            <i class="far fa-list-alt"></i>
+            <span>Meus Orçamentos</span>
+        </a>
+    </div>
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'ads:dashboard' %}">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </div>
+    {% if user.is_staff %}
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'admin_panel:dashboard' %}">
+            <i class="fas fa-cogs"></i>
+            <span>Configurações</span>
+        </a>
+    </div>
+    {% endif %}
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link text-danger" href="{% url 'users:logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sair</span>
+        </a>
+    </div>
+    {% else %}
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'users:login' %}">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Login</span>
+        </a>
+    </div>
+    <div class="mobile-nav-item">
+        <a class="mobile-nav-link" href="{% url 'users:register' %}">
+            <i class="fas fa-user-plus"></i>
+            <span>Registrar</span>
+        </a>
+    </div>
+    {% endif %}
     
-    .list-group-item.bg-light {
-        background-color: #f8f9fa !important;
-    }
-    
-    .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
-    }
-</style>
-    <!-- Off Canvas Notificações -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications" aria-labelledby="offcanvasNotificationsLabel">
+    <div class="mobile-nav-item">
+        <a class="cta-button" href="{% url 'ads:necessidade_create' %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anunciar grátis</span>
+        </a>
+    </div>
+</div>
+
+<!-- Offcanvas Notificações Modernizado -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasNotificationsLabel" style="color: #0B5ED7;">
-            <i class="fa-solid fa-bell"></i> Notificações
+        <h5 class="offcanvas-title">
+            <i class="fas fa-bell"></i> Notificações
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
         {% if user.is_authenticated %}
@@ -226,52 +731,158 @@
                 {% if user_notifications %}
                     <div class="list-group">
                         {% for notificacao in user_notifications %}
-                            <div class="list-group-item {% if not notificacao.is_read %} bg-light {% endif %}">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <div class="mb-1">{{ notificacao.message|safe }}</div>
-                                    <small><i class='fas fa-clock'></i> {{ notificacao.created_at|timesince }} atrás</small>
+                            <div class="notification-item {% if not notificacao.is_read %}unread{% endif %}">
+                                <div class="d-flex w-100 justify-content-between mb-2">
+                                    <div>{{ notificacao.message|safe }}</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ notificacao.created_at|timesince }} atrás
+                                    </small>
                                 </div>
-                                <div class="d-flex w-100 justify-content-between">
-                                {% if notificacao.necessidade %}
-                                    <a href="{% url 'ads:necessidade_detail' notificacao.necessidade.id %}" class="btn btn-sm btn-primary mt-2">
-                                        <i class="fas fa-bullhorn me-2"></i> Visualizar Anúncio
+                                <div class="d-flex gap-2">
+                                    {% if notificacao.necessidade %}
+                                    <a href="{% url 'ads:necessidade_detail' notificacao.necessidade.id %}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-bullhorn"></i> Ver Anúncio
                                     </a>
-                                {% endif %}
-                                {% if not notificacao.is_read %}
-                                    <a href="{% url 'notification_mark_read' notificacao.id %}" class="btn btn-sm btn-secondary mt-2">
-                                        <i class="fa-solid fa-circle-xmark"></i> Marcar como lido
+                                    {% endif %}
+                                    {% if not notificacao.is_read %}
+                                    <a href="{% url 'notification_mark_read' notificacao.id %}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-check"></i> Marcar como lido
                                     </a>
-                                {% endif %}
-                            </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p>Você não tem notificações.</p>
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Você não tem notificações.</p>
+                    </div>
                 {% endif %}
             {% endwith %}
         {% else %}
-            <p>Você precisa estar logado para ver notificações.</p>
+            <div class="text-center py-4">
+                <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Você precisa estar logado para ver notificações.</p>
+                <a href="{% url 'users:login' %}" class="btn btn-primary">Fazer Login</a>
+            </div>
         {% endif %}
     </div>
 </div>
 
-</header>
-
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const stateInput  = document.getElementById("stateInput");
-      const stateButton = document.getElementById("stateButton");
-      const dropdownItems = document.querySelectorAll('[data-state]');
+document.addEventListener("DOMContentLoaded", () => {
+    // Header scroll effect
+    const header = document.getElementById('modernHeader');
+    let lastScrollTop = 0;
     
-      dropdownItems.forEach(item => {
-        item.addEventListener('click', e => {
-          e.preventDefault();
-          const sigla = item.dataset.state;
-          stateInput.value = sigla;       // atualiza o campo oculto
-          stateButton.textContent = sigla; // mostra nova sigla
-          item.closest('form').submit();   // dispara a busca
-        });
-      });
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
     });
-    </script>
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    function toggleMobileMenu() {
+        mobileMenuBtn.classList.toggle('active');
+        mobileOverlay.classList.toggle('show');
+        mobileMenu.classList.toggle('show');
+        document.body.style.overflow = mobileMenu.classList.contains('show') ? 'hidden' : '';
+    }
+
+    function closeMobileMenu() {
+        mobileMenuBtn.classList.remove('active');
+        mobileOverlay.classList.remove('show');
+        mobileMenu.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    // Dynamic search placeholders
+    const searchPlaceholders = [
+        'Buscar Apartamento',
+        'Buscar Serviços Diversos',
+        'Buscar Produtos',
+        'Buscar Consultoria',
+        'Buscar Manutenção',
+        'Buscar Tecnologia',
+        'Buscar Alimentação',
+        'Buscar Transporte',
+        'Buscar Educação',
+        'Buscar Saúde',
+        'Buscar Beleza',
+        'Buscar Construção',
+        'Buscar Design',
+        'Buscar Marketing',
+        'Buscar Eventos'
+    ];
+
+    function getRandomPlaceholder() {
+        return searchPlaceholders[Math.floor(Math.random() * searchPlaceholders.length)];
+    }
+
+    function updateSearchPlaceholders() {
+        const desktopInput = document.getElementById('dynamicSearchInput');
+        const mobileInput = document.getElementById('dynamicSearchInputMobile');
+        const newPlaceholder = getRandomPlaceholder();
+        
+        if (desktopInput) desktopInput.placeholder = newPlaceholder;
+        if (mobileInput) mobileInput.placeholder = newPlaceholder;
+    }
+
+    // Atualizar placeholder a cada 3 segundos
+    setInterval(updateSearchPlaceholders, 3000);
+    
+    // Definir placeholder inicial aleatório
+    updateSearchPlaceholders();
+
+    // Search input animations
+    const searchInputs = document.querySelectorAll('.search-input');
+    searchInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-1px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add smooth animations to buttons
+    const buttons = document.querySelectorAll('.cta-button, .search-btn, .notification-btn');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.05)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Notification badge animation
+    const badge = document.querySelector('.notification-badge');
+    if (badge) {
+        setInterval(() => {
+            badge.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                badge.style.transform = 'scale(1)';
+            }, 200);
+        }, 3000);
+    }
+});
+</script>

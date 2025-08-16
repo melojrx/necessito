@@ -158,4 +158,66 @@ def help_view(request):
         'page_keywords': 'ajuda, suporte, como usar, tutorial, indicaai',
     }
     
-    return render(request, 'help/help.html', context) 
+    return render(request, 'help/help.html', context)
+
+
+# VIEWS PARA PÁGINAS LEGAIS
+
+class TermsOfServiceView(TemplateView):
+    """View para a página de Termos de Uso"""
+    template_name = 'legal/termos_de_uso.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Termos de Uso - Indicaai.com',
+            'page_description': 'Termos de uso e condições da plataforma Indicaai.com. Leia nossos termos de serviço.',
+            'page_keywords': 'termos de uso, condições, serviço, indicaai, plataforma, legal',
+            'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context
+
+
+class PrivacyPolicyView(TemplateView):
+    """View para a página de Política de Privacidade"""
+    template_name = 'legal/politica_privacidade.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Política de Privacidade - Indicaai.com',
+            'page_description': 'Política de privacidade da Indicaai.com. Como protegemos e utilizamos seus dados pessoais conforme a LGPD.',
+            'page_keywords': 'política de privacidade, LGPD, proteção de dados, privacidade, indicaai',
+            'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context
+
+
+class IntellectualPropertyView(TemplateView):
+    """View para a página de Propriedade Intelectual"""
+    template_name = 'legal/politica-propriedade-intelectual.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Propriedade Intelectual - Indicaai.com',
+            'page_description': 'Política de propriedade intelectual da Indicaai.com. Direitos autorais, marcas e uso de conteúdo.',
+            'page_keywords': 'propriedade intelectual, direitos autorais, marcas, copyright, indicaai',
+            'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context
+
+
+class SitemapView(TemplateView):
+    """View para a página do Mapa do Site"""
+    template_name = 'sitemap.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Mapa do Site - Indicaai.com',
+            'page_description': 'Navegue por todas as páginas e funcionalidades da plataforma Indicaai.com. Encontre rapidamente o que você procura.',
+            'page_keywords': 'mapa do site, navegação, páginas, indicaai, sitemap, estrutura, ajuda',
+            'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context

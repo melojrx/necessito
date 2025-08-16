@@ -30,12 +30,15 @@
     <!-- Script do Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
+    {% block head_extra_content %}{% endblock %}
+    {% block extra_css %}{% endblock %}
 
   </head>
 
 <style>
     body {
         font-family: 'Nunito Sans', sans-serif;
+        padding-top: 80px;
     }
 </style>
 <body>

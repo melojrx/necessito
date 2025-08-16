@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Navegação de retorno -->
+    <div class="mb-4">
+        <a href="{% url 'ads:home' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Voltar ao Início
+        </a>
+    </div>
+
+    <div class="legal-document">
+        <h1 class="display-4 mb-4 text-center">Termos de Uso - Indicaai.com</h1>
+        
+        <div class="alert alert-info text-center mb-5">
+            <p class="mb-0"><strong>Última atualização:</strong> 16 de agosto de 2025</p>
+        </div>
+
+    <section id="introducao">
+        <h2>1. Introdução e Definições</h2>
+        <p>1.1. Bem-vindo ao Indicaai.com ("Plataforma", "Serviço", "Nós", "Nossa"), uma plataforma digital que conecta usuários com necessidades a fornecedores capazes de atendê-las.</p>
+        <p>1.2. Ao acessar ou se cadastrar no Indicaai.com, você ("Usuário", "Você") concorda integralmente com estes Termos de Uso.</p>
+        <p>1.3. Definições:
+            <ul>
+                <li>Cliente: Usuário que publica uma necessidade</li>
+                <li>Fornecedor: Usuário que oferece serviços ou produtos</li>
+                <li>Conteúdo: Informações, imagens, textos publicados pelos usuários</li>
+            </ul>
+        </p>
+    </section>
+
+    <section id="servicos">
+        <h2>2. Descrição dos Serviços</h2>
+        <p>2.1. O Indicaai.com oferece uma plataforma para:</p>
+        <ul>
+            <li>Publicação de necessidades por clientes</li>
+            <li>Envio de orçamentos por fornecedores</li>
+            <li>Comunicação via chat integrado</li>
+            <li>Sistema de avaliações e reputação</li>
+        </ul>
+        <p>2.2. A Plataforma atua exclusivamente como intermediária, não sendo responsável pela execução direta de serviços ou entrega de produtos.</p>
+    </section>
+
+    <section id="cadastro">
+        <h2>3. Cadastro e Responsabilidades do Usuário</h2>
+        <p>3.1. Para utilizar a Plataforma, o Usuário deve:</p>
+        <ul>
+            <li>Ser maior de 18 anos</li>
+            <li>Fornecer informações precisas e atualizadas</li>
+            <li>Manter sigilo sobre sua senha</li>
+            <li>Ser responsável por todas as atividades realizadas em sua conta</li>
+        </ul>
+        <p>3.2. É proibido:</p>
+        <ul>
+            <li>Usar identidade falsa</li>
+            <li>Criar múltiplas contas</li>
+            <li>Compartilhar credenciais de acesso</li>
+        </ul>
+    </section>
+
+    <section id="uso-adequado">
+        <h2>4. Uso Adequado da Plataforma</h2>
+        <p>4.1. O Usuário compromete-se a usar a Plataforma de forma ética, legal e respeitosa.</p>
+        <p>4.2. São expressamente proibidos:</p>
+        <ul>
+            <li>Conteúdo ilegal, ofensivo ou discriminatório</li>
+            <li>Assédio ou intimidação</li>
+            <li>Spam ou publicidade não autorizada</li>
+            <li>Atividades que possam danificar a Plataforma</li>
+        </ul>
+    </section>
+
+    <section id="conteudo">
+        <h2>5. Conteúdo Publicado</h2>
+        <p>5.1. O Usuário é exclusivamente responsável pelo conteúdo que publica.</p>
+        <p>5.2. Ao publicar, o Usuário concede à Indicaai.com licença não exclusiva para utilização do conteúdo na Plataforma.</p>
+        <p>5.3. Reservamo-nos o direito de moderar, editar ou remover conteúdo que viole estes Termos.</p>
+    </section>
+
+    <section id="propriedade-intelectual">
+        <h2>6. Propriedade Intelectual</h2>
+        <p>6.1. Todo o design, estrutura, software e marca Indicaai.com são propriedade exclusiva da empresa.</p>
+        <p>6.2. É proibida qualquer reprodução, distribuição ou modificação sem autorização prévia.</p>
+    </section>
+
+    <section id="responsabilidades">
+        <h2>7. Responsabilidades e Limitações</h2>
+        <p>7.1. A Indicaai.com não se responsabiliza por:</p>
+        <ul>
+            <li>Qualidade, segurança ou legalidade dos serviços negociados</li>
+            <li>Danos diretos ou indiretos resultantes de negociações</li>
+            <li>Inadimplemento entre Clientes e Fornecedores</li>
+        </ul>
+        <p>7.2. Nossa responsabilidade limita-se ao valor máximo de R$ 1.000,00 (mil reais).</p>
+    </section>
+
+    <section id="transacoes">
+        <h2>8. Pagamentos e Transações</h2>
+        <p>8.1. Atualmente, a conexão entre Clientes e Fornecedores é gratuita.</p>
+        <p>8.2. Futuras taxas ou comissões serão comunicadas previamente.</p>
+        <p>8.3. Transações financeiras são de responsabilidade exclusiva das partes envolvidas.</p>
+    </section>
+
+    <section id="privacidade">
+        <h2>9. Privacidade</h2>
+        <p>9.1. O tratamento de dados pessoais rege-se pela Política de Privacidade, disponível em nosso site.</p>
+        <p>9.2. Ao usar a Plataforma, o Usuário consente com a coleta e uso de dados conforme a Política de Privacidade.</p>
+    </section>
+
+    <section id="modificacoes">
+        <h2>10. Modificações dos Termos</h2>
+        <p>10.1. Podemos atualizar estes Termos a qualquer momento.</p>
+        <p>10.2. Modificações significativas serão comunicadas com 30 dias de antecedência.</p>
+        <p>10.3. O uso continuado após as modificações implica aceitação tácita.</p>
+    </section>
+
+    <section id="rescisao">
+        <h2>11. Rescisão</h2>
+        <p>11.1. O Usuário pode encerrar sua conta a qualquer momento.</p>
+        <p>11.2. Reservamo-nos o direito de suspender ou cancelar contas que violem estes Termos.</p>
+    </section>
+
+    <section id="jurisdicao">
+        <h2>12. Lei Aplicável e Jurisdição</h2>
+        <p>12.1. Estes Termos regem-se pela legislação brasileira.</p>
+        <p>12.2. Eventuais disputas serão resolvidas no Foro da Comarca de São Paulo, SP.</p>
+    </section>
+
+    <section id="disposicoes-gerais">
+        <h2>13. Disposições Gerais</h2>
+        <p>13.1. Estes Termos constituem acordo integral entre Usuário e Indicaai.com.</p>
+        <p>13.2. Caso alguma disposição seja considerada inválida, as demais permanecerão em pleno vigor.</p>
+    </section>
+
+        <div class="alert alert-warning mt-5">
+            <p class="mb-0"><strong><i class="fas fa-exclamation-triangle me-2"></i>Aviso Legal:</strong> Este documento é uma minuta para fins informativos. Recomendamos sempre consultar um advogado para orientações jurídicas específicas.</p>
+        </div>
+
+        <!-- Navegação final -->
+        <div class="text-center mt-5 pt-4 border-top">
+            <a href="{% url 'ads:home' %}" class="btn btn-primary me-3">
+                <i class="fas fa-home me-2"></i>Voltar ao Início
+            </a>
+            <a href="{% url 'privacy_policy' %}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-shield-alt me-2"></i>Política de Privacidade
+            </a>
+            <a href="{% url 'intellectual_property' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-copyright me-2"></i>Propriedade Intelectual
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.legal-document {
+    font-family: 'Nunito Sans', sans-serif;
+    line-height: 1.6;
+}
+
+.legal-document h1 {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.legal-document h2 {
+    color: #34495e;
+    font-weight: 600;
+    margin-top: 2rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.legal-document p {
+    text-align: justify;
+    margin-bottom: 1rem;
+}
+
+.legal-document ul {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .legal-document {
+        font-size: 0.9rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

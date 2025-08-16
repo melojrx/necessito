@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Navegação de retorno -->
+    <div class="mb-4">
+        <a href="{% url 'ads:home' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Voltar ao Início
+        </a>
+    </div>
+
+    <div class="legal-document">
+        <h1 class="display-4 mb-4 text-center">Política de Privacidade - Indicaai.com</h1>
+        
+        <div class="alert alert-info text-center mb-5">
+            <h5><i class="fas fa-shield-alt me-2"></i>Proteção de Dados Pessoais</h5>
+            <p class="mb-0"><strong>Última atualização:</strong> 16 de agosto de 2025</p>
+            <p class="mb-0"><small>Conforme a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</small></p>
+        </div>
+
+    <section id="informacoes-gerais">
+        <h2>1. Informações Gerais</h2>
+        <p>1.1. A Indicaai.com ("Indicaai", "Plataforma", "nós", "nossa") está comprometida com a proteção da privacidade e dos dados pessoais de todos os usuários ("você", "usuário", "titular dos dados").</p>
+        <p>1.2. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos, compartilhamos e protegemos suas informações pessoais, em total conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD).</p>
+        <p>1.3. <strong>Definições importantes:</strong></p>
+        <ul>
+            <li><strong>Dados Pessoais:</strong> Informação relacionada a pessoa natural identificada ou identificável</li>
+            <li><strong>Dados Sensíveis:</strong> Dados sobre origem racial, convicções religiosas, opiniões políticas, saúde, vida sexual, etc.</li>
+            <li><strong>Titular dos Dados:</strong> Pessoa natural a quem se referem os dados pessoais</li>
+            <li><strong>Controlador:</strong> Indicaai.com, responsável pelas decisões sobre o tratamento de dados</li>
+            <li><strong>Operador:</strong> Pessoa que realiza o tratamento em nome do controlador</li>
+            <li><strong>Tratamento:</strong> Toda operação com dados pessoais (coleta, armazenamento, uso, compartilhamento, etc.)</li>
+        </ul>
+    </section>
+
+    <section id="dados-coletados">
+        <h2>2. Dados Pessoais Coletados</h2>
+        <h3>2.1. Dados fornecidos diretamente pelo usuário:</h3>
+        <ul>
+            <li><strong>Dados de identificação:</strong> Nome completo, CPF, CNPJ, RG, data de nascimento</li>
+            <li><strong>Dados de contato:</strong> Endereço de e-mail, número de telefone, endereço completo (CEP, rua, número, bairro, cidade, estado)</li>
+            <li><strong>Dados profissionais:</strong> Razão social, nome fantasia, área de atuação, experiência profissional</li>
+            <li><strong>Dados de acesso:</strong> Senha criptografada, preferências de conta</li>
+            <li><strong>Dados de perfil:</strong> Foto de perfil, descrição pessoal/profissional, categorias de interesse</li>
+            <li><strong>Dados de comunicação:</strong> Mensagens do chat interno, avaliações, comentários</li>
+            <li><strong>Dados de localização:</strong> Coordenadas geográficas (latitude/longitude) quando fornecidas ou calculadas a partir do endereço</li>
+            <li><strong>Dados financeiros:</strong> Informações sobre orçamentos e valores (quando fornecidos)</li>
+        </ul>
+
+        <h3>2.2. Dados coletados automaticamente:</h3>
+        <ul>
+            <li><strong>Dados de navegação:</strong> Endereço IP, tipo de dispositivo, navegador, sistema operacional</li>
+            <li><strong>Dados de uso:</strong> Páginas visitadas, tempo de permanência, ações realizadas na plataforma</li>
+            <li><strong>Dados de cookies:</strong> Preferências, sessão de usuário, dados de autenticação</li>
+            <li><strong>Logs de sistema:</strong> Data e hora de acesso, funcionalidades utilizadas</li>
+        </ul>
+
+        <h3>2.3. Dados obtidos de terceiros:</h3>
+        <ul>
+            <li><strong>Verificação de identidade:</strong> Dados obtidos de bureaus de crédito ou sistemas de verificação quando necessário</li>
+            <li><strong>Integração de pagamento:</strong> Dados obtidos de processadores de pagamento (quando aplicável)</li>
+        </ul>
+    </section>
+
+    <section id="como-coletamos">
+        <h2>3. Como Coletamos os Dados</h2>
+        <p>3.1. <strong>Cadastro e perfil:</strong> Durante o processo de registro e atualização de perfil</p>
+        <p>3.2. <strong>Uso da plataforma:</strong> Quando você navega, publica necessidades, envia orçamentos ou utiliza o chat</p>
+        <p>3.3. <strong>Cookies e tecnologias similares:</strong> Automaticamente durante a navegação</p>
+        <p>3.4. <strong>Formulários de contato:</strong> Quando você nos envia mensagens ou solicita suporte</p>
+        <p>3.5. <strong>Integração com terceiros:</strong> Através de APIs de parceiros quando você autoriza expressamente</p>
+        <p>3.6. <strong>Geolocalização:</strong> Quando você autoriza o compartilhamento da sua localização ou fornece seu endereço</p>
+    </section>
+
+    <section id="finalidades">
+        <h2>4. Finalidades do Uso dos Dados</h2>
+        <p>4.1. Utilizamos seus dados pessoais para as seguintes finalidades específicas:</p>
+        
+        <h3>4.1.1. Operação da plataforma:</h3>
+        <ul>
+            <li>Criar e gerenciar sua conta de usuário</li>
+            <li>Autenticar seu acesso à plataforma</li>
+            <li>Permitir a publicação de necessidades e envio de orçamentos</li>
+            <li>Facilitar a comunicação entre usuários através do chat</li>
+            <li>Processar e exibir avaliações e comentários</li>
+        </ul>
+
+        <h3>4.1.2. Melhoria de serviços:</h3>
+        <ul>
+            <li>Personalizar sua experiência na plataforma</li>
+            <li>Sugerir fornecedores relevantes baseados na localização</li>
+            <li>Analisar padrões de uso para melhorar funcionalidades</li>
+            <li>Desenvolver novos recursos e serviços</li>
+        </ul>
+
+        <h3>4.1.3. Comunicação:</h3>
+        <ul>
+            <li>Enviar notificações sobre atividades na plataforma</li>
+            <li>Comunicar atualizações de serviços e políticas</li>
+            <li>Responder a suas solicitações de suporte</li>
+            <li>Enviar comunicações promocionais (com seu consentimento)</li>
+        </ul>
+
+        <h3>4.1.4. Segurança e conformidade:</h3>
+        <ul>
+            <li>Detectar e prevenir fraudes e atividades suspeitas</li>
+            <li>Cumprir obrigações legais e regulamentares</li>
+            <li>Proteger direitos e propriedade da Indicaai e usuários</li>
+            <li>Investigar violações de termos de uso</li>
+        </ul>
+
+        <h3>4.1.5. Análise e pesquisa:</h3>
+        <ul>
+            <li>Gerar estatísticas agregadas e anonimizadas</li>
+            <li>Realizar pesquisas de mercado e satisfação</li>
+            <li>Criar métricas de desempenho da plataforma</li>
+        </ul>
+    </section>
+
+    <section id="base-legal">
+        <h2>5. Base Legal para o Tratamento</h2>
+        <p>5.1. O tratamento dos seus dados pessoais está fundamentado nas seguintes bases legais previstas na LGPD:</p>
+        
+        <table border="1" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr>
+                    <th>Tipo de Dados</th>
+                    <th>Base Legal (LGPD Art. 7º)</th>
+                    <th>Justificativa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Dados de cadastro e perfil</td>
+                    <td>Consentimento (I) / Execução de contrato (V)</td>
+                    <td>Necessário para prestação do serviço contratado</td>
+                </tr>
+                <tr>
+                    <td>Dados de comunicação (chat)</td>
+                    <td>Execução de contrato (V)</td>
+                    <td>Essencial para intermediação entre usuários</td>
+                </tr>
+                <tr>
+                    <td>Dados de localização</td>
+                    <td>Consentimento (I)</td>
+                    <td>Melhorar a experiência de busca por proximidade</td>
+                </tr>
+                <tr>
+                    <td>Dados de navegação e cookies</td>
+                    <td>Legítimo interesse (IX)</td>
+                    <td>Melhoria dos serviços e segurança da plataforma</td>
+                </tr>
+                <tr>
+                    <td>Dados para prevenção de fraudes</td>
+                    <td>Legítimo interesse (IX)</td>
+                    <td>Proteção dos usuários e da plataforma</td>
+                </tr>
+                <tr>
+                    <td>Dados para cumprimento legal</td>
+                    <td>Obrigação legal (II)</td>
+                    <td>Atendimento a requisitos legais e regulamentares</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="compartilhamento">
+        <h2>6. Compartilhamento de Dados</h2>
+        <p>6.1. <strong>Não vendemos ou alugamos seus dados pessoais a terceiros.</strong></p>
+        <p>6.2. Compartilhamos dados pessoais apenas nas seguintes situações:</p>
+
+        <h3>6.2.1. Com outros usuários da plataforma:</h3>
+        <ul>
+            <li>Informações de perfil público (nome, foto, cidade, avaliações)</li>
+            <li>Dados de contato (apenas após conexão estabelecida)</li>
+            <li>Histórico de mensagens do chat (apenas entre as partes envolvidas)</li>
+        </ul>
+
+        <h3>6.2.2. Com prestadores de serviços:</h3>
+        <ul>
+            <li><strong>Hospedagem:</strong> Provedores de infraestrutura em nuvem</li>
+            <li><strong>Comunicação:</strong> Serviços de envio de e-mail e SMS</li>
+            <li><strong>Analytics:</strong> Ferramentas de análise de dados (dados anonimizados)</li>
+            <li><strong>Pagamentos:</strong> Processadores de pagamento (quando aplicável)</li>
+            <li><strong>Suporte:</strong> Ferramentas de atendimento ao cliente</li>
+        </ul>
+
+        <h3>6.2.3. Por exigência legal:</h3>
+        <ul>
+            <li>Autoridades judiciais ou administrativas</li>
+            <li>Órgãos de proteção de dados</li>
+            <li>Cumprimento de obrigações legais</li>
+        </ul>
+
+        <h3>6.2.4. Transferências corporativas:</h3>
+        <ul>
+            <li>Em caso de fusão, aquisição ou venda de ativos</li>
+            <li>Sempre com manutenção dos mesmos níveis de proteção</li>
+        </ul>
+
+        <p>6.3. <strong>Contratos de proteção:</strong> Todos os prestadores de serviços assinam acordos de proteção de dados que garantem o mesmo nível de segurança e conformidade com a LGPD.</p>
+    </section>
+
+    <section id="armazenamento-seguranca">
+        <h2>7. Armazenamento e Segurança</h2>
+        <h3>7.1. Localização dos dados:</h3>
+        <ul>
+            <li>Dados armazenados em servidores localizados no Brasil</li>
+            <li>Backup em infraestrutura certificada internacionalmente</li>
+            <li>Transferências internacionais apenas com adequado nível de proteção</li>
+        </ul>
+
+        <h3>7.2. Medidas de segurança implementadas:</h3>
+        <ul>
+            <li><strong>Criptografia:</strong> Dados sensíveis criptografados em repouso e em trânsito</li>
+            <li><strong>Controle de acesso:</strong> Acesso restrito baseado em necessidade e função</li>
+            <li><strong>Autenticação:</strong> Senhas seguras e autenticação de dois fatores</li>
+            <li><strong>Monitoramento:</strong> Logs de auditoria e monitoramento 24/7</li>
+            <li><strong>Backup:</strong> Cópias de segurança regulares e testadas</li>
+            <li><strong>Firewall:</strong> Proteção contra acessos não autorizados</li>
+            <li><strong>Atualizações:</strong> Sistemas mantidos sempre atualizados</li>
+            <li><strong>Treinamento:</strong> Equipe treinada em proteção de dados</li>
+        </ul>
+
+        <h3>7.3. Incidentes de segurança:</h3>
+        <ul>
+            <li>Notificação à ANPD em até 72 horas quando aplicável</li>
+            <li>Comunicação aos titulares quando houver risco aos direitos</li>
+            <li>Plano de resposta a incidentes documentado e testado</li>
+        </ul>
+    </section>
+
+    <section id="direitos-titulares">
+        <h2>8. Direitos dos Titulares de Dados</h2>
+        <p>8.1. Conforme a LGPD, você possui os seguintes direitos em relação aos seus dados pessoais:</p>
+
+        <h3>8.1.1. Direito de acesso (Art. 18, I e II):</h3>
+        <ul>
+            <li>Confirmar se realizamos tratamento dos seus dados</li>
+            <li>Acessar seus dados pessoais que possuímos</li>
+            <li>Obter cópia dos dados em formato estruturado</li>
+        </ul>
+
+        <h3>8.1.2. Direito de correção (Art. 18, III):</h3>
+        <ul>
+            <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
+            <li>Atualizar informações de perfil e contato</li>
+        </ul>
+
+        <h3>8.1.3. Direito de eliminação (Art. 18, IV):</h3>
+        <ul>
+            <li>Solicitar a exclusão de dados desnecessários ou excessivos</li>
+            <li>Excluir dados tratados com base no consentimento</li>
+            <li>Excluir conta e dados associados</li>
+        </ul>
+
+        <h3>8.1.4. Direito de portabilidade (Art. 18, V):</h3>
+        <ul>
+            <li>Obter dados em formato interoperável</li>
+            <li>Transferir dados para outro prestador de serviços</li>
+        </ul>
+
+        <h3>8.1.5. Direito de oposição (Art. 18, VI):</h3>
+        <ul>
+            <li>Opor-se ao tratamento baseado em legítimo interesse</li>
+            <li>Solicitar não recebimento de comunicações promocionais</li>
+        </ul>
+
+        <h3>8.1.6. Direito de revisão (Art. 18, VII):</h3>
+        <ul>
+            <li>Solicitar revisão de decisões automatizadas</li>
+            <li>Questionar algoritmos que afetem seus interesses</li>
+        </ul>
+
+        <h3>8.1.7. Direito de revogação do consentimento (Art. 18, IX):</h3>
+        <ul>
+            <li>Retirar consentimento a qualquer momento</li>
+            <li>Ser informado sobre as consequências da revogação</li>
+        </ul>
+
+        <h3>8.2. Como exercer seus direitos:</h3>
+        <ul>
+            <li><strong>E-mail:</strong> Envie solicitação para dpo@indicaai.com</li>
+            <li><strong>Formulário:</strong> Use nosso formulário de solicitação online</li>
+            <li><strong>Conta:</strong> Acesse configurações de privacidade no seu perfil</li>
+            <li><strong>Prazo:</strong> Responderemos em até 15 dias úteis</li>
+        </ul>
+
+        <h3>8.3. Verificação de identidade:</h3>
+        <p>Para proteger seus dados, poderemos solicitar verificação de identidade antes de atender solicitações que envolvam acesso ou modificação de dados pessoais.</p>
+    </section>
+
+    <section id="cookies">
+        <h2>9. Cookies e Tecnologias Similares</h2>
+        <h3>9.1. Tipos de cookies utilizados:</h3>
+        
+        <table border="1" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Finalidade</th>
+                    <th>Duração</th>
+                    <th>Base Legal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Essenciais</td>
+                    <td>Funcionamento básico da plataforma</td>
+                    <td>Sessão</td>
+                    <td>Legítimo interesse</td>
+                </tr>
+                <tr>
+                    <td>Autenticação</td>
+                    <td>Manter usuário conectado</td>
+                    <td>30 dias</td>
+                    <td>Execução de contrato</td>
+                </tr>
+                <tr>
+                    <td>Preferências</td>
+                    <td>Lembrar configurações do usuário</td>
+                    <td>1 ano</td>
+                    <td>Legítimo interesse</td>
+                </tr>
+                <tr>
+                    <td>Analytics</td>
+                    <td>Melhorar experiência e performance</td>
+                    <td>2 anos</td>
+                    <td>Consentimento</td>
+                </tr>
+                <tr>
+                    <td>Marketing</td>
+                    <td>Personalizar conteúdo promocional</td>
+                    <td>1 ano</td>
+                    <td>Consentimento</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>9.2. Gerenciamento de cookies:</h3>
+        <ul>
+            <li>Configure suas preferências no banner de cookies</li>
+            <li>Acesse configurações de privacidade na sua conta</li>
+            <li>Configure seu navegador para bloquear cookies</li>
+            <li>Use modo anônimo/privado do navegador</li>
+        </ul>
+
+        <h3>9.3. Outras tecnologias:</h3>
+        <ul>
+            <li><strong>Local Storage:</strong> Armazenamento temporário no dispositivo</li>
+            <li><strong>Web Beacons:</strong> Pixels de rastreamento em e-mails</li>
+            <li><strong>Fingerprinting:</strong> Identificação de dispositivos para segurança</li>
+        </ul>
+    </section>
+
+    <section id="transferencia-internacional">
+        <h2>10. Transferência Internacional de Dados</h2>
+        <p>10.1. <strong>Princípio geral:</strong> Priorizamos o armazenamento de dados no Brasil.</p>
+        <p>10.2. <strong>Transferências excepcionais:</strong> Quando necessário, transferimos dados internacionalmente apenas para:</p>
+        <ul>
+            <li>Países com nível adequado de proteção reconhecido pela ANPD</li>
+            <li>Empresas que implementam salvaguardas apropriadas (Cláusulas Contratuais Padrão)</li>
+            <li>Situações previstas em lei (proteção da vida, cumprimento de obrigação legal)</li>
+        </ul>
+        
+        <h3>10.3. Salvaguardas implementadas:</h3>
+        <ul>
+            <li>Contratos de transferência com cláusulas de proteção de dados</li>
+            <li>Certificações internacionais de segurança</li>
+            <li>Auditoria regular dos destinatários</li>
+            <li>Direito de acesso e correção mantidos</li>
+        </ul>
+
+        <h3>10.4. Países para os quais dados podem ser transferidos:</h3>
+        <ul>
+            <li><strong>União Europeia:</strong> Serviços de infraestrutura em nuvem</li>
+            <li><strong>Estados Unidos:</strong> Prestadores de serviços certificados</li>
+            <li><strong>Outros:</strong> Apenas com adequado nível de proteção</li>
+        </ul>
+    </section>
+
+    <section id="retencao">
+        <h2>11. Retenção de Dados</h2>
+        <h3>11.1. Critérios para retenção:</h3>
+        <ul>
+            <li>Finalidade para a qual os dados foram coletados</li>
+            <li>Obrigações legais de retenção</li>
+            <li>Necessidade para exercício de direitos</li>
+            <li>Prevenção de fraudes e segurança</li>
+        </ul>
+
+        <h3>11.2. Prazos específicos:</h3>
+        <table border="1" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr>
+                    <th>Tipo de Dados</th>
+                    <th>Prazo de Retenção</th>
+                    <th>Justificativa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Dados de conta ativa</td>
+                    <td>Durante a vigência da conta</td>
+                    <td>Prestação do serviço</td>
+                </tr>
+                <tr>
+                    <td>Dados de conta encerrada</td>
+                    <td>3 anos após encerramento</td>
+                    <td>Obrigações legais e contratuais</td>
+                </tr>
+                <tr>
+                    <td>Mensagens de chat</td>
+                    <td>5 anos após última mensagem</td>
+                    <td>Resolução de disputas</td>
+                </tr>
+                <tr>
+                    <td>Logs de acesso</td>
+                    <td>1 ano</td>
+                    <td>Segurança e auditoria</td>
+                </tr>
+                <tr>
+                    <td>Dados financeiros</td>
+                    <td>5 anos</td>
+                    <td>Obrigações fiscais</td>
+                </tr>
+                <tr>
+                    <td>Dados anonimizados</td>
+                    <td>Indefinidamente</td>
+                    <td>Pesquisa e desenvolvimento</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>11.3. Descarte seguro:</h3>
+        <ul>
+            <li>Eliminação permanente após expiração do prazo</li>
+            <li>Métodos de descarte certificados e irreversíveis</li>
+            <li>Documentação do processo de eliminação</li>
+            <li>Anonimização quando eliminação não for possível</li>
+        </ul>
+    </section>
+
+    <section id="menores">
+        <h2>12. Proteção de Menores de Idade</h2>
+        <p>12.1. <strong>Idade mínima:</strong> Nossa plataforma é destinada a maiores de 18 anos.</p>
+        <p>12.2. <strong>Verificação de idade:</strong> Solicitamos data de nascimento durante o cadastro.</p>
+        <p>12.3. <strong>Coleta acidental:</strong> Se tomarmos conhecimento de dados de menores:</p>
+        <ul>
+            <li>Suspenderemos imediatamente a conta</li>
+            <li>Excluiremos os dados coletados</li>
+            <li>Implementaremos medidas para prevenir nova coleta</li>
+        </ul>
+        <p>12.4. <strong>Responsáveis legais:</strong> Pais ou responsáveis podem contatar nosso DPO para relatar uso indevido por menores.</p>
+        <p>12.5. <strong>Proteção especial:</strong> Dados de adolescentes (16-18 anos) que porventura sejam coletados recebem proteção especial conforme Art. 14 da LGPD.</p>
+    </section>
+
+    <section id="alteracoes">
+        <h2>13. Alterações na Política de Privacidade</h2>
+        <p>13.1. <strong>Direito de alteração:</strong> Podemos atualizar esta Política conforme evolução de nossos serviços ou mudanças legais.</p>
+        <p>13.2. <strong>Notificação de mudanças:</strong></p>
+        <ul>
+            <li><strong>Mudanças significativas:</strong> Notificação por e-mail com 30 dias de antecedência</li>
+            <li><strong>Mudanças menores:</strong> Publicação no site com destaque por 15 dias</li>
+            <li><strong>Urgentes:</strong> Notificação imediata quando exigido por lei</li>
+        </ul>
+        <p>13.3. <strong>Controle de versões:</strong></p>
+        <ul>
+            <li>Cada versão receberá nova data de atualização</li>
+            <li>Versões anteriores mantidas arquivadas por 5 anos</li>
+            <li>Histórico de mudanças disponível mediante solicitação</li>
+        </ul>
+        <p>13.4. <strong>Consentimento para novas práticas:</strong> Mudanças que exigirem novo consentimento serão claramente identificadas e você poderá optar por aceitar ou encerrar sua conta.</p>
+    </section>
+
+    <section id="encarregado-dpo">
+        <h2>14. Encarregado de Proteção de Dados (DPO)</h2>
+        <p>14.1. <strong>Designação:</strong> Designamos um Encarregado de Proteção de Dados conforme Art. 41 da LGPD.</p>
+        <p>14.2. <strong>Responsabilidades do DPO:</strong></p>
+        <ul>
+            <li>Atuar como canal de comunicação entre titulares, controlador e ANPD</li>
+            <li>Orientar funcionários sobre práticas de proteção de dados</li>
+            <li>Executar demais atribuições determinadas pela ANPD</li>
+            <li>Receber e tratar solicitações dos titulares</li>
+        </ul>
+        <p>14.3. <strong>Contato com o DPO:</strong></p>
+        <ul>
+            <li><strong>E-mail:</strong> dpo@indicaai.com</li>
+            <li><strong>Formulário online:</strong> Disponível em nossa plataforma</li>
+            <li><strong>Correio:</strong> [Endereço a ser preenchido]</li>
+            <li><strong>Prazo de resposta:</strong> 15 dias úteis</li>
+        </ul>
+        <p>14.4. <strong>Escalonamento:</strong> Caso não fique satisfeito com nossa resposta, você pode contatar a ANPD através do site gov.br/anpd.</p>
+    </section>
+
+    <section id="jurisdicao">
+        <h2>15. Lei Aplicável e Jurisdição</h2>
+        <p>15.1. <strong>Lei aplicável:</strong> Esta Política é regida pela legislação brasileira, especialmente pela LGPD e Marco Civil da Internet.</p>
+        <p>15.2. <strong>Jurisdição:</strong> Foro da comarca de São Paulo, SP, para resolução de disputas.</p>
+        <p>15.3. <strong>Conformidade internacional:</strong> Quando aplicável, também observamos:</p>
+        <ul>
+            <li>Regulamento Geral de Proteção de Dados (GDPR) da União Europeia</li>
+            <li>Lei de Privacidade do Consumidor da Califórnia (CCPA)</li>
+            <li>Outras regulamentações locais relevantes</li>
+        </ul>
+        <p>15.4. <strong>Resolução de conflitos:</strong> Priorizamos resolução amigável de disputas antes de processo judicial.</p>
+    </section>
+
+    <section id="contato">
+        <h2>16. Informações de Contato</h2>
+        <h3>16.1. Controlador de dados:</h3>
+        <ul>
+            <li><strong>Razão social:</strong> [Razão social da empresa a ser preenchida]</li>
+            <li><strong>CNPJ:</strong> [CNPJ a ser preenchido]</li>
+            <li><strong>Endereço:</strong> [Endereço completo a ser preenchido]</li>
+            <li><strong>E-mail:</strong> contato@indicaai.com</li>
+        </ul>
+
+        <h3>16.2. Encarregado de Proteção de Dados:</h3>
+        <ul>
+            <li><strong>E-mail:</strong> dpo@indicaai.com</li>
+            <li><strong>Formulário:</strong> Disponível na plataforma</li>
+        </ul>
+
+        <h3>16.3. Órgãos de controle:</h3>
+        <ul>
+            <li><strong>ANPD:</strong> gov.br/anpd</li>
+            <li><strong>Procon:</strong> [Conforme localidade]</li>
+        </ul>
+    </section>
+
+    <section id="disposicoes-finais">
+        <h2>17. Disposições Finais</h2>
+        <p>17.1. <strong>Vigência:</strong> Esta Política entra em vigor na data de sua publicação.</p>
+        <p>17.2. <strong>Integração:</strong> Esta Política complementa nossos Termos de Uso, não os substitui.</p>
+        <p>17.3. <strong>Idioma:</strong> Em caso de tradução, a versão em português prevalece.</p>
+        <p>17.4. <strong>Salvaguarda:</strong> Se alguma disposição for considerada inválida, as demais permanecem válidas.</p>
+        <p>17.5. <strong>Compromisso contínuo:</strong> Comprometemo-nos com a melhoria contínua de nossas práticas de proteção de dados.</p>
+    </section>
+
+        <div class="alert alert-warning mt-5">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Aviso Legal Importante</h5>
+            <p><strong>Este documento é um template para fins informativos.</strong> Embora tenha sido desenvolvido em conformidade com a LGPD, recomendamos fortemente consultar um advogado especializado em proteção de dados para:</p>
+            <ul>
+                <li>Adaptar a política às especificidades do seu negócio</li>
+                <li>Verificar conformidade com regulamentações setoriais específicas</li>
+                <li>Preencher informações específicas da empresa (CNPJ, endereço, etc.)</li>
+                <li>Revisar periodicamente conforme evolução legal</li>
+            </ul>
+            <p class="mb-0"><strong>A Indicaai.com não se responsabiliza por uso inadequado deste template ou por questões legais decorrentes de sua implementação sem devida adaptação profissional.</strong></p>
+        </div>
+
+        <div class="alert alert-secondary text-center mt-3">
+            <p class="mb-0"><small><strong>Versão 1.0</strong> | Elaborada em conformidade com a Lei nº 13.709/2018 (LGPD) | Última revisão: 16 de agosto de 2025</small></p>
+        </div>
+
+        <!-- Navegação final -->
+        <div class="text-center mt-5 pt-4 border-top">
+            <a href="{% url 'ads:home' %}" class="btn btn-primary me-3">
+                <i class="fas fa-home me-2"></i>Voltar ao Início
+            </a>
+            <a href="{% url 'terms_of_service' %}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-file-contract me-2"></i>Termos de Uso
+            </a>
+            <a href="{% url 'intellectual_property' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-copyright me-2"></i>Propriedade Intelectual
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.legal-document {
+    font-family: 'Nunito Sans', sans-serif;
+    line-height: 1.6;
+}
+
+.legal-document h1 {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.legal-document h2 {
+    color: #34495e;
+    font-weight: 600;
+    margin-top: 2rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.legal-document h3 {
+    color: #5d6d7e;
+    font-weight: 500;
+}
+
+.legal-document p {
+    text-align: justify;
+    margin-bottom: 1rem;
+}
+
+.legal-document ul {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .legal-document {
+        font-size: 0.9rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

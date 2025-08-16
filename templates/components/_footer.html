@@ -1,65 +1,716 @@
 {% load static %}
+
 <style>
-    .stick-footer {
-        background-color: #f8f9fa;
-        padding: 20px 0;
-        border-top: 1px solid #e9ecef;
+/* ========================================
+   FOOTER MODERNO 2025 - INDICAAI.COM
+   Seguindo tendências de UX/UI para marketplaces
+======================================== */
+
+.modern-footer {
+    background: linear-gradient(135deg, #0d1421 0%, #1a2332 50%, #2c3e50 100%);
+    position: relative;
+    overflow: hidden;
+    margin-top: auto;
+}
+
+.modern-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0d6efd 0%, #28a745 25%, #17a2b8 50%, #6f42c1 75%, #fd7e14 100%);
+    animation: gradient-slide 3s ease-in-out infinite;
+}
+
+@keyframes gradient-slide {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+}
+
+.footer-main {
+    padding: 4rem 0 2rem;
+    color: #ffffff;
+}
+
+.footer-bottom {
+    padding: 1.5rem 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Newsletter Section - Hero CTA */
+.newsletter-hero {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.9), rgba(40, 167, 69, 0.9));
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.newsletter-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(-20px, -20px) rotate(0deg); }
+    50% { transform: translate(20px, 20px) rotate(180deg); }
+}
+
+.newsletter-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.newsletter-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.newsletter-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.newsletter-input {
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    font-size: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.newsletter-input:focus {
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+    transform: translateY(-2px);
+}
+
+.newsletter-btn {
+    background: linear-gradient(45deg, #fd7e14, #dc3545);
+    border: none;
+    border-radius: 50px;
+    padding: 15px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.newsletter-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Footer Sections */
+.footer-section h5 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-section h5::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #0d6efd, #28a745);
+    border-radius: 2px;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: block;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.footer-link:hover {
+    color: #28a745;
+    transform: translateX(8px);
+    text-decoration: none;
+}
+
+.footer-link i {
+    margin-right: 8px;
+    width: 16px;
+    font-size: 0.9rem;
+}
+
+/* Trust Badges */
+.trust-badges {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trust-badge {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+}
+
+.trust-badge:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.trust-badge i {
+    font-size: 2.5rem;
+    color: #28a745;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.trust-badge h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.trust-badge p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Social Icons */
+.social-icons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.social-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.social-icon:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.4);
+    color: white;
+}
+
+.social-icon.facebook { background: linear-gradient(135deg, #3b5998, #8b9dc3); }
+.social-icon.twitter { background: linear-gradient(135deg, #1da1f2, #0e71c8); }
+.social-icon.instagram { background: linear-gradient(135deg, #e4405f, #ffad40); }
+.social-icon.linkedin { background: linear-gradient(135deg, #0077b5, #40a0c4); }
+.social-icon.whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); }
+
+/* Contact Info */
+.contact-info {
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.contact-item i {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 0.9rem;
+}
+
+.contact-item div h6 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.contact-item div p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+/* App Download Buttons */
+.app-download {
+    margin-top: 1.5rem;
+}
+
+.app-btn {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin: 0.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.app-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.app-btn img {
+    height: 35px;
+}
+
+/* Bottom Footer */
+.footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-logo img {
+    height: 60px;
+    filter: brightness(1.2);
+}
+
+.footer-copyright {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.footer-legal-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.footer-legal-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s ease;
+}
+
+.footer-legal-links a:hover {
+    color: #28a745;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer-main {
+        padding: 3rem 0 1.5rem;
     }
-    .footer-links a {
-        color: #6c757d;
-        text-decoration: none;
-        margin: 0 10px;
+    
+    .newsletter-hero {
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
     }
-    .footer-links a:hover {
-        color: #0056b3;
+    
+    .newsletter-title {
+        font-size: 1.8rem;
     }
-    .footer-icons a {
-        color: #6c757d;
-        margin: 0 10px;
+    
+    .newsletter-form .input-group {
+        flex-direction: column;
     }
-    .footer-icons a:hover {
-        color: #0056b3;
+    
+    .newsletter-btn {
+        margin-top: 1rem;
+        width: 100%;
     }
-    .footer-copyright {
-        color: #6c757d;
-        margin-top: 10px;
+    
+    .trust-badges {
+        padding: 1.5rem;
     }
-  </style>
-  
-  <footer class="stick-footer">
-    <div class="container-fluid">
-      <div class="row align-items-center text-center">
-  
-        <!-- Coluna adicionada para logo à esquerda -->
-        <div class="col-md-2 col-12 mb-3 mb-md-0">
-          <img src="{% static 'img/logo1.png' %}" alt="Logo Indicaai" height="100">
+    
+    .contact-info {
+        padding: 1.5rem;
+    }
+    
+    .footer-bottom-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-legal-links {
+        justify-content: center;
+    }
+    
+    .social-icons {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 576px) {
+    .newsletter-title {
+        font-size: 1.5rem;
+    }
+    
+    .footer-section {
+        margin-bottom: 2rem;
+    }
+    
+    .trust-badge {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Smooth Scrolling and Animations */
+.footer-link, .trust-badge, .contact-item, .social-icon, .app-btn {
+    will-change: transform;
+}
+
+/* Dark mode support ready */
+@media (prefers-color-scheme: dark) {
+    .modern-footer {
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2a2a2a 100%);
+    }
+}
+</style>
+
+<!-- FOOTER MODERNO 2025 -->
+<footer class="modern-footer">
+    <div class="footer-main">
+        <div class="container">
+            
+            <!-- Newsletter Hero Section -->
+            <div class="newsletter-hero text-center">
+                <h2 class="newsletter-title">
+                    <i class="fas fa-rocket me-3"></i>
+                    Acelere seus negócios!
+                </h2>
+                <p class="newsletter-subtitle">
+                    Receba as melhores oportunidades, dicas de fornecedores e novidades do marketplace direto no seu email.
+                </p>
+                <form class="newsletter-form">
+                    <div class="input-group">
+                        <input type="email" class="form-control newsletter-input" placeholder="Digite seu melhor email" required>
+                        <button class="btn newsletter-btn" type="submit">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Quero receber!
+                        </button>
+                    </div>
+                    <small class="text-white-50 mt-2 d-block">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Seus dados estão protegidos. Cancele quando quiser.
+                    </small>
+                </form>
+            </div>
+
+            <div class="row">
+                
+                <!-- Sobre a Indicaai -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h5><i class="fas fa-info-circle me-2"></i>Sobre a Indicaai</h5>
+                        <a href="{% url 'help' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Como funciona
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Para Clientes -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h5><i class="fas fa-user-friends me-2"></i>Para Clientes</h5>
+                        <a href="{% url 'ads:necessidade_create' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Postar necessidade
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Como escolher fornecedor
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Dicas de negociação
+                        </a>
+                        <a href="{% url 'security_tips' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Compras seguras
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Para Fornecedores -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h5><i class="fas fa-store me-2"></i>Para Fornecedores</h5>
+                        <a href="{% url 'users:register' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Cadastre-se grátis
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Como conseguir clientes
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Dicas de orçamento
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Programa de destaque
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Central do fornecedor
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Suporte & Legal -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="footer-section">
+                        <h5><i class="fas fa-headset me-2"></i>Suporte & Legal</h5>
+                        <a href="{% url 'help' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Central de ajuda
+                        </a>
+                        <a href="{% url 'privacy_policy' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Política de privacidade
+                        </a>
+                        <a href="{% url 'intellectual_property' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Propriedade intelectual
+                        </a>
+                        <a href="{% url 'terms_of_service' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Termos de uso
+                        </a>
+                        <a href="{% url 'sitemap' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Mapa do site
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="trust-badges mt-5">
+                <div class="row text-center">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="trust-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <h6>SSL Seguro</h6>
+                            <p>Conexão criptografada e dados protegidos</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="trust-badge">
+                            <i class="fas fa-credit-card"></i>
+                            <h6>Pagamento Protegido</h6>
+                            <p>Transações seguras e monitoradas</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="trust-badge">
+                            <i class="fas fa-user-shield"></i>
+                            <h6>LGPD Compliant</h6>
+                            <p>Conformidade total com a lei de proteção</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="trust-badge">
+                            <i class="fas fa-clock"></i>
+                            <h6>Suporte 24/7</h6>
+                            <p>Atendimento quando você precisar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info & Social -->
+            <div class="row mt-5">
+                <div class="col-lg-8">
+                    <div class="contact-info">
+                        <h5 class="mb-3"><i class="fas fa-phone-alt me-2"></i>Fale Conosco</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <i class="fab fa-whatsapp"></i>
+                                    <div>
+                                        <h6>WhatsApp Business</h6>
+                                        <p>(11) 99999-9999</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <div>
+                                        <h6>Email de Suporte</h6>
+                                        <p>suporte@indicaai.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <h6>Horário de Atendimento</h6>
+                                        <p>Segunda a Sexta: 8h às 18h</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div>
+                                        <h6>Localização</h6>
+                                        <p>São Paulo, SP - Brasil</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <h5 class="mb-3"><i class="fas fa-share-alt me-2"></i>Siga-nos</h5>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon facebook" target="_blank" rel="noopener" aria-label="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-icon instagram" target="_blank" rel="noopener" aria-label="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-icon linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-icon whatsapp" target="_blank" rel="noopener" aria-label="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- App Download (Preparado para futuro) -->
+                        <div class="app-download">
+                            <h6 class="text-white mb-3">
+                                <i class="fas fa-mobile-alt me-2"></i>
+                                Baixe nosso app (em breve)
+                            </h6>
+                            <a href="#" class="app-btn" style="opacity: 0.6; cursor: not-allowed;">
+                                <i class="fab fa-apple me-2"></i>App Store
+                            </a>
+                            <a href="#" class="app-btn" style="opacity: 0.6; cursor: not-allowed;">
+                                <i class="fab fa-google-play me-2"></i>Google Play
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-  
-        <!-- Conteúdo original centralizado -->
-        <div class="col-md-10 col-12">
-          <div class="footer-links">
-            <a href="#">Sobre</a>
-            <a href="#">Comprar</a>
-            <a href="#">Plano profissional</a>
-            <a href="{% url 'help' %}">Central de Ajuda</a>
-            <a href="#">Dicas de segurança</a>
-            <a href="#">Termos de uso</a>
-            <a href="#">Política de privacidade</a>
-            <a href="#">Propriedade intelectual</a>
-            <a href="#">Mapa do site</a>
-            <a href="#">Grupo Indicaai</a>
-          </div>
-          <div class="footer-icons mt-3">
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-          </div>
-          <div class="footer-copyright">
-            © 2025 | Indicaai - Todos os direitos reservados
-          </div>
-        </div>
-  
-      </div>
     </div>
-  </footer>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="footer-bottom-content">
+                <div class="footer-logo">
+                    <img src="{% static 'img/logo1.png' %}" alt="Logo Indicaai" class="img-fluid">
+                </div>
+                
+                <div class="footer-copyright text-center">
+                    <p class="mb-1">© 2025 Indicaai - Todos os direitos reservados</p>
+                    <p class="mb-0 small">
+                        <i class="fas fa-heart text-danger"></i>
+                        Feito com amor para conectar pessoas e negócios
+                    </p>
+                </div>
+                
+                <div class="footer-legal-links">
+                    <a href="{% url 'terms_of_service' %}">Termos</a>
+                    <a href="{% url 'privacy_policy' %}">Privacidade</a>
+                    <a href="{% url 'security_tips' %}">Segurança</a>
+                    <a href="{% url 'help' %}">Ajuda</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Script para Newsletter (pode ser movido para arquivo separado) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Newsletter form submission
+    const newsletterForm = document.querySelector('.newsletter-form');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            
+            // Aqui você pode integrar com sua API de newsletter
+            if (email) {
+                // Simular sucesso
+                const btn = this.querySelector('.newsletter-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Inscrito!';
+                btn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'linear-gradient(45deg, #fd7e14, #dc3545)';
+                    this.querySelector('input[type="email"]').value = '';
+                }, 3000);
+            }
+        });
+    }
+    
+    // Smooth scroll para links internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>

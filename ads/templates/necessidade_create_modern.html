@@ -452,7 +452,127 @@
                         </div>
                     </div>
 
-                    <!-- Seção 4: Imagens -->
+                    <!-- Seção 4: Endereço do Serviço -->
+                    <div class="form-section section-address">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-1 fw-bold">Local do Serviço</h3>
+                                <p class="text-muted mb-0">Informe onde o serviço será executado</p>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Usar Endereço do Usuário -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch form-check-lg">
+                                {{ form.usar_endereco_usuario }}
+                                <label class="form-check-label" for="useUserAddress">
+                                    <i class="fas fa-home me-2"></i>
+                                    {{ form.usar_endereco_usuario.label }}
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ form.usar_endereco_usuario.help_text }}</small>
+                        </div>
+
+                        <!-- Campos de Endereço Personalizado -->
+                        <div id="enderecoPersonalizado" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-mail-bulk"></i>
+                                            {{ form.cep_servico.label }}
+                                        </label>
+                                        {{ form.cep_servico }}
+                                        <div class="help-text">{{ form.cep_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-road"></i>
+                                            {{ form.endereco_servico.label }}
+                                        </label>
+                                        {{ form.endereco_servico }}
+                                        <div class="help-text">{{ form.endereco_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-hashtag"></i>
+                                            {{ form.numero_servico.label }}
+                                        </label>
+                                        {{ form.numero_servico }}
+                                        <div class="help-text">{{ form.numero_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-building"></i>
+                                            {{ form.complemento_servico.label }}
+                                        </label>
+                                        {{ form.complemento_servico }}
+                                        <div class="help-text">{{ form.complemento_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-map"></i>
+                                            {{ form.bairro_servico.label }}
+                                        </label>
+                                        {{ form.bairro_servico }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-city"></i>
+                                            {{ form.cidade_servico.label }}
+                                        </label>
+                                        {{ form.cidade_servico }}
+                                        <div class="help-text">{{ form.cidade_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="modern-label">
+                                            <i class="fas fa-flag"></i>
+                                            {{ form.estado_servico.label }}
+                                        </label>
+                                        {{ form.estado_servico }}
+                                        <div class="help-text">{{ form.estado_servico.help_text }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mapa para confirmar localização -->
+                            <div class="mb-3">
+                                <label class="modern-label">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    Confirme a localização no mapa
+                                </label>
+                                <div id="address-map" style="height: 300px; border-radius: 10px; border: 2px solid #e9ecef;"></div>
+                                <small class="text-muted">Clique no mapa para ajustar a localização exata</small>
+                            </div>
+
+                            <!-- Campos hidden para coordenadas -->
+                            <input type="hidden" name="lat_servico" id="id_lat_servico">
+                            <input type="hidden" name="lon_servico" id="id_lon_servico">
+                        </div>
+                    </div>
+
+                    <!-- Seção 5: Imagens -->
                     <div class="form-section section-media">
                         <div class="section-header">
                             <div class="section-icon">
@@ -707,6 +827,258 @@ Esta solicitação foi enviada através do formulário de criação de anúncio 
     // Mostrar confirmação
     alert('Solicitação enviada! Nossa equipe analisará e responderá em até 24 horas úteis.');
 }
+
+// ==================== SISTEMA DE ENDEREÇO INTELIGENTE ====================
+
+// Toggle entre endereço do usuário e endereço personalizado
+const useUserAddressCheckbox = document.getElementById('useUserAddress');
+const enderecoPersonalizado = document.getElementById('enderecoPersonalizado');
+const enderecoFields = document.querySelectorAll('.endereco-field');
+
+if (useUserAddressCheckbox && enderecoPersonalizado) {
+    function toggleEnderecoFields() {
+        const useUserAddress = useUserAddressCheckbox.checked;
+        
+        if (useUserAddress) {
+            enderecoPersonalizado.style.display = 'none';
+            enderecoFields.forEach(field => {
+                field.disabled = true;
+                field.style.backgroundColor = '#f8f9fa';
+            });
+        } else {
+            enderecoPersonalizado.style.display = 'block';
+            enderecoFields.forEach(field => {
+                field.disabled = false;
+                field.style.backgroundColor = '';
+            });
+        }
+    }
+    
+    // Estado inicial
+    toggleEnderecoFields();
+    
+    // Listener para mudanças
+    useUserAddressCheckbox.addEventListener('change', toggleEnderecoFields);
+}
+</script>
+
+<!-- Incluir Leaflet CSS e JS para o mapa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+
+<style>
+/* Corrigir problemas comuns do Leaflet */
+#address-map {
+    height: 300px !important;
+    width: 100% !important;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    z-index: 1;
+}
+
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+/* Garantir que os tiles carreguem */
+.leaflet-tile-pane {
+    z-index: 1;
+}
+
+.leaflet-overlay-pane {
+    z-index: 2;
+}
+
+.leaflet-marker-pane {
+    z-index: 3;
+}
+</style>
+
+<!-- Carregar Leaflet.js antes do nosso script -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+<script>
+// Função para inicializar mapa
+function initializeMap() {
+    const mapContainer = document.getElementById('address-map');
+    
+    if (!mapContainer || typeof L === 'undefined') {
+        return;
+    }
+    
+    try {
+        // Inicializar mapa centrado no Brasil
+        const map = L.map('address-map', {
+            center: [-14.2350, -51.9253],
+            zoom: 4,
+            scrollWheelZoom: true,
+            dragging: true,
+            zoomControl: true
+        });
+        
+        // Adicionar camada do OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Forçar redimensionamento do mapa
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+        
+        // Variáveis globais
+        window.leafletMap = map;
+        window.mapMarker = null;
+        
+        // Evento de clique no mapa
+        map.on('click', function(e) {
+            const { lat, lng } = e.latlng;
+            
+            // Remover marcador anterior
+            if (window.mapMarker) {
+                map.removeLayer(window.mapMarker);
+            }
+            
+            // Adicionar novo marcador
+            window.mapMarker = L.marker([lat, lng]).addTo(map);
+            
+            // Atualizar campos hidden
+            const latField = document.getElementById('id_lat_servico');
+            const lonField = document.getElementById('id_lon_servico');
+            
+            if (latField) latField.value = lat;
+            if (lonField) lonField.value = lng;
+        });
+        
+    } catch (error) {
+        console.error('Erro ao inicializar mapa:', error);
+    }
+}
+
+// Função para buscar CEP
+function buscarCEP(cep) {
+    const cleanCEP = cep.replace(/\D/g, '');
+    
+    if (cleanCEP.length !== 8) return;
+    
+    fetch(`/api/django/address/cep/?cep=${cleanCEP}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Preencher campos
+                const campos = {
+                    '[name="endereco_servico"]': data.data.logradouro,
+                    '[name="bairro_servico"]': data.data.bairro,
+                    '[name="cidade_servico"]': data.data.cidade,
+                    '[name="estado_servico"]': data.data.estado
+                };
+                
+                Object.entries(campos).forEach(([selector, value]) => {
+                    const field = document.querySelector(selector);
+                    if (field && value) {
+                        field.value = value;
+                    }
+                });
+                
+                // Geocodificar para o mapa
+                if (data.data.logradouro && data.data.cidade && data.data.estado) {
+                    const endereco = `${data.data.logradouro}, ${data.data.cidade}, ${data.data.estado}, Brasil`;
+                    geocodificarEndereco(endereco);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro na busca de CEP:', error);
+        });
+}
+
+// Função para geocodificar endereço
+function geocodificarEndereco(endereco) {
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`, {
+        headers: {
+            'User-Agent': 'Indicai-Marketplace/1.0'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                
+                if (window.leafletMap) {
+                    // Remover marcador anterior
+                    if (window.mapMarker) {
+                        window.leafletMap.removeLayer(window.mapMarker);
+                    }
+                    
+                    // Adicionar novo marcador
+                    window.mapMarker = L.marker([lat, lon]).addTo(window.leafletMap);
+                    
+                    // Centralizar mapa
+                    window.leafletMap.setView([lat, lon], 15);
+                    
+                    // Atualizar campos hidden
+                    const latField = document.getElementById('id_lat_servico');
+                    const lonField = document.getElementById('id_lon_servico');
+                    
+                    if (latField) latField.value = lat;
+                    if (lonField) lonField.value = lon;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro no geocoding:', error);
+        });
+}
+
+// Inicializar quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    // Aguardar carregamento do Leaflet
+    setTimeout(() => {
+        initializeMap();
+        
+        // Configurar busca por CEP
+        const cepField = document.querySelector('[name="cep_servico"]');
+        if (cepField) {
+            cepField.addEventListener('input', function(e) {
+                let cep = e.target.value.replace(/\D/g, '');
+                
+                // Aplicar máscara
+                if (cep.length > 5) {
+                    cep = cep.replace(/(\d{5})(\d)/, '$1-$2');
+                }
+                e.target.value = cep;
+                
+                // Buscar quando CEP estiver completo
+                if (cep.replace('-', '').length === 8) {
+                    buscarCEP(cep);
+                }
+            });
+        }
+        
+        // Configurar toggle de endereço
+        const useUserAddressCheckbox = document.getElementById('useUserAddress');
+        
+        if (useUserAddressCheckbox) {
+            useUserAddressCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    // Redimensionar mapa quando mostrar campos personalizados
+                    setTimeout(() => {
+                        if (window.leafletMap) {
+                            window.leafletMap.invalidateSize();
+                        }
+                    }, 300);
+                }
+            });
+        }
+        
+    }, 1000);
+});
 </script>
 
 {% endblock %}

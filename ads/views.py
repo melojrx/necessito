@@ -143,6 +143,12 @@ class NecessidadeCreateView(ClientRequiredMixin, EmailVerifiedRequiredMixin, Cre
     form_class = AdsForms
     template_name = 'necessidade_create_modern.html'
     success_url = reverse_lazy('ads:home')
+    
+    def get_form_kwargs(self):
+        """Passa o usuário para o formulário"""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         # Validação adicional usando o sistema de permissões

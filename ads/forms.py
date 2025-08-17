@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ValidationError
 from .models import Necessidade
+from core.services.address_service import BrazilianStates
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
@@ -44,6 +45,18 @@ class AdsForms(forms.ModelForm):
         
         return imagens
     
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Pre-preencher campos de endereço com dados do usuário se for novo
+        if self.user and not self.instance.pk:
+            self.fields['cidade_servico'].initial = self.user.cidade or ''
+            self.fields['estado_servico'].initial = self.user.estado or ''
+            self.fields['cep_servico'].initial = self.user.cep or ''
+            self.fields['bairro_servico'].initial = self.user.bairro or ''
+            self.fields['endereco_servico'].initial = self.user.endereco or ''
+    
     class Meta:
         model = Necessidade
         fields = [
@@ -60,7 +73,17 @@ class AdsForms(forms.ModelForm):
             'compr',
             'peso',
             'altura',
-            'duracao',  
+            'duracao',
+            
+            # ==================== CAMPOS DE ENDEREÇO ====================
+            'usar_endereco_usuario',
+            'cep_servico',
+            'endereco_servico',
+            'numero_servico',
+            'complemento_servico',
+            'bairro_servico',
+            'cidade_servico',
+            'estado_servico',
         ]
         widgets = {
             'categoria': forms.Select(attrs={'class': 'form-control'}),
@@ -79,8 +102,44 @@ class AdsForms(forms.ModelForm):
             'duracao': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex.: 7 dias, 3:00:00'
-            }), 
-             
+            }),
+            
+            # ==================== WIDGETS DE ENDEREÇO ====================
+            'usar_endereco_usuario': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'id': 'useUserAddress',
+                'checked': True
+            }),
+            'cep_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field',
+                'placeholder': '12345-678',
+                'maxlength': '10',
+                'data-mask': '00000-000'
+            }),
+            'endereco_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field address-autocomplete',
+                'placeholder': 'Ex: Rua das Flores'
+            }),
+            'numero_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field',
+                'placeholder': '123'
+            }),
+            'complemento_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field',
+                'placeholder': 'Apt 45, Bloco B'
+            }),
+            'bairro_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field',
+                'placeholder': 'Ex: Centro'
+            }),
+            'cidade_servico': forms.TextInput(attrs={
+                'class': 'form-control endereco-field',
+                'placeholder': 'Ex: São Paulo'
+            }),
+            'estado_servico': forms.Select(
+                choices=BrazilianStates.get_choices(),
+                attrs={'class': 'form-control endereco-field'}
+            ),
         }
         labels = {
             'categoria': 'Categoria',
@@ -96,7 +155,17 @@ class AdsForms(forms.ModelForm):
             'compr': 'Comprimento (m)',
             'peso': 'Peso (Kg)',
             'altura': 'Altura (m)',
-            'duracao': 'Duração', 
+            'duracao': 'Duração',
+            
+            # ==================== LABELS DE ENDEREÇO ====================
+            'usar_endereco_usuario': 'Usar meu endereço cadastrado',
+            'cep_servico': 'CEP do local do serviço',
+            'endereco_servico': 'Endereço (Rua/Avenida)',
+            'numero_servico': 'Número',
+            'complemento_servico': 'Complemento',
+            'bairro_servico': 'Bairro',
+            'cidade_servico': 'Cidade',
+            'estado_servico': 'Estado',
         }
         help_texts = {
             'unidade': 'Ex.: m², unidades, kg',
@@ -104,7 +173,16 @@ class AdsForms(forms.ModelForm):
             'compr': 'Ex: metros (m)',
             'peso': 'Ex: quilogramas (Kg)',
             'altura': 'Ex: metros (m)',
-            'duracao': 'Informe a duração (Ex.: 7 dias, 3:00:00)',  
+            'duracao': 'Informe a duração (Ex.: 7 dias, 3:00:00)',
+            
+            # ==================== HELP TEXTS DE ENDEREÇO ====================
+            'usar_endereco_usuario': 'Marque se o serviço será executado no seu endereço cadastrado',
+            'cep_servico': 'Digite o CEP para preenchimento automático',
+            'endereco_servico': 'O endereço será preenchido automaticamente pelo CEP',
+            'numero_servico': 'Número do local onde será executado o serviço',
+            'complemento_servico': 'Apartamento, sala, bloco, etc. (opcional)',
+            'cidade_servico': 'Cidade onde o serviço será executado',
+            'estado_servico': 'Estado onde o serviço será executado',
         }
         
     

@@ -64,6 +64,67 @@ class Necessidade(models.Model):
     ], default='ativo')
     ip_usuario = models.GenericIPAddressField(blank=True, null=True, help_text="Endereço IP do usuário que cadastrou o anúncio")
     duracao = models.CharField(max_length=20, blank=True, null=True, help_text="Duração do serviço ou entrega (ex.: 7 dias, 3 horas)")
+    
+    # ==================== CAMPOS DE ENDEREÇO DO SERVIÇO ====================
+    usar_endereco_usuario = models.BooleanField(
+        "Usar meu endereço", 
+        default=True,
+        help_text="Marque se o serviço será executado no seu endereço cadastrado"
+    )
+    
+    # Endereço específico do serviço (quando diferente do usuário)
+    cep_servico = models.CharField(
+        "CEP do local do serviço", 
+        max_length=10, 
+        blank=True,
+        help_text="Apenas números: 01234567"
+    )
+    endereco_servico = models.CharField(
+        "Logradouro", 
+        max_length=200, 
+        blank=True,
+        help_text="Rua, Avenida, etc."
+    )
+    numero_servico = models.CharField(
+        "Número", 
+        max_length=10, 
+        blank=True
+    )
+    complemento_servico = models.CharField(
+        "Complemento", 
+        max_length=100, 
+        blank=True,
+        help_text="Apartamento, sala, etc."
+    )
+    bairro_servico = models.CharField(
+        "Bairro do serviço", 
+        max_length=100, 
+        blank=True
+    )
+    cidade_servico = models.CharField(
+        "Cidade do serviço", 
+        max_length=100, 
+        blank=True
+    )
+    estado_servico = models.CharField(
+        "Estado (UF) do serviço",
+        max_length=2,
+        blank=True,
+        help_text="Ex: SP, RJ, MG"
+    )
+    
+    # Coordenadas do local do serviço
+    lat_servico = models.FloatField("Latitude do serviço", null=True, blank=True)
+    lon_servico = models.FloatField("Longitude do serviço", null=True, blank=True)
+    
+    # Campo para armazenar dados completos da API
+    endereco_completo_json = models.JSONField(
+        "Dados completos do endereço", 
+        null=True, 
+        blank=True,
+        help_text="Dados retornados pela API de CEP/Geocoding"
+    )
+    
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(blank=True, null=True, auto_now=True)
 
@@ -89,6 +150,58 @@ class Necessidade(models.Model):
     def tem_imagens(self):
         """Verifica se o anúncio tem pelo menos uma imagem"""
         return self.imagens.exists()
+    
+    # ==================== MÉTODOS DE ENDEREÇO ====================
+    
+    def get_endereco_completo(self):
+        """Retorna endereço completo formatado do local do serviço"""
+        if self.usar_endereco_usuario:
+            return self.cliente.get_endereco_completo() if hasattr(self.cliente, 'get_endereco_completo') else f"{self.cliente.cidade}, {self.cliente.estado}"
+        
+        # Montar endereço do serviço
+        partes = []
+        if self.endereco_servico:
+            endereco_base = self.endereco_servico
+            if self.numero_servico:
+                endereco_base += f", {self.numero_servico}"
+            if self.complemento_servico:
+                endereco_base += f", {self.complemento_servico}"
+            partes.append(endereco_base)
+        
+        if self.bairro_servico:
+            partes.append(self.bairro_servico)
+        
+        if self.cidade_servico and self.estado_servico:
+            partes.append(f"{self.cidade_servico}/{self.estado_servico}")
+        
+        if self.cep_servico:
+            partes.append(f"CEP: {self.cep_servico}")
+        
+        return ", ".join(partes) if partes else "Endereço não informado"
+    
+    def get_cidade_estado_servico(self):
+        """Retorna cidade e estado do local do serviço"""
+        if self.usar_endereco_usuario:
+            return f"{self.cliente.cidade}, {self.cliente.estado}"
+        return f"{self.cidade_servico}, {self.estado_servico}"
+    
+    def get_coordenadas_servico(self):
+        """Retorna tupla (lat, lon) do local do serviço"""
+        if self.usar_endereco_usuario:
+            return (self.cliente.lat, self.cliente.lon)
+        return (self.lat_servico, self.lon_servico)
+    
+    def get_cep_servico(self):
+        """Retorna CEP do local do serviço"""
+        if self.usar_endereco_usuario:
+            return self.cliente.cep
+        return self.cep_servico
+    
+    def endereco_servico_preenchido(self):
+        """Verifica se o endereço do serviço está preenchido"""
+        if self.usar_endereco_usuario:
+            return bool(self.cliente.cidade and self.cliente.estado)
+        return bool(self.cidade_servico and self.estado_servico)
 
     def __str__(self):
         return self.titulo

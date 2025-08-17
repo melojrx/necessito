@@ -13,6 +13,11 @@ from .views import (
     api_logout_redirect,
 )
 from .views_clean import CustomLoginView
+from .v1.address_views import (
+    search_cep, search_addresses, geocode_address, 
+    get_states, get_user_address,
+    django_search_cep, django_search_addresses, django_geocode_address
+)
 
 # Configuração do router para v1
 v1_router = DefaultRouter()
@@ -39,6 +44,14 @@ v1_urlpatterns = [
     
     # Registro de usuários
     path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    
+    # ==================== ENDPOINTS DE ENDEREÇAMENTO ====================
+    # API REST (DRF)
+    path('address/cep/', search_cep, name='api-search-cep'),
+    path('address/search/', search_addresses, name='api-search-addresses'),
+    path('address/geocode/', geocode_address, name='api-geocode-address'),
+    path('address/states/', get_states, name='api-get-states'),
+    path('address/user/', get_user_address, name='api-get-user-address'),
 ]
 
 # URLs principais da API
@@ -52,6 +65,11 @@ urlpatterns = [
     
     # API v1 (versão atual) - APENAS esta versão aparecerá no Swagger
     path('v1/', include(v1_urlpatterns)),
+    
+    # ==================== ENDPOINTS DJANGO (para formulários) ====================
+    path('django/address/cep/', django_search_cep, name='django-search-cep'),
+    path('django/address/search/', django_search_addresses, name='django-search-addresses'),
+    path('django/address/geocode/', django_geocode_address, name='django-geocode-address'),
     
     # URLs do DRF Spectacular
     path('schema/', SpectacularAPIView.as_view(), name='schema'),

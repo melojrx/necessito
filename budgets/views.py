@@ -146,7 +146,7 @@ class OrcamentoFornecedorAceitarView(LoginRequiredMixin, View):
 
         # Atualiza o status usando state machine
         try:
-            orcamento.transition_to('confirmado', user=request.user, budget=orcamento)
+            orcamento.transition_to('confirmado', user=request.user)
             logger.info(f"Orçamento {orcamento.id} confirmado usando state machine")
         except Exception as e:
             logger.error(f"Erro ao confirmar orçamento usando state machine: {e}")

@@ -77,11 +77,15 @@ class Orcamento(models.Model):
     tipo_venda = models.CharField(max_length=50, choices=TIPO_VENDA_CHOICES, default='uso_consumo')
 
     STATUS = [
-        ('enviado', 'Enviado'),
-        ('aceito_pelo_cliente', 'Aceito pelo cliente'),
-        ('confirmado', 'Confirmado'),
-        ('rejeitado_pelo_cliente', 'Rejeitado pelo cliente'),
-        ('recusado_pelo_fornecedor', 'Recusado pelo fornecedor'),
+        ('enviado', 'Enviado'),  # O fornecedor enviou a proposta e o cliente pode analisá-la
+        ('aceito_pelo_cliente', 'Aceito pelo cliente'),  # Cliente selecionou este orçamento e aguarda confirmação do fornecedor
+        ('confirmado', 'Confirmado'),  # Orçamento vencedor - fornecedor confirmou o aceite do cliente
+        ('rejeitado_pelo_cliente', 'Rejeitado pelo cliente'),  # Cliente não aceitou o orçamento
+        ('recusado_pelo_fornecedor', 'Recusado pelo fornecedor'),  # Fornecedor não pôde confirmar após aceite do cliente
+        ('cancelado_pelo_fornecedor', 'Cancelado pelo fornecedor'),  # Fornecedor retirou o orçamento antes da decisão do cliente
+        ('finalizado', 'Finalizado'),  # Serviço atrelado foi concluído (anúncio finalizado)
+        ('anuncio_cancelado', 'Anúncio cancelado'),  # Orçamento invalidado porque anúncio foi cancelado
+        ('anuncio_expirado', 'Anúncio expirado'),  # Orçamento invalidado porque anúncio expirou
     ]
     status = models.CharField(max_length=50, choices=STATUS, default='enviado')
     data_criacao = models.DateTimeField(auto_now_add=True)

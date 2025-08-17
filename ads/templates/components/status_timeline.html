@@ -7,83 +7,114 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
     <div class="timeline-container">
         {% with current_status=necessidade.status %}
         
-        <!-- Ativo -->
-        <div class="timeline-item {% if current_status == 'ativo' %}active{% elif current_status != 'ativo' %}completed{% endif %}">
-            <div class="timeline-dot">
-                <i class="fas fa-play"></i>
-            </div>
-            <div class="timeline-content">
-                <span class="timeline-label">Publicado</span>
-                <small class="timeline-date">{{ necessidade.data_criacao|date:"d/m H:i" }}</small>
-            </div>
-        </div>
-        
-        <div class="timeline-connector {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
-        
-        <!-- Analisando Orçamentos -->
-        <div class="timeline-item {% if current_status == 'analisando_orcamentos' %}active{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
-            <div class="timeline-dot">
-                <i class="fas fa-search"></i>
-            </div>
-            <div class="timeline-content">
-                <span class="timeline-label">Recebendo Propostas</span>
-                {% if necessidade.data_primeiro_orcamento %}
-                    <small class="timeline-date">{{ necessidade.data_primeiro_orcamento|date:"d/m H:i" }}</small>
+        <!-- Status especiais (cancelado, expirado, em_disputa) -->
+        {% if current_status == 'cancelado' or current_status == 'expirado' or current_status == 'em_disputa' %}
+            <div class="special-status-banner">
+                {% if current_status == 'cancelado' %}
+                    <i class="fas fa-times-circle"></i>
+                    <span>Anúncio Cancelado</span>
+                {% elif current_status == 'expirado' %}
+                    <i class="fas fa-calendar-times"></i>
+                    <span>Anúncio Expirado</span>
+                {% elif current_status == 'em_disputa' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Em Disputa</span>
                 {% endif %}
             </div>
-        </div>
-        
-        <div class="timeline-connector {% if current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
-        
-        <!-- Aguardando Confirmação -->
-        <div class="timeline-item {% if current_status == 'aguardando_confirmacao' %}active{% elif current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
-            <div class="timeline-dot">
-                <i class="fas fa-clock"></i>
+        {% else %}
+            <!-- Timeline normal -->
+            <!-- Ativo -->
+            <div class="timeline-item {% if current_status == 'ativo' %}active{% elif current_status != 'ativo' and current_status != 'cancelado' and current_status != 'expirado' and current_status != 'em_disputa' %}completed{% endif %}">
+                <div class="timeline-dot">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Publicado</span>
+                    <small class="timeline-date">{{ necessidade.data_criacao|date:"d/m H:i" }}</small>
+                </div>
             </div>
-            <div class="timeline-content">
-                <span class="timeline-label">Aguardando Confirmação</span>
-                {% if necessidade.aguardando_confirmacao_desde %}
-                    <small class="timeline-date">{{ necessidade.aguardando_confirmacao_desde|date:"d/m H:i" }}</small>
-                {% endif %}
+            
+            <div class="timeline-connector {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            
+            <!-- Analisando Orçamentos -->
+            <div class="timeline-item {% if current_status == 'analisando_orcamentos' %}active{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+                <div class="timeline-dot">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Recebendo Propostas</span>
+                    {% if necessidade.data_primeiro_orcamento %}
+                        <small class="timeline-date">{{ necessidade.data_primeiro_orcamento|date:"d/m H:i" }}</small>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        
-        <div class="timeline-connector {% if current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
-        
-        <!-- Em Atendimento -->
-        <div class="timeline-item {% if current_status == 'em_atendimento' %}active{% elif current_status == 'finalizado' %}completed{% endif %}">
-            <div class="timeline-dot">
-                <i class="fas fa-tools"></i>
+            
+            <div class="timeline-connector {% if current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            
+            <!-- Aguardando Confirmação -->
+            <div class="timeline-item {% if current_status == 'aguardando_confirmacao' %}active{% elif current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+                <div class="timeline-dot">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Aguardando Confirmação</span>
+                    {% if necessidade.aguardando_confirmacao_desde %}
+                        <small class="timeline-date">{{ necessidade.aguardando_confirmacao_desde|date:"d/m H:i" }}</small>
+                    {% endif %}
+                </div>
             </div>
-            <div class="timeline-content">
-                <span class="timeline-label">Em Atendimento</span>
-                {% comment "Adicionar timestamp quando implementado" %}
-                {% if necessidade.data_inicio_atendimento %}
-                    <small class="timeline-date">{{ necessidade.data_inicio_atendimento|date:"d/m H:i" }}</small>
-                {% endif %}
-                {% endcomment %}
+            
+            <div class="timeline-connector {% if current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            
+            <!-- Em Andamento (Status legado) -->
+            {% if current_status == 'em_andamento' %}
+            <div class="timeline-item active">
+                <div class="timeline-dot">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Em Andamento</span>
+                    <small class="text-muted">(Status legado)</small>
+                </div>
             </div>
-        </div>
-        
-        <div class="timeline-connector {% if current_status == 'finalizado' %}completed{% endif %}"></div>
-        
-        <!-- Finalizado -->
-        <div class="timeline-item {% if current_status == 'finalizado' %}active completed{% endif %}">
-            <div class="timeline-dot">
-                <i class="fas fa-check"></i>
+            {% else %}
+            <!-- Em Atendimento -->
+            <div class="timeline-item {% if current_status == 'em_atendimento' %}active{% elif current_status == 'finalizado' %}completed{% endif %}">
+                <div class="timeline-dot">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Em Atendimento</span>
+                    {% comment "Adicionar timestamp quando implementado" %}
+                    {% if necessidade.data_inicio_atendimento %}
+                        <small class="timeline-date">{{ necessidade.data_inicio_atendimento|date:"d/m H:i" }}</small>
+                    {% endif %}
+                    {% endcomment %}
+                </div>
             </div>
-            <div class="timeline-content">
-                <span class="timeline-label">Finalizado</span>
-                {% if necessidade.data_finalizacao %}
-                    <small class="timeline-date">{{ necessidade.data_finalizacao|date:"d/m H:i" }}</small>
-                {% endif %}
+            {% endif %}
+            
+            <div class="timeline-connector {% if current_status == 'finalizado' %}completed{% endif %}"></div>
+            
+            <!-- Finalizado -->
+            <div class="timeline-item {% if current_status == 'finalizado' %}active completed{% endif %}">
+                <div class="timeline-dot">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Finalizado</span>
+                    {% if necessidade.data_finalizacao %}
+                        <small class="timeline-date">{{ necessidade.data_finalizacao|date:"d/m H:i" }}</small>
+                    {% endif %}
+                </div>
             </div>
-        </div>
+        {% endif %}
         
         {% endwith %}
     </div>
     
     <!-- Status Legend -->
+    {% if necessidade.status != 'cancelado' and necessidade.status != 'expirado' and necessidade.status != 'em_disputa' %}
     <div class="timeline-legend mt-3">
         <div class="d-flex justify-content-between align-items-center">
             <div class="legend-item">
@@ -100,6 +131,7 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <style>
@@ -207,6 +239,47 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
     background: var(--bs-success);
 }
 
+/* Special Status Banner */
+.special-status-banner {
+    width: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.special-status-banner i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.special-status-banner span {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Status específicos */
+.special-status-banner:has(i.fa-times-circle) {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--bs-danger);
+    border: 2px solid rgba(220, 53, 69, 0.3);
+}
+
+.special-status-banner:has(i.fa-calendar-times) {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--bs-warning);
+    border: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+.special-status-banner:has(i.fa-exclamation-triangle) {
+    background: rgba(253, 126, 20, 0.1);
+    color: #fd7e14;
+    border: 2px solid rgba(253, 126, 20, 0.3);
+}
+
 /* Timeline Legend */
 .timeline-legend {
     border-top: 1px solid #dee2e6;
@@ -265,13 +338,5 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
         flex-direction: column;
         gap: 8px;
     }
-}
-
-/* Special Status Handling */
-.timeline-item[data-status="cancelado"] .timeline-dot,
-.timeline-item[data-status="expirado"] .timeline-dot {
-    background: var(--bs-danger);
-    color: white;
-    border-color: var(--bs-danger);
 }
 </style>

@@ -177,11 +177,20 @@ class NecessidadeStateMachine(StateMachineBase):
         # From em_atendimento
         self.add_transition('em_atendimento', 'finalizado')
         self.add_transition('em_atendimento', 'cancelado')
+        self.add_transition('em_atendimento', 'em_disputa')
         
         # From em_andamento (legacy state, maps to em_atendimento)
         self.add_transition('em_andamento', 'em_atendimento')
         self.add_transition('em_andamento', 'finalizado')
         self.add_transition('em_andamento', 'cancelado')
+        
+        # From em_disputa
+        self.add_transition('em_disputa', 'em_atendimento')
+        self.add_transition('em_disputa', 'finalizado')
+        self.add_transition('em_disputa', 'cancelado')
+        
+        # From expirado (terminal state - can only be cancelled)
+        self.add_transition('expirado', 'cancelado')
     
     def _setup_conditions(self):
         """Define transition conditions."""
@@ -332,10 +341,10 @@ class NecessidadeStateMachine(StateMachineBase):
     
     def _effect_cancelled(self, **kwargs):
         """Execute when necessidade is cancelled."""
-        # Cancel all pending budgets
+        # Update all pending budgets to anuncio_cancelado
         self.instance.orcamentos.filter(
             status__in=['enviado', 'aceito_pelo_cliente']
-        ).update(status='cancelado')
+        ).update(status='anuncio_cancelado')
         
         self._send_notification('NECESSIDADE_CANCELLED')
     
@@ -429,16 +438,23 @@ class OrcamentoStateMachine(StateMachineBase):
         # From enviado
         self.add_transition('enviado', 'aceito_pelo_cliente')
         self.add_transition('enviado', 'rejeitado_pelo_cliente')
-        self.add_transition('enviado', 'cancelado')
+        self.add_transition('enviado', 'cancelado_pelo_fornecedor')
+        self.add_transition('enviado', 'anuncio_cancelado')
+        self.add_transition('enviado', 'anuncio_expirado')
         
         # From aceito_pelo_cliente
         self.add_transition('aceito_pelo_cliente', 'confirmado')
         self.add_transition('aceito_pelo_cliente', 'recusado_pelo_fornecedor')
-        self.add_transition('aceito_pelo_cliente', 'cancelado')
+        self.add_transition('aceito_pelo_cliente', 'anuncio_cancelado')
+        self.add_transition('aceito_pelo_cliente', 'anuncio_expirado')
         
-        # Any status can go to cancelado
-        for status in ['confirmado', 'rejeitado_pelo_cliente', 'recusado_pelo_fornecedor']:
-            self.add_transition(status, 'cancelado')
+        # From confirmado
+        self.add_transition('confirmado', 'finalizado')
+        self.add_transition('confirmado', 'anuncio_cancelado')
+        
+        # Status terminais (não têm transições de saída)
+        # rejeitado_pelo_cliente, recusado_pelo_fornecedor, cancelado_pelo_fornecedor, 
+        # finalizado, anuncio_cancelado, anuncio_expirado são estados finais
     
     def _setup_conditions(self):
         """Define transition conditions."""

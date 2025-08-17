@@ -209,3 +209,67 @@ def cleanup_expired_necessidades():
     except Exception as e:
         logger.error(f"Error in cleanup_expired_necessidades: {str(e)}")
         return {'status': 'error', 'message': str(e)}
+
+
+@shared_task
+def verificar_anuncios_expirados():
+    """
+    Verifica e expira anúncios que passaram da data de validade.
+    Deve ser executado diariamente via Celery Beat.
+    """
+    try:
+        from notifications.models import Notification, NotificationType
+        
+        # Buscar anúncios que devem expirar baseado em data_validade
+        anuncios_para_expirar = Necessidade.objects.filter(
+            status__in=['ativo', 'analisando_orcamentos', 'aguardando_confirmacao'],
+            data_validade__lt=timezone.now()
+        )
+        
+        contador = 0
+        for anuncio in anuncios_para_expirar:
+            try:
+                # Atualizar status do anúncio usando state machine
+                from core.state_machine import get_necessidade_state_machine
+                state_machine = get_necessidade_state_machine(anuncio)
+                state_machine.transition_to('expirado')
+                
+                # Atualizar status dos orçamentos relacionados
+                from budgets.models import Orcamento
+                anuncio.orcamentos.filter(
+                    status__in=['enviado', 'aceito_pelo_cliente']
+                ).update(status='anuncio_expirado')
+                
+                # Notificar o cliente
+                Notification.objects.create(
+                    user=anuncio.cliente,
+                    message=f'Seu anúncio "{anuncio.titulo}" expirou sem fechar negócio.',
+                    notification_type=NotificationType.NEW_END_AD,
+                    necessidade=anuncio
+                )
+                
+                # Notificar fornecedores que tinham orçamentos enviados
+                fornecedores_notificados = set()
+                for orcamento in anuncio.orcamentos.filter(status='anuncio_expirado'):
+                    if orcamento.fornecedor not in fornecedores_notificados:
+                        Notification.objects.create(
+                            user=orcamento.fornecedor,
+                            message=f'O anúncio "{anuncio.titulo}" expirou.',
+                            notification_type=NotificationType.NEW_END_AD,
+                            necessidade=anuncio
+                        )
+                        fornecedores_notificados.add(orcamento.fornecedor)
+                
+                contador += 1
+                logger.info(f"Anúncio {anuncio.id} - {anuncio.titulo} expirado com sucesso")
+                
+            except Exception as e:
+                logger.error(f"Erro ao expirar anúncio {anuncio.id}: {str(e)}")
+                continue
+        
+        logger.info(f"Task verificar_anuncios_expirados concluída. {contador} anúncios expirados.")
+        return {'status': 'completed', 'expired_count': contador}
+        
+    except Exception as e:
+        logger.error(f"Erro na task verificar_anuncios_expirados: {str(e)}")
+        return {'status': 'error', 'message': str(e)}

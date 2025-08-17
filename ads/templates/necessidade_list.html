@@ -21,10 +21,14 @@
                       <select class="form-select" name="status">
                           <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
                           <option value="ativo" {% if request.GET.status == 'ativo' %}selected{% endif %}>Ativo</option>
+                          <option value="analisando_orcamentos" {% if request.GET.status == 'analisando_orcamentos' %}selected{% endif %}>Analisando orçamentos</option>
+                          <option value="aguardando_confirmacao" {% if request.GET.status == 'aguardando_confirmacao' %}selected{% endif %}>Aguardando confirmação</option>
                           <option value="em_andamento" {% if request.GET.status == 'em_andamento' %}selected{% endif %}>Em andamento</option>
                           <option value="em_atendimento" {% if request.GET.status == 'em_atendimento' %}selected{% endif %}>Em atendimento</option>
                           <option value="finalizado" {% if request.GET.status == 'finalizado' %}selected{% endif %}>Finalizado</option>
                           <option value="cancelado" {% if request.GET.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                          <option value="expirado" {% if request.GET.status == 'expirado' %}selected{% endif %}>Expirado</option>
+                          <option value="em_disputa" {% if request.GET.status == 'em_disputa' %}selected{% endif %}>Em disputa</option>
                       </select>
                   </div>
                   <!-- Botão de buscar -->
@@ -99,8 +103,8 @@
                     <div class="status-timeline mb-3">
                         <div class="progress" style="height: 4px;">
                             <div class="progress-bar" 
-                                 style="width: {% if necessidade.status == 'ativo' %}25%{% elif necessidade.status == 'analisando_orcamentos' %}50%{% elif necessidade.status == 'aguardando_confirmacao' %}75%{% elif necessidade.status == 'em_atendimento' %}90%{% elif necessidade.status == 'finalizado' %}100%{% else %}0%{% endif %}; 
-                                        background-color: {% if necessidade.status == 'ativo' %}var(--bs-primary){% elif necessidade.status == 'analisando_orcamentos' %}var(--bs-info){% elif necessidade.status == 'aguardando_confirmacao' %}var(--bs-warning){% elif necessidade.status == 'em_atendimento' %}var(--bs-warning){% elif necessidade.status == 'finalizado' %}var(--bs-success){% else %}var(--bs-secondary){% endif %};">
+                                 style="width: {% if necessidade.status == 'ativo' %}20%{% elif necessidade.status == 'analisando_orcamentos' %}40%{% elif necessidade.status == 'aguardando_confirmacao' %}60%{% elif necessidade.status == 'em_atendimento' or necessidade.status == 'em_andamento' %}80%{% elif necessidade.status == 'finalizado' %}100%{% elif necessidade.status == 'cancelado' %}100%{% elif necessidade.status == 'expirado' %}100%{% elif necessidade.status == 'em_disputa' %}70%{% else %}0%{% endif %}; 
+                                        background-color: {% if necessidade.status == 'ativo' %}var(--bs-primary){% elif necessidade.status == 'analisando_orcamentos' %}var(--bs-info){% elif necessidade.status == 'aguardando_confirmacao' %}var(--bs-warning){% elif necessidade.status == 'em_atendimento' or necessidade.status == 'em_andamento' %}var(--bs-info){% elif necessidade.status == 'finalizado' %}var(--bs-success){% elif necessidade.status == 'cancelado' %}var(--bs-danger){% elif necessidade.status == 'expirado' %}var(--bs-secondary){% elif necessidade.status == 'em_disputa' %}var(--bs-danger){% else %}var(--bs-secondary){% endif %};">
                             </div>
                         </div>
                         <small class="text-muted mt-1 d-block">{{ necessidade.get_status_display }}</small>
@@ -109,9 +113,9 @@
                     <!-- Status Badge -->
                     <div class="mb-3">
                         <span class="badge rounded-pill 
-                            {% if necessidade.status == 'ativo' %}bg-primary{% elif necessidade.status == 'analisando_orcamentos' %}bg-info{% elif necessidade.status == 'aguardando_confirmacao' %}bg-warning text-dark{% elif necessidade.status == 'em_atendimento' %}bg-warning text-dark{% elif necessidade.status == 'finalizado' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if necessidade.status == 'ativo' %}bg-primary{% elif necessidade.status == 'analisando_orcamentos' %}bg-info{% elif necessidade.status == 'aguardando_confirmacao' %}bg-warning text-dark{% elif necessidade.status == 'em_atendimento' or necessidade.status == 'em_andamento' %}bg-info text-white{% elif necessidade.status == 'finalizado' %}bg-success{% elif necessidade.status == 'cancelado' %}bg-danger{% elif necessidade.status == 'expirado' %}bg-secondary{% elif necessidade.status == 'em_disputa' %}bg-danger{% else %}bg-secondary{% endif %}">
                             <i class="fas 
-                                {% if necessidade.status == 'ativo' %}fa-play{% elif necessidade.status == 'analisando_orcamentos' %}fa-search{% elif necessidade.status == 'aguardando_confirmacao' %}fa-clock{% elif necessidade.status == 'em_atendimento' %}fa-tools{% elif necessidade.status == 'finalizado' %}fa-check{% else %}fa-times{% endif %} me-1">
+                                {% if necessidade.status == 'ativo' %}fa-play{% elif necessidade.status == 'analisando_orcamentos' %}fa-search{% elif necessidade.status == 'aguardando_confirmacao' %}fa-clock{% elif necessidade.status == 'em_atendimento' or necessidade.status == 'em_andamento' %}fa-tools{% elif necessidade.status == 'finalizado' %}fa-check{% elif necessidade.status == 'cancelado' %}fa-times-circle{% elif necessidade.status == 'expirado' %}fa-calendar-times{% elif necessidade.status == 'em_disputa' %}fa-exclamation-triangle{% else %}fa-question{% endif %} me-1">
                             </i>
                             {{ necessidade.get_status_display }}
                         </span>

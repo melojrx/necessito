@@ -1,129 +1,387 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 
+{% block title %}Meus Orçamentos{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>Meus Orçamentos</h2>
-  <div class="row align-items-center mb-4">
-    <div class="col-lg-8 col-md-8 col-sm-12">
-      <form method="get" action="{% url 'budgets:budget_list' %}">
-        <div class="row g-2">
-          <div class="col-lg-5 col-md-6 col-sm-12">
-            <div class="input-group">
-              <input type="text" class="form-control" name="search" placeholder="Buscar por descrição" value="{{ request.GET.search }}">
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <select class="form-select" name="status">
-              <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
-              <option value="enviado" {% if request.GET.status == 'enviado' %}selected{% endif %}>Enviado</option>
-              <option value="aceito_pelo_cliente" {% if request.GET.status == 'aceito_pelo_cliente' %}selected{% endif %}>Aceito pelo cliente</option>
-<option value="confirmado" {% if request.GET.status == 'confirmado' %}selected{% endif %}>Confirmado</option>
-              <option value="rejeitado_pelo_cliente" {% if request.GET.status == 'rejeitado_pelo_cliente' %}selected{% endif %}>Rejeitado pelo cliente</option>
-              <option value="recusado_pelo_fornecedor" {% if request.GET.status == 'recusado_pelo_fornecedor' %}selected{% endif %}>Recusado pelo fornecedor</option>
-            </select>
-          </div>
-          <div class="col-lg-3 col-md-12 col-sm-12">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-search"></i> Buscar
-            </button>
-          </div>
+<div class="container">
+    <h1 class="mb-4">Meus Orçamentos</h1>
+    <div class="row align-items-center mb-4">
+        <!-- Formulário de busca -->
+        <div class="col-lg-8 col-md-8 col-sm-12">
+            <form method="get" action="{% url 'budgets:budget_list' %}">
+                <div class="row g-2">
+                    <!-- Campo de busca -->
+                    <div class="col-lg-5 col-md-6 col-sm-12">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Buscar por descrição" value="{{ request.GET.search }}">
+                        </div>
+                    </div>
+                    <!-- Campo de seleção de status -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <select class="form-select" name="status">
+                            <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
+                            <option value="enviado" {% if request.GET.status == 'enviado' %}selected{% endif %}>Enviado</option>
+                            <option value="aceito_pelo_cliente" {% if request.GET.status == 'aceito_pelo_cliente' %}selected{% endif %}>Aceito pelo cliente</option>
+                            <option value="confirmado" {% if request.GET.status == 'confirmado' %}selected{% endif %}>Confirmado</option>
+                            <option value="rejeitado_pelo_cliente" {% if request.GET.status == 'rejeitado_pelo_cliente' %}selected{% endif %}>Rejeitado pelo cliente</option>
+                            <option value="recusado_pelo_fornecedor" {% if request.GET.status == 'recusado_pelo_fornecedor' %}selected{% endif %}>Recusado pelo fornecedor</option>
+                            <option value="cancelado_pelo_fornecedor" {% if request.GET.status == 'cancelado_pelo_fornecedor' %}selected{% endif %}>Cancelado pelo fornecedor</option>
+                            <option value="finalizado" {% if request.GET.status == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                            <option value="anuncio_cancelado" {% if request.GET.status == 'anuncio_cancelado' %}selected{% endif %}>Anúncio cancelado</option>
+                            <option value="anuncio_expirado" {% if request.GET.status == 'anuncio_expirado' %}selected{% endif %}>Anúncio expirado</option>
+                        </select>
+                    </div>
+                    <!-- Botão de buscar -->
+                    <div class="col-lg-3 col-md-12 col-sm-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
-    </div>
-  </div>  
-  <div class="row">  
-  {% for orcamento in orcamentos %}
-  <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-    <div class="card h-100 shadow">
-        <div class="card-body">
-            <h5 class="card-title">{{ orcamento.anuncio.titulo }}</h5>
-            <p class="card-text">
-                <small class="text-muted">Cliente: {{ orcamento.anuncio.cliente.get_full_name }}</small><br>
-                <strong>Valor Total: {{ orcamento.valor_total_com_impostos|moeda_brasileira }}</strong><br>
-                <small>{{ orcamento.itens.count }} item(ns)</small>
-            </p>
-            <span class="badge 
-              {% if orcamento.status == 'enviado' %} text-bg-secondary
-              {% elif orcamento.status == 'aceito_pelo_cliente' %} text-bg-warning
-{% elif orcamento.status == 'confirmado' %} text-bg-success
-              {% elif orcamento.status == 'rejeitado_pelo_cliente' %} text-bg-danger
-              {% elif orcamento.status == 'recusado_pelo_fornecedor' %} text-bg-danger
-              {% endif %}">
-              Status: {{ orcamento.get_status_display }}
+        <!-- Botão "Novo Orçamento" - Pode ser removido se não aplicável -->
+        <div class="col-lg-4 col-md-4 col-sm-12 text-end">
+            <span class="badge bg-info fs-6">
+                <i class="fas fa-calculator me-2"></i>{{ orcamentos|length }} orçamento{{ orcamentos|length|pluralize:",s" }}
             </span>
-          </div>
-        <div class="card-footer d-flex justify-content-between">
-            <a href="{% url 'budget_detail' orcamento.pk %}" class="btn btn-primary btn-sm">Ver Detalhes</a>
-            <div>
-              {% if user == orcamento.fornecedor %}
-                {% if orcamento.status == 'aceito_pelo_cliente' %}
-                    <form method="post" action="{% url 'budget_vendor_accept' orcamento.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
-                    </form>
-                {% endif %}
-                {% if orcamento.status == 'enviado' %}
-                    <a href="{% url 'budget_update' orcamento.id %}" class="btn btn-warning btn-sm">Editar</a>
-                {% endif %}
-              {% endif %}
-          </div>          
         </div>
     </div>
-  </div>
-  {% endfor %}
-  </div>
-</div> 
-<!-- Modal de Confirmação -->
-<div class="modal fade" id="confirmarAceiteFornecedorModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="modalLabel">Confirmar Aceite do Orçamento</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-          </div>
-          <div class="modal-body">
-              Você confirma o aceite deste orçamento? O anúncio entrará em atendimento.
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="button" class="btn btn-success" id="confirmarAceiteFornecedorBtn">Aceitar</button>
-          </div>
-      </div>
-  </div>
+    
+    <div class="row">
+        {% for orcamento in orcamentos %}
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+            <div class="budget-card card h-100 shadow-sm border-0" 
+                 data-status="{{ orcamento.status }}"
+                 data-orcamento-id="{{ orcamento.id }}">
+                <!-- Card Header with Badges -->
+                <div class="card-badge-container position-relative">
+                    {% comment "Priority badge - can be added later" %}
+                    {% if orcamento.is_urgent %}
+                        <span class="badge badge-urgent position-absolute top-0 start-0 m-2">
+                            <i class="fas fa-fire"></i> Urgente
+                        </span>
+                    {% endif %}
+                    {% endcomment %}
+                    
+                    <span class="badge badge-category position-absolute top-0 end-0 m-2 bg-light text-dark">
+                        {{ orcamento.anuncio.categoria.nome }}
+                    </span>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Title -->
+                    <h5 class="card-title mb-3 fw-bold text-dark">{{ orcamento.anuncio.titulo }}</h5>
+                    
+                    <!-- Value Highlight -->
+                    <div class="value-highlight mb-3 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Valor Total:</span>
+                            <strong class="fs-5 text-success">{{ orcamento.valor_total_com_impostos|moeda_brasileira }}</strong>
+                        </div>
+                        <small class="text-muted">{{ orcamento.itens.count }} item{{ orcamento.itens.count|pluralize:",ns" }}</small>
+                    </div>
+                    
+                    <!-- Meta Information -->
+                    <div class="card-meta d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="fas fa-user me-1"></i>
+                            <span>{{ orcamento.anuncio.cliente.get_full_name }}</span>
+                        </div>
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span>{{ orcamento.anuncio.cliente.cidade|default:"" }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Client Trust Badges -->
+                    <div class="client-badges mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted">Para:</span>
+                            <strong class="small">{{ orcamento.anuncio.cliente.get_full_name }}</strong>
+                        </div>
+                        {% comment "User badges can be included if available" %}
+                        {% include 'components/user_badges.html' with user=orcamento.anuncio.cliente show_score=False %}
+                        {% endcomment %}
+                    </div>
+                    
+                    <!-- Status Progress Bar -->
+                    <div class="status-timeline mb-3">
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar" 
+                                 style="width: {% if orcamento.status == 'enviado' %}25%{% elif orcamento.status == 'aceito_pelo_cliente' %}50%{% elif orcamento.status == 'confirmado' %}75%{% elif orcamento.status == 'finalizado' %}100%{% elif orcamento.status == 'rejeitado_pelo_cliente' or orcamento.status == 'recusado_pelo_fornecedor' or orcamento.status == 'cancelado_pelo_fornecedor' %}100%{% elif orcamento.status == 'anuncio_cancelado' or orcamento.status == 'anuncio_expirado' %}100%{% else %}0%{% endif %}; 
+                                        background-color: {% if orcamento.status == 'enviado' %}var(--bs-primary){% elif orcamento.status == 'aceito_pelo_cliente' %}var(--bs-warning){% elif orcamento.status == 'confirmado' %}var(--bs-info){% elif orcamento.status == 'finalizado' %}var(--bs-success){% elif orcamento.status == 'rejeitado_pelo_cliente' or orcamento.status == 'recusado_pelo_fornecedor' %}var(--bs-danger){% elif orcamento.status == 'cancelado_pelo_fornecedor' %}var(--bs-secondary){% elif orcamento.status == 'anuncio_cancelado' %}var(--bs-dark){% elif orcamento.status == 'anuncio_expirado' %}var(--bs-secondary){% else %}var(--bs-secondary){% endif %};">
+                            </div>
+                        </div>
+                        <small class="text-muted mt-1 d-block">{{ orcamento.get_status_display }}</small>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <div class="mb-3">
+                        <span class="badge rounded-pill 
+                            {% if orcamento.status == 'enviado' %}bg-primary{% elif orcamento.status == 'aceito_pelo_cliente' %}bg-warning text-dark{% elif orcamento.status == 'confirmado' %}bg-info text-white{% elif orcamento.status == 'finalizado' %}bg-success{% elif orcamento.status == 'rejeitado_pelo_cliente' or orcamento.status == 'recusado_pelo_fornecedor' %}bg-danger{% elif orcamento.status == 'cancelado_pelo_fornecedor' %}bg-secondary{% elif orcamento.status == 'anuncio_cancelado' %}bg-dark{% elif orcamento.status == 'anuncio_expirado' %}bg-secondary{% else %}bg-secondary{% endif %}">
+                            <i class="fas 
+                                {% if orcamento.status == 'enviado' %}fa-paper-plane{% elif orcamento.status == 'aceito_pelo_cliente' %}fa-thumbs-up{% elif orcamento.status == 'confirmado' %}fa-check-circle{% elif orcamento.status == 'finalizado' %}fa-flag-checkered{% elif orcamento.status == 'rejeitado_pelo_cliente' %}fa-times-circle{% elif orcamento.status == 'recusado_pelo_fornecedor' %}fa-user-times{% elif orcamento.status == 'cancelado_pelo_fornecedor' %}fa-ban{% elif orcamento.status == 'anuncio_cancelado' %}fa-times{% elif orcamento.status == 'anuncio_expirado' %}fa-calendar-times{% else %}fa-question{% endif %} me-1">
+                            </i>
+                            {{ orcamento.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Timestamps -->
+                    <div class="text-muted small mb-3">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Enviado em {{ orcamento.data_criacao|date:"d/m/Y H:i" }}
+                        {% if orcamento.modificado_em and orcamento.modificado_em != orcamento.data_criacao %}
+                            <br><i class="fas fa-edit me-1"></i>
+                            Atualizado {{ orcamento.modificado_em|timesince }} atrás
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Prazo Information -->
+                    <div class="deadline-info mb-3 p-2 bg-light rounded">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Válido até:</small>
+                                <small class="fw-bold">{{ orcamento.prazo_validade|date:"d/m/Y" }}</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Entrega:</small>
+                                <small class="fw-bold">{{ orcamento.prazo_entrega|date:"d/m/Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Actions -->
+                <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                    <div class="d-flex flex-column gap-2">
+                        <!-- Primary Action -->
+                        <a href="{% url 'budgets:budget_detail' orcamento.pk %}" 
+                           class="btn btn-primary btn-sm d-flex align-items-center justify-content-center">
+                            <i class="fas fa-eye me-2"></i>
+                            Ver Detalhes
+                        </a>
+                        
+                        <!-- Secondary Actions -->
+                        <div class="d-flex flex-column gap-2">
+                            <!-- Botão para ver anúncio -->
+                            <a href="{% url 'ads:necessidade_detail' orcamento.anuncio.pk %}" 
+                               class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center">
+                                <i class="fas fa-bullhorn me-2"></i>
+                                Ver Anúncio
+                            </a>
+                            
+                            <div class="d-flex gap-2">
+                                {% if user == orcamento.fornecedor %}
+                                    {% if orcamento.status == 'aceito_pelo_cliente' %}
+                                        <form method="post" action="{% url 'budgets:aceitar_orcamento_fornecedor' orcamento.id %}" class="flex-fill">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                                <i class="fas fa-check me-1"></i>
+                                                Confirmar
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm flex-fill">
+                                            <i class="fas fa-times me-1"></i>
+                                            Recusar
+                                        </button>
+                                    {% elif orcamento.status == 'enviado' %}
+                                        <a href="{% url 'budgets:budget_update' orcamento.id %}" 
+                                           class="btn btn-outline-warning btn-sm flex-fill">
+                                            <i class="fas fa-edit me-1"></i>
+                                            Editar
+                                        </a>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill">
+                                            <i class="fas fa-ban me-1"></i>
+                                            Cancelar
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                {% if orcamento.arquivo_anexo %}
+                                    <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank" 
+                                       class="btn btn-outline-info btn-sm flex-fill">
+                                        <i class="fas fa-file-download me-1"></i>
+                                        Anexo
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum orçamento encontrado</h5>
+                <p class="text-muted">Você ainda não enviou nenhum orçamento ou não há orçamentos que correspondam aos filtros aplicados.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmarAceiteFornecedorModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirmar Aceite do Orçamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Você confirma o aceite deste orçamento? O anúncio entrará em atendimento.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarAceiteFornecedorBtn">Aceitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Budget Card Styles - Similar to Necessity Cards */
+.budget-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.budget-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card-badge-container {
+    height: 60px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.badge-category {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+}
+
+.value-highlight {
+    border-left: 4px solid var(--bs-success);
+}
+
+.deadline-info {
+    border-left: 3px solid var(--bs-info);
+}
+
+.budget-card .card-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    color: #2c3e50;
+}
+
+.budget-card .card-body {
+    position: relative;
+}
+
+.budget-card .card-footer {
+    background: rgba(248, 249, 250, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+/* Status specific styling */
+.budget-card[data-status="enviado"] {
+    border-left: 4px solid var(--bs-primary);
+}
+
+.budget-card[data-status="aceito_pelo_cliente"] {
+    border-left: 4px solid var(--bs-warning);
+}
+
+.budget-card[data-status="confirmado"] {
+    border-left: 4px solid var(--bs-info);
+}
+
+.budget-card[data-status="finalizado"] {
+    border-left: 4px solid var(--bs-success);
+}
+
+.budget-card[data-status="rejeitado_pelo_cliente"], 
+.budget-card[data-status="recusado_pelo_fornecedor"] {
+    border-left: 4px solid var(--bs-danger);
+}
+
+.budget-card[data-status="cancelado_pelo_fornecedor"],
+.budget-card[data-status="anuncio_cancelado"],
+.budget-card[data-status="anuncio_expirado"] {
+    border-left: 4px solid var(--bs-secondary);
+    opacity: 0.85;
+}
+
+/* Progress bar customization */
+.status-timeline .progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.status-timeline .progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .budget-card .d-flex.gap-2 {
+        flex-direction: column;
+    }
+    
+    .budget-card .d-flex.gap-2 .flex-fill {
+        width: 100% !important;
+    }
+}
+
+/* Button animations */
+.budget-card .btn {
+    transition: all 0.2s ease;
+}
+
+.budget-card .btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-      let aceitarFornecedorUrl = null;
+document.addEventListener('DOMContentLoaded', function () {
+    let aceitarFornecedorUrl = null;
 
-      // Captura a URL ao abrir o modal
-      document.querySelectorAll('.btn-aceitar-fornecedor').forEach(btn => {
-          btn.addEventListener('click', function () {
-              aceitarFornecedorUrl = this.getAttribute('data-url');
-          });
-      });
+    // Captura a URL ao abrir o modal
+    document.querySelectorAll('.btn-aceitar-fornecedor').forEach(btn => {
+        btn.addEventListener('click', function () {
+            aceitarFornecedorUrl = this.getAttribute('data-url');
+        });
+    });
 
-      // Envia requisição AJAX ao clicar no botão de confirmação
-      document.getElementById('confirmarAceiteFornecedorBtn').addEventListener('click', function () {
-          if (aceitarFornecedorUrl) {
-              fetch(aceitarFornecedorUrl, {
-                  method: 'POST',
-                  headers: {
-                      'X-CSRFToken': '{{ csrf_token }}',
-                      'Content-Type': 'application/json'
-                  },
-              })
-              .then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      location.reload();
-                  } else {
-                      alert('Erro ao aceitar orçamento: ' + (data.error || 'Tente novamente.'));
-                  }
-              });
-          }
-      });
-  });
+    // Envia requisição AJAX ao clicar no botão de confirmação
+    document.getElementById('confirmarAceiteFornecedorBtn').addEventListener('click', function () {
+        if (aceitarFornecedorUrl) {
+            fetch(aceitarFornecedorUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao aceitar orçamento: ' + (data.error || 'Tente novamente.'));
+                }
+            });
+        }
+    });
+});
 </script>
 {% endblock %}

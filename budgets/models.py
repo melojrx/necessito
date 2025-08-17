@@ -8,20 +8,20 @@ from ads.models import Necessidade
 
 
 class OrcamentoManager(models.Manager):
-    def pendentes(self):
-        return self.filter(status='pendente')
+    def enviados(self):
+        return self.filter(status='enviado')
     
     def aceitos_pelo_cliente(self):
         return self.filter(status='aceito_pelo_cliente')
         
-    def aceitos_pelo_fornecedor(self):
-        return self.filter(status='aceito_pelo_fornecedor')
-        
     def confirmados(self):
         return self.filter(status='confirmado')
     
-    def rejeitados(self):
-        return self.filter(status='rejeitado')
+    def rejeitados_pelo_cliente(self):
+        return self.filter(status='rejeitado_pelo_cliente')
+        
+    def recusados_pelo_fornecedor(self):
+        return self.filter(status='recusado_pelo_fornecedor')
 
 
 class Orcamento(models.Model):
@@ -77,13 +77,13 @@ class Orcamento(models.Model):
     tipo_venda = models.CharField(max_length=50, choices=TIPO_VENDA_CHOICES, default='uso_consumo')
 
     STATUS = [
-        ('pendente', 'Pendente'),
+        ('enviado', 'Enviado'),
         ('aceito_pelo_cliente', 'Aceito pelo cliente'),
-        ('aceito_pelo_fornecedor', 'Aceito pelo fornecedor'),
         ('confirmado', 'Confirmado'),
-        ('rejeitado', 'Rejeitado'),
+        ('rejeitado_pelo_cliente', 'Rejeitado pelo cliente'),
+        ('recusado_pelo_fornecedor', 'Recusado pelo fornecedor'),
     ]
-    status = models.CharField(max_length=50, choices=STATUS, default='pendente')
+    status = models.CharField(max_length=50, choices=STATUS, default='enviado')
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(auto_now=True)
 
@@ -117,6 +117,58 @@ class Orcamento(models.Model):
         super().clean()
         # Removida a validação incorreta - prazo de entrega pode ser posterior ao prazo de validade
         # O prazo de validade é quando o orçamento expira, não quando o trabalho deve ser entregue
+    
+    # ==================== MÉTODOS DO STATE MACHINE ====================
+    
+    def get_state_machine(self):
+        """Retorna uma instância do state machine para este orçamento."""
+        from core.state_machine import get_orcamento_state_machine
+        return get_orcamento_state_machine(self)
+    
+    def can_transition_to(self, new_status, user=None, **kwargs):
+        """Verifica se pode fazer transição para o novo status."""
+        state_machine = self.get_state_machine()
+        return state_machine.can_transition(new_status, user=user, **kwargs)
+    
+    def transition_to(self, new_status, user=None, **kwargs):
+        """Executa transição de status usando o state machine."""
+        state_machine = self.get_state_machine()
+        return state_machine.transition_to(new_status, user=user, **kwargs)
+    
+    def get_valid_transitions(self):
+        """Retorna lista de transições válidas a partir do status atual."""
+        state_machine = self.get_state_machine()
+        return state_machine.get_valid_transitions()
+    
+    def can_be_accepted(self, user=None):
+        """Verifica se o orçamento pode ser aceito pelo cliente."""
+        if user and user != self.anuncio.cliente:
+            return False
+        return self.status == 'enviado'
+    
+    def can_be_rejected(self, user=None):
+        """Verifica se o orçamento pode ser rejeitado pelo cliente."""
+        if user and user != self.anuncio.cliente:
+            return False
+        return self.status == 'enviado'
+    
+    def can_be_confirmed(self, user=None):
+        """Verifica se o orçamento pode ser confirmado pelo fornecedor."""
+        if user and user != self.fornecedor:
+            return False
+        return self.status == 'aceito_pelo_cliente'
+    
+    def can_be_refused(self, user=None):
+        """Verifica se o orçamento pode ser recusado pelo fornecedor."""
+        if user and user != self.fornecedor:
+            return False
+        return self.status == 'aceito_pelo_cliente'
+    
+    def can_be_edited(self, user=None):
+        """Verifica se o orçamento pode ser editado."""
+        if user and user != self.fornecedor:
+            return False
+        return self.status == 'enviado'
 
     def __str__(self):
         return f'Orçamento #{self.pk} – {self.fornecedor.get_full_name()}'

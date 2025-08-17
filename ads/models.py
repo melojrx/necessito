@@ -125,6 +125,31 @@ class Necessidade(models.Model):
         help_text="Dados retornados pela API de CEP/Geocoding"
     )
     
+    # ==================== CAMPOS DE TIMESTAMPS PARA STATE MACHINE ====================
+    data_primeiro_orcamento = models.DateTimeField(
+        "Data do primeiro orçamento", 
+        null=True, 
+        blank=True,
+        help_text="Timestamp de quando o primeiro orçamento foi recebido"
+    )
+    aguardando_confirmacao_desde = models.DateTimeField(
+        "Aguardando confirmação desde", 
+        null=True, 
+        blank=True,
+        help_text="Timestamp de quando entrou no status aguardando_confirmacao (timeout de 48h)"
+    )
+    data_finalizacao = models.DateTimeField(
+        "Data de finalização", 
+        null=True, 
+        blank=True,
+        help_text="Timestamp de quando a necessidade foi finalizada"
+    )
+    avaliacao_liberada = models.BooleanField(
+        "Avaliação liberada",
+        default=False,
+        help_text="Se verdadeiro, permite avaliação entre cliente e fornecedor"
+    )
+    
     data_criacao = models.DateTimeField(auto_now_add=True)
     modificado_em = models.DateTimeField(blank=True, null=True, auto_now=True)
 
@@ -202,6 +227,64 @@ class Necessidade(models.Model):
         if self.usar_endereco_usuario:
             return bool(self.cliente.cidade and self.cliente.estado)
         return bool(self.cidade_servico and self.estado_servico)
+    
+    # ==================== MÉTODOS DO STATE MACHINE ====================
+    
+    def get_state_machine(self):
+        """Retorna uma instância do state machine para esta necessidade."""
+        from core.state_machine import get_necessidade_state_machine
+        return get_necessidade_state_machine(self)
+    
+    def can_transition_to(self, new_status, user=None, **kwargs):
+        """Verifica se pode fazer transição para o novo status."""
+        state_machine = self.get_state_machine()
+        return state_machine.can_transition(new_status, user=user, **kwargs)
+    
+    def transition_to(self, new_status, user=None, **kwargs):
+        """Executa transição de status usando o state machine."""
+        state_machine = self.get_state_machine()
+        return state_machine.transition_to(new_status, user=user, **kwargs)
+    
+    def get_valid_transitions(self):
+        """Retorna lista de transições válidas a partir do status atual."""
+        state_machine = self.get_state_machine()
+        return state_machine.get_valid_transitions()
+    
+    def is_confirmation_expired(self):
+        """Verifica se o timeout de confirmação expirou."""
+        state_machine = self.get_state_machine()
+        return state_machine.is_confirmation_expired()
+    
+    def handle_timeout(self):
+        """Manipula timeout de confirmação automaticamente."""
+        state_machine = self.get_state_machine()
+        return state_machine.handle_timeout()
+    
+    def can_be_edited(self, user=None):
+        """Verifica se a necessidade pode ser editada baseado no status."""
+        if self.status in ['analisando_orcamentos', 'aguardando_confirmacao', 'em_atendimento', 'finalizado', 'cancelado']:
+            return False
+        return True
+    
+    def can_be_finalized(self, user=None):
+        """Verifica se a necessidade pode ser finalizada."""
+        if user and user != self.cliente:
+            return False
+        return self.status == 'em_atendimento'
+    
+    def can_be_cancelled(self, user=None):
+        """Verifica se a necessidade pode ser cancelada."""
+        if user and user != self.cliente:
+            return False
+        return self.status not in ['finalizado', 'cancelado']
+    
+    def get_accepted_budget(self):
+        """Retorna o orçamento aceito (se houver)."""
+        return self.orcamentos.filter(status='aceito_pelo_cliente').first()
+    
+    def get_confirmed_budget(self):
+        """Retorna o orçamento confirmado (se houver)."""
+        return self.orcamentos.filter(status='confirmado').first()
 
     def __str__(self):
         return self.titulo

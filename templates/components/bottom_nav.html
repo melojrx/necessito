@@ -1,0 +1,319 @@
+{% comment %}
+Bottom Navigation Component for Mobile
+Shows only on mobile devices (< 768px)
+{% endcomment %}
+
+{% load static %}
+
+<nav class="bottom-nav" id="bottomNav">
+    <!-- Home -->
+    <a href="{% url 'ads:home' %}" 
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+       data-page="home">
+        <i class="fas fa-home bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Início</span>
+    </a>
+
+    <!-- Browse/Search -->
+    <a href="{% url 'ads:necessidade_list' %}" 
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'necessidade_list' %}active{% endif %}"
+       data-page="browse">
+        <i class="fas fa-search bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Buscar</span>
+    </a>
+
+    <!-- Create (Center action) -->
+    {% if user.is_authenticated and user.is_client %}
+    <a href="{% url 'ads:necessidade_create' %}" 
+       class="bottom-nav-item {% if request.resolver_match.url_name == 'necessidade_create' %}active{% endif %}"
+       data-page="create">
+        <i class="fas fa-plus-circle bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Criar</span>
+    </a>
+    {% else %}
+    <a href="#" onclick="showLoginPrompt()" class="bottom-nav-item" data-page="create">
+        <i class="fas fa-plus-circle bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Criar</span>
+    </a>
+    {% endif %}
+
+    <!-- Messages/Chat -->
+    {% if user.is_authenticated %}
+    <a href="{% url 'chat:lista_chats' %}" 
+       class="bottom-nav-item {% if 'chat' in request.resolver_match.url_name %}active{% endif %}"
+       data-page="messages">
+        <i class="fas fa-comment-dots bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Mensagens</span>
+        {% comment "Add notification badge if there are unread messages" %}
+        {% if user.unread_messages_count > 0 %}
+            <span class="bottom-nav-badge">{{ user.unread_messages_count|default:'' }}</span>
+        {% endif %}
+        {% endcomment %}
+    </a>
+    {% else %}
+    <a href="#" onclick="showLoginPrompt()" class="bottom-nav-item" data-page="messages">
+        <i class="fas fa-comment-dots bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Mensagens</span>
+    </a>
+    {% endif %}
+
+    <!-- Profile/Account -->
+    {% if user.is_authenticated %}
+    <a href="#" onclick="toggleProfileMenu()" 
+       class="bottom-nav-item"
+       data-page="profile">
+        {% if user.foto %}
+            <img src="{{ user.foto.url }}" 
+                 alt="Profile" 
+                 class="bottom-nav-icon rounded-circle"
+                 style="width: 24px; height: 24px; object-fit: cover;">
+        {% else %}
+            <i class="fas fa-user bottom-nav-icon"></i>
+        {% endif %}
+        <span class="bottom-nav-label">Perfil</span>
+    </a>
+    {% else %}
+    <a href="{% url 'users:login' %}" 
+       class="bottom-nav-item"
+       data-page="profile">
+        <i class="fas fa-sign-in-alt bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Entrar</span>
+    </a>
+    {% endif %}
+</nav>
+
+<!-- Floating Action Button (Main CTA) -->
+{% if user.is_authenticated and user.is_client %}
+<div class="fab-container">
+    <a href="{% url 'ads:necessidade_create' %}" class="fab" title="Criar Nova Necessidade">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+{% endif %}
+
+<!-- Quick Actions (expandable from FAB) -->
+{% if user.is_authenticated %}
+<div class="quick-actions" id="quickActions">
+    {% if user.is_client %}
+        <a href="{% url 'ads:necessidade_list' %}" class="quick-action" title="Minhas Necessidades">
+            <i class="fas fa-list"></i>
+        </a>
+    {% endif %}
+    
+    {% if user.is_supplier %}
+        <a href="{% url 'budgets:budget_list' %}" class="quick-action" title="Meus Orçamentos">
+            <i class="fas fa-file-invoice-dollar"></i>
+        </a>
+    {% endif %}
+    
+    <a href="{% url 'chat:lista_chats' %}" class="quick-action" title="Conversas">
+        <i class="fas fa-comments"></i>
+    </a>
+</div>
+{% endif %}
+
+<!-- Mobile Profile Menu Overlay -->
+{% if user.is_authenticated %}
+<div class="mobile-overlay" id="profileOverlay" onclick="hideProfileMenu()"></div>
+<div class="mobile-profile-menu" id="profileMenu">
+    <div class="profile-header">
+        <div class="d-flex align-items-center p-3">
+            {% if user.foto %}
+                <img src="{{ user.foto.url }}" alt="Profile" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+            {% else %}
+                <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h6 class="mb-0">{{ user.get_full_name }}</h6>
+                <small class="text-muted">{{ user.email }}</small>
+                <br>
+                {% include 'components/user_badges.html' with user=user show_score=True %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-menu-items">
+        {% if user.is_client %}
+            <a href="{% url 'ads:necessidade_list' %}" class="profile-menu-item">
+                <i class="fas fa-list-ul me-3"></i>
+                Minhas Necessidades
+            </a>
+        {% endif %}
+        
+        {% if user.is_supplier %}
+            <a href="{% url 'budgets:budget_list' %}" class="profile-menu-item">
+                <i class="fas fa-file-invoice-dollar me-3"></i>
+                Meus Orçamentos
+            </a>
+        {% endif %}
+        
+        <a href="#" class="profile-menu-item">
+            <i class="fas fa-cog me-3"></i>
+            Configurações
+        </a>
+        
+        <a href="#" class="profile-menu-item">
+            <i class="fas fa-question-circle me-3"></i>
+            Ajuda
+        </a>
+        
+        <hr class="my-2">
+        
+        <a href="{% url 'account_logout' %}" class="profile-menu-item text-danger">
+            <i class="fas fa-sign-out-alt me-3"></i>
+            Sair
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<style>
+/* Mobile Profile Menu */
+.mobile-profile-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    max-height: 80vh;
+    z-index: 1051;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+.mobile-profile-menu.show {
+    transform: translateY(0);
+}
+
+.profile-header {
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.profile-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #495057;
+    text-decoration: none;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.profile-menu-item:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+}
+
+.profile-menu-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+@media (min-width: 768px) {
+    .mobile-profile-menu,
+    .mobile-overlay {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// Bottom Navigation JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    let lastScrollTop = 0;
+    const bottomNav = document.getElementById('bottomNav');
+    let hideTimeout;
+
+    // Auto-hide bottom nav on scroll (optional)
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            // Scrolling down
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                if (bottomNav) bottomNav.classList.add('hidden');
+            }, 150);
+        } else {
+            // Scrolling up
+            clearTimeout(hideTimeout);
+            if (bottomNav) bottomNav.classList.remove('hidden');
+        }
+        
+        lastScrollTop = scrollTop;
+    });
+
+    // Keep nav visible when touching it
+    if (bottomNav) {
+        bottomNav.addEventListener('touchstart', function() {
+            clearTimeout(hideTimeout);
+            bottomNav.classList.remove('hidden');
+        });
+    }
+});
+
+// Profile menu functions
+function toggleProfileMenu() {
+    const menu = document.getElementById('profileMenu');
+    const overlay = document.getElementById('profileOverlay');
+    
+    if (menu && overlay) {
+        const isShowing = menu.classList.contains('show');
+        
+        if (isShowing) {
+            hideProfileMenu();
+        } else {
+            menu.classList.add('show');
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+}
+
+function hideProfileMenu() {
+    const menu = document.getElementById('profileMenu');
+    const overlay = document.getElementById('profileOverlay');
+    
+    if (menu && overlay) {
+        menu.classList.remove('show');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
+// Quick actions toggle
+function toggleQuickActions() {
+    const actions = document.getElementById('quickActions');
+    if (actions) {
+        actions.classList.toggle('show');
+    }
+}
+
+// Login prompt for non-authenticated users
+function showLoginPrompt() {
+    if (confirm('Você precisa estar logado para acessar esta função. Deseja fazer login agora?')) {
+        window.location.href = '{% url "users:login" %}';
+    }
+}
+
+// Add haptic feedback for supported devices
+function addHapticFeedback(element) {
+    element.addEventListener('touchstart', function() {
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    });
+}
+
+// Initialize haptic feedback for nav items
+document.addEventListener('DOMContentLoaded', function() {
+    const navItems = document.querySelectorAll('.bottom-nav-item, .fab, .quick-action');
+    navItems.forEach(addHapticFeedback);
+});
+</script>

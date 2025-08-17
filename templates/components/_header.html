@@ -287,117 +287,6 @@
     box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
 }
 
-/* Mobile Menu Modernizado */
-.mobile-menu-btn {
-    background: transparent;
-    border: none;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: var(--transition-smooth);
-    position: relative;
-    width: 40px;
-    height: 40px;
-}
-
-.mobile-menu-btn:hover {
-    background: rgba(0, 123, 255, 0.1);
-}
-
-.hamburger {
-    width: 24px;
-    height: 18px;
-    position: relative;
-    cursor: pointer;
-}
-
-.hamburger span {
-    display: block;
-    position: absolute;
-    height: 2px;
-    width: 100%;
-    background: var(--text-dark);
-    border-radius: 2px;
-    transition: var(--transition-smooth);
-}
-
-.hamburger span:nth-child(1) { top: 0; }
-.hamburger span:nth-child(2) { top: 8px; }
-.hamburger span:nth-child(3) { top: 16px; }
-
-.mobile-menu-btn.active .hamburger span:nth-child(1) {
-    transform: rotate(45deg);
-    top: 8px;
-}
-
-.mobile-menu-btn.active .hamburger span:nth-child(2) {
-    opacity: 0;
-}
-
-.mobile-menu-btn.active .hamburger span:nth-child(3) {
-    transform: rotate(-45deg);
-    top: 8px;
-}
-
-.mobile-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    z-index: 1025;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition-smooth);
-}
-
-.mobile-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.mobile-menu {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 320px;
-    height: 100vh;
-    background: #ffffff;
-    padding: 2rem;
-    z-index: 1026;
-    transition: var(--transition-elastic);
-    box-shadow: var(--shadow-strong);
-}
-
-.mobile-menu.show {
-    right: 0;
-}
-
-.mobile-search {
-    margin-bottom: 2rem;
-}
-
-.mobile-nav-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.mobile-nav-link {
-    color: var(--text-dark);
-    text-decoration: none;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    transition: var(--transition-smooth);
-}
-
-.mobile-nav-link:hover {
-    color: var(--text-accent);
-    transform: translateX(5px);
-}
 
 /* Dropdown moderno */
 .dropdown-menu {
@@ -501,6 +390,35 @@
 }
 
 /* Body offset para header fixo - já definido no base.html */
+
+/* Dropdown coordination styles */
+.user-dropdown .dropdown-menu {
+    z-index: 1055 !important;
+}
+
+.notification-dropdown {
+    z-index: 1056 !important;
+}
+
+/* Mobile dropdown optimization */
+@media (max-width: 768px) {
+    .user-dropdown .dropdown-menu {
+        min-width: 250px;
+        max-width: 90vw;
+        right: 10px !important;
+        left: auto !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Garantir que dropdown não interfira com conteúdo */
+    .dropdown-menu.show {
+        transform: translateY(0) !important;
+    }
+}
 </style>
 
 <header class="modern-header" id="modernHeader">
@@ -512,14 +430,15 @@
                 <span class="modern-logo-text">Indicaai</span>
             </a>
 
-            <!-- Botão mobile menu -->
-            <button class="mobile-menu-btn d-lg-none" type="button" id="mobileMenuBtn">
-                <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </button>
+            <!-- Menu hambúrguer APENAS mobile -->
+            {% if user.is_authenticated %}
+            <div class="d-lg-none">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileUserOffcanvas" aria-controls="mobileUserOffcanvas">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            {% endif %}
+
 
             <!-- Menu principal desktop -->
             <div class="d-none d-lg-flex flex-grow-1 align-items-center justify-content-between ms-4">
@@ -546,6 +465,7 @@
                 <!-- Ações de navegação -->
                 <div class="nav-actions">
                     
+
                     <!-- Notificações -->
                     <button class="notification-btn" type="button" data-bs-toggle="offcanvas"
                             data-bs-target="#offcanvasNotifications">
@@ -557,8 +477,8 @@
 
                     {% if user.is_authenticated %}
                     <!-- Dropdown do usuário -->
-                    <div class="user-dropdown dropdown">
-                        <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <div class="user-dropdown dropdown ms-2">
+                        <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="userDropdownBtn">
                             <i class="fas fa-user"></i>
                             <span>Olá, {{ user.first_name|capfirst }}!</span>
                         </button>
@@ -621,101 +541,6 @@
     </nav>
 </header>
 
-<!-- Mobile Menu Overlay -->
-<div class="mobile-overlay" id="mobileOverlay"></div>
-
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu">
-    <!-- Barra de pesquisa mobile -->
-    <div class="mobile-search">
-        <form method="get" action="{% url 'search:necessidade_search_all' %}">
-            <div class="modern-search-bar d-flex align-items-center">
-                <input type="text"
-                       name="q"
-                       class="search-input"
-                       id="dynamicSearchInputMobile"
-                       placeholder="Buscar Apartamento"
-                       value="{{ request.GET.q|default:'' }}"
-                       autocomplete="off">
-                <button class="search-btn" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Menu items mobile -->
-    <div class="mobile-nav-item">
-        <button class="mobile-nav-link" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifications">
-            <i class="fas fa-bell"></i>
-            <span>Notificações</span>
-            {% if unread_notifications_count > 0 %}
-            <span class="notification-badge">{{ unread_notifications_count }}</span>
-            {% endif %}
-        </button>
-    </div>
-
-    {% if user.is_authenticated %}
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'users:minha_conta_detail' user.pk %}">
-            <i class="fas fa-user"></i>
-            <span>Minha Conta</span>
-        </a>
-    </div>
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'ads:necessidade_list' %}">
-            <i class="fas fa-bullhorn"></i>
-            <span>Meus Anúncios</span>
-        </a>
-    </div>
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'budgets:budget_list' %}">
-            <i class="far fa-list-alt"></i>
-            <span>Meus Orçamentos</span>
-        </a>
-    </div>
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'ads:dashboard' %}">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-        </a>
-    </div>
-    {% if user.is_staff %}
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'admin_panel:dashboard' %}">
-            <i class="fas fa-cogs"></i>
-            <span>Configurações</span>
-        </a>
-    </div>
-    {% endif %}
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link text-danger" href="{% url 'users:logout' %}">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>Sair</span>
-        </a>
-    </div>
-    {% else %}
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'users:login' %}">
-            <i class="fas fa-sign-in-alt"></i>
-            <span>Login</span>
-        </a>
-    </div>
-    <div class="mobile-nav-item">
-        <a class="mobile-nav-link" href="{% url 'users:register' %}">
-            <i class="fas fa-user-plus"></i>
-            <span>Registrar</span>
-        </a>
-    </div>
-    {% endif %}
-    
-    <div class="mobile-nav-item">
-        <a class="cta-button" href="{% url 'ads:necessidade_create' %}">
-            <i class="fas fa-bullhorn"></i>
-            <span>Anunciar grátis</span>
-        </a>
-    </div>
-</div>
 
 <!-- Offcanvas Notificações Modernizado -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNotifications">
@@ -772,6 +597,49 @@
     </div>
 </div>
 
+<!-- Offcanvas Menu Mobile do Usuário -->
+{% if user.is_authenticated %}
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileUserOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="fas fa-user me-2"></i>Olá, {{ user.first_name|capfirst }}!
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center" href="{% url 'users:minha_conta_detail' user.pk %}">
+                    <i class="fas fa-user me-3"></i>Minha Conta
+                </a>
+            </li>
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center" href="{% url 'ads:necessidade_list' %}">
+                    <i class="fas fa-bullhorn me-3"></i>Meus Anúncios
+                </a>
+            </li>
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center" href="{% url 'budgets:budget_list' %}">
+                    <i class="fas fa-file-invoice-dollar me-3"></i>Meus Orçamentos
+                </a>
+            </li>
+            {% if user.is_staff %}
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center" href="{% url 'ads:dashboard' %}">
+                    <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                </a>
+            </li>
+            {% endif %}
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center text-danger" href="{% url 'users:logout' %}">
+                    <i class="fas fa-sign-out-alt me-3"></i>Sair
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     // Header scroll effect
@@ -790,27 +658,6 @@ document.addEventListener("DOMContentLoaded", () => {
         lastScrollTop = scrollTop;
     });
 
-    // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    function toggleMobileMenu() {
-        mobileMenuBtn.classList.toggle('active');
-        mobileOverlay.classList.toggle('show');
-        mobileMenu.classList.toggle('show');
-        document.body.style.overflow = mobileMenu.classList.contains('show') ? 'hidden' : '';
-    }
-
-    function closeMobileMenu() {
-        mobileMenuBtn.classList.remove('active');
-        mobileOverlay.classList.remove('show');
-        mobileMenu.classList.remove('show');
-        document.body.style.overflow = '';
-    }
-
-    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-    mobileOverlay.addEventListener('click', closeMobileMenu);
 
     // Dynamic search placeholders
     const searchPlaceholders = [

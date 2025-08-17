@@ -49,8 +49,8 @@ class PermissionValidator:
     @staticmethod
     def can_edit_ad(user, ad):
         """
-        Verifica se o usuário pode editar um anúncio.
-        Regra: Deve ser o cliente que criou o anúncio.
+        Verifica se o usuário pode editar um anúncio usando o state machine.
+        Regra: Deve ser o cliente que criou o anúncio e estado deve permitir edição.
         """
         if isinstance(user, AnonymousUser) or not user.is_authenticated:
             return False, "Você precisa estar logado."
@@ -58,7 +58,8 @@ class PermissionValidator:
         if user != ad.cliente:
             return False, "Você só pode editar seus próprios anúncios."
         
-        if ad.status in ['analisando_orcamentos', 'aguardando_confirmacao', 'em_atendimento', 'finalizado', 'cancelado']:
+        # Use state machine logic
+        if not ad.can_be_edited(user):
             return False, "Não é possível editar anúncios que possuem orçamentos ou já foram finalizados."
         
         return True, ""
@@ -66,7 +67,7 @@ class PermissionValidator:
     @staticmethod
     def can_edit_budget(user, budget):
         """
-        Verifica se o usuário pode editar um orçamento.
+        Verifica se o usuário pode editar um orçamento usando o state machine.
         Regra: Deve ser o fornecedor que criou o orçamento e status deve permitir edição.
         """
         if isinstance(user, AnonymousUser) or not user.is_authenticated:
@@ -75,7 +76,8 @@ class PermissionValidator:
         if user != budget.fornecedor:
             return False, "Você só pode editar seus próprios orçamentos."
         
-        if budget.status in ['aceito_pelo_cliente', 'confirmado', 'rejeitado']:
+        # Use state machine logic
+        if not budget.can_be_edited(user):
             return False, "Não é possível editar orçamentos já processados."
         
         return True, ""
@@ -83,7 +85,7 @@ class PermissionValidator:
     @staticmethod
     def can_accept_budget(user, budget):
         """
-        Verifica se o usuário pode aceitar um orçamento.
+        Verifica se o usuário pode aceitar um orçamento usando o state machine.
         Regra: Deve ser o cliente dono do anúncio.
         """
         if isinstance(user, AnonymousUser) or not user.is_authenticated:
@@ -92,15 +94,16 @@ class PermissionValidator:
         if user != budget.anuncio.cliente:
             return False, "Apenas o cliente que criou o anúncio pode aceitar orçamentos."
         
-        if budget.status != 'pendente':
-            return False, "Este orçamento já foi processado."
+        # Use state machine logic
+        if not budget.can_be_accepted(user):
+            return False, "Este orçamento não pode ser aceito no momento."
         
         return True, ""
     
     @staticmethod
     def can_reject_budget(user, budget):
         """
-        Verifica se o usuário pode rejeitar um orçamento.
+        Verifica se o usuário pode rejeitar um orçamento usando o state machine.
         Regra: Deve ser o cliente dono do anúncio.
         """
         if isinstance(user, AnonymousUser) or not user.is_authenticated:
@@ -109,16 +112,17 @@ class PermissionValidator:
         if user != budget.anuncio.cliente:
             return False, "Apenas o cliente que criou o anúncio pode rejeitar orçamentos."
         
-        if budget.status != 'pendente':
-            return False, "Este orçamento já foi processado."
+        # Use state machine logic
+        if not budget.can_be_rejected(user):
+            return False, "Este orçamento não pode ser rejeitado no momento."
         
         return True, ""
     
     @staticmethod
     def can_finalize_ad(user, ad):
         """
-        Verifica se o usuário pode finalizar um anúncio.
-        Regra: Deve ser o cliente dono do anúncio e ter orçamento aceito.
+        Verifica se o usuário pode finalizar um anúncio usando o state machine.
+        Regra: Deve ser o cliente dono do anúncio e estar em estado apropriado.
         """
         if isinstance(user, AnonymousUser) or not user.is_authenticated:
             return False, "Você precisa estar logado."
@@ -126,13 +130,9 @@ class PermissionValidator:
         if user != ad.cliente:
             return False, "Apenas o cliente que criou o anúncio pode finalizá-lo."
         
-        if ad.status != 'em_atendimento':
-            return False, "O anúncio deve estar em atendimento para ser finalizado."
-        
-        # Verificar se há orçamento aceito
-        has_accepted_budget = ad.orcamentos.filter(status='confirmado').exists()
-        if not has_accepted_budget:
-            return False, "Não há orçamentos aceitos para este anúncio."
+        # Use state machine logic
+        if not ad.can_be_finalized(user):
+            return False, "O anúncio não pode ser finalizado no momento."
         
         return True, ""
     
@@ -186,6 +186,86 @@ class PermissionValidator:
             return False, "Apenas administradores podem acessar o dashboard."
         
         return True, ""
+    
+    # ==================== STATE MACHINE PERMISSIONS ====================
+    
+    @staticmethod
+    def can_confirm_budget(user, budget):
+        """
+        Verifica se o usuário pode confirmar um orçamento.
+        Regra: Deve ser o fornecedor e orçamento deve estar aceito pelo cliente.
+        """
+        if isinstance(user, AnonymousUser) or not user.is_authenticated:
+            return False, "Você precisa estar logado."
+        
+        if user != budget.fornecedor:
+            return False, "Apenas o fornecedor pode confirmar o orçamento."
+        
+        # Use state machine logic
+        if not budget.can_be_confirmed(user):
+            return False, "Este orçamento não pode ser confirmado no momento."
+        
+        return True, ""
+    
+    @staticmethod
+    def can_refuse_budget(user, budget):
+        """
+        Verifica se o usuário pode recusar um orçamento.
+        Regra: Deve ser o fornecedor e orçamento deve estar aceito pelo cliente.
+        """
+        if isinstance(user, AnonymousUser) or not user.is_authenticated:
+            return False, "Você precisa estar logado."
+        
+        if user != budget.fornecedor:
+            return False, "Apenas o fornecedor pode recusar o orçamento."
+        
+        # Use state machine logic
+        if not budget.can_be_refused(user):
+            return False, "Este orçamento não pode ser recusado no momento."
+        
+        return True, ""
+    
+    @staticmethod
+    def can_cancel_ad(user, ad):
+        """
+        Verifica se o usuário pode cancelar um anúncio.
+        Regra: Deve ser o cliente dono do anúncio.
+        """
+        if isinstance(user, AnonymousUser) or not user.is_authenticated:
+            return False, "Você precisa estar logado."
+        
+        if user != ad.cliente:
+            return False, "Apenas o cliente que criou o anúncio pode cancelá-lo."
+        
+        # Use state machine logic
+        if not ad.can_be_cancelled(user):
+            return False, "Este anúncio não pode ser cancelado no momento."
+        
+        return True, ""
+    
+    @staticmethod
+    def can_transition_necessidade(user, necessidade, new_status):
+        """
+        Verifica se o usuário pode fazer uma transição específica na necessidade.
+        """
+        if isinstance(user, AnonymousUser) or not user.is_authenticated:
+            return False, "Você precisa estar logado."
+        
+        # Check if transition is valid using state machine
+        can_transition, message = necessidade.can_transition_to(new_status, user=user)
+        return can_transition, message
+    
+    @staticmethod
+    def can_transition_orcamento(user, orcamento, new_status):
+        """
+        Verifica se o usuário pode fazer uma transição específica no orçamento.
+        """
+        if isinstance(user, AnonymousUser) or not user.is_authenticated:
+            return False, "Você precisa estar logado."
+        
+        # Check if transition is valid using state machine
+        can_transition, message = orcamento.can_transition_to(new_status, user=user)
+        return can_transition, message
 
 def require_permission(permission_func, *args, **kwargs):
     """

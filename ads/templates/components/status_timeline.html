@@ -1,0 +1,277 @@
+{% comment %}
+Status Timeline Component
+Usage: {% include 'components/status_timeline.html' with necessidade=necessidade %}
+{% endcomment %}
+
+<div class="status-timeline-component">
+    <div class="timeline-container">
+        {% with current_status=necessidade.status %}
+        
+        <!-- Ativo -->
+        <div class="timeline-item {% if current_status == 'ativo' %}active{% elif current_status != 'ativo' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-play"></i>
+            </div>
+            <div class="timeline-content">
+                <span class="timeline-label">Publicado</span>
+                <small class="timeline-date">{{ necessidade.data_criacao|date:"d/m H:i" }}</small>
+            </div>
+        </div>
+        
+        <div class="timeline-connector {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+        
+        <!-- Analisando Orçamentos -->
+        <div class="timeline-item {% if current_status == 'analisando_orcamentos' %}active{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="timeline-content">
+                <span class="timeline-label">Recebendo Propostas</span>
+                {% if necessidade.data_primeiro_orcamento %}
+                    <small class="timeline-date">{{ necessidade.data_primeiro_orcamento|date:"d/m H:i" }}</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="timeline-connector {% if current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+        
+        <!-- Aguardando Confirmação -->
+        <div class="timeline-item {% if current_status == 'aguardando_confirmacao' %}active{% elif current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="timeline-content">
+                <span class="timeline-label">Aguardando Confirmação</span>
+                {% if necessidade.aguardando_confirmacao_desde %}
+                    <small class="timeline-date">{{ necessidade.aguardando_confirmacao_desde|date:"d/m H:i" }}</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="timeline-connector {% if current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+        
+        <!-- Em Atendimento -->
+        <div class="timeline-item {% if current_status == 'em_atendimento' %}active{% elif current_status == 'finalizado' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="timeline-content">
+                <span class="timeline-label">Em Atendimento</span>
+                {% comment "Adicionar timestamp quando implementado" %}
+                {% if necessidade.data_inicio_atendimento %}
+                    <small class="timeline-date">{{ necessidade.data_inicio_atendimento|date:"d/m H:i" }}</small>
+                {% endif %}
+                {% endcomment %}
+            </div>
+        </div>
+        
+        <div class="timeline-connector {% if current_status == 'finalizado' %}completed{% endif %}"></div>
+        
+        <!-- Finalizado -->
+        <div class="timeline-item {% if current_status == 'finalizado' %}active completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="timeline-content">
+                <span class="timeline-label">Finalizado</span>
+                {% if necessidade.data_finalizacao %}
+                    <small class="timeline-date">{{ necessidade.data_finalizacao|date:"d/m H:i" }}</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% endwith %}
+    </div>
+    
+    <!-- Status Legend -->
+    <div class="timeline-legend mt-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="legend-item">
+                <span class="legend-dot completed"></span>
+                <small>Concluído</small>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot active"></span>
+                <small>Atual</small>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot"></span>
+                <small>Pendente</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Status Timeline Component Styles */
+.status-timeline-component {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.timeline-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.timeline-item.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.timeline-item.completed {
+    opacity: 1;
+}
+
+.timeline-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    border: 3px solid #dee2e6;
+}
+
+.timeline-item.active .timeline-dot {
+    background: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+    animation: pulse-dot 2s infinite;
+}
+
+.timeline-item.completed .timeline-dot {
+    background: var(--bs-success);
+    color: white;
+    border-color: var(--bs-success);
+}
+
+@keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.1); }
+    100% { box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2); }
+}
+
+.timeline-content {
+    text-align: center;
+}
+
+.timeline-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #495057;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.timeline-item.active .timeline-label {
+    color: var(--bs-primary);
+}
+
+.timeline-date {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.timeline-connector {
+    position: absolute;
+    top: 24px;
+    height: 3px;
+    background: #dee2e6;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+.timeline-connector.completed {
+    background: var(--bs-success);
+}
+
+/* Timeline Legend */
+.timeline-legend {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e9ecef;
+    border: 2px solid #dee2e6;
+}
+
+.legend-dot.active {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.legend-dot.completed {
+    background: var(--bs-success);
+    border-color: var(--bs-success);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .timeline-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .timeline-item {
+        flex-direction: row;
+        text-align: left;
+        width: 100%;
+        justify-content: flex-start;
+        gap: 1rem;
+    }
+    
+    .timeline-dot {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .timeline-connector {
+        display: none;
+    }
+    
+    .timeline-legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Special Status Handling */
+.timeline-item[data-status="cancelado"] .timeline-dot,
+.timeline-item[data-status="expirado"] .timeline-dot {
+    background: var(--bs-danger);
+    color: white;
+    border-color: var(--bs-danger);
+}
+</style>

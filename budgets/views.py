@@ -74,11 +74,16 @@ def submeter_orcamento(request, pk):
             
             logger.info(f"Itens salvos com sucesso: {len(itens_salvos)} itens")
 
-            # Alterar o status do anúncio SOMENTE se ele ainda estiver "ativo"
+            # Alterar o status do anúncio usando state machine
             if anuncio.status == 'ativo':
-                anuncio.status = 'analisando_orcamentos'
-                anuncio.save(update_fields=['status'])
-                logger.info("Status do anúncio alterado para analisando_orcamentos")
+                try:
+                    anuncio.transition_to('analisando_orcamentos')
+                    logger.info("Status do anúncio alterado para analisando_orcamentos usando state machine")
+                except Exception as e:
+                    logger.error(f"Erro ao alterar status do anúncio: {e}")
+                    # Fallback para método antigo se necessário
+                    anuncio.status = 'analisando_orcamentos'
+                    anuncio.save(update_fields=['status'])
             
             messages.success(request, 'Orçamento submetido com sucesso!')
             logger.info("Redirecionando para detalhes do anúncio")
@@ -109,12 +114,17 @@ class OrcamentoAceitarView(LoginRequiredMixin, View):
         if not can_accept:
             return JsonResponse({'error': message}, status=403)
 
-        # Atualiza o status do orçamento e do anúncio
-        orcamento.status = 'aceito_pelo_cliente'
-        orcamento.save()
-
-        orcamento.anuncio.status = 'aguardando_confirmacao'
-        orcamento.anuncio.save(update_fields=['status'])
+        # Atualiza o status usando state machine
+        try:
+            orcamento.transition_to('aceito_pelo_cliente', user=request.user, budget=orcamento)
+            logger.info(f"Orçamento {orcamento.id} aceito usando state machine")
+        except Exception as e:
+            logger.error(f"Erro ao aceitar orçamento usando state machine: {e}")
+            # Fallback para método antigo
+            orcamento.status = 'aceito_pelo_cliente'
+            orcamento.save()
+            orcamento.anuncio.status = 'aguardando_confirmacao'
+            orcamento.anuncio.save(update_fields=['status'])
 
         messages.success(request, "Orçamento aceito com sucesso!")
         return JsonResponse({'success': True, 'message': 'Orçamento aceito com sucesso!'}) 
@@ -129,17 +139,22 @@ class OrcamentoFornecedorAceitarView(LoginRequiredMixin, View):
         if request.user != orcamento.fornecedor:
             return JsonResponse({'error': 'Você não tem permissão para aceitar este orçamento!'}, status=403)
 
-        # Verificar se o orçamento está no status correto
-        if orcamento.status != 'aceito_pelo_cliente':
-            return JsonResponse({'error': 'Este orçamento não está aguardando confirmação!'}, status=400)
+        # Verificar se o orçamento pode ser confirmado usando state machine
+        can_confirm, message = orcamento.can_transition_to('confirmado', user=request.user)
+        if not can_confirm:
+            return JsonResponse({'error': message}, status=400)
 
-        # Atualiza o status do orçamento e do anúncio
-        orcamento.status = 'confirmado'
-        orcamento.save()
-
-        # Atualiza o status do anúncio para "em_atendimento"
-        orcamento.anuncio.status = 'em_atendimento'
-        orcamento.anuncio.save(update_fields=['status'])
+        # Atualiza o status usando state machine
+        try:
+            orcamento.transition_to('confirmado', user=request.user, budget=orcamento)
+            logger.info(f"Orçamento {orcamento.id} confirmado usando state machine")
+        except Exception as e:
+            logger.error(f"Erro ao confirmar orçamento usando state machine: {e}")
+            # Fallback para método antigo
+            orcamento.status = 'confirmado'
+            orcamento.save()
+            orcamento.anuncio.status = 'em_atendimento'
+            orcamento.anuncio.save(update_fields=['status'])
 
         messages.success(request, "Orçamento aceito pelo fornecedor com sucesso!")
         return JsonResponse({'success': True, 'message': 'Orçamento aceito com sucesso!'})
@@ -155,9 +170,15 @@ class OrcamentoRejeitarView(LoginRequiredMixin, View):
         if not can_reject:
             return JsonResponse({'error': message}, status=403)
 
-        # Atualiza o status do orçamento para "rejeitado"
-        orcamento.status = 'rejeitado'
-        orcamento.save()
+        # Atualiza o status usando state machine
+        try:
+            orcamento.transition_to('rejeitado_pelo_cliente', user=request.user)
+            logger.info(f"Orçamento {orcamento.id} rejeitado usando state machine")
+        except Exception as e:
+            logger.error(f"Erro ao rejeitar orçamento usando state machine: {e}")
+            # Fallback para método antigo
+            orcamento.status = 'rejeitado_pelo_cliente'
+            orcamento.save()
 
         messages.success(request, "Orçamento rejeitado com sucesso!")
         return JsonResponse({'success': True, 'message': 'Orçamento rejeitado com sucesso!'})

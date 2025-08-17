@@ -16,10 +16,11 @@
           <div class="col-lg-4 col-md-6 col-sm-12">
             <select class="form-select" name="status">
               <option value="" {% if not request.GET.status %}selected{% endif %}>Todos os Status</option>
-              <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+              <option value="enviado" {% if request.GET.status == 'enviado' %}selected{% endif %}>Enviado</option>
               <option value="aceito_pelo_cliente" {% if request.GET.status == 'aceito_pelo_cliente' %}selected{% endif %}>Aceito pelo cliente</option>
 <option value="confirmado" {% if request.GET.status == 'confirmado' %}selected{% endif %}>Confirmado</option>
-              <option value="rejeitado" {% if request.GET.status == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+              <option value="rejeitado_pelo_cliente" {% if request.GET.status == 'rejeitado_pelo_cliente' %}selected{% endif %}>Rejeitado pelo cliente</option>
+              <option value="recusado_pelo_fornecedor" {% if request.GET.status == 'recusado_pelo_fornecedor' %}selected{% endif %}>Recusado pelo fornecedor</option>
             </select>
           </div>
           <div class="col-lg-3 col-md-12 col-sm-12">
@@ -43,10 +44,11 @@
                 <small>{{ orcamento.itens.count }} item(ns)</small>
             </p>
             <span class="badge 
-              {% if orcamento.status == 'pendente' %} text-bg-secondary
+              {% if orcamento.status == 'enviado' %} text-bg-secondary
               {% elif orcamento.status == 'aceito_pelo_cliente' %} text-bg-warning
 {% elif orcamento.status == 'confirmado' %} text-bg-success
-              {% elif orcamento.status == 'rejeitado' %} text-bg-danger
+              {% elif orcamento.status == 'rejeitado_pelo_cliente' %} text-bg-danger
+              {% elif orcamento.status == 'recusado_pelo_fornecedor' %} text-bg-danger
               {% endif %}">
               Status: {{ orcamento.get_status_display }}
             </span>
@@ -61,7 +63,7 @@
                       <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
                     </form>
                 {% endif %}
-                {% if orcamento.status == 'pendente' %}
+                {% if orcamento.status == 'enviado' %}
                     <a href="{% url 'budget_update' orcamento.id %}" class="btn btn-warning btn-sm">Editar</a>
                 {% endif %}
               {% endif %}

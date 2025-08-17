@@ -1,0 +1,162 @@
+{
+  "name": "Indicai - Marketplace de Necessidades",
+  "short_name": "Indicai",
+  "description": "Conectamos pessoas que precisam de serviços com fornecedores qualificados",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  
+  "icons": [
+    {
+      "src": "/static/img/icons/icon-72x72.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-96x96.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-128x128.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-144x144.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-152x152.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-384x384.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/img/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Criar Necessidade",
+      "short_name": "Criar",
+      "description": "Criar uma nova necessidade",
+      "url": "/necessidades/criar/",
+      "icons": [
+        {
+          "src": "/static/img/icons/shortcut-create.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Buscar Serviços",
+      "short_name": "Buscar",
+      "description": "Buscar necessidades disponíveis",
+      "url": "/necessidades/",
+      "icons": [
+        {
+          "src": "/static/img/icons/shortcut-search.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Mensagens",
+      "short_name": "Chat",
+      "description": "Ver conversas ativas",
+      "url": "/chat/",
+      "icons": [
+        {
+          "src": "/static/img/icons/shortcut-chat.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  
+  "categories": ["business", "productivity", "social"],
+  
+  "screenshots": [
+    {
+      "src": "/static/img/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/static/img/screenshots/mobile-1.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  
+  "share_target": {
+    "action": "/share/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": ["image/*", "application/pdf"]
+        }
+      ]
+    }
+  },
+  
+  "protocol_handlers": [
+    {
+      "protocol": "web+indicai",
+      "url": "/handle?type=%s"
+    }
+  ],
+  
+  "prefer_related_applications": false,
+  
+  "file_handlers": [
+    {
+      "action": "/handle-file/",
+      "accept": {
+        "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
+        "application/pdf": [".pdf"]
+      }
+    }
+  ],
+  
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  
+  "display_override": ["window-controls-overlay", "standalone", "browser"]
+}

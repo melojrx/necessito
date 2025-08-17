@@ -94,12 +94,31 @@
 
       {# ---- Cabeçalho do anúncio ---- #}
       <h2>{{ necessidade.titulo }}</h2>
-      <p><strong>Publicado em:</strong> {{ necessidade.data_criacao }}</p>
-      <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
-      <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
-      <p><strong>Quantidade:</strong> {{ necessidade.quantidade }}</p>
-      <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
-      <p><strong>Descrição:</strong> {{ necessidade.descricao }}</p>
+      
+      {# ---- Timeline Visual de Status ---- #}
+      {% include 'components/status_timeline.html' with necessidade=necessidade %}
+      
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <p><strong>Publicado em:</strong> {{ necessidade.data_criacao|date:"d/m/Y H:i" }}</p>
+          <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
+          <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Quantidade:</strong> {{ necessidade.quantidade }}</p>
+          <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
+          <p><strong>Status:</strong> 
+            <span class="badge bg-primary">{{ necessidade.get_status_display }}</span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="mt-3">
+        <p><strong>Descrição:</strong></p>
+        <div class="border rounded p-3 bg-light">
+          {{ necessidade.descricao }}
+        </div>
+      </div>
 
       {# ---- Botões de ação (editar, excluir, finalizar, avaliar) ---- #}
       <div class="d-flex align-items-center mb-3 gap-2">
@@ -293,8 +312,8 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-warning mb-1">{{ necessidade.orcamentos.all|count_pendentes }}</h5>
-                <p class="card-text small text-muted mb-0">Pendentes</p>
+                <h5 class="card-title text-warning mb-1">{{ necessidade.orcamentos.all|count_enviados }}</h5>
+                <p class="card-text small text-muted mb-0">Enviados</p>
               </div>
             </div>
           </div>
@@ -309,7 +328,7 @@
           <div class="col-md-3">
             <div class="card text-center">
               <div class="card-body py-2">
-                <h5 class="card-title text-danger mb-1">{{ necessidade.orcamentos.all|count_rejeitados }}</h5>
+                <h5 class="card-title text-danger mb-1">{{ necessidade.orcamentos.all|count_rejeitados_pelo_cliente }}</h5>
                 <p class="card-text small text-muted mb-0">Rejeitados</p>
               </div>
             </div>

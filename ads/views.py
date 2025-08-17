@@ -1,7 +1,10 @@
 from django.utils import timezone
 from pyexpat.errors import messages
 from itertools import islice
+import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+logger = logging.getLogger(__name__)
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
@@ -336,9 +339,15 @@ class FinalizarAnuncioView(LoginRequiredMixin, View):
             if not can_finalize:
                 return JsonResponse({'success': False, 'error': message}, status=403)
 
-            # Alterar o status do anúncio para "finalizado"
-            anuncio.status = 'finalizado'
-            anuncio.save(update_fields=['status'])
+            # Alterar o status do anúncio para "finalizado" usando state machine
+            try:
+                anuncio.transition_to('finalizado', user=request.user)
+                logger.info(f"Anúncio {anuncio.id} finalizado usando state machine")
+            except Exception as e:
+                logger.error(f"Erro ao finalizar anúncio usando state machine: {e}")
+                # Fallback para método antigo
+                anuncio.status = 'finalizado'
+                anuncio.save(update_fields=['status'])
 
             # Retornar resposta JSON indicando sucesso
             return JsonResponse({'success': True, 'message': 'Anúncio finalizado com sucesso!'})

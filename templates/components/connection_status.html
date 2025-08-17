@@ -1,0 +1,80 @@
+<!-- Real-Time Connection Status -->
+<div x-data="connectionStatus()" 
+     class="connection-status alert alert-sm py-2 px-3 border-0 shadow-sm"
+     :class="{
+         'connected': connected && !reconnecting,
+         'disconnected': !connected && !reconnecting,
+         'reconnecting': reconnecting
+     }"
+     x-show="showStatus"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="transform translate-x-full opacity-0"
+     x-transition:enter-end="transform translate-x-0 opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="transform translate-x-0 opacity-100"
+     x-transition:leave-end="transform translate-x-full opacity-0">
+     
+    <!-- Connected State (briefly shown) -->
+    <div x-show="connected && !reconnecting" class="d-flex align-items-center">
+        <i class="fas fa-wifi me-2"></i>
+        <span class="fw-medium">Conectado</span>
+        <i class="fas fa-check-circle ms-2"></i>
+    </div>
+    
+    <!-- Disconnected State -->
+    <div x-show="!connected && !reconnecting" class="d-flex align-items-center">
+        <i class="fas fa-wifi-slash me-2"></i>
+        <span class="fw-medium">Sem conexão</span>
+        <button @click="retry()" 
+                class="btn btn-sm btn-outline-danger ms-2 py-0 px-2">
+            <i class="fas fa-redo-alt"></i>
+        </button>
+    </div>
+    
+    <!-- Reconnecting State -->
+    <div x-show="reconnecting" class="d-flex align-items-center">
+        <i class="fas fa-spinner fa-spin me-2"></i>
+        <span class="fw-medium">Reconectando...</span>
+    </div>
+</div>
+
+<style>
+.connection-status {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1040;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    min-width: 180px;
+    margin: 0;
+}
+
+.connection-status.connected {
+    background: linear-gradient(135deg, #d1e7dd, #badbcc);
+    color: #0f5132;
+    border: 1px solid #a3cfbb;
+}
+
+.connection-status.disconnected {
+    background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+    color: #721c24;
+    border: 1px solid #e5383b;
+}
+
+.connection-status.reconnecting {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+    border: 1px solid #ffd60a;
+}
+
+@media (max-width: 768px) {
+    .connection-status {
+        top: 60px;
+        right: 10px;
+        left: 10px;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+}
+</style>

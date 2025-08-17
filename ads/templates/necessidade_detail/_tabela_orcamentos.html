@@ -33,7 +33,7 @@
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     
-                                    {% if orcamento.status == 'pendente' and necessidade.status == 'analisando_orcamentos' %}
+                                    {% if orcamento.status == 'enviado' and necessidade.status == 'analisando_orcamentos' %}
                                     <button class="btn btn-success btn-sm btn-aceitar" 
                                             data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}" 
                                             data-bs-toggle="modal" 

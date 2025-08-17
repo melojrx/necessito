@@ -1,0 +1,205 @@
+<!-- Real-Time Chat Component -->
+<div x-data="chatBox()" class="realtime-chat card shadow-sm">
+    <!-- Chat Header -->
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-comments me-2"></i>
+            <span class="fw-bold">Chat em Tempo Real</span>
+        </div>
+        
+        <!-- Connection Status -->
+        <div class="d-flex align-items-center">
+            <div class="presence-dot me-2" 
+                 :class="{ 'online': $store.realtime.connected, 'offline': !$store.realtime.connected }">
+            </div>
+            <small x-text="$store.realtime.connected ? 'Online' : 'Offline'"></small>
+        </div>
+    </div>
+    
+    <!-- Messages Container -->
+    <div class="card-body p-0">
+        <div class="messages-container" style="height: 300px; overflow-y: auto; padding: 1rem;">
+            <!-- No Messages -->
+            <div x-show="messages.length === 0" class="text-center text-muted py-4">
+                <i class="fas fa-comment-slash mb-2" style="font-size: 2rem;"></i>
+                <p class="mb-0">Nenhuma mensagem ainda</p>
+                <small>Seja o primeiro a enviar uma mensagem!</small>
+            </div>
+            
+            <!-- Messages List -->
+            <template x-for="message in messages" :key="message.id">
+                <div class="message" 
+                     :class="{ 'own': message.sender_id === window.currentUserId, 'other': message.sender_id !== window.currentUserId }">
+                    <div class="message-content">
+                        <div class="message-text" x-text="message.content"></div>
+                        <div class="message-time" x-text="$store.realtime.formatTime(message.timestamp)"></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+    <!-- Message Input -->
+    <div class="card-footer bg-light">
+        <form @submit.prevent="sendMessage()" class="d-flex gap-2">
+            <input type="text" 
+                   x-model="newMessage"
+                   class="form-control"
+                   placeholder="Digite sua mensagem..."
+                   :disabled="!$store.realtime.connected"
+                   maxlength="500">
+            <button type="submit" 
+                    class="btn btn-primary"
+                    :disabled="!newMessage.trim() || !$store.realtime.connected">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+        
+        <!-- Connection Status Message -->
+        <div x-show="!$store.realtime.connected" class="text-center text-muted mt-2">
+            <small>
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                Desconectado - Tentando reconectar...
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+.realtime-chat {
+    max-width: 400px;
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 1040;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.realtime-chat .card-header {
+    border-radius: 15px 15px 0 0;
+    border: none;
+}
+
+.realtime-chat .card-footer {
+    border-radius: 0 0 15px 15px;
+    border: none;
+    border-top: 1px solid #e9ecef;
+}
+
+.messages-container {
+    scroll-behavior: smooth;
+}
+
+.message {
+    margin-bottom: 12px;
+    display: flex;
+}
+
+.message.own {
+    justify-content: flex-end;
+}
+
+.message.other {
+    justify-content: flex-start;
+}
+
+.message-content {
+    max-width: 75%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    position: relative;
+}
+
+.message.own .message-content {
+    background: #0d6efd;
+    color: white;
+    border-bottom-right-radius: 6px;
+}
+
+.message.other .message-content {
+    background: #f8f9fa;
+    color: #333;
+    border-bottom-left-radius: 6px;
+}
+
+.message-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.message.other .message-time {
+    text-align: left;
+}
+
+.presence-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.presence-dot.online {
+    background: #28a745;
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+}
+
+.presence-dot.offline {
+    background: #6c757d;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .realtime-chat {
+        right: 10px;
+        left: 10px;
+        bottom: 80px;
+        max-width: none;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+}
+
+/* Animation for new messages */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.message.own .message-content {
+    animation: slideInRight 0.3s ease;
+}
+
+.message.other .message-content {
+    animation: slideInLeft 0.3s ease;
+}
+</style>

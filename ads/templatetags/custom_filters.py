@@ -44,9 +44,9 @@ def count_orcamentos_by_status(orcamentos, status):
     return orcamentos.filter(status=status).count()
 
 @register.filter
-def count_pendentes(orcamentos):
-    """Contar orçamentos pendentes"""
-    return orcamentos.filter(status='pendente').count()
+def count_enviados(orcamentos):
+    """Contar orçamentos enviados"""
+    return orcamentos.filter(status='enviado').count()
 
 @register.filter
 def count_aceitos_pelo_cliente(orcamentos):
@@ -54,14 +54,47 @@ def count_aceitos_pelo_cliente(orcamentos):
     return orcamentos.filter(status='aceito_pelo_cliente').count()
 
 @register.filter
-def count_rejeitados(orcamentos):
-    """Contar orçamentos rejeitados"""
-    return orcamentos.filter(status='rejeitado').count()
+def count_rejeitados_pelo_cliente(orcamentos):
+    """Contar orçamentos rejeitados pelo cliente"""
+    return orcamentos.filter(status='rejeitado_pelo_cliente').count()
 
 @register.filter
 def count_confirmados(orcamentos):
     """Contar orçamentos confirmados (aceitos pelo fornecedor)"""
     return orcamentos.filter(status='confirmado').count()
+
+@register.filter
+def count_recusados_pelo_fornecedor(orcamentos):
+    """Contar orçamentos recusados pelo fornecedor"""
+    return orcamentos.filter(status='recusado_pelo_fornecedor').count()
+
+@register.filter
+def status_badge_class(status):
+    """Retorna a classe CSS para o badge de status do orçamento"""
+    status_classes = {
+        'enviado': 'bg-secondary',
+        'aceito_pelo_cliente': 'bg-warning text-dark',
+        'confirmado': 'bg-success',
+        'rejeitado_pelo_cliente': 'bg-danger',
+        'recusado_pelo_fornecedor': 'bg-danger',
+    }
+    return status_classes.get(status, 'bg-secondary')
+
+@register.filter
+def order_by_status(orcamentos):
+    """Ordena orçamentos por status (enviado primeiro, depois aceito pelo cliente, etc.)"""
+    status_order = {
+        'enviado': 1,
+        'aceito_pelo_cliente': 2,
+        'confirmado': 3,
+        'rejeitado_pelo_cliente': 4,
+        'recusado_pelo_fornecedor': 5,
+    }
+    
+    def get_status_order(orcamento):
+        return status_order.get(orcamento.status, 99)
+    
+    return sorted(orcamentos, key=get_status_order)
 
 @register.filter
 def imagem_principal_url(anuncio):

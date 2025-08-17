@@ -1,0 +1,184 @@
+/* Necessity Cards - Modern UI Components */
+
+.necessity-card {
+    transition: all 0.3s ease;
+    border-radius: 12px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.necessity-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Card Header and Badges */
+.card-badge-container {
+    min-height: 40px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.badge-urgent {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white !important;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+.badge-category {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Status Progress Bar */
+.status-timeline .progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.status-timeline .progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+/* Card Meta Information */
+.card-meta {
+    padding: 8px 0;
+    border-top: 1px solid #f1f3f4;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.card-meta i {
+    opacity: 0.7;
+}
+
+/* Status Badges with Icons */
+.necessity-card .badge {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    font-weight: 500;
+}
+
+.necessity-card .badge i {
+    font-size: 0.7rem;
+}
+
+/* Card Actions */
+.card-footer .btn {
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.card-footer .btn:hover {
+    transform: translateY(-1px);
+}
+
+.card-footer .btn-primary {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    border: none;
+}
+
+.card-footer .btn-outline-warning:hover {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    border-color: #ffc107;
+}
+
+.card-footer .btn-outline-danger:hover {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .necessity-card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-meta {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .card-footer .d-flex {
+        gap: 8px !important;
+    }
+}
+
+/* Status-specific card styling */
+.necessity-card[data-status="ativo"] {
+    border-left: 4px solid var(--bs-primary);
+}
+
+.necessity-card[data-status="analisando_orcamentos"] {
+    border-left: 4px solid var(--bs-info);
+}
+
+.necessity-card[data-status="aguardando_confirmacao"] {
+    border-left: 4px solid var(--bs-warning);
+}
+
+.necessity-card[data-status="em_atendimento"] {
+    border-left: 4px solid var(--bs-warning);
+    background: linear-gradient(to right, #fff3cd 0%, #ffffff 8%);
+}
+
+.necessity-card[data-status="finalizado"] {
+    border-left: 4px solid var(--bs-success);
+    background: linear-gradient(to right, #d1e7dd 0%, #ffffff 8%);
+}
+
+.necessity-card[data-status="cancelado"] {
+    border-left: 4px solid var(--bs-secondary);
+    opacity: 0.8;
+}
+
+/* Loading Animation for Cards */
+.necessity-card.loading {
+    pointer-events: none;
+}
+
+.necessity-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}

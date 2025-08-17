@@ -17,10 +17,11 @@
                         <div class="d-flex gap-1 mt-1 mt-md-0">
                             <span class="badge bg-light text-dark fs-6">{{ orcamento.data_criacao|date:"d/m/Y" }}</span>
                             <span class="badge fs-6
-                                {% if orcamento.status == 'pendente' %}bg-secondary
+                                {% if orcamento.status == 'enviado' %}bg-secondary
                                 {% elif orcamento.status == 'aceito_pelo_cliente' %}bg-warning
                                 {% elif orcamento.status == 'confirmado' %}bg-success
-                                {% elif orcamento.status == 'rejeitado' %}bg-danger{% endif %}">
+                                {% elif orcamento.status == 'rejeitado_pelo_cliente' %}bg-danger
+                                {% elif orcamento.status == 'recusado_pelo_fornecedor' %}bg-danger{% endif %}">
                                 {{ orcamento.get_status_display }}
                             </span>
                         </div>

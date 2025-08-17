@@ -325,3 +325,21 @@ CELERY_TASK_ALWAYS_EAGER = os.environ.get('CELERY_TASK_ALWAYS_EAGER', 'False') =
 CELERY_TASK_EAGER_PROPAGATES = os.environ.get('CELERY_TASK_EAGER_PROPAGATES', 'True') == 'True'
 CELERY_WORKER_CONCURRENCY = int(os.environ.get('CELERY_WORKER_CONCURRENCY', '2'))
 CELERY_BEAT_SCHEDULER = os.environ.get('CELERY_BEAT_SCHEDULER', 'django_celery_beat.schedulers:DatabaseScheduler')
+
+# Celery Beat Schedule
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'handle-confirmation-timeouts': {
+        'task': 'ads.tasks.handle_confirmation_timeouts',
+        'schedule': crontab(minute=0),  # Every hour
+    },
+    'send-timeout-notifications': {
+        'task': 'ads.tasks.send_timeout_notifications',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+    },
+    'cleanup-expired-necessidades': {
+        'task': 'ads.tasks.cleanup_expired_necessidades',
+        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM
+    },
+}

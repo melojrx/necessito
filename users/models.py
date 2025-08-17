@@ -254,3 +254,121 @@ class User(AbstractUser):
                     "media": media,
                 }
         return resultado
+    
+    # ---------------------------------------------------------------------
+    #  SISTEMA DE BADGES DE CONFIANÇA
+    # ---------------------------------------------------------------------
+    def get_badges(self):
+        """
+        Retorna lista de badges de confiança baseado no perfil e atividade do usuário.
+        """
+        from datetime import timedelta
+        from django.utils import timezone
+        
+        badges = []
+        
+        # Badge: Identidade Verificada
+        if self.email_verified and self.cpf:
+            badges.append({
+                'icon': 'fas fa-check-circle',
+                'label': 'Identidade Verificada',
+                'class': 'badge-verified',
+                'color': 'success'
+            })
+        
+        # Badge: Usuário Ativo (cadastrado há mais de 30 dias)
+        if self.date_joined < timezone.now() - timedelta(days=30):
+            badges.append({
+                'icon': 'fas fa-star',
+                'label': 'Usuário Experiente',
+                'class': 'badge-experienced',
+                'color': 'primary'
+            })
+        
+        # Badge: Fornecedor Verificado
+        if self.is_supplier and self.cnpj:
+            badges.append({
+                'icon': 'fas fa-briefcase',
+                'label': 'Fornecedor Profissional',
+                'class': 'badge-professional',
+                'color': 'info'
+            })
+        
+        # Badge: Avaliação Alta (média >= 4.5)
+        media_avaliacoes = self.get_media_avaliacoes()
+        if media_avaliacoes and media_avaliacoes >= 4.5:
+            badges.append({
+                'icon': 'fas fa-trophy',
+                'label': f'Excelente ({media_avaliacoes:.1f}★)',
+                'class': 'badge-excellent',
+                'color': 'warning'
+            })
+        
+        # Badge: Muitas avaliações (mais de 10)
+        num_avaliacoes = self.avaliacoes_recebidas.count()
+        if num_avaliacoes >= 10:
+            badges.append({
+                'icon': 'fas fa-users',
+                'label': f'{num_avaliacoes}+ Avaliações',
+                'class': 'badge-popular',
+                'color': 'secondary'
+            })
+        
+        # Badge: Cliente Frequente (mais de 5 necessidades)
+        if self.is_client:
+            num_necessidades = self.necessidades.count()
+            if num_necessidades >= 5:
+                badges.append({
+                    'icon': 'fas fa-medal',
+                    'label': 'Cliente Frequente',
+                    'class': 'badge-frequent',
+                    'color': 'purple'
+                })
+        
+        # Badge: Fornecedor Ativo (mais de 10 orçamentos)
+        if self.is_supplier:
+            num_orcamentos = self.orcamentos.count()
+            if num_orcamentos >= 10:
+                badges.append({
+                    'icon': 'fas fa-hammer',
+                    'label': 'Fornecedor Ativo',
+                    'class': 'badge-active-supplier',
+                    'color': 'dark'
+                })
+        
+        return badges
+    
+    @property
+    def trust_score(self):
+        """
+        Calcula um score de confiança baseado nos badges e atividade.
+        Retorna um valor entre 0 e 100.
+        """
+        score = 0
+        
+        # Base score por estar verificado
+        if self.email_verified:
+            score += 20
+        
+        # Score por documentos
+        if self.cpf:
+            score += 15
+        if self.cnpj:
+            score += 10
+            
+        # Score por avaliações
+        media_avaliacoes = self.get_media_avaliacoes()
+        if media_avaliacoes:
+            score += min(media_avaliacoes * 10, 30)  # máximo 30 pontos
+        
+        # Score por atividade
+        num_avaliacoes = self.avaliacoes_recebidas.count()
+        score += min(num_avaliacoes * 2, 20)  # máximo 20 pontos
+        
+        # Score por tempo de cadastro
+        from datetime import timedelta
+        from django.utils import timezone
+        days_since_joined = (timezone.now() - self.date_joined).days
+        score += min(days_since_joined / 10, 15)  # máximo 15 pontos
+        
+        return min(score, 100)  # máximo 100 pontos

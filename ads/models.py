@@ -230,6 +230,42 @@ class Necessidade(models.Model):
             return bool(self.cliente.cidade and self.cliente.estado)
         return bool(self.cidade_servico and self.estado_servico)
     
+    def get_latitude_mapa(self):
+        """Retorna a latitude para exibição no mapa"""
+        if self.usar_endereco_usuario:
+            return self.cliente.lat if self.cliente.lat else None
+        return self.lat_servico
+    
+    def get_longitude_mapa(self):
+        """Retorna a longitude para exibição no mapa"""
+        if self.usar_endereco_usuario:
+            return self.cliente.lon if self.cliente.lon else None
+        return self.lon_servico
+    
+    def get_cidade_mapa(self):
+        """Retorna a cidade para exibição no mapa"""
+        if self.usar_endereco_usuario:
+            return self.cliente.cidade
+        return self.cidade_servico
+    
+    def get_estado_mapa(self):
+        """Retorna o estado para exibição no mapa"""
+        if self.usar_endereco_usuario:
+            return self.cliente.estado
+        return self.estado_servico
+    
+    def get_bairro_mapa(self):
+        """Retorna o bairro para exibição no mapa"""
+        if self.usar_endereco_usuario:
+            return getattr(self.cliente, 'bairro', '')
+        return self.bairro_servico
+    
+    def tem_coordenadas_mapa(self):
+        """Verifica se tem coordenadas válidas para exibir o mapa"""
+        lat = self.get_latitude_mapa()
+        lon = self.get_longitude_mapa()
+        return lat is not None and lon is not None
+    
     # ==================== MÉTODOS DO STATE MACHINE ====================
     
     def get_state_machine(self):

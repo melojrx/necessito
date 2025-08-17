@@ -3,11 +3,10 @@
 {% load static %}
 {% load chat_tags %}
 
-{% block title %}Detalhes do Anúncio{% endblock %}
+{% block title %}{{ necessidade.titulo }} - Indicaai.com{% endblock %}
 
-{# Meta tags Open Graph para compartilhamento #}
 {% block extra_head %}
-<!-- Meta tags Open Graph para melhor compartilhamento -->
+<!-- Meta tags Open Graph para compartilhamento -->
 <meta property="og:title" content="Procuro: {{ necessidade.titulo }} - Indicaai.com" />
 <meta property="og:description" content="{{ necessidade.descricao|truncatechars:160 }}" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
@@ -31,347 +30,471 @@
 <meta name="twitter:image" content="{{ request.build_absolute_uri }}{% static 'img/logo2.png' %}" />
 {% endif %}
 
-<!-- Meta tags adicionais -->
 <meta name="description" content="Procuro: {{ necessidade.titulo }} em {{ necessidade.cliente.cidade }}, {{ necessidade.cliente.estado }}. {{ necessidade.descricao|truncatechars:120 }}" />
 <meta name="keywords" content="{{ necessidade.categoria.nome }}, {{ necessidade.titulo }}, {{ necessidade.cliente.cidade }}, indicaai, anúncio, procuro" />
 
 <style>
-  /* Garantir que o mapa não sobreponha os dropdowns */
-  .leaflet-container,
-  .leaflet-control,
-  .leaflet-pane,
-  .leaflet-top,
-  .leaflet-bottom {
+  /* Garantir z-index correto para componentes */
+  .leaflet-container, .leaflet-control, .leaflet-pane, .leaflet-top, .leaflet-bottom {
     z-index: 1 !important;
   }
+  .dropdown-menu { z-index: 1050 !important; }
+  .navbar .dropdown-menu { z-index: 1051 !important; }
 
-  /* Garantir que os dropdowns do Bootstrap fiquem acima de outros elementos */
-  .dropdown-menu {
-    z-index: 1050 !important;
+  /* Cards responsivos com design limpo */
+  .card {
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+  }
+  
+  .card-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-bottom: none;
+    font-weight: 600;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  
+  .card-header h5, .card-header h6 {
+    margin: 0;
+    color: white;
   }
 
-  /* Correção para dropdown do navbar */
-  .navbar .dropdown-menu {
-    z-index: 1051 !important;
+  /* Botões com design moderno */
+  .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-width: 2px;
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 
-  /* Galeria de imagens */
-  .carousel-item img {
-    max-height: 400px;
-    object-fit: cover;
-  }
-
-  /* Links na prévia de compartilhamento */
-  #previaCompartilhamento a {
-    text-decoration: underline;
+  /* Alertas profissionais */
+  .alert {
+    border-radius: 10px;
+    border-left: 4px solid;
     font-weight: 500;
   }
-  
-  #previaCompartilhamento a:hover {
-    text-decoration: none;
-    font-weight: 600;
+
+  /* Badge status moderno */
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
   }
 
-  /* ========== ESTILOS ESPECÍFICOS DA PÁGINA ========== */
-  
-  /* Mobile - botões empilhados */
+  /* Responsividade aprimorada */
   @media (max-width: 767px) {
-    .d-flex.gap-2 {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
+    .card { margin-bottom: 1rem; }
+    .btn { font-size: 0.9rem; padding: 0.6rem 1rem; }
+    .table-responsive { font-size: 0.85rem; }
+    .d-flex.gap-2 { flex-direction: column !important; gap: 0.75rem !important; }
+  }
+
+  /* Animações suaves */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-card { animation: fadeInUp 0.6s ease-out; }
+
+  /* Timeline responsividade aprimorada */
+  .status-timeline-component .timeline-horizontal {
+    padding: 1rem 0;
+    min-height: 80px;
+  }
+
+  /* Melhorar espaçamento dos steps em mobile */
+  @media (max-width: 768px) {
+    .status-timeline-component .timeline-horizontal {
+      padding: 0.75rem 0;
+      gap: 0.75rem;
+    }
+    
+    .status-timeline-component .timeline-step {
+      padding: 0.75rem 1rem;
+      margin: 0;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+    
+    .status-timeline-component .timeline-step.current {
+      background: linear-gradient(135deg, #e3f2fd, #f0f8ff);
+      border-color: #2196f3;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+    }
+    
+    .status-timeline-component .timeline-step.completed {
+      background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+      border-color: #4caf50;
+    }
+    
+    .status-timeline-component .step-icon {
+      background: white;
+      border: 2px solid #dee2e6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .status-timeline-component .timeline-step.current .step-icon {
+      background: #2196f3;
+      border-color: #2196f3;
+      color: white;
+    }
+    
+    .status-timeline-component .timeline-step.completed .step-icon {
+      background: #4caf50;
+      border-color: #4caf50;
+      color: white;
+    }
+    
+    .status-timeline-component .step-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+    
+    .status-timeline-component .step-date {
+      color: #666;
+      font-size: 0.8rem;
+    }
+  }
+
+  /* Ajustes específicos para telas muito pequenas */
+  @media (max-width: 576px) {
+    .status-timeline-component {
+      margin: 0.5rem 0;
+    }
+    
+    .status-timeline-component .timeline-step {
+      padding: 0.5rem 0.75rem;
+      gap: 0.5rem;
+    }
+    
+    .status-timeline-component .step-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 0.8rem;
+    }
+    
+    .status-timeline-component .step-title {
+      font-size: 0.85rem;
+    }
+    
+    .status-timeline-component .step-date {
+      font-size: 0.75rem;
     }
   }
 </style>
 {% endblock %}
 
-{% block head_extra_content %}{% endblock %}
-
 {% block content %}
-<div class="container mb-2">
-  <div class="row">
-    {# ========================= COLUNA ESQUERDA ======================== #}
-    <div class="col-md-8 mb-2">
-
-      {# ---- Cabeçalho do anúncio ---- #}
-      <h2>{{ necessidade.titulo }}</h2>
+<div class="container my-4">
+  <div class="row g-4">
+    
+    {# ========================= COLUNA PRINCIPAL ======================== #}
+    <div class="col-xl-8 col-lg-7">
       
-      {# ---- Timeline Visual de Status ---- #}
-      {% include 'components/status_timeline.html' with necessidade=necessidade %}
-      
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <p><strong>Publicado em:</strong> {{ necessidade.data_criacao|date:"d/m/Y H:i" }}</p>
-          <p><strong>Categoria:</strong> {{ necessidade.categoria.nome }}</p>
-          <p><strong>Subcategoria:</strong> {{ necessidade.subcategoria.nome }}</p>
+      {# Cabeçalho com título e ID #}
+      <div class="card animate-card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="{{ necessidade.categoria.icone|default:'fas fa-tag' }} me-2"></i>
+            {{ necessidade.titulo }}
+          </h5>
         </div>
-        <div class="col-md-6">
-          <p><strong>Quantidade:</strong> {{ necessidade.quantidade }}</p>
-          <p><strong>Unidade:</strong> {{ necessidade.unidade }}</p>
-          <p><strong>Status:</strong> 
-            <span class="badge bg-primary">{{ necessidade.get_status_display }}</span>
-          </p>
-        </div>
-      </div>
-      
-      <div class="mt-3">
-        <p><strong>Descrição:</strong></p>
-        <div class="border rounded p-3 bg-light">
-          {{ necessidade.descricao }}
-        </div>
-      </div>
-
-      {# ---- Botões de ação (editar, excluir, finalizar, avaliar) ---- #}
-      <div class="d-flex align-items-center mb-3 gap-2">
-        {% if user.is_authenticated %}
-        {# Editar / Excluir – apenas para o cliente dono #}
-        {% if user == necessidade.cliente %}
-        <a href="{% url 'ads:necessidade_update' necessidade.pk %}" class="btn btn-warning">
-          <i class="fa-solid fa-pen-to-square"></i> Editar
-        </a>
-        <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" class="btn btn-danger">
-          <i class="fa-solid fa-trash-can"></i> Excluir
-        </a>
-        {% endif %}
-
-        {# Finalizar anúncio – aparece se há orçamento confirmado em atendimento #}
-        {% if user == necessidade.cliente and necessidade.status == 'em_atendimento' %}
-        {% for orcamento in necessidade.orcamentos.all %}
-        {% if orcamento.status == 'confirmado' %}
-        <button class="btn btn-primary btn-finalizar" data-url="{% url 'ads:finalizar_anuncio' necessidade.pk %}"
-          data-bs-toggle="modal" data-bs-target="#confirmarFinalizacaoModal" title="Finalizar Anúncio">
-          <i class="fas fa-check-circle"></i> Finalizar Anúncio
-        </button>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-
-        {# Solicitar avaliação – cliente ou fornecedor, somente 1× #}
-        {% if necessidade.status == 'finalizado' %}
-        {% if user == necessidade.cliente and not avaliacao_cliente %}
-        <!-- Cliente ainda não avaliou -->
-        <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-          data-bs-target="#avaliacaoModal">
-          <i class="fas fa-star me-1"></i> Avaliar Negociação
-        </a>
-        {% elif user == fornecedor and not avaliacao_fornecedor %}
-        <!-- Fornecedor ainda não avaliou -->
-        <a href="{% url 'avaliar_negociacao' necessidade.pk %}" class="btn btn-primary" data-bs-toggle="modal"
-          data-bs-target="#avaliacaoModal">
-          <i class="fas fa-star me-1"></i> Avaliar Negociação
-        </a>
-        {% endif %}
-        {% endif %}
-        {% else %}
-        <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
-          Faça login para interagir
-        </a>
-        {% endif %}
-      </div>
-
-      <hr>
-
-      {# ---- Galeria de imagens do anúncio ---- #}
-      {% if necessidade.imagens.all %}
-      <div class="row mb-4">
-        <div class="col-md-12">
-          <h3>Galeria de Imagens</h3>
-
-          <div id="galeriaCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-              {% for imagem in necessidade.imagens.all %}
-              <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ imagem.imagem.url }}" class="d-block w-100" alt="Imagem {{ forloop.counter }}">
-              </div>
-              {% endfor %}
-            </div>
-
-            <!-- Controles -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Anterior</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#galeriaCarousel" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Próximo</span>
-            </button>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <span class="text-muted">
+              <i class="fas fa-hashtag me-1"></i>
+              ID do Anúncio: <strong>{{ necessidade.id }}</strong>
+            </span>
+            <span class="badge bg-primary">
+              {{ necessidade.get_status_display }}
+            </span>
           </div>
         </div>
       </div>
+
+      {# Timeline de Status #}
+      <div class="card animate-card mb-4">
+        <div class="card-body p-0">
+          {% include 'components/status_timeline.html' with necessidade=necessidade %}
+        </div>
+      </div>
+
+
+
+      {# Card Informações do Anúncio #}
+      <div class="card animate-card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Informações do Anúncio
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-2">
+                <strong>Publicado em:</strong> 
+                <span class="text-muted">{{ necessidade.data_criacao|date:"d/m/Y H:i" }}</span>
+              </p>
+              {% if necessidade.modificado_em %}
+                <p class="mb-2">
+                  <strong>Atualizado em:</strong> 
+                  <span class="text-muted">{{ necessidade.modificado_em|date:"d/m/Y H:i" }}</span>
+                </p>
+              {% endif %}
+              <p class="mb-2">
+                <strong>Categoria:</strong> 
+                <span class="text-primary">{{ necessidade.categoria.nome }}</span>
+              </p>
+              <p class="mb-0">
+                <strong>Subcategoria:</strong> 
+                <span class="text-muted">{{ necessidade.subcategoria.nome }}</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2">
+                <strong>Quantidade:</strong> 
+                <span class="text-muted">{{ necessidade.quantidade }}</span>
+              </p>
+              <p class="mb-2">
+                <strong>Unidade:</strong> 
+                <span class="text-muted">{{ necessidade.unidade }}</span>
+              </p>
+              <p class="mb-2">
+                <strong>Total de orçamentos:</strong> 
+                <span class="badge bg-primary">{{ necessidade.orcamentos.count }}</span>
+              </p>
+              {% if user.is_authenticated %}
+                {% chat_stats user as stats %}
+                {% if stats.total_chats > 0 %}
+                  <p class="mb-2">
+                    <strong>Seus chats ativos:</strong> 
+                    <span class="badge bg-info">{{ stats.total_chats }}</span>
+                  </p>
+                {% endif %}
+              {% endif %}
+              <p class="mb-0">
+                <strong>Status atual:</strong> 
+                <span class="badge bg-success">{{ necessidade.get_status_display|capfirst }}</span>
+              </p>
+            </div>
+          </div>
+          
+          <hr class="my-3">
+          
+          <div>
+            <strong>Descrição:</strong>
+            <div class="bg-light p-3 rounded mt-2" style="line-height: 1.6;">
+              {{ necessidade.descricao }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Seção de Ações por Status (Card de Negócio Fechado) #}
+      {% if necessidade.status == 'ativo' %}
+        {% include 'components/actions/status_ativo.html' %}
+      {% elif necessidade.status == 'analisando_orcamentos' %}
+        {% include 'components/actions/status_analisando.html' %}
+      {% elif necessidade.status == 'aguardando_confirmacao' %}
+        {% include 'components/actions/status_aguardando.html' %}
+      {% elif necessidade.status == 'em_atendimento' %}
+        <div class="card animate-card mb-4">
+          {% include 'components/actions/status_em_atendimento.html' %}
+        </div>
+      {% elif necessidade.status == 'finalizado' %}
+        {% include 'components/actions/status_finalizado.html' %}
+      {% else %}
+        <div class="card border-secondary shadow-sm animate-card mb-4">
+          <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              {{ necessidade.get_status_display }}
+            </h6>
+          </div>
+          <div class="card-body text-center">
+            <p class="text-muted mb-0">
+              Este anúncio não está mais disponível para novos orçamentos.
+            </p>
+          </div>
+        </div>
       {% endif %}
 
-      <hr>
-
-      {# ---- Seção de orçamentos recebidos (apenas para o dono do anúncio) ---- #}
+      {# Tabela de Orçamentos (apenas para o dono) #}
       {% if user.is_authenticated and user == necessidade.cliente %}
-        {# ---- Tabela de orçamentos recebidos ---- #}
-        <h3>
-          <i class="fas fa-file-invoice-dollar me-2 text-primary"></i>
-          Orçamentos Recebidos
-        </h3>
-        <div class="table-responsive">
-          <table class="table table-striped table-hover table-bordered text-center">
-            <thead class="table-primary">
-              <tr>
-                <th class="align-middle">Fornecedor</th>
-                <th class="align-middle">Valor</th>
-                <th class="align-middle">Status</th>
-                <th class="align-middle">Data</th>
-                <th class="align-middle">Ações</th>
-                <th class="align-middle">Detalhes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for orcamento in necessidade.orcamentos.all %}
-              <tr>
-                <td class="align-middle">{{ orcamento.fornecedor.get_full_name }}</td>
-                <td class="align-middle">{{ orcamento.valor_total|moeda_brasileira }}</td>
-                <td class="align-middle">
-                  <span class="badge
-                                      {% if orcamento.status == 'pendente' %}text-bg-secondary
-                                      {% elif orcamento.status == 'aceito_pelo_cliente' %}text-bg-warning
-                                      {% elif orcamento.status == 'confirmado' %}text-bg-success
-                                      {% elif orcamento.status == 'rejeitado' %}text-bg-danger{% endif %}">
-                    {% if orcamento.status == 'aceito_pelo_cliente' %}
-                    Aguardando confirmação do fornecedor
-                    {% else %}
-                    {{ orcamento.get_status_display }}
-                    {% endif %}
-                  </span>
-                </td>
-                <td class="align-middle">{{ orcamento.data_criacao|date:"d/m/Y" }}</td>
-                <td class="align-middle">
-                  <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    {% if orcamento.arquivo_anexo %}
-                    <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
-                      class="btn btn-primary btn-sm d-flex align-items-center justify-content-center" data-bs-toggle="tooltip"
-                      title="Baixar Anexo">
-                      <i class="fas fa-file-download"></i>
-                    </a>
-                    {% else %}
-                    <span class="badge bg-secondary d-flex align-items-center justify-content-center"
-                      style="height: 38px;" data-bs-toggle="tooltip" title="Sem anexo disponível">
-                      <i class="fas fa-file-excel"></i> Sem anexo
-                    </span>
-                    {% endif %}
-
-                    {% if orcamento.status == "pendente" %}
-                    <button class="btn btn-success btn-sm btn-aceitar" data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}"
-                      data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal" title="Aceitar Orçamento">
-                      <i class="fas fa-thumbs-up"></i>
-                    </button>
-                    {% else %}
-                    <button class="btn btn-success btn-sm" disabled title="Orçamento já processado">
-                      <i class="fas fa-thumbs-up"></i>
-                    </button>
-                    {% endif %}
-
-                    {% if necessidade.status == "em_andamento" and orcamento.status == "pendente" %}
-                    <button class="btn btn-danger btn-sm btn-rejeitar" data-url="{% url 'budgets:rejeitar_orcamento' orcamento.id %}"
-                      data-bs-toggle="modal" data-bs-target="#confirmarRejeicaoModal" title="Rejeitar Orçamento">
-                      <i class="fas fa-thumbs-down"></i>
-                    </button>
-                    {% else %}
-                    <button class="btn btn-danger btn-sm" disabled title="Orçamento já processado">
-                      <i class="fas fa-thumbs-down"></i>
-                    </button>
-                    {% endif %}
+        <div class="card animate-card mb-4">
+          <div class="card-header">
+            <h6 class="mb-0">
+              <i class="fas fa-file-invoice-dollar me-2"></i>
+              Orçamentos Recebidos
+            </h6>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Fornecedor</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Data/Hora</th>
+                    <th>Anexos</th>
+                    <th>Ações</th>
+                    <th>Detalhes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for orcamento in necessidade.orcamentos.all %}
+                  <tr>
+                    <td class="align-middle">
+                      <span class="fw-medium">{{ orcamento.fornecedor.get_full_name }}</span>
+                    </td>
+                    <td class="align-middle">
+                      <span class="fw-medium text-success">{{ orcamento.valor_total|moeda_brasileira }}</span>
+                    </td>
+                    <td class="align-middle">
+                      <span class="badge 
+                        {% if orcamento.status == 'pendente' %}bg-secondary
+                        {% elif orcamento.status == 'aceito_pelo_cliente' %}bg-warning
+                        {% elif orcamento.status == 'confirmado' %}bg-success
+                        {% elif orcamento.status == 'rejeitado' %}bg-danger{% endif %}">
+                        {% if orcamento.status == 'aceito_pelo_cliente' %}
+                          Aguardando confirmação
+                        {% else %}
+                          {{ orcamento.get_status_display }}
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td class="align-middle">{{ orcamento.data_criacao|date:"d/m/Y H:i" }}</td>
+                    <td class="align-middle text-center">
+                      {% if orcamento.arquivo_anexo %}
+                        <a href="{{ orcamento.arquivo_anexo.url }}" target="_blank"
+                           class="btn btn-sm btn-outline-primary" title="Baixar Anexo">
+                          <i class="fas fa-paperclip"></i>
+                        </a>
+                      {% else %}
+                        <span class="text-muted" title="Sem anexo">
+                          <i class="fas fa-minus"></i>
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td class="align-middle">
+                       <div class="d-flex gap-1" role="group">
+                         {% if orcamento.status == "pendente" %}
+                           <button class="btn btn-sm btn-success btn-aceitar" 
+                                   data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}"
+                                   data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal" 
+                                   title="Aceitar Orçamento">
+                             <i class="fas fa-thumbs-up"></i>
+                           </button>
+                           <button class="btn btn-sm btn-danger btn-rejeitar" 
+                                   data-url="{% url 'budgets:rejeitar_orcamento' orcamento.id %}"
+                                   data-bs-toggle="modal" data-bs-target="#confirmarRejeicaoModal" 
+                                   title="Rejeitar Orçamento">
+                             <i class="fas fa-thumbs-down"></i>
+                           </button>
+                         {% else %}
+                           <button class="btn btn-sm btn-success" disabled title="Aceitar Orçamento">
+                             <i class="fas fa-thumbs-up"></i>
+                           </button>
+                           <button class="btn btn-sm btn-danger" disabled title="Rejeitar Orçamento">
+                             <i class="fas fa-thumbs-down"></i>
+                           </button>
+                         {% endif %}
+                       </div>
+                     </td>
+                    <td class="align-middle">
+                      <a href="{% url 'budgets:budget_detail' orcamento.id %}" 
+                         class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-eye me-1"></i>Ver
+                      </a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="7" class="text-center py-4">
+                      <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                      <p class="text-muted mb-0">Nenhum orçamento recebido ainda.</p>
+                      <small class="text-muted">Os fornecedores poderão enviar orçamentos enquanto seu anúncio estiver ativo.</small>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            {% if necessidade.orcamentos.all %}
+              <div class="card-footer bg-light">
+                <div class="row text-center">
+                  <div class="col-3">
+                    <div class="fw-bold text-primary">{{ necessidade.orcamentos.count }}</div>
+                    <small class="text-muted">Total</small>
                   </div>
-                </td>
-                <td class="align-middle">
-                  <a href="{% url 'budgets:budget_detail' orcamento.id %}" class="btn btn-info btn-sm">
-                    <i class="fas fa-eye me-1"></i>Detalhes
-                  </a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td class="align-middle" colspan="6">
-                  <div class="py-4">
-                    <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
-                    <p class="text-muted mb-0">Nenhum orçamento recebido ainda.</p>
-                    <small class="text-muted">Os fornecedores poderão enviar orçamentos enquanto seu anúncio estiver ativo.</small>
+                  <div class="col-3">
+                    <div class="fw-bold text-warning">{{ necessidade.orcamentos.all|count_enviados }}</div>
+                    <small class="text-muted">Enviados</small>
                   </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        {# Estatísticas rápidas dos orçamentos #}
-        {% if necessidade.orcamentos.all %}
-        <div class="row mt-3">
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body py-2">
-                <h5 class="card-title text-primary mb-1">{{ necessidade.orcamentos.count }}</h5>
-                <p class="card-text small text-muted mb-0">Total de Orçamentos</p>
+                  <div class="col-3">
+                    <div class="fw-bold text-success">{{ necessidade.orcamentos.all|count_confirmados }}</div>
+                    <small class="text-muted">Confirmados</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="fw-bold text-danger">{{ necessidade.orcamentos.all|count_rejeitados_pelo_cliente }}</div>
+                    <small class="text-muted">Rejeitados</small>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body py-2">
-                <h5 class="card-title text-warning mb-1">{{ necessidade.orcamentos.all|count_enviados }}</h5>
-                <p class="card-text small text-muted mb-0">Enviados</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body py-2">
-                <h5 class="card-title text-success mb-1">{{ necessidade.orcamentos.all|count_confirmados }}</h5>
-                <p class="card-text small text-muted mb-0">Confirmados</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card text-center">
-              <div class="card-body py-2">
-                <h5 class="card-title text-danger mb-1">{{ necessidade.orcamentos.all|count_rejeitados_pelo_cliente }}</h5>
-                <p class="card-text small text-muted mb-0">Rejeitados</p>
-              </div>
-            </div>
+            {% endif %}
           </div>
         </div>
-        {% endif %}
-
       {% elif user.is_authenticated %}
-        {# ---- Mensagem para usuários logados que não são donos do anúncio ---- #}
-        <div class="card border-warning">
+        <div class="card border-warning animate-card mb-4">
           <div class="card-body text-center py-4">
             <i class="fas fa-lock fa-3x text-warning mb-3"></i>
-            <h4 class="card-title text-warning">Informações Restritas</h4>
-            <p class="card-text text-muted">
+            <h5 class="text-warning">Informações Restritas</h5>
+            <p class="text-muted">
               Os orçamentos recebidos são informações confidenciais e só podem ser visualizados pelo anunciante.
             </p>
             {% if user != necessidade.cliente and necessidade.status in 'ativo,em_andamento' %}
-            <div class="mt-3">
               <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-primary">
                 <i class="fas fa-file-invoice-dollar me-2"></i>
                 Enviar Meu Orçamento
               </a>
-            </div>
             {% endif %}
           </div>
         </div>
       {% else %}
-        {# ---- Mensagem para usuários não logados ---- #}
-        <div class="card border-info">
+        <div class="card border-info animate-card mb-4">
           <div class="card-body text-center py-4">
             <i class="fas fa-user-lock fa-3x text-info mb-3"></i>
-            <h4 class="card-title text-info">Faça Login para Ver Mais</h4>
-            <p class="card-text text-muted">
+            <h5 class="text-info">Faça Login para Ver Mais</h5>
+            <p class="text-muted">
               Entre na sua conta para ter acesso a mais informações sobre este anúncio.
             </p>
             <div class="mt-3">
               <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-info">
-                <i class="fas fa-sign-in-alt me-2"></i>
-                Entrar
+                <i class="fas fa-sign-in-alt me-2"></i>Entrar
               </a>
               <a href="{% url 'users:register' %}" class="btn btn-outline-info ms-2">
-                <i class="fas fa-user-plus me-2"></i>
-                Cadastrar
+                <i class="fas fa-user-plus me-2"></i>Cadastrar
               </a>
             </div>
           </div>
@@ -379,189 +502,102 @@
       {% endif %}
     </div>
 
-    {# ========================= COLUNA DIREITA (CARDS) ======================== #}
-    <div class="col-md-4">
-
-      {# ----- Card Categoria + contatos ----- #}
-      <div class="card mb-2 shadow">
+    {# ========================= COLUNA LATERAL ======================== #}
+    <div class="col-xl-4 col-lg-5">
+      
+      {# Card de Ações Rápidas #}
+      <div class="card animate-card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-bolt me-2"></i>
+            Ações Rápidas
+          </h6>
+        </div>
         <div class="card-body">
-          <h5 class="card-title"><i class="fa-solid fa-icons"></i> Categoria</h5>
-          <p class="card-text">{{ necessidade.categoria.nome }}</p>
-          <span class="badge text-bg-success">Status: {{ necessidade.get_status_display|capfirst }}</span>
-          <hr>
-          <div class="d-flex gap-2 w-100">
-            <a href="#"
-              class="btn btn-primary btn-sm d-flex align-items-center justify-content-center flex-fill {% if user == necessidade.cliente %} disabled{% endif %}"
-              style="flex: 1 1 0; min-width: 0;"
-              {% if user == necessidade.cliente %} tabindex="-1" aria-disabled="true" title="Usuário é dono do anuncio."
-              {% else %} data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal"
-              title="Enviar Mensagem ao Anunciante" {% endif %}>
-              <i class="fas fa-comments me-1"></i>
-              <span>Contato</span>
-            </a>
-            <a href="{% if user != necessidade.cliente and necessidade.status in 'ativo em_andamento' %}
-                                 {% url 'budgets:submeter_orcamento' necessidade.id %}
-                             {% else %}#{% endif %}"
-              class="btn btn-warning btn-sm d-flex align-items-center justify-content-center flex-fill
-                                {% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}disabled{% endif %}"
-              style="flex: 1 1 0; min-width: 0;"
-              data-bs-toggle="tooltip" title="{% if user == necessidade.cliente or necessidade.status not in 'ativo em_andamento' %}
-                                   Você não pode submeter orçamento neste anúncio.
-                                {% else %}
-                                   Enviar orçamento para este anúncio
-                                {% endif %}">
-              <i class="fas fa-folder-plus me-1"></i>
-              <span>Orçamento</span>
-            </a> 
-            <button type="button" class="btn btn-success btn-sm d-flex align-items-center justify-content-center flex-fill" 
-                    style="flex: 1 1 0; min-width: 0;"
-                    id="btnCompartilhar" title="Compartilhar anúncio">
-              <i class="fa-solid fa-share-nodes me-1"></i>
-              <span>Compartilhar</span>
+          <div class="d-grid gap-2">
+            <button type="button" 
+                    class="btn btn-outline-primary {% if user == necessidade.cliente %}disabled{% endif %}"
+                    {% if user != necessidade.cliente %}
+                    data-bs-toggle="modal" data-bs-target="#contatoAnuncianteModal"
+                    {% endif %}
+                    title="{% if user == necessidade.cliente %}Você é o dono deste anúncio{% else %}Enviar mensagem ao anunciante{% endif %}">
+              <i class="fas fa-comments me-2"></i>
+              Contatar Anunciante
+            </button>
+            <button type="button" class="btn btn-outline-success" id="btnCompartilhar" title="Compartilhar anúncio">
+              <i class="fas fa-share-nodes me-2"></i>
+              Compartilhar Anúncio
             </button>
           </div>
-          <hr>
-          <!-- Ações para fornecedores -->
-          {% if user.is_authenticated and user != necessidade.cliente %}
-          {% if necessidade.status == 'ativo' or necessidade.status == 'em_andamento' or necessidade.status == 'em_atendimento' %}
-          {% if user.is_supplier %}
-          <div class="card mb-3">
-            <div class="card-header bg-success text-white">
-              <h6 class="mb-0"><i class="fas fa-tools"></i> Ações do Fornecedor</h6>
-            </div>
-            <div class="card-body">
-              {% if usuario_tem_orcamento %}
-                <!-- Já tem orçamento - pode conversar -->
-                <div class="alert alert-info small">
-                  <i class="fas fa-check-circle"></i>
-                  Você já enviou um orçamento para esta necessidade.
-                </div>
-
-                <!-- BOTÃO PRINCIPAL DO CHAT -->
-                <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary w-100 mb-2">
-                  <i class="fas fa-comments"></i> Conversar com Cliente
-                </a>
-
-                <a href="{% url 'budgets:budget_list' %}" class="btn btn-outline-secondary w-100">
-                  <i class="fas fa-edit"></i> Ver Meu Orçamento
-                </a>
-              {% else %}
-                <!-- Ainda não tem orçamento - só permite se status for ativo -->
-                {% if necessidade.status == 'ativo' %}
-                <p class="text-muted small mb-3">
-                  Para conversar com o cliente, você precisa primeiro enviar um orçamento.
-                </p>
-
-                <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-success w-100 mb-2">
-                  <i class="fas fa-file-invoice-dollar"></i> Enviar Orçamento
-                </a>
-
-                <button class="btn btn-outline-primary w-100" disabled>
-                  <i class="fas fa-comments"></i> Chat (Após Orçamento)
-                </button>
-                {% else %}
-                <div class="alert alert-warning small">
-                  <i class="fas fa-info-circle"></i>
-                  Esta necessidade não está mais aceitando novos orçamentos.
-                </div>
-                {% endif %}
-              {% endif %}
-            </div>
-          </div>
-          {% else %}
-          <!-- Usuário não é fornecedor -->
-          <div class="card mb-2">
-            <div class="card-body text-center">
-              <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
-              <h6 class="text-muted mb-2">Você precisa ser um fornecedor para enviar orçamentos</h6>
-              <p class="text-muted small mb-3">
-                Atualize seu perfil marcando a opção "Fornecedor" para poder enviar orçamentos e participar de negócios.
-              </p>
-              <a href="{% url 'users:minha_conta_update' user.pk %}" class="btn btn-warning">
-                <i class="fas fa-user-edit me-1"></i> Atualizar Perfil
-              </a>
-            </div>
-          </div>
-          {% endif %}
-          {% endif %}
-          {% endif %}
-          <div class="card mb-2">
-            <div class="card-header">
-              <h6><i class="fas fa-info-circle"></i> Informações</h6>
-            </div>
-            <div class="card-body">
-              <small class="text-muted">
-                <p><strong>Publicado:</strong> {{ necessidade.data_criacao|date:"d/m/Y H:i" }}</p>
-                {% if necessidade.modificado_em %}
-                <p><strong>Atualizado:</strong> {{ necessidade.modificado_em|date:"d/m/Y H:i" }}</p>
-                {% endif %}
-                <p><strong>Total de orçamentos:</strong> {{ necessidade.orcamentos.count }}</p>
-
-                <!-- Estatísticas do chat -->
-                {% if user.is_authenticated %}
-                {% chat_stats user as stats %}
-                {% if stats.total_chats > 0 %}
-                <p><strong>Seus chats ativos:</strong> {{ stats.total_chats }}</p>
-                {% endif %}
-                {% endif %}
-              </small>
-            </div>
-          </div>
-          <!-- {# ----- Card Anunciante ----- #} -->
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title"><i class="fas fa-bullhorn text-primary"></i> Anunciante</h5>
-              <p><strong>Nome:</strong> {{ necessidade.cliente.get_full_name|capfirst }}</p>
-              <p><strong>Último Acesso:</strong> {{ necessidade.cliente.last_login|date:"d/m/Y H:i" }}</p>
-              <p><strong>Data de Cadastro:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</p>
-              <a href="{% url 'users:user_profile' necessidade.cliente.pk %}" class="btn btn-secondary w-100">
-                <i class="fas fa-user me-2"></i> Ver Perfil
-              </a>
-            </div>
-          </div>
         </div>
+      </div>
+
+
+      {# Card Dados do Anunciante #}
+      <div class="card animate-card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-user me-2"></i>
+            Anunciante
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          {% if necessidade.cliente.foto %}
+            <img src="{{ necessidade.cliente.foto.url }}" alt="Foto do anunciante" 
+                 class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+          {% else %}
+            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                 style="width: 80px; height: 80px;">
+              <i class="fas fa-user fa-2x text-white"></i>
+            </div>
+          {% endif %}
+          
+          <h6 class="mb-2">{{ necessidade.cliente.get_full_name|capfirst }}</h6>
+          
+          <div class="text-muted small mb-3">
+            <div><strong>Último Acesso:</strong> {{ necessidade.cliente.last_login|date:"d/m/Y H:i" }}</div>
+            <div><strong>Membro desde:</strong> {{ necessidade.cliente.date_joined|date:"d/m/Y" }}</div>
+          </div>
+          
+          <a href="{% url 'users:user_profile' necessidade.cliente.pk %}" class="btn btn-outline-primary w-100">
+            <i class="fas fa-eye me-2"></i>Ver Perfil Completo
+          </a>
+        </div>
+      </div>
+
+      {# Card Galeria de Imagens #}
+      <div class="mb-4">
+        {% include 'components/_galeria_imagens_compact.html' with necessidade=necessidade %}
+      </div>
+
+      {# Card Localização #}
+      <div class="mb-4">
+        {% include 'components/_mapa_localizacao.html' with necessidade=necessidade %}
       </div>
     </div>
   </div>
 </div>
-{# ----- Card Localização (mapa OpenStreetMap via Leaflet) ----- #}
-<div class="card mb-2 shadow">
-  <div class="card-body">
-    <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Localização</h5>
-    <p><strong>Cidade:</strong> {{ necessidade.cliente.cidade }}</p>
-    <p><strong>Estado:</strong> {{ necessidade.cliente.estado }}</p>
-    <p><strong>Bairro:</strong> {{ necessidade.cliente.bairro }}</p>
-    <p><strong>CEP:</strong> {{ necessidade.cliente.cep }}</p>
-    <div id="map" style="height: 300px; width: 100%;"></div>
-  </div>
-</div>
-</div>
-</div>
-</div>
+
+{# ========================= MODALS ======================== #}
 
 <!-- Modal: Contato com o Anunciante -->
-<div class="modal fade" id="contatoAnuncianteModal" tabindex="-1" aria-labelledby="contatoAnuncianteLabel"
-  aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+<div class="modal fade" id="contatoAnuncianteModal" tabindex="-1" aria-labelledby="contatoAnuncianteLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-
-      <!-- Cabeçalho do modal com botão Fechar -->
       <div class="modal-header">
         <h5 class="modal-title" id="contatoAnuncianteLabel">Entrar em Contato</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
-
       <div class="modal-body d-flex p-0">
-
-        <!-- LADO ESQUERDO: INFO DO ANUNCIANTE no topo -->
-        <div class="col-md-4 bg-light p-3 ">
+        <!-- Info do Anunciante -->
+        <div class="col-md-4 bg-light p-3">
           <div class="text-center mt-4">
             {% if necessidade.cliente.foto %}
-            <img src="{{ necessidade.cliente.foto.url }}" alt="Foto" class="rounded-circle mb-2"
-              style="width: 100px; height: 100px; object-fit: cover;">
+              <img src="{{ necessidade.cliente.foto.url }}" alt="Foto" class="rounded-circle mb-2"
+                   style="width: 100px; height: 100px; object-fit: cover;">
             {% else %}
-            <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle mb-2"
-              style="width: 100px; height: 100px; object-fit: cover;">
+              <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle mb-2"
+                   style="width: 100px; height: 100px; object-fit: cover;">
             {% endif %}
 
             <h5 class="mt-2">{{ necessidade.cliente.get_full_name }}</h5>
@@ -578,7 +614,7 @@
           </div>
         </div>
 
-        <!-- LADO DIREITO: FORMULÁRIO -->
+        <!-- Formulário -->
         <div class="col-md-8 p-4">
           <form method="post" action="{% url 'ads:enviar_mensagem' necessidade.pk %}">
             {% csrf_token %}
@@ -600,8 +636,7 @@
 
             <div class="mb-3">
               <label for="mensagem" class="form-label">Mensagem</label>
-              <textarea class="form-control" id="mensagem" name="mensagem" rows="4"
-                required>Olá, gostaria de ter mais informações sobre o anúncio "{{ necessidade.titulo }}" que encontrei no Necessito.com. Aguardo seu contato, obrigado.</textarea>
+              <textarea class="form-control" id="mensagem" name="mensagem" rows="4" required>Olá, gostaria de ter mais informações sobre o anúncio "{{ necessidade.titulo }}" que encontrei no Necessito.com. Aguardo seu contato, obrigado.</textarea>
             </div>
 
             <div class="form-check mb-3">
@@ -614,8 +649,7 @@
             <button type="submit" class="btn btn-primary w-100">Enviar Mensagem</button>
 
             <p class="small text-muted mt-2">
-              Ao "Ver telefone" e/ou "Enviar mensagem" você aceita os <a href="#">Termos de uso</a> e <a
-                href="#">Política de privacidade</a>.
+              Ao "Ver telefone" e/ou "Enviar mensagem" você aceita os <a href="#">Termos de uso</a> e <a href="#">Política de privacidade</a>.
             </p>
           </form>
 
@@ -625,31 +659,7 @@
             <a href="#">Saiba como se proteger</a>.
           </div>
         </div>
-
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Agradecimento -->
-<div class="modal fade" id="avaliacaoAgradecimentoModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center">
-
-      <div class="modal-header bg-primary text-white justify-content-center">
-        <h5 class="modal-title">Avalie seu atendimento</h5>
-      </div>
-
-      <div class="modal-body">
-        <img src="{% static 'img/logo2.png' %}" alt="Obrigado" class="img-fluid mb-3" style="max-height: 200px;">
-        <!-- <img src="https://via.placeholder.com/200x200?text=Obrigado" alt="Obrigado" class="img-fluid mb-3"> -->
-
-        <h5 class="fw-bold">Obrigado por participar da avaliação</h5>
-        <p class="text-muted">Sua opinião é valiosa e nos ajudará a melhorar ainda mais nossos serviços.</p>
-
-        <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">Concluir avaliação</button>
-      </div>
-
     </div>
   </div>
 </div>
@@ -672,8 +682,7 @@
 </div>
 
 <!-- Modal: Rejeitar orçamento -->
-<div class="modal fade" id="confirmarRejeicaoModal" tabindex="-1" aria-labelledby="modalRejeicaoLabel"
-  aria-hidden="true">
+<div class="modal fade" id="confirmarRejeicaoModal" tabindex="-1" aria-labelledby="modalRejeicaoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -690,8 +699,7 @@
 </div>
 
 <!-- Modal: Finalizar anúncio -->
-<div class="modal fade" id="confirmarFinalizacaoModal" tabindex="-1" aria-labelledby="modalFinalizacaoLabel"
-  aria-hidden="true">
+<div class="modal fade" id="confirmarFinalizacaoModal" tabindex="-1" aria-labelledby="modalFinalizacaoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -707,6 +715,7 @@
   </div>
 </div>
 
+<!-- Modal: Avaliação -->
 <div class="modal fade" id="avaliacaoModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -715,7 +724,6 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <!-- apenas este container vazio -->
         <div id="avaliacao-form-container" class="text-center py-4">
           <i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário...
         </div>
@@ -741,7 +749,6 @@
         </div>
 
         <div class="row g-3">
-          <!-- WhatsApp -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-success w-100 py-3 btn-compartilhar" 
                     data-platform="whatsapp" title="Compartilhar no WhatsApp">
@@ -750,7 +757,6 @@
             </button>
           </div>
 
-          <!-- Facebook -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-primary w-100 py-3 btn-compartilhar" 
                     data-platform="facebook" title="Compartilhar no Facebook">
@@ -759,7 +765,6 @@
             </button>
           </div>
 
-          <!-- Twitter -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-info w-100 py-3 btn-compartilhar" 
                     data-platform="twitter" title="Compartilhar no Twitter">
@@ -768,7 +773,6 @@
             </button>
           </div>
 
-          <!-- LinkedIn -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-secondary w-100 py-3 btn-compartilhar" 
                     data-platform="linkedin" title="Compartilhar no LinkedIn">
@@ -777,7 +781,6 @@
             </button>
           </div>
 
-          <!-- Telegram -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-info w-100 py-3 btn-compartilhar" 
                     data-platform="telegram" title="Compartilhar no Telegram">
@@ -786,7 +789,6 @@
             </button>
           </div>
 
-          <!-- Copiar Link -->
           <div class="col-6">
             <button type="button" class="btn btn-outline-dark w-100 py-3" 
                     id="btnCopiarLink" title="Copiar link do anúncio">
@@ -798,15 +800,29 @@
 
         <hr class="my-4">
 
-        <!-- Prévia do texto de compartilhamento -->
         <div class="bg-light p-3 rounded">
           <h6 class="fw-bold mb-2">
             <i class="fas fa-eye me-2"></i>Prévia da mensagem:
           </h6>
-          <div class="text-muted small" id="previaCompartilhamento" style="line-height: 1.5;">
-            <!-- Será preenchido dinamicamente pelo JavaScript -->
-          </div>
+          <div class="text-muted small" id="previaCompartilhamento" style="line-height: 1.5;"></div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Agradecimento -->
+<div class="modal fade" id="avaliacaoAgradecimentoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header bg-primary text-white justify-content-center">
+        <h5 class="modal-title">Avalie seu atendimento</h5>
+      </div>
+      <div class="modal-body">
+        <img src="{% static 'img/logo2.png' %}" alt="Obrigado" class="img-fluid mb-3" style="max-height: 200px;">
+        <h5 class="fw-bold">Obrigado por participar da avaliação</h5>
+        <p class="text-muted">Sua opinião é valiosa e nos ajudará a melhorar ainda mais nossos serviços.</p>
+        <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">Concluir avaliação</button>
       </div>
     </div>
   </div>
@@ -815,471 +831,412 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="{% static 'js/status_validator.js' %}"></script>
+
 <script>
-  // Consolida todos os scripts em um único DOMContentLoaded
-  document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
+  
+  // ==================== INICIALIZAR STATUS VALIDATOR ====================
+  const userType = '{% if not user.is_authenticated %}visitante{% elif user == necessidade.cliente %}cliente{% else %}fornecedor{% endif %}';
+  const userIdRaw = "{{ user.id|default_if_none:'' }}";
+  const clienteIdRaw = "{{ necessidade.cliente.id|default_if_none:'' }}";
+  const necessidadeIdRaw = "{{ necessidade.id }}";
 
-    // ==================== MAPA LEAFLET ====================
-    try {
-      const mapElement = document.getElementById('map');
-      if (mapElement) {
-        const map = L.map('map').setView([-14.2350, -51.9253], 5); // centro do BR
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+  const userId = userIdRaw ? parseInt(userIdRaw, 10) : null;
+  const clienteId = clienteIdRaw ? parseInt(clienteIdRaw, 10) : null;
+  const necessidadeId = necessidadeIdRaw ? parseInt(necessidadeIdRaw, 10) : null;
+  
+  const statusValidator = new StatusValidator(
+    necessidadeId,
+    '{{ necessidade.status }}',
+    userType,
+    userId,
+    clienteId
+  );
+  
+  window.statusValidator = statusValidator;
+  
+  // ==================== ACEITAR/REJEITAR ORÇAMENTO ====================
+  let aceitarUrl = null;
+  let rejeitarUrl = null;
+  
+  const btnAceitar = document.querySelectorAll('.btn-aceitar');
+  const btnRejeitar = document.querySelectorAll('.btn-rejeitar');
+  const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
+  const confirmarRejeicaoBtn = document.getElementById('confirmarRejeicaoBtn');
 
-        // Converte CEP em coordenada
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q={{ necessidade.cliente.cep }}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.length) {
-              const { lat, lon } = data[0];
-              L.marker([lat, lon]).addTo(map)
-                .bindPopup('Localização aproximada do anunciante.')
-                .openPopup();
-              map.setView([lat, lon], 13);
-            }
-          })
-          .catch(console.error);
-      }
-    } catch (error) {
-      console.error('Erro ao inicializar mapa:', error);
-    }
+  if (btnAceitar.length > 0 && confirmarAceiteBtn) {
+    btnAceitar.forEach(btn => {
+      btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
+    });
 
-    // ==================== ACEITAR ORÇAMENTO ====================
-    let aceitarUrl = null;
-    const btnAceitar = document.querySelectorAll('.btn-aceitar');
-    const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
+    confirmarAceiteBtn.addEventListener('click', () => {
+      if (!aceitarUrl) return;
+      fetch(aceitarUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+        .then(res => res.json())
+        .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
+        .catch(err => alert('Erro inesperado: ' + err));
+    });
+  }
 
-    if (btnAceitar.length > 0 && confirmarAceiteBtn) {
-      btnAceitar.forEach(btn => {
-        btn.addEventListener('click', () => aceitarUrl = btn.getAttribute('data-url'));
-      });
+  if (btnRejeitar.length > 0 && confirmarRejeicaoBtn) {
+    btnRejeitar.forEach(btn => {
+      btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
+    });
 
-      confirmarAceiteBtn.addEventListener('click', () => {
-        if (!aceitarUrl) return;
-        fetch(aceitarUrl, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-        })
-          .then(res => res.json())
-          .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
-          .catch(err => alert('Erro inesperado: ' + err));
-      });
-    }
+    confirmarRejeicaoBtn.addEventListener('click', () => {
+      if (!rejeitarUrl) return;
+      fetch(rejeitarUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+        .then(res => res.json())
+        .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
+        .catch(err => alert('Erro inesperado: ' + err));
+    });
+  }
 
-    // ==================== REJEITAR ORÇAMENTO ====================
-    let rejeitarUrl = null;
-    const btnRejeitar = document.querySelectorAll('.btn-rejeitar');
-    const confirmarRejeicaoBtn = document.getElementById('confirmarRejeicaoBtn');
-
-    if (btnRejeitar.length > 0 && confirmarRejeicaoBtn) {
-      btnRejeitar.forEach(btn => {
-        btn.addEventListener('click', () => rejeitarUrl = btn.getAttribute('data-url'));
-      });
-
-      confirmarRejeicaoBtn.addEventListener('click', () => {
-        if (!rejeitarUrl) return;
-        fetch(rejeitarUrl, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-        })
-          .then(res => res.json())
-          .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
-          .catch(err => alert('Erro inesperado: ' + err));
-      });
-    }
-
-    // ==================== FINALIZAR ANÚNCIO ====================
-    let finalizarUrl = null;
-    const finalizarBtn = document.querySelector('.btn-finalizar');
-    const confirmarFinalizacaoBtn = document.getElementById('confirmarFinalizacaoBtn');
-
-    if (finalizarBtn && confirmarFinalizacaoBtn) {
-      finalizarBtn.addEventListener('click', () => finalizarUrl = finalizarBtn.getAttribute('data-url'));
-
-      confirmarFinalizacaoBtn.addEventListener('click', () => {
-        if (!finalizarUrl) return;
-        fetch(finalizarUrl, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              bootstrap.Modal.getInstance(document.getElementById('confirmarFinalizacaoModal')).hide();
-              location.reload();
-            }
-          })
-          .catch(err => alert('Erro inesperado: ' + err));
-      });
-    }
-
-    // ==================== FORMULÁRIO DE AVALIAÇÃO ====================
-    const modalEl = document.getElementById('avaliacaoModal');
-    const formContainer = document.getElementById('avaliacao-form-container');
-
-    if (modalEl && formContainer) {
-      modalEl.addEventListener('show.bs.modal', () => {
-        formContainer.innerHTML =
-          '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
-
-        fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Falha ao carregar o formulário');
-            }
-            return response.text();
-          })
-          .then(html => {
-            formContainer.innerHTML = html;
-
-            // Inicializar o sistema de estrelas após carregar o formulário
-            initializeStarRating();
-
-            // Configurar submissão via AJAX do formulário
-            setupFormSubmission();
-          })
-          .catch(error => {
-            console.error('Erro:', error);
-            formContainer.innerHTML =
-              '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
-          });
-      });
-    }
-
-    // ==================== SUBMISSÃO DO FORMULÁRIO ====================
-    function setupFormSubmission() {
-      const formAvaliacao = document.getElementById('form-avaliacao');
-      if (formAvaliacao) {
-        formAvaliacao.addEventListener('submit', function (e) {
-          e.preventDefault();
-
-          // Verificar se todos os critérios foram avaliados
-          const allRatings = formAvaliacao.querySelectorAll('.star-rating');
-          let todosAvaliados = true;
-
-          allRatings.forEach(rating => {
-            const checked = rating.querySelector('input:checked');
-            if (!checked) {
-              todosAvaliados = false;
-              // Adicionar indicação visual de erro
-              const container = rating.closest('.mb-4');
-              container.classList.add('border', 'border-danger', 'rounded', 'p-2');
-              // Adicionar mensagem de erro se não existir
-              if (!container.querySelector('.text-danger')) {
-                const errorMsg = document.createElement('small');
-                errorMsg.className = 'text-danger d-block mt-1';
-                errorMsg.textContent = 'Por favor, selecione uma avaliação';
-                container.appendChild(errorMsg);
-              }
-            } else {
-              const container = rating.closest('.mb-4');
-              container.classList.remove('border', 'border-danger', 'rounded', 'p-2');
-              const errorMsg = container.querySelector('.text-danger');
-              if (errorMsg) errorMsg.remove();
-            }
-          });
-
-          if (!todosAvaliados) {
-            alert('Por favor, avalie todos os critérios antes de enviar.');
-            return false;
+  // ==================== FINALIZAR SERVIÇO ====================
+  const finalizarServicoBtn = document.getElementById('finalizarServicoBtn');
+  if (finalizarServicoBtn) {
+    finalizarServicoBtn.addEventListener('click', () => {
+      const url = finalizarServicoBtn.getAttribute('data-url');
+      if (!url) return;
+      
+      finalizarServicoBtn.disabled = true;
+      finalizarServicoBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Finalizando...';
+      
+      fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('finalizarServicoModal')).hide();
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            alert(data.error || 'Erro na finalização');
+            finalizarServicoBtn.disabled = false;
+            finalizarServicoBtn.innerHTML = 'Confirmar Finalização';
           }
-
-          // Se tudo estiver OK, enviar o formulário
-          const formData = new FormData(formAvaliacao);
-          const submitBtn = formAvaliacao.querySelector('#btn-enviar-avaliacao');
-
-          // Desabilitar botão e mostrar loading
-          submitBtn.disabled = true;
-          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-
-          fetch(formAvaliacao.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            }
-          })
-            .then(response => {
-              if (response.redirected) {
-                // Se houve redirecionamento, seguir para a nova página
-                window.location.href = response.url;
-              } else {
-                return response.text();
-              }
-            })
-            .catch(error => {
-              console.error('Erro ao enviar avaliação:', error);
-              alert('Erro ao enviar avaliação. Por favor, tente novamente.');
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = 'Enviar Avaliação';
-            });
+        })
+        .catch(err => {
+          alert('Erro inesperado');
+          finalizarServicoBtn.disabled = false;
+          finalizarServicoBtn.innerHTML = 'Confirmar Finalização';
         });
+    });
+  }
+
+  // ==================== TOGGLE TELEFONE ====================
+  const toggleBtn = document.getElementById('toggleTelefoneBtn');
+  const toggleText = document.getElementById('toggleTelefoneText');
+  const telefoneInfo = document.getElementById('telefoneInfo');
+
+  if (toggleBtn && toggleText && telefoneInfo) {
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (telefoneInfo.style.display === 'none') {
+        telefoneInfo.style.display = 'block';
+        toggleText.textContent = 'Ocultar telefone';
+      } else {
+        telefoneInfo.style.display = 'none';
+        toggleText.textContent = 'Ver telefone';
       }
+    });
+  }
+
+  // ==================== COMPARTILHAMENTO ====================
+  const dadosAnuncio = {
+    titulo: "{{ necessidade.titulo|escapejs }}",
+    descricao: "{{ necessidade.descricao|truncatechars:150|escapejs }}",
+    categoria: "{{ necessidade.categoria.nome|escapejs }}",
+    cidade: "{{ necessidade.cliente.cidade|escapejs }}",
+    estado: "{{ necessidade.cliente.estado|escapejs }}",
+    url: window.location.href
+  };
+
+  const textoCompartilhamento = "🔍 Procuro: " + dadosAnuncio.titulo + "\n\n📋 " + dadosAnuncio.descricao + "\n📍 " + dadosAnuncio.cidade + ", " + dadosAnuncio.estado + "\n💰 Categoria: " + dadosAnuncio.categoria + "\n\n👆 Acesse o anúncio completo no link:\n" + dadosAnuncio.url + "\n\n#Indicaai #" + dadosAnuncio.categoria.replace(/\s+/g, '');
+
+  const previaElement = document.getElementById('previaCompartilhamento');
+  if (previaElement) {
+    let textoFormatado = textoCompartilhamento.replace(/\n/g, '<br>');
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    textoFormatado = textoFormatado.replace(urlRegex, '<a href="$1" target="_blank" class="text-primary">$1</a>');
+    previaElement.innerHTML = textoFormatado;
+  }
+
+  const btnCompartilhar = document.getElementById('btnCompartilhar');
+  
+  if (btnCompartilhar) {
+    btnCompartilhar.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (navigator.share) {
+        navigator.share({
+          title: `Procuro: ${dadosAnuncio.titulo}`,
+          text: textoCompartilhamento
+        }).then(() => {
+          return;
+        }).catch((error) => {
+          const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
+          modalCompartilhar.show();
+        });
+      } else {
+        const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
+        modalCompartilhar.show();
+      }
+    });
+  }
+
+  const botoesCompartilhar = document.querySelectorAll('.btn-compartilhar');
+  
+  botoesCompartilhar.forEach(botao => {
+    botao.addEventListener('click', function() {
+      const plataforma = this.getAttribute('data-platform');
+      compartilharEm(plataforma);
+    });
+  });
+
+  function compartilharEm(plataforma) {
+    const textoEncoded = encodeURIComponent(textoCompartilhamento);
+    const urlEncoded = encodeURIComponent(dadosAnuncio.url);
+    
+    let shareUrl = '';
+
+    switch(plataforma) {
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${textoEncoded}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${urlEncoded}&quote=${textoEncoded}`;
+        break;
+      case 'twitter':
+        const textoTwitter = encodeURIComponent(`🔍 Procuro: ${dadosAnuncio.titulo}\n\n📍 ${dadosAnuncio.cidade}, ${dadosAnuncio.estado}\n💰 ${dadosAnuncio.categoria}\n\n👆 Acesse:`);
+        shareUrl = `https://twitter.com/intent/tweet?text=${textoTwitter}&url=${urlEncoded}&hashtags=Indicaai,${dadosAnuncio.categoria.replace(/\s+/g, '')}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEncoded}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${urlEncoded}&text=${textoEncoded}`;
+        break;
     }
 
-    // ==================== SISTEMA DE ESTRELAS ====================
-    function initializeStarRating() {
-      const starRatings = document.querySelectorAll('.star-rating');
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+      
+      const modal = bootstrap.Modal.getInstance(document.getElementById('compartilharModal'));
+      if (modal) {
+        setTimeout(() => modal.hide(), 500);
+      }
+    }
+  }
 
-      starRatings.forEach(rating => {
-        const labels = rating.querySelectorAll('label');
-        const inputs = rating.querySelectorAll('input');
+  const btnCopiarLink = document.getElementById('btnCopiarLink');
+  if (btnCopiarLink) {
+    btnCopiarLink.addEventListener('click', async function() {
+      try {
+        await navigator.clipboard.writeText(dadosAnuncio.url);
+        
+        const textoOriginal = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
+        this.classList.remove('btn-outline-dark');
+        this.classList.add('btn-outline-success');
+        
+        setTimeout(() => {
+          this.innerHTML = textoOriginal;
+          this.classList.remove('btn-outline-success');
+          this.classList.add('btn-outline-dark');
+        }, 2000);
+        
+      } catch (error) {
+        const textArea = document.createElement('textarea');
+        textArea.value = dadosAnuncio.url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        const textoOriginal = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
+        this.classList.remove('btn-outline-dark');
+        this.classList.add('btn-outline-success');
+        
+        setTimeout(() => {
+          this.innerHTML = textoOriginal;
+          this.classList.remove('btn-outline-success');
+          this.classList.add('btn-outline-dark');
+        }, 2000);
+      }
+    });
+  }
 
-        // Função para atualizar visualmente as estrelas
-        function updateStars(value) {
-          rating.setAttribute('data-rating', value);
+  // ==================== AVALIAÇÃO ====================
+  const modalEl = document.getElementById('avaliacaoModal');
+  const formContainer = document.getElementById('avaliacao-form-container');
 
-          // Atualizar visualmente todas as estrelas
-          labels.forEach((label, index) => {
-            if (index < value) {
-              label.style.backgroundImage = "url('/static/img/star-filled.svg')";
-            } else {
-              label.style.backgroundImage = "url('/static/img/star-empty.svg')";
+  if (modalEl && formContainer) {
+    modalEl.addEventListener('show.bs.modal', () => {
+      formContainer.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
+
+      fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Falha ao carregar o formulário');
+          }
+          return response.text();
+        })
+        .then(html => {
+          formContainer.innerHTML = html;
+          initializeStarRating();
+          setupFormSubmission();
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          formContainer.innerHTML = '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
+        });
+    });
+  }
+
+  function setupFormSubmission() {
+    const formAvaliacao = document.getElementById('form-avaliacao');
+    if (formAvaliacao) {
+      formAvaliacao.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const allRatings = formAvaliacao.querySelectorAll('.star-rating');
+        let todosAvaliados = true;
+
+        allRatings.forEach(rating => {
+          const checked = rating.querySelector('input:checked');
+          if (!checked) {
+            todosAvaliados = false;
+            const container = rating.closest('.mb-4');
+            container.classList.add('border', 'border-danger', 'rounded', 'p-2');
+            if (!container.querySelector('.text-danger')) {
+              const errorMsg = document.createElement('small');
+              errorMsg.className = 'text-danger d-block mt-1';
+              errorMsg.textContent = 'Por favor, selecione uma avaliação';
+              container.appendChild(errorMsg);
             }
-          });
+          } else {
+            const container = rating.closest('.mb-4');
+            container.classList.remove('border', 'border-danger', 'rounded', 'p-2');
+            const errorMsg = container.querySelector('.text-danger');
+            if (errorMsg) errorMsg.remove();
+          }
+        });
+
+        if (!todosAvaliados) {
+          alert('Por favor, avalie todos os critérios antes de enviar.');
+          return false;
         }
 
-        // Evento de clique nas estrelas
-        labels.forEach((label, index) => {
-          label.addEventListener('click', function (e) {
-            e.preventDefault();
-            const value = this.getAttribute('data-value');
-            const input = rating.querySelector(`input[value="${value}"]`);
-            if (input) {
-              input.checked = true;
-              updateStars(value);
-            }
-          });
+        const formData = new FormData(formAvaliacao);
+        const submitBtn = formAvaliacao.querySelector('#btn-enviar-avaliacao');
 
-          // Efeito hover
-          label.addEventListener('mouseenter', function () {
-            const value = this.getAttribute('data-value');
-            // Preenche temporariamente até a estrela atual
-            labels.forEach((l, i) => {
-              if (i < value) {
-                l.style.backgroundImage = "url('/static/img/star-filled.svg')";
-              } else {
-                l.style.backgroundImage = "url('/static/img/star-empty.svg')";
-              }
-            });
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+
+        fetch(formAvaliacao.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+          }
+        })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else {
+              return response.text();
+            }
+          })
+          .catch(error => {
+            console.error('Erro ao enviar avaliação:', error);
+            alert('Erro ao enviar avaliação. Por favor, tente novamente.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Enviar Avaliação';
           });
+      });
+    }
+  }
+
+  function initializeStarRating() {
+    const starRatings = document.querySelectorAll('.star-rating');
+
+    starRatings.forEach(rating => {
+      const labels = rating.querySelectorAll('label');
+      const inputs = rating.querySelectorAll('input');
+
+      function updateStars(value) {
+        rating.setAttribute('data-rating', value);
+
+        labels.forEach((label, index) => {
+          if (index < value) {
+            label.style.backgroundImage = "url('/static/img/star-filled.svg')";
+          } else {
+            label.style.backgroundImage = "url('/static/img/star-empty.svg')";
+          }
+        });
+      }
+
+      labels.forEach((label, index) => {
+        label.addEventListener('click', function (e) {
+          e.preventDefault();
+          const value = this.getAttribute('data-value');
+          const input = rating.querySelector(`input[value="${value}"]`);
+          if (input) {
+            input.checked = true;
+            updateStars(value);
+          }
         });
 
-        // Restaura o estado quando o mouse sai
-        rating.addEventListener('mouseleave', function () {
-          const currentRating = rating.getAttribute('data-rating') || '0';
+        label.addEventListener('mouseenter', function () {
+          const value = this.getAttribute('data-value');
           labels.forEach((l, i) => {
-            if (i < parseInt(currentRating)) {
+            if (i < value) {
               l.style.backgroundImage = "url('/static/img/star-filled.svg')";
             } else {
               l.style.backgroundImage = "url('/static/img/star-empty.svg')";
             }
           });
         });
-
-        // Inicializa com o valor atual (se houver)
-        const checkedInput = rating.querySelector('input:checked');
-        if (checkedInput) {
-          updateStars(checkedInput.value);
-        }
       });
-    }
 
-    // ==================== TOGGLE TELEFONE ====================
-    const toggleBtn = document.getElementById('toggleTelefoneBtn');
-    const toggleText = document.getElementById('toggleTelefoneText');
-    const telefoneInfo = document.getElementById('telefoneInfo');
-
-    if (toggleBtn && toggleText && telefoneInfo) {
-      toggleBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (telefoneInfo.style.display === 'none') {
-          telefoneInfo.style.display = 'block';
-          toggleText.textContent = 'Ocultar telefone';
-        } else {
-          telefoneInfo.style.display = 'none';
-          toggleText.textContent = 'Ver telefone';
-        }
+      rating.addEventListener('mouseleave', function () {
+        const currentRating = rating.getAttribute('data-rating') || '0';
+        labels.forEach((l, i) => {
+          if (i < parseInt(currentRating)) {
+            l.style.backgroundImage = "url('/static/img/star-filled.svg')";
+          } else {
+            l.style.backgroundImage = "url('/static/img/star-empty.svg')";
+          }
+        });
       });
-    }
 
-    // ==================== FUNCIONALIDADE DE COMPARTILHAMENTO ====================
-    
-    // Dados do anúncio para compartilhamento
-    const dadosAnuncio = {
-      titulo: `{{ necessidade.titulo|escapejs }}`,
-      descricao: `{{ necessidade.descricao|truncatechars:150|escapejs }}`,
-      categoria: `{{ necessidade.categoria.nome|escapejs }}`,
-      cidade: `{{ necessidade.cliente.cidade|escapejs }}`,
-      estado: `{{ necessidade.cliente.estado|escapejs }}`,
-      url: window.location.href
-    };
-
-
-
-    // Texto formatado para compartilhamento
-    const textoCompartilhamento = `🔍 Procuro: ${dadosAnuncio.titulo}
-
-📋 ${dadosAnuncio.descricao}
-📍 ${dadosAnuncio.cidade}, ${dadosAnuncio.estado}
-💰 Categoria: ${dadosAnuncio.categoria}
-
-👆 Acesse o anúncio completo no link:
-${dadosAnuncio.url}
-
-#Indicaai #${dadosAnuncio.categoria.replace(/\s+/g, '')}`;
-
-    // Preencher a prévia no modal com links clicáveis
-    const previaElement = document.getElementById('previaCompartilhamento');
-    if (previaElement) {
-      // Substituir quebras de linha por <br> e tornar links clicáveis
-      let textoFormatado = textoCompartilhamento.replace(/\n/g, '<br>');
-      
-      // Tornar o link clicável na prévia
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      textoFormatado = textoFormatado.replace(urlRegex, '<a href="$1" target="_blank" class="text-primary">$1</a>');
-      
-      previaElement.innerHTML = textoFormatado;
-    }
-
-    // Botão principal de compartilhar
-    const btnCompartilhar = document.getElementById('btnCompartilhar');
-    
-    if (btnCompartilhar) {
-      btnCompartilhar.addEventListener('click', function(e) {
-        // Evitar que o evento seja interceptado
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Verificar se o navegador suporta Web Share API
-        if (navigator.share) {
-          navigator.share({
-            title: `Procuro: ${dadosAnuncio.titulo}`,
-            text: textoCompartilhamento
-          }).then(() => {
-            // Compartilhamento realizado com sucesso via API nativa
-            return;
-          }).catch((error) => {
-            // Se falhar ou usuário cancelar, abrir modal personalizado
-            const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
-            modalCompartilhar.show();
-          });
-                  } else {
-          // Fallback: abrir modal personalizado
-          const modalCompartilhar = new bootstrap.Modal(document.getElementById('compartilharModal'));
-          modalCompartilhar.show();
-        }
-      });
-    }
-
-    // Botões de compartilhamento específicos do modal
-    const botoesCompartilhar = document.querySelectorAll('.btn-compartilhar');
-    
-    botoesCompartilhar.forEach(botao => {
-      botao.addEventListener('click', function() {
-        const plataforma = this.getAttribute('data-platform');
-        compartilharEm(plataforma);
-      });
-    });
-
-    // Função para compartilhar em plataformas específicas (fallback para quando Web Share API não funcionar)
-    function compartilharEm(plataforma) {
-      const textoEncoded = encodeURIComponent(textoCompartilhamento);
-      const urlEncoded = encodeURIComponent(dadosAnuncio.url);
-      const tituloEncoded = encodeURIComponent(`Procuro: ${dadosAnuncio.titulo}`);
-      
-      let shareUrl = '';
-
-      switch(plataforma) {
-        case 'whatsapp':
-          shareUrl = `https://wa.me/?text=${textoEncoded}`;
-          break;
-          
-        case 'facebook':
-          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${urlEncoded}&quote=${textoEncoded}`;
-          break;
-          
-        case 'twitter':
-          const textoTwitter = encodeURIComponent(`🔍 Procuro: ${dadosAnuncio.titulo}\n\n📍 ${dadosAnuncio.cidade}, ${dadosAnuncio.estado}\n💰 ${dadosAnuncio.categoria}\n\n👆 Acesse:`);
-          shareUrl = `https://twitter.com/intent/tweet?text=${textoTwitter}&url=${urlEncoded}&hashtags=Indicaai,${dadosAnuncio.categoria.replace(/\s+/g, '')}`;
-          break;
-          
-        case 'linkedin':
-          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${urlEncoded}`;
-          break;
-          
-        case 'telegram':
-          shareUrl = `https://t.me/share/url?url=${urlEncoded}&text=${textoEncoded}`;
-          break;
+      const checkedInput = rating.querySelector('input:checked');
+      if (checkedInput) {
+        updateStars(checkedInput.value);
       }
-
-      if (shareUrl) {
-        // Abrir em nova janela
-        window.open(shareUrl, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
-        
-        // Fechar modal após compartilhar
-        const modal = bootstrap.Modal.getInstance(document.getElementById('compartilharModal'));
-        if (modal) {
-          setTimeout(() => modal.hide(), 500);
-        }
-      }
-    }
-
-    // Botão copiar link
-    const btnCopiarLink = document.getElementById('btnCopiarLink');
-    if (btnCopiarLink) {
-      btnCopiarLink.addEventListener('click', async function() {
-        try {
-          await navigator.clipboard.writeText(dadosAnuncio.url);
-          
-          // Feedback visual
-          const textoOriginal = this.innerHTML;
-          this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
-          this.classList.remove('btn-outline-dark');
-          this.classList.add('btn-outline-success');
-          
-          setTimeout(() => {
-            this.innerHTML = textoOriginal;
-            this.classList.remove('btn-outline-success');
-            this.classList.add('btn-outline-dark');
-          }, 2000);
-          
-        } catch (error) {
-          // Fallback para navegadores que não suportam clipboard API
-          const textArea = document.createElement('textarea');
-          textArea.value = dadosAnuncio.url;
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          
-          // Feedback visual
-          const textoOriginal = this.innerHTML;
-          this.innerHTML = '<i class="fas fa-check fa-2x mb-2 text-success"></i><div class="small fw-bold">Copiado!</div>';
-          this.classList.remove('btn-outline-dark');
-          this.classList.add('btn-outline-success');
-          
-          setTimeout(() => {
-            this.innerHTML = textoOriginal;
-            this.classList.remove('btn-outline-success');
-            this.classList.add('btn-outline-dark');
-          }, 2000);
-        }
-      });
-    }
-
-    // ==================== INICIALIZAÇÃO DE TOOLTIPS ====================
-    // Re-inicializa tooltips específicos desta página
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+  }
 
+  // ==================== TOOLTIPS ====================
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
   });
+
+});
 </script>
 
 {% if show_modal %}

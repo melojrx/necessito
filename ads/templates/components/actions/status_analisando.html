@@ -1,0 +1,172 @@
+{# Componente de ações para status ANALISANDO ORÇAMENTOS #}
+<div class="status-actions-container" data-status="analisando_orcamentos">
+  <div class="row g-3">
+    
+    {# Card principal de ações do proprietário #}
+    {% if user.is_authenticated and user == necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-warning shadow-sm">
+        <div class="card-header bg-warning text-dark">
+          <h6 class="mb-0">
+            <i class="fas fa-search me-2"></i>
+            Analisando Orçamentos
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-1"></i>
+            <strong>Atenção:</strong> Você já recebeu orçamentos. O anúncio não pode mais ser editado.
+          </div>
+          
+          <div class="d-flex flex-column gap-2">
+            <div class="text-center py-2">
+              <h5 class="text-primary mb-1">{{ necessidade.orcamentos.count }}</h5>
+              <small class="text-muted">Orçamento{{ necessidade.orcamentos.count|pluralize:"s" }} recebido{{ necessidade.orcamentos.count|pluralize:"s" }}</small>
+            </div>
+            
+            <hr class="my-2">
+            
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-danger flex-fill" 
+                      data-bs-toggle="modal" 
+                      data-bs-target="#cancelarAnuncioModal">
+                <i class="fas fa-times me-1"></i>
+                Cancelar Anúncio
+              </button>
+              <a href="#tabela-orcamentos" class="btn btn-primary flex-fill">
+                <i class="fas fa-eye me-1"></i>
+                Ver Orçamentos
+              </a>
+            </div>
+            
+            <small class="text-muted mt-2">
+              <i class="fas fa-info-circle me-1"></i>
+              Analise os orçamentos recebidos e aceite o que melhor atender suas necessidades.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para fornecedores que ainda podem enviar orçamentos #}
+    {% if user.is_authenticated and user != necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-primary shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-briefcase me-2"></i>
+            Área do Fornecedor
+          </h6>
+        </div>
+        <div class="card-body">
+          {% if user.is_supplier %}
+            {% if usuario_tem_orcamento %}
+              <div class="alert alert-success mb-2">
+                <i class="fas fa-check-circle me-1"></i>
+                Você já enviou um orçamento para esta necessidade.
+              </div>
+              <a href="{% url 'budgets:budget_list' %}" class="btn btn-outline-primary w-100">
+                <i class="fas fa-edit me-1"></i>
+                Ver Meu Orçamento
+              </a>
+            {% else %}
+              <div class="mb-3">
+                <div class="alert alert-info small mb-2">
+                  <i class="fas fa-clock me-1"></i>
+                  Cliente analisando orçamentos. Você ainda pode participar!
+                </div>
+                <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" 
+                   class="btn btn-primary w-100">
+                  <i class="fas fa-file-invoice-dollar me-2"></i>
+                  Enviar Orçamento
+                </a>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="text-center py-3">
+              <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
+              <p class="text-muted mb-2">Torne-se um fornecedor para participar</p>
+              <a href="{% url 'users:minha_conta_update' user.pk %}" 
+                 class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-1"></i>
+                Atualizar Perfil
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para visitantes não logados #}
+    {% if not user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-eye me-2"></i>
+            Anúncio em Análise
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-muted mb-3">
+            Este anúncio está recebendo propostas de fornecedores.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{% url 'users:login' %}?next={{ request.path }}" 
+               class="btn btn-secondary flex-fill">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              Entrar
+            </a>
+            <a href="{% url 'users:register' %}" 
+               class="btn btn-outline-secondary flex-fill">
+              <i class="fas fa-user-plus me-1"></i>
+              Cadastrar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card de informações do status #}
+    <div class="col-12">
+      <div class="card bg-light border-0">
+        <div class="card-body py-2">
+          <div class="d-flex align-items-center">
+            <div class="status-indicator bg-warning me-2"></div>
+            <small class="text-muted">
+              <strong>Status:</strong> Cliente analisando {{ necessidade.orcamentos.count }} orçamento{{ necessidade.orcamentos.count|pluralize:"s" }} recebido{{ necessidade.orcamentos.count|pluralize:"s" }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para cancelar anúncio -->
+<div class="modal fade" id="cancelarAnuncioModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cancelar Anúncio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja cancelar este anúncio?</p>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          Os fornecedores que enviaram orçamentos serão notificados sobre o cancelamento.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+        <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" class="btn btn-danger">
+          Confirmar Cancelamento
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

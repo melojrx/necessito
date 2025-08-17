@@ -1,0 +1,255 @@
+{# Componente de ações para status AGUARDANDO CONFIRMAÇÃO #}
+<div class="status-actions-container" data-status="aguardando_confirmacao">
+  <div class="row g-3">
+    
+    {# Card principal para o cliente #}
+    {% if user.is_authenticated and user == necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-info shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-clock me-2"></i>
+            Aguardando Confirmação do Fornecedor
+          </h6>
+        </div>
+        <div class="card-body">
+          {% with orcamento_aceito=necessidade.get_accepted_budget %}
+          {% if orcamento_aceito %}
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-handshake me-1"></i>
+            <strong>Orçamento aceito!</strong> Aguardando confirmação de <strong>{{ orcamento_aceito.fornecedor.get_full_name }}</strong>
+          </div>
+          
+          <div class="row text-center mb-3">
+            <div class="col-6">
+              <h5 class="text-success mb-1">{{ orcamento_aceito.valor_total|floatformat:2 }}</h5>
+              <small class="text-muted">Valor acordado</small>
+            </div>
+            <div class="col-6">
+              <h5 class="text-info mb-1">
+                {% if necessidade.aguardando_confirmacao_desde %}
+                  {{ necessidade.aguardando_confirmacao_desde|timesince }}
+                {% else %}
+                  Recente
+                {% endif %}
+              </h5>
+              <small class="text-muted">Tempo esperando</small>
+            </div>
+          </div>
+          
+          <div class="progress mb-3" style="height: 8px;">
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
+                 role="progressbar" style="width: 50%">
+            </div>
+          </div>
+          
+          <div class="alert alert-warning small">
+            <i class="fas fa-info-circle me-1"></i>
+            O fornecedor tem até 48 horas para confirmar. Caso não confirme, o orçamento será automaticamente rejeitado.
+          </div>
+          
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger flex-fill" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#cancelarAnuncioModal">
+              <i class="fas fa-times me-1"></i>
+              Cancelar Anúncio
+            </button>
+            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary flex-fill">
+              <i class="fas fa-comments me-1"></i>
+              Conversar
+            </a>
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para o fornecedor que precisa confirmar #}
+    {% if user.is_authenticated and user != necessidade.cliente %}
+    {% with orcamento_aceito=necessidade.get_accepted_budget %}
+    {% if orcamento_aceito and user == orcamento_aceito.fornecedor %}
+    <div class="col-12">
+      <div class="card border-success shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-check-circle me-2"></i>
+            Seu Orçamento Foi Aceito!
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success mb-3">
+            <i class="fas fa-trophy me-1"></i>
+            <strong>Parabéns!</strong> O cliente aceitou seu orçamento de <strong>R$ {{ orcamento_aceito.valor_total|floatformat:2 }}</strong>
+          </div>
+          
+          <div class="countdown-container mb-3 text-center">
+            <div class="alert alert-warning">
+              <i class="fas fa-clock me-1"></i>
+              <strong>Confirme em até 48 horas</strong> ou o orçamento será automaticamente rejeitado.
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-success flex-fill" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#confirmarOrcamentoModal">
+              <i class="fas fa-handshake me-1"></i>
+              Confirmar Orçamento
+            </button>
+            <button class="btn btn-outline-danger flex-fill" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#rejeitarOrcamentoModal">
+              <i class="fas fa-times me-1"></i>
+              Rejeitar
+            </button>
+          </div>
+          
+          <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-outline-primary w-100">
+            <i class="fas fa-comments me-1"></i>
+            Conversar com Cliente
+          </a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    {# Outros fornecedores #}
+    <div class="col-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Orçamento em Análise
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+          <p class="text-muted mb-0">
+            O cliente já aceitou um orçamento e está aguardando confirmação do fornecedor.
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
+
+    {# Card para visitantes não logados #}
+    {% if not user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-clock me-2"></i>
+            Negociação em Andamento
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-muted mb-3">
+            Este anúncio está em processo de confirmação entre cliente e fornecedor.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{% url 'users:login' %}?next={{ request.path }}" 
+               class="btn btn-secondary flex-fill">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              Entrar
+            </a>
+            <a href="{% url 'users:register' %}" 
+               class="btn btn-outline-secondary flex-fill">
+              <i class="fas fa-user-plus me-1"></i>
+              Cadastrar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card de informações do status #}
+    <div class="col-12">
+      <div class="card bg-light border-0">
+        <div class="card-body py-2">
+          <div class="d-flex align-items-center">
+            <div class="status-indicator bg-info me-2 pulse-animation"></div>
+            <small class="text-muted">
+              <strong>Status:</strong> Aguardando confirmação do fornecedor (prazo: 48 horas)
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modais específicos -->
+{% if user.is_authenticated and orcamento_aceito and user == orcamento_aceito.fornecedor %}
+<!-- Modal confirmar orçamento -->
+<div class="modal fade" id="confirmarOrcamentoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Orçamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Confirmar que você pode executar este serviço/fornecimento pelo valor de <strong>R$ {{ orcamento_aceito.valor_total|floatformat:2 }}</strong>?</p>
+        <div class="alert alert-info">
+          <i class="fas fa-handshake me-1"></i>
+          Após a confirmação, o chat será liberado e vocês poderão acertar os detalhes finais.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="confirmarOrcamentoBtn">
+          Confirmar Orçamento
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal rejeitar orçamento -->
+<div class="modal fade" id="rejeitarOrcamentoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Rejeitar Orçamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja rejeitar este orçamento?</p>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          O anúncio voltará para o status "ativo" e outros fornecedores poderão enviar propostas.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="rejeitarOrcamentoBtn">
+          Rejeitar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.countdown-container {
+  background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+  border-radius: 8px;
+  padding: 1rem;
+}
+</style>

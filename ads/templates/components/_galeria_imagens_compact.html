@@ -1,0 +1,149 @@
+{% comment %}
+Galeria de Imagens Compacta - Componente Responsivo
+Usage: {% include 'components/_galeria_imagens_compact.html' with necessidade=necessidade %}
+{% endcomment %}
+
+<div class="galeria-compact-component">
+    {% if necessidade.imagens.all %}
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <i class="fas fa-images me-2"></i>Imagens
+                </h6>
+                <span class="badge bg-primary">{{ necessidade.imagens.count }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div id="galeriaCompactCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for imagem in necessidade.imagens.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ imagem.imagem.url }}" 
+                                 class="d-block w-100 galeria-image" 
+                                 alt="Imagem {{ forloop.counter }} do anúncio {{ necessidade.titulo }}"
+                                 loading="lazy">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if necessidade.imagens.count > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#galeriaCompactCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#galeriaCompactCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Próximo</span>
+                    </button>
+                    
+                    <!-- Indicadores -->
+                    <div class="carousel-indicators">
+                        {% for imagem in necessidade.imagens.all %}
+                        <button type="button" 
+                                data-bs-target="#galeriaCompactCarousel" 
+                                data-bs-slide-to="{{ forloop.counter0 }}" 
+                                {% if forloop.first %}class="active"{% endif %}
+                                aria-label="Imagem {{ forloop.counter }}"></button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Placeholder quando não há imagens -->
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-images me-2"></i>Imagens
+                </h6>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center galeria-placeholder">
+                <div class="text-center text-muted">
+                    <i class="fas fa-image fa-3x mb-3 opacity-50"></i>
+                    <p class="mb-0">Nenhuma imagem disponível</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Galeria Compacta Component Styles */
+.galeria-compact-component .card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.galeria-compact-component .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.galeria-compact-component .card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.galeria-compact-component .galeria-image {
+    height: 280px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.galeria-compact-component .galeria-image:hover {
+    transform: scale(1.02);
+}
+
+.galeria-compact-component .carousel-control-prev,
+.galeria-compact-component .carousel-control-next {
+    width: 15%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.galeria-compact-component .card:hover .carousel-control-prev,
+.galeria-compact-component .card:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.galeria-compact-component .carousel-indicators {
+    margin-bottom: 0.5rem;
+}
+
+.galeria-compact-component .carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 3px;
+}
+
+.galeria-compact-component .galeria-placeholder {
+    height: 280px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .galeria-compact-component .galeria-image,
+    .galeria-compact-component .galeria-placeholder {
+        height: 220px;
+    }
+    
+    .galeria-compact-component .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .galeria-compact-component .card-header h6 {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .galeria-compact-component .galeria-image,
+    .galeria-compact-component .galeria-placeholder {
+        height: 200px;
+    }
+}
+</style>

@@ -1,0 +1,274 @@
+{# Componente de ações para status EM ATENDIMENTO #}
+<div class="status-actions-container" data-status="em_atendimento">
+  <div class="row g-3">
+    
+    {# Card principal para o cliente #}
+    {% if user.is_authenticated and user == necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-primary shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-cogs me-2"></i>
+            Serviço em Andamento
+          </h6>
+        </div>
+        <div class="card-body">
+          {% with orcamento_confirmado=necessidade.get_confirmed_budget %}
+          {% if orcamento_confirmado %}
+          <div class="alert alert-success mb-3">
+            <i class="fas fa-check-double me-1"></i>
+            <strong>Negócio fechado!</strong> Serviço confirmado com <strong>{{ orcamento_confirmado.fornecedor.get_full_name }}</strong>
+          </div>
+          
+          <div class="row text-center mb-3">
+            <div class="col-6">
+              <h5 class="text-success mb-1">R$ {{ orcamento_confirmado.valor_total|floatformat:2 }}</h5>
+              <small class="text-muted">Valor acordado</small>
+            </div>
+            <div class="col-6">
+              <h5 class="text-primary mb-1">
+                {% if necessidade.data_finalizacao %}
+                  {{ necessidade.data_finalizacao|timesince }}
+                {% else %}
+                  Em andamento
+                {% endif %}
+              </h5>
+              <small class="text-muted">Tempo do serviço</small>
+            </div>
+          </div>
+          
+          <div class="progress mb-3" style="height: 10px;">
+            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
+                 role="progressbar" style="width: 75%">
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2 mb-3">
+            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary flex-fill">
+              <i class="fas fa-comments me-1"></i>
+              Chat com Fornecedor
+            </a>
+            <button class="btn btn-success flex-fill" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#finalizarServicoModal"
+                    data-action="finalize">
+              <i class="fas fa-check-circle me-1"></i>
+              Finalizar Serviço
+            </button>
+          </div>
+          
+          <div class="alert alert-info small">
+            <i class="fas fa-info-circle me-1"></i>
+            <strong>Próximo passo:</strong> Após receber o serviço/produto, clique em "Finalizar Serviço" para liberar a avaliação.
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para o fornecedor em atendimento #}
+    {% if user.is_authenticated and user != necessidade.cliente %}
+    {% with orcamento_confirmado=necessidade.get_confirmed_budget %}
+    {% if orcamento_confirmado and user == orcamento_confirmado.fornecedor %}
+    <div class="col-12">
+      <div class="card border-success shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-tools me-2"></i>
+            Executando Serviço
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success mb-3">
+            <i class="fas fa-handshake me-1"></i>
+            <strong>Negócio confirmado!</strong> Valor: <strong>R$ {{ orcamento_confirmado.valor_total|floatformat:2 }}</strong>
+          </div>
+          
+          <div class="timeline-container mb-3">
+            <div class="timeline-item completed">
+              <i class="fas fa-check-circle"></i>
+              <span>Orçamento aceito</span>
+            </div>
+            <div class="timeline-item completed">
+              <i class="fas fa-handshake"></i>
+              <span>Acordo confirmado</span>
+            </div>
+            <div class="timeline-item active">
+              <i class="fas fa-cogs"></i>
+              <span>Executando serviço</span>
+            </div>
+            <div class="timeline-item">
+              <i class="fas fa-star"></i>
+              <span>Aguardando finalização</span>
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2 mb-3">
+            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary flex-fill">
+              <i class="fas fa-comments me-1"></i>
+              Chat com Cliente
+            </a>
+            <a href="{% url 'budgets:budget_detail' orcamento_confirmado.id %}" 
+               class="btn btn-outline-primary flex-fill">
+              <i class="fas fa-file-alt me-1"></i>
+              Ver Contrato
+            </a>
+          </div>
+          
+          <div class="alert alert-warning small">
+            <i class="fas fa-clipboard-check me-1"></i>
+            Mantenha contato com o cliente e execute o serviço conforme acordado.
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    {# Outros fornecedores #}
+    <div class="col-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Serviço em Andamento
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <i class="fas fa-cogs fa-2x text-muted mb-2"></i>
+          <p class="text-muted mb-0">
+            Este anúncio já está sendo atendido por outro fornecedor.
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endif %}
+
+    {# Card para visitantes não logados #}
+    {% if not user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-secondary shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-cogs me-2"></i>
+            Serviço em Execução
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-muted mb-3">
+            Este anúncio está sendo executado. O serviço foi acordado entre cliente e fornecedor.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{% url 'users:login' %}?next={{ request.path }}" 
+               class="btn btn-secondary flex-fill">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              Entrar
+            </a>
+            <a href="{% url 'users:register' %}" 
+               class="btn btn-outline-secondary flex-fill">
+              <i class="fas fa-user-plus me-1"></i>
+              Cadastrar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card de informações do status #}
+    <div class="col-12">
+      <div class="card bg-light border-0">
+        <div class="card-body py-2">
+          <div class="d-flex align-items-center">
+            <div class="status-indicator bg-primary me-2 working-animation"></div>
+            <small class="text-muted">
+              <strong>Status:</strong> Serviço em execução - Chat liberado entre as partes
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal finalizar serviço -->
+{% if user.is_authenticated and user == necessidade.cliente %}
+<div class="modal fade" id="finalizarServicoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Finalizar Serviço</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Confirma que o serviço foi executado conforme acordado?</p>
+        <div class="alert alert-info">
+          <i class="fas fa-star me-1"></i>
+          Após a finalização, vocês poderão avaliar um ao outro e a negociação será concluída.
+        </div>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          <strong>Atenção:</strong> Esta ação não pode ser desfeita.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" 
+                data-url="{% url 'ads:finalizar_anuncio' necessidade.pk %}"
+                id="finalizarServicoBtn">
+          Confirmar Finalização
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.timeline-item i {
+  width: 20px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.timeline-item.completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.timeline-item.active {
+  background-color: #cce7ff;
+  color: #0056b3;
+  font-weight: 500;
+}
+
+.timeline-item:not(.completed):not(.active) {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.working-animation {
+  animation: working 1.5s ease-in-out infinite;
+}
+
+@keyframes working {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+</style>

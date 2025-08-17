@@ -4,134 +4,115 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
 {% endcomment %}
 
 <div class="status-timeline-component">
-    <div class="timeline-container">
-        {% with current_status=necessidade.status %}
-        
-        <!-- Status especiais (cancelado, expirado, em_disputa) -->
-        {% if current_status == 'cancelado' or current_status == 'expirado' or current_status == 'em_disputa' %}
-            <div class="special-status-banner">
-                {% if current_status == 'cancelado' %}
-                    <i class="fas fa-times-circle"></i>
-                    <span>Anúncio Cancelado</span>
-                {% elif current_status == 'expirado' %}
-                    <i class="fas fa-calendar-times"></i>
-                    <span>Anúncio Expirado</span>
-                {% elif current_status == 'em_disputa' %}
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Em Disputa</span>
-                {% endif %}
-            </div>
-        {% else %}
-            <!-- Timeline normal -->
-            <!-- Ativo -->
-            <div class="timeline-item {% if current_status == 'ativo' %}active{% elif current_status != 'ativo' and current_status != 'cancelado' and current_status != 'expirado' and current_status != 'em_disputa' %}completed{% endif %}">
-                <div class="timeline-dot">
+    {% with current_status=necessidade.status %}
+    
+    <!-- Status especiais (cancelado, expirado, em_disputa) -->
+    {% if current_status == 'cancelado' or current_status == 'expirado' or current_status == 'em_disputa' %}
+        <div class="special-status-banner">
+            {% if current_status == 'cancelado' %}
+                <i class="fas fa-times-circle"></i>
+                <span>Anúncio Cancelado</span>
+            {% elif current_status == 'expirado' %}
+                <i class="fas fa-calendar-times"></i>
+                <span>Anúncio Expirado</span>
+            {% elif current_status == 'em_disputa' %}
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Em Disputa</span>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Timeline horizontal -->
+        <div class="timeline-horizontal">
+            <!-- Publicado -->
+            <div class="timeline-step {% if current_status == 'ativo' %}current{% else %}completed{% endif %}">
+                <div class="step-icon">
                     <i class="fas fa-play"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Publicado</span>
-                    <small class="timeline-date">{{ necessidade.data_criacao|date:"d/m H:i" }}</small>
+                <div class="step-content">
+                    <div class="step-title">Publicado</div>
+                    <div class="step-date">{{ necessidade.data_criacao|date:"d/m" }}</div>
                 </div>
             </div>
             
-            <div class="timeline-connector {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <!-- Linha de conexão -->
+            <div class="timeline-line {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
-            <!-- Analisando Orçamentos -->
-            <div class="timeline-item {% if current_status == 'analisando_orcamentos' %}active{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
-                <div class="timeline-dot">
+            <!-- Recebendo Propostas -->
+            <div class="timeline-step {% if current_status == 'analisando_orcamentos' %}current{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+                <div class="step-icon">
                     <i class="fas fa-search"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Recebendo Propostas</span>
+                <div class="step-content">
+                    <div class="step-title">Recebendo Propostas</div>
                     {% if necessidade.data_primeiro_orcamento %}
-                        <small class="timeline-date">{{ necessidade.data_primeiro_orcamento|date:"d/m H:i" }}</small>
+                        <div class="step-date">{{ necessidade.data_primeiro_orcamento|date:"d/m" }}</div>
                     {% endif %}
                 </div>
             </div>
             
-            <div class="timeline-connector {% if current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <!-- Linha de conexão -->
+            <div class="timeline-line {% if current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
             <!-- Aguardando Confirmação -->
-            <div class="timeline-item {% if current_status == 'aguardando_confirmacao' %}active{% elif current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
-                <div class="timeline-dot">
+            <div class="timeline-step {% if current_status == 'aguardando_confirmacao' %}current{% elif current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+                <div class="step-icon">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Aguardando Confirmação</span>
+                <div class="step-content">
+                    <div class="step-title">Aguardando Confirmação</div>
                     {% if necessidade.aguardando_confirmacao_desde %}
-                        <small class="timeline-date">{{ necessidade.aguardando_confirmacao_desde|date:"d/m H:i" }}</small>
+                        <div class="step-date">{{ necessidade.aguardando_confirmacao_desde|date:"d/m" }}</div>
                     {% endif %}
                 </div>
             </div>
             
-            <div class="timeline-connector {% if current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <!-- Linha de conexão -->
+            <div class="timeline-line {% if current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
-            <!-- Em Andamento (Status legado) -->
+            <!-- Em Atendimento -->
             {% if current_status == 'em_andamento' %}
-            <div class="timeline-item active">
-                <div class="timeline-dot">
+            <div class="timeline-step current">
+                <div class="step-icon">
                     <i class="fas fa-cogs"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Em Andamento</span>
-                    <small class="text-muted">(Status legado)</small>
+                <div class="step-content">
+                    <div class="step-title">Em Andamento</div>
+                    <div class="step-date">Legado</div>
                 </div>
             </div>
             {% else %}
-            <!-- Em Atendimento -->
-            <div class="timeline-item {% if current_status == 'em_atendimento' %}active{% elif current_status == 'finalizado' %}completed{% endif %}">
-                <div class="timeline-dot">
+            <div class="timeline-step {% if current_status == 'em_atendimento' %}current{% elif current_status == 'finalizado' %}completed{% endif %}">
+                <div class="step-icon">
                     <i class="fas fa-tools"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Em Atendimento</span>
-                    {% comment "Adicionar timestamp quando implementado" %}
+                <div class="step-content">
+                    <div class="step-title">Em Atendimento</div>
                     {% if necessidade.data_inicio_atendimento %}
-                        <small class="timeline-date">{{ necessidade.data_inicio_atendimento|date:"d/m H:i" }}</small>
+                        <div class="step-date">{{ necessidade.data_inicio_atendimento|date:"d/m" }}</div>
                     {% endif %}
-                    {% endcomment %}
                 </div>
             </div>
             {% endif %}
             
-            <div class="timeline-connector {% if current_status == 'finalizado' %}completed{% endif %}"></div>
+            <!-- Linha de conexão -->
+            <div class="timeline-line {% if current_status == 'finalizado' %}completed{% endif %}"></div>
             
             <!-- Finalizado -->
-            <div class="timeline-item {% if current_status == 'finalizado' %}active completed{% endif %}">
-                <div class="timeline-dot">
+            <div class="timeline-step {% if current_status == 'finalizado' %}current completed{% endif %}">
+                <div class="step-icon">
                     <i class="fas fa-check"></i>
                 </div>
-                <div class="timeline-content">
-                    <span class="timeline-label">Finalizado</span>
+                <div class="step-content">
+                    <div class="step-title">Finalizado</div>
                     {% if necessidade.data_finalizacao %}
-                        <small class="timeline-date">{{ necessidade.data_finalizacao|date:"d/m H:i" }}</small>
+                        <div class="step-date">{{ necessidade.data_finalizacao|date:"d/m" }}</div>
                     {% endif %}
                 </div>
             </div>
-        {% endif %}
-        
-        {% endwith %}
-    </div>
-    
-    <!-- Status Legend -->
-    {% if necessidade.status != 'cancelado' and necessidade.status != 'expirado' and necessidade.status != 'em_disputa' %}
-    <div class="timeline-legend mt-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="legend-item">
-                <span class="legend-dot completed"></span>
-                <small>Concluído</small>
-            </div>
-            <div class="legend-item">
-                <span class="legend-dot active"></span>
-                <small>Atual</small>
-            </div>
-            <div class="legend-item">
-                <span class="legend-dot"></span>
-                <small>Pendente</small>
-            </div>
         </div>
-    </div>
     {% endif %}
+    
+    {% endwith %}
 </div>
 
 <style>
@@ -143,36 +124,39 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
     margin: 1rem 0;
 }
 
-.timeline-container {
+/* Timeline Horizontal Layout */
+.timeline-horizontal {
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: relative;
-    flex-wrap: wrap;
-    gap: 1rem;
+    width: 100%;
+    padding: 1rem 0;
 }
 
-.timeline-item {
+.timeline-step {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    flex: 1;
-    min-width: 100px;
+    flex: 0 0 auto;
+    min-width: 120px;
+    position: relative;
+    z-index: 2;
     opacity: 0.6;
     transition: all 0.3s ease;
 }
 
-.timeline-item.active {
+.timeline-step.current {
     opacity: 1;
     transform: scale(1.05);
 }
 
-.timeline-item.completed {
+.timeline-step.completed {
     opacity: 1;
 }
 
-.timeline-dot {
+.step-icon {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -183,60 +167,67 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
     margin-bottom: 8px;
     transition: all 0.3s ease;
     border: 3px solid #dee2e6;
+    position: relative;
+    z-index: 3;
+    color: #6c757d;
 }
 
-.timeline-item.active .timeline-dot {
-    background: var(--bs-primary);
+.timeline-step.current .step-icon {
+    background: #007bff;
     color: white;
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
-    animation: pulse-dot 2s infinite;
+    border-color: #007bff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+    animation: pulse-step 2s infinite;
 }
 
-.timeline-item.completed .timeline-dot {
-    background: var(--bs-success);
+.timeline-step.completed .step-icon {
+    background: #28a745;
     color: white;
-    border-color: var(--bs-success);
+    border-color: #28a745;
 }
 
-@keyframes pulse-dot {
-    0% { box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2); }
-    50% { box-shadow: 0 0 0 8px rgba(13, 110, 253, 0.1); }
-    100% { box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2); }
+@keyframes pulse-step {
+    0% { box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(0, 123, 255, 0.1); }
+    100% { box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2); }
 }
 
-.timeline-content {
+.step-content {
     text-align: center;
 }
 
-.timeline-label {
+.step-title {
     font-weight: 600;
     font-size: 0.85rem;
     color: #495057;
     display: block;
     margin-bottom: 2px;
+    line-height: 1.2;
 }
 
-.timeline-item.active .timeline-label {
-    color: var(--bs-primary);
+.timeline-step.current .step-title {
+    color: #007bff;
 }
 
-.timeline-date {
+.step-date {
     font-size: 0.7rem;
     color: #6c757d;
+    line-height: 1.2;
 }
 
-.timeline-connector {
-    position: absolute;
-    top: 24px;
+.timeline-line {
+    flex: 1;
     height: 3px;
     background: #dee2e6;
+    margin: 0 10px;
     z-index: 1;
     transition: background-color 0.3s ease;
+    position: relative;
+    top: -20px;
 }
 
-.timeline-connector.completed {
-    background: var(--bs-success);
+.timeline-line.completed {
+    background: #28a745;
 }
 
 /* Special Status Banner */
@@ -264,13 +255,13 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
 /* Status específicos */
 .special-status-banner:has(i.fa-times-circle) {
     background: rgba(220, 53, 69, 0.1);
-    color: var(--bs-danger);
+    color: #dc3545;
     border: 2px solid rgba(220, 53, 69, 0.3);
 }
 
 .special-status-banner:has(i.fa-calendar-times) {
     background: rgba(255, 193, 7, 0.1);
-    color: var(--bs-warning);
+    color: #ffc107;
     border: 2px solid rgba(255, 193, 7, 0.3);
 }
 
@@ -280,63 +271,122 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
     border: 2px solid rgba(253, 126, 20, 0.3);
 }
 
-/* Timeline Legend */
-.timeline-legend {
-    border-top: 1px solid #dee2e6;
-    padding-top: 1rem;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #e9ecef;
-    border: 2px solid #dee2e6;
-}
-
-.legend-dot.active {
-    background: var(--bs-primary);
-    border-color: var(--bs-primary);
-}
-
-.legend-dot.completed {
-    background: var(--bs-success);
-    border-color: var(--bs-success);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
-    .timeline-container {
-        flex-direction: column;
-        gap: 1.5rem;
+    .status-timeline-component {
+        padding: 1rem;
+        margin: 0.5rem 0;
     }
     
-    .timeline-item {
+    .timeline-horizontal {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        padding: 0.5rem 0;
+    }
+    
+    .timeline-step {
         flex-direction: row;
         text-align: left;
         width: 100%;
         justify-content: flex-start;
         gap: 1rem;
+        min-width: auto;
+        flex: none;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .timeline-dot {
+    .step-icon {
         margin-bottom: 0;
         flex-shrink: 0;
+        width: 40px;
+        height: 40px;
     }
     
-    .timeline-connector {
+    .step-content {
+        text-align: left;
+        flex: 1;
+    }
+    
+    .step-title {
+        font-size: 0.9rem;
+    }
+    
+    .step-date {
+        font-size: 0.75rem;
+    }
+    
+    .timeline-line {
         display: none;
     }
+}
+
+/* Medium-small screens adjustments (643x313 and similar) */
+@media (max-width: 650px) and (max-height: 320px) {
+    .status-timeline-component {
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+    }
     
-    .timeline-legend {
-        flex-direction: column;
-        gap: 8px;
+    .timeline-horizontal {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .timeline-step {
+        min-width: 80px;
+        flex: 0 0 auto;
+    }
+    
+    .step-title {
+        font-size: 0.7rem;
+        line-height: 1.1;
+    }
+    
+    .step-date {
+        font-size: 0.6rem;
+    }
+    
+    .step-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 4px;
+    }
+    
+    .timeline-line {
+        margin: 0 5px;
+        top: -16px;
+    }
+}
+
+/* Small screens adjustments */
+@media (max-width: 576px) {
+    .status-timeline-component {
+        padding: 0.75rem;
+        margin: 0.25rem 0;
+    }
+    
+    .timeline-step {
+        min-width: auto;
+        padding: 0.5rem;
+        gap: 0.75rem;
+    }
+    
+    .step-title {
+        font-size: 0.8rem;
+    }
+    
+    .step-date {
+        font-size: 0.7rem;
+    }
+    
+    .step-icon {
+        width: 36px;
+        height: 36px;
     }
 }
 </style>

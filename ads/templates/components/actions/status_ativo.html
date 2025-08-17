@@ -1,0 +1,138 @@
+{# Componente de ações para status ATIVO #}
+<div class="status-actions-container" data-status="ativo">
+  <div class="row g-3">
+    
+    {# Card principal de ações do proprietário #}
+    {% if user.is_authenticated and user == necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-success shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-tools me-2"></i>
+            Gerenciar Anúncio
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex gap-2">
+              <a href="{% url 'ads:necessidade_update' necessidade.pk %}" 
+                 class="btn btn-warning flex-fill"
+                 data-action="edit">
+                <i class="fas fa-edit me-1"></i>
+                Editar Anúncio
+              </a>
+              <a href="{% url 'ads:necessidade_delete' necessidade.pk %}" 
+                 class="btn btn-outline-danger flex-fill"
+                 data-action="cancel">
+                <i class="fas fa-trash me-1"></i>
+                Cancelar
+              </a>
+            </div>
+            <small class="text-muted">
+              <i class="fas fa-info-circle me-1"></i>
+              Você pode editar todas as informações enquanto não houver orçamentos.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para fornecedores #}
+    {% if user.is_authenticated and user != necessidade.cliente %}
+    <div class="col-12">
+      <div class="card border-primary shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-briefcase me-2"></i>
+            Área do Fornecedor
+          </h6>
+        </div>
+        <div class="card-body">
+          {% if user.is_supplier %}
+            <div class="mb-3">
+              <div class="alert alert-info small mb-2">
+                <i class="fas fa-lightbulb me-1"></i>
+                Envie um orçamento para participar desta oportunidade de negócio.
+              </div>
+              <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" 
+                 class="btn btn-primary w-100"
+                 data-action="submit-budget">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
+                Enviar Orçamento
+              </a>
+            </div>
+            <small class="text-muted">
+              Após enviar um orçamento, você poderá conversar com o cliente.
+            </small>
+          {% else %}
+            <div class="text-center py-3">
+              <i class="fas fa-user-plus fa-2x text-muted mb-2"></i>
+              <p class="text-muted mb-2">Torne-se um fornecedor para enviar orçamentos</p>
+              <a href="{% url 'users:minha_conta_update' user.pk %}" 
+                 class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-1"></i>
+                Atualizar Perfil
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para visitantes não logados #}
+    {% if not user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-info shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            Faça Login para Participar
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-muted mb-3">
+            Entre na sua conta para enviar orçamentos ou gerenciar seus anúncios.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{% url 'users:login' %}?next={{ request.path }}" 
+               class="btn btn-info flex-fill">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              Entrar
+            </a>
+            <a href="{% url 'users:register' %}" 
+               class="btn btn-outline-info flex-fill">
+              <i class="fas fa-user-plus me-1"></i>
+              Cadastrar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card de informações do status #}
+    <div class="col-12">
+      <div class="card bg-light border-0">
+        <div class="card-body py-2">
+          <div class="d-flex align-items-center">
+            <div class="status-indicator bg-success me-2"></div>
+            <small class="text-muted">
+              <strong>Status:</strong> Anúncio ativo e disponível para receber orçamentos
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+</style>

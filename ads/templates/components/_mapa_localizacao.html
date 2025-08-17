@@ -1,0 +1,124 @@
+{% comment %}
+Mapa de Localização - Componente Responsivo
+Usage: {% include 'components/_mapa_localizacao.html' with necessidade=necessidade %}
+Requer: Leaflet CSS/JS globais no base.html
+{% endcomment %}
+
+<div class="mapa-localizacao-component">
+    <div class="card shadow-sm h-100">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Localização Aproximada</h6>
+        </div>
+        <div class="card-body p-0">
+            {% if necessidade.tem_coordenadas_mapa %}
+                <div id="map-localizacao" 
+                     class="map-container"
+                     data-lat="{{ necessidade.get_latitude_mapa }}"
+                     data-lon="{{ necessidade.get_longitude_mapa }}"
+                     data-cidade="{{ necessidade.get_cidade_mapa }}"
+                     data-estado="{{ necessidade.get_estado_mapa }}"
+                     data-bairro="{{ necessidade.get_bairro_mapa }}">
+                </div>
+                <div class="p-3 small text-muted">
+                    {% if necessidade.get_cidade_mapa %}<div><strong>Cidade:</strong> {{ necessidade.get_cidade_mapa }}</div>{% endif %}
+                    {% if necessidade.get_estado_mapa %}<div><strong>Estado:</strong> {{ necessidade.get_estado_mapa }}</div>{% endif %}
+                    {% if necessidade.get_bairro_mapa %}<div><strong>Bairro:</strong> {{ necessidade.get_bairro_mapa }}</div>{% endif %}
+                    {% if necessidade.usar_endereco_usuario %}
+                        <div class="text-info small mt-2"><i class="fas fa-info-circle me-1"></i>Localização baseada no endereço do anunciante</div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted">
+                    <i class="fas fa-map-marker-alt fa-2x mb-2 text-secondary"></i>
+                    <div><strong>Localização não disponível</strong></div>
+                    <small>As coordenadas de localização não foram informadas.</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    function initMap() {
+        const el = document.getElementById('map-localizacao');
+        if (!el) return;
+        const lat = parseFloat(el.dataset.lat);
+        const lon = parseFloat(el.dataset.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            el.innerHTML = '<div class="alert alert-light text-center m-3">Localização não disponível.</div>';
+            return;
+        }
+
+        if (typeof L === 'undefined') {
+            el.innerHTML = '<div class="alert alert-danger text-center m-3">Mapa indisponível no momento.</div>';
+            return;
+        }
+
+        const map = L.map('map-localizacao', { zoomControl: true }).setView([lat, lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Criar marcador com popup personalizado
+        const marker = L.marker([lat, lon]).addTo(map);
+        
+        // Obter informações do elemento para o popup
+        const cidade = el.dataset.cidade || '';
+        const estado = el.dataset.estado || '';
+        const bairro = el.dataset.bairro || '';
+        
+        let popupContent = '<div class="text-center"><strong>📍 Localização do Serviço</strong><br>';
+        if (cidade && estado) {
+            popupContent += `${cidade}, ${estado}`;
+            if (bairro) popupContent += `<br>Bairro: ${bairro}`;
+        } else {
+            popupContent += 'Localização aproximada';
+        }
+        popupContent += '</div>';
+        
+        marker.bindPopup(popupContent);
+
+        // Corrige render pós-toggle/aba/carrossel
+        setTimeout(() => { map.invalidateSize(); }, 200);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
+})();
+</script>
+
+<style>
+.mapa-localizacao-component .card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.mapa-localizacao-component .card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.mapa-localizacao-component .map-container {
+    width: 100%;
+    height: 350px;
+}
+
+@media (max-width: 992px) {
+    .mapa-localizacao-component .map-container { height: 280px; }
+}
+
+@media (max-width: 768px) {
+    .mapa-localizacao-component .map-container { height: 220px; }
+    .mapa-localizacao-component .card-header { padding: 0.5rem 0.75rem; }
+}
+
+@media (max-width: 576px) {
+    .mapa-localizacao-component .map-container { height: 200px; }
+}
+</style>

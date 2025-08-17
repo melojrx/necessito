@@ -32,6 +32,9 @@ class NotificationType(models.TextChoices):
     TIMEOUT_WARNING = 'TIMEOUT_WARNING', 'Aviso de Timeout'
     CONFIRMATION_TIMEOUT = 'CONFIRMATION_TIMEOUT', 'Timeout de Confirmação'
     
+    # Chat and messaging
+    NEW_CHAT_MESSAGE = 'NEW_CHAT_MESSAGE', 'Nova Mensagem no Chat'
+    
     # System notifications
     SYSTEM_MESSAGE = 'SYSTEM_MESSAGE', 'Mensagem do Sistema'
     WELCOME = 'WELCOME', 'Bem-vindo'
@@ -175,6 +178,7 @@ class UserNotificationPreferences(models.Model):
     new_budget_notifications = models.BooleanField('Novos orçamentos', default=True)
     budget_status_notifications = models.BooleanField('Status de orçamentos', default=True)
     service_notifications = models.BooleanField('Notificações de serviço', default=True)
+    chat_notifications = models.BooleanField('Mensagens de chat', default=True)
     timeout_warnings = models.BooleanField('Avisos de timeout', default=True)
     system_notifications = models.BooleanField('Notificações do sistema', default=True)
     marketing_notifications = models.BooleanField('Notificações de marketing', default=False)
@@ -217,6 +221,7 @@ class UserNotificationPreferences(models.Model):
             NotificationType.ORCAMENTO_CONFIRMADO: self.budget_status_notifications,
             NotificationType.SERVICE_STARTED: self.service_notifications,
             NotificationType.SERVICE_COMPLETED: self.service_notifications,
+            NotificationType.NEW_CHAT_MESSAGE: self.chat_notifications,
             NotificationType.TIMEOUT_WARNING: self.timeout_warnings,
             NotificationType.SYSTEM_MESSAGE: self.system_notifications,
         }

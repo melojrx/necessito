@@ -36,8 +36,7 @@ def notificar_nova_mensagem_chat(sender, instance, created, **kwargs):
                 f"<small>Anúncio: {chat_room.necessidade.titulo}</small>"
             ),
             notification_type=NotificationType.NEW_CHAT_MESSAGE,
-            necessidade=chat_room.necessidade,
-            chat_room=chat_room
+            necessidade=chat_room.necessidade
         )
         
         # Opcional: Enviar email se usuário estiver offline por muito tempo

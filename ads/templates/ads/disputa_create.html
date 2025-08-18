@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Abrir Disputa - {{ necessidade.titulo }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dispute-form {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 1rem 0;
+  }
+  
+  @media (min-width: 768px) {
+    .dispute-form {
+      padding: 2rem 0;
+    }
+  }
+  
+  .dispute-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .dispute-header {
+    background: linear-gradient(135deg, #ff6b6b, #feca57);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .form-floating {
+    margin-bottom: 1.5rem;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .alert-warning {
+    border-left: 4px solid #feca57;
+    background: #fff9e6;
+    border-radius: 8px;
+  }
+  
+  .service-info {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .file-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  @media (min-width: 768px) {
+    .file-upload-area {
+      padding: 2rem;
+    }
+  }
+  
+  .file-upload-area.dragover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: scale(1.02);
+  }
+  
+  .file-preview {
+    background: #e8f5e8;
+    border: 1px solid #28a745;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  
+  .file-error {
+    background: #f8d7da;
+    border: 1px solid #dc3545;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: #721c24;
+    display: none;
+  }
+  
+  .file-upload-area:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+  }
+  
+  .character-counter {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: right;
+    transition: color 0.3s ease;
+  }
+  
+  .character-counter.warning {
+    color: #f39c12;
+    font-weight: 600;
+  }
+  
+  .character-counter.danger {
+    color: #dc3545;
+    font-weight: 600;
+  }
+  
+  .form-floating textarea.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  }
+  
+  .form-floating textarea.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dispute-form">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="dispute-card">
+          <!-- Header -->
+          <div class="dispute-header">
+            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+            <h2>Abrir Disputa</h2>
+            <p class="mb-0">Relate o problema para que possamos ajudar a resolver</p>
+          </div>
+          
+          <div class="p-4">
+            <!-- Informações do Serviço -->
+            <div class="service-info">
+              <h5><i class="fas fa-info-circle me-2"></i>Sobre este serviço</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Necessidade:</strong> {{ necessidade.titulo }}</p>
+                  <p><strong>Cliente:</strong> {{ necessidade.cliente.get_full_name }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Fornecedor:</strong> {{ orcamento.fornecedor.get_full_name }}</p>
+                  <p><strong>Valor:</strong> R$ {{ orcamento.get_total_geral|floatformat:2 }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Aviso Importante -->
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Importante:</strong> Ao abrir uma disputa, o serviço será pausado e nossa equipe analisará o caso. 
+              Forneça o máximo de detalhes possível para agilizar a resolução.
+            </div>
+            
+            <!-- Formulário -->
+            <form method="post" enctype="multipart/form-data" id="disputeForm">
+              {% csrf_token %}
+              
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                  {% for error in form.non_field_errors %}
+                    <p class="mb-0">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              
+              <!-- Motivo da Disputa -->
+              <div class="form-floating">
+                {{ form.motivo }}
+                <label for="{{ form.motivo.id_for_label }}">{{ form.motivo.label }}</label>
+                {% if form.motivo.errors %}
+                  <div class="text-danger mt-1">
+                    {% for error in form.motivo.errors %}
+                      <small>{{ error }}</small>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="character-counter">
+                  <span id="charCount">0</span>/2000 caracteres
+                </div>
+                <small class="form-text text-muted mt-2">
+                  {{ form.motivo.help_text }}
+                </small>
+              </div>
+              
+              <!-- Arquivo de Evidência -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">{{ form.arquivo_evidencia.label }}</label>
+                <div class="file-upload-area" id="fileUploadArea">
+                  <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                  <h6>Clique ou arraste arquivo aqui</h6>
+                  <p class="text-muted mb-0">PDF, Word, JPEG, PNG ou TXT (máx. 10MB)</p>
+                  {{ form.arquivo_evidencia }}
+                </div>
+                <div id="filePreview" class="file-preview">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                      <i class="fas fa-file-alt me-2 text-success"></i>
+                      <div>
+                        <div id="fileName" class="fw-bold"></div>
+                        <small id="fileSize" class="text-muted"></small>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div id="fileError" class="file-error">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  <span id="fileErrorMessage"></span>
+                </div>
+                {% if form.arquivo_evidencia.errors %}
+                  <div class="text-danger mt-2">
+                    {% for error in form.arquivo_evidencia.errors %}
+                      <small>{{ error }}</small>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <small class="form-text text-muted mt-2">
+                  {{ form.arquivo_evidencia.help_text }}
+                </small>
+              </div>
+              
+              <!-- Botões -->
+              <div class="d-flex gap-3 justify-content-end">
+                <a href="{% url 'ads:necessidade_detail' necessidade.pk %}" class="btn btn-secondary">
+                  <i class="fas fa-times me-2"></i>Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane me-2"></i>Abrir Disputa
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Contador de caracteres com validação avançada
+  const motivo = document.getElementById('id_motivo');
+  const charCount = document.getElementById('charCount');
+  
+  function updateCharCount() {
+    const count = motivo.value.length;
+    charCount.textContent = count;
+    
+    // Remover classes anteriores
+    charCount.classList.remove('warning', 'danger');
+    motivo.classList.remove('is-invalid', 'is-valid');
+    
+    if (count < 50) {
+      charCount.classList.add('danger');
+      motivo.classList.add('is-invalid');
+    } else if (count > 1800) {
+      charCount.classList.add('warning');
+    } else if (count >= 50) {
+      motivo.classList.add('is-valid');
+    }
+  }
+  
+  motivo.addEventListener('input', updateCharCount);
+  updateCharCount(); // Inicial
+  
+  // Sistema avançado de upload de arquivos
+  const fileInput = document.getElementById('id_arquivo_evidencia');
+  const fileUploadArea = document.getElementById('fileUploadArea');
+  const filePreview = document.getElementById('filePreview');
+  const fileError = document.getElementById('fileError');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const removeFileBtn = document.getElementById('removeFile');
+  
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'text/plain'
+  ];
+  
+  function showError(message) {
+    document.getElementById('fileErrorMessage').textContent = message;
+    fileError.style.display = 'block';
+    filePreview.style.display = 'none';
+  }
+  
+  function hideError() {
+    fileError.style.display = 'none';
+  }
+  
+  function showPreview(file) {
+    fileName.textContent = file.name;
+    fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    filePreview.style.display = 'block';
+    hideError();
+  }
+  
+  function validateFile(file) {
+    if (file.size > maxSize) {
+      showError('Arquivo muito grande. Tamanho máximo: 10MB');
+      return false;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      showError('Tipo de arquivo não permitido. Use PDF, Word, JPEG, PNG ou TXT');
+      return false;
+    }
+    
+    return true;
+  }
+  
+  function handleFile(file) {
+    if (validateFile(file)) {
+      showPreview(file);
+      return true;
+    }
+    return false;
+  }
+  
+  // Click para selecionar arquivo
+  fileUploadArea.addEventListener('click', function(e) {
+    if (e.target !== removeFileBtn && !removeFileBtn.contains(e.target)) {
+      fileInput.click();
+    }
+  });
+  
+  // Mudança no input file
+  fileInput.addEventListener('change', function() {
+    if (this.files.length > 0) {
+      handleFile(this.files[0]);
+    } else {
+      filePreview.style.display = 'none';
+      hideError();
+    }
+  });
+  
+  // Drag and Drop
+  fileUploadArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  });
+  
+  fileUploadArea.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+  });
+  
+  fileUploadArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (handleFile(file)) {
+        // Simular seleção no input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+      }
+    }
+  });
+  
+  // Remover arquivo
+  removeFileBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+    hideError();
+  });
+  
+  // Validação robusta antes do submit
+  document.getElementById('disputeForm').addEventListener('submit', function(e) {
+    const motivo = document.getElementById('id_motivo').value.trim();
+    let hasError = false;
+    let errorMessages = [];
+    
+    // Validar motivo
+    if (motivo.length < 50) {
+      errorMessages.push('• Descreva o problema com mais detalhes (mínimo 50 caracteres)');
+      hasError = true;
+    }
+    
+    if (motivo.length > 2000) {
+      errorMessages.push('• Descrição muito longa (máximo 2000 caracteres)');
+      hasError = true;
+    }
+    
+    // Validar arquivo se selecionado
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      if (!validateFile(file)) {
+        errorMessages.push('• Arquivo selecionado é inválido');
+        hasError = true;
+      }
+    }
+    
+    if (hasError) {
+      e.preventDefault();
+      const errorMessage = 'Por favor, corrija os seguintes problemas:\n\n' + errorMessages.join('\n');
+      alert(errorMessage);
+      return false;
+    }
+    
+    // Confirmação final com mais informações
+    const confirmMessage = `Tem certeza que deseja abrir esta disputa?\n\n` +
+                          `⚠️ IMPORTANTE:\n` +
+                          `• O serviço será pausado imediatamente\n` +
+                          `• Nossa equipe analisará o caso\n` +
+                          `• Ambas as partes serão notificadas\n\n` +
+                          `Esta ação não pode ser desfeita.`;
+    
+    if (!confirm(confirmMessage)) {
+      e.preventDefault();
+      return false;
+    }
+    
+    // Desabilitar botão para evitar duplo clique
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+  });
+});
+</script>
+{% endblock %}

@@ -72,6 +72,11 @@ def chat_detail(request, chat_id):
         messages.error(request, "Você não tem permissão para acessar este chat.")
         return redirect('chat:lista_chats')
     
+    # Verificar se o chat ainda está disponível para novas mensagens
+    chat_disponivel = chat_room.necessidade.status in ['em_atendimento', 'em_disputa']
+    if not chat_disponivel:
+        messages.warning(request, "Este chat está bloqueado. Novas mensagens só são permitidas quando o anúncio está 'Em Atendimento' ou 'Em Disputa'.")
+    
     # Marcar mensagens como lidas
     ChatMessage.objects.filter(
         chat_room=chat_room,
@@ -128,6 +133,11 @@ def chat_websocket(request, chat_id):
     page_number = request.GET.get('page')
     mensagens_paginadas = paginator.get_page(page_number)
     
+    # Verificar se o chat ainda está disponível para novas mensagens
+    chat_disponivel = chat_room.necessidade.status in ['em_atendimento', 'em_disputa']
+    if not chat_disponivel:
+        messages.warning(request, "Este chat está bloqueado. Novas mensagens só são permitidas quando o anúncio está 'Em Atendimento' ou 'Em Disputa'.")
+    
     # Determinar papel do usuário
     is_cliente = request.user == chat_room.cliente
     
@@ -137,6 +147,7 @@ def chat_websocket(request, chat_id):
         'is_cliente': is_cliente,
         'outro_usuario': chat_room.fornecedor if is_cliente else chat_room.cliente,
         'use_websocket': True,  # Flag para ativar WebSocket
+        'chat_disponivel': chat_disponivel,
     }
     
     return render(request, 'chat/chat_detail.html', context)
@@ -153,6 +164,12 @@ def enviar_mensagem(request, chat_id):
     # Verificar permissões
     if request.user not in [chat_room.cliente, chat_room.fornecedor]:
         return JsonResponse({'error': 'Permissão negada'}, status=403)
+    
+    # Verificar se a necessidade ainda está em atendimento ou disputa
+    if chat_room.necessidade.status not in ['em_atendimento', 'em_disputa']:
+        return JsonResponse({
+            'error': 'Chat não disponível. O anúncio precisa estar "Em Atendimento" ou "Em Disputa".'
+        }, status=403)
     
     try:
         logger.info(f"=== DEBUG ENVIAR MENSAGEM ===")
@@ -242,16 +259,20 @@ def enviar_mensagem(request, chat_id):
 def iniciar_chat(request, necessidade_id):
     """Inicia um chat entre fornecedor e cliente"""
     
-    # Permitir chat em múltiplos status, não apenas 'ativo'
+    # Chat permitido apenas em status 'em_atendimento' ou 'em_disputa' conforme regras de negócio
     try:
         necessidade = get_object_or_404(
             Necessidade, 
-            id=necessidade_id, 
-            status__in=['ativo', 'em_andamento', 'em_atendimento']
+            id=necessidade_id
         )
+        
+        if necessidade.status not in ['em_atendimento', 'em_disputa']:
+            messages.error(request, f"Chat não disponível. O anúncio precisa estar 'Em Atendimento' ou 'Em Disputa' para habilitar o chat.")
+            return redirect('ads:necessidade_detail', pk=necessidade_id)
+            
     except:
-        messages.error(request, f"Necessidade ID {necessidade_id} não encontrada ou não disponível para chat.")
-        return redirect('necessidade_list')
+        messages.error(request, f"Anúncio não encontrado.")
+        return redirect('ads:necessidade_detail', pk=necessidade_id)
     
     # Verificar se não é o próprio cliente
     if request.user == necessidade.cliente:

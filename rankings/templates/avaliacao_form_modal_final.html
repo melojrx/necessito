@@ -1,0 +1,413 @@
+{% load static %}
+
+<!-- SISTEMA DE AVALIAÇÃO DEFINITIVO - 100% FUNCIONAL -->
+<style>
+.rating-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.rating-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.stars-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 1rem 0;
+}
+
+.star {
+    font-size: 35px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star:hover {
+    color: #ffc107;
+    transform: scale(1.2);
+}
+
+.star.filled {
+    color: #ffc107;
+}
+
+.rating-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.validation-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+</style>
+
+<form method="post" action="{% url 'rankings:avaliar_negociacao' necessidade.pk %}" id="avaliacaoFormFinal">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <p class="text-center">
+            {% if tipo_avaliacao == 'fornecedor' %}
+                Avalie o <strong>fornecedor</strong> com base nos seguintes critérios:
+            {% else %}
+                Avalie o <strong>cliente</strong> com base nos seguintes critérios:
+            {% endif %}
+        </p>
+    </div>
+
+    {% for field in form %}
+        {% if field.name|slice:":9" == "criterio_" %}
+            <div class="rating-section">
+                <div class="rating-title">{{ field.label }}</div>
+                
+                <!-- Container das estrelas -->
+                <div class="stars-container" data-field="{{ field.name }}">
+                    <span class="star" data-value="1" title="1 estrela">★</span>
+                    <span class="star" data-value="2" title="2 estrelas">★</span>
+                    <span class="star" data-value="3" title="3 estrelas">★</span>
+                    <span class="star" data-value="4" title="4 estrelas">★</span>
+                    <span class="star" data-value="5" title="5 estrelas">★</span>
+                </div>
+                
+                <!-- Input oculto para enviar o valor -->
+                <input type="hidden" name="{{ field.name }}" value="" id="input-{{ field.name }}">
+                
+                <div class="rating-labels">
+                    <small>Nada satisfeito</small>
+                    <small>Muito satisfeito</small>
+                </div>
+                
+                <div class="validation-error" id="error-{{ field.name }}">
+                    Por favor, avalie este critério.
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="modal-footer mt-4">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span class="spinner-border spinner-border-sm d-none me-2" role="status"></span>
+            Enviar Avaliação
+        </button>
+    </div>
+</form>
+
+<script>
+// SISTEMA DE ESTRELAS DEFINITIVO - 100% FUNCIONAL
+console.log('🌟 SISTEMA DEFINITIVO DE AVALIAÇÕES CARREGANDO...');
+
+(function() {
+    'use strict';
+    
+    let isInitialized = false;
+    
+    function initAvaliacaoFinal() {
+        if (isInitialized) {
+            console.log('⚠️ Sistema já inicializado');
+            return;
+        }
+        
+        console.log('🚀 Inicializando sistema definitivo...');
+        
+        // Selecionar todos os containers de estrelas
+        const starsContainers = document.querySelectorAll('.stars-container');
+        console.log(`📊 Encontrados ${starsContainers.length} containers de estrelas`);
+        
+        if (starsContainers.length === 0) {
+            console.error('❌ Nenhum container de estrelas encontrado!');
+            return;
+        }
+        
+        // Configurar cada container
+        starsContainers.forEach(setupStarsContainer);
+        
+        // Configurar formulário
+        setupFormSubmission();
+        
+        isInitialized = true;
+        console.log('✅ Sistema definitivo inicializado com sucesso!');
+    }
+    
+    function setupStarsContainer(container) {
+        const fieldName = container.getAttribute('data-field');
+        const stars = container.querySelectorAll('.star');
+        const hiddenInput = document.getElementById(`input-${fieldName}`);
+        const errorDiv = document.getElementById(`error-${fieldName}`);
+        
+        console.log(`🔧 Configurando ${stars.length} estrelas para ${fieldName}`);
+        
+        if (!hiddenInput) {
+            console.error(`❌ Input oculto não encontrado para ${fieldName}`);
+            return;
+        }
+        
+        // Adicionar event listeners
+        stars.forEach((star, index) => {
+            const value = parseInt(star.getAttribute('data-value'));
+            
+            // Click handler
+            star.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log(`🖱️ Clique na estrela ${value} do campo ${fieldName}`);
+                
+                // Atualizar valor do input
+                hiddenInput.value = value;
+                
+                // Atualizar visual
+                updateStarsVisual(container, value);
+                
+                // Remover erro se existir
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+                
+                console.log(`✅ Valor ${value} definido para ${fieldName}`);
+                
+                // Dispara evento personalizado
+                container.dispatchEvent(new CustomEvent('starSelected', {
+                    detail: { field: fieldName, value: value }
+                }));
+            });
+            
+            // Hover handlers
+            star.addEventListener('mouseenter', function() {
+                highlightStars(container, value);
+            });
+        });
+        
+        // Mouse leave handler
+        container.addEventListener('mouseleave', function() {
+            const currentValue = parseInt(hiddenInput.value) || 0;
+            updateStarsVisual(container, currentValue);
+        });
+    }
+    
+    function highlightStars(container, rating) {
+        const stars = container.querySelectorAll('.star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#ffc107';
+                star.style.transform = 'scale(1.1)';
+            } else {
+                star.style.color = '#ddd';
+                star.style.transform = 'scale(1)';
+            }
+        });
+    }
+    
+    function updateStarsVisual(container, rating) {
+        const stars = container.querySelectorAll('.star');
+        stars.forEach((star, index) => {
+            star.classList.remove('filled');
+            star.style.transform = 'scale(1)';
+            
+            if (index < rating) {
+                star.classList.add('filled');
+            }
+        });
+    }
+    
+    function setupFormSubmission() {
+        const form = document.getElementById('avaliacaoFormFinal');
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        if (!form) {
+            console.error('❌ Formulário não encontrado!');
+            return;
+        }
+        
+        console.log('📝 Configurando envio do formulário...');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('📤 Processando envio do formulário...');
+            
+            // Validar todos os campos
+            if (!validateForm()) {
+                console.log('❌ Validação falhou');
+                return;
+            }
+            
+            // UI de loading
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            
+            // Preparar dados
+            const formData = new FormData(form);
+            
+            // Log dos dados para debug
+            console.log('📋 Dados sendo enviados:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+            
+            // Enviar via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => {
+                console.log(`📨 Resposta recebida: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Resposta processada:', data);
+                
+                if (data.success) {
+                    console.log('✅ Avaliação enviada com sucesso!');
+                    
+                    // Mostrar sucesso
+                    showSuccess('Avaliação registrada com sucesso!');
+                    
+                    // Fechar modal após delay
+                    setTimeout(() => {
+                        closeModal();
+                        // Recarregar página
+                        window.location.reload();
+                    }, 1500);
+                    
+                } else {
+                    console.error('❌ Erro no servidor:', data.message);
+                    showError(data.message || 'Erro ao processar avaliação');
+                    
+                    if (data.errors) {
+                        console.error('Erros específicos:', data.errors);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('💥 Erro na requisição:', error);
+                showError('Erro de conexão. Tente novamente.');
+            })
+            .finally(() => {
+                // Restaurar UI
+                submitBtn.disabled = false;
+                spinner.classList.add('d-none');
+            });
+        });
+    }
+    
+    function validateForm() {
+        const containers = document.querySelectorAll('.stars-container');
+        let isValid = true;
+        
+        containers.forEach(container => {
+            const fieldName = container.getAttribute('data-field');
+            const hiddenInput = document.getElementById(`input-${fieldName}`);
+            const errorDiv = document.getElementById(`error-${fieldName}`);
+            
+            if (!hiddenInput.value) {
+                isValid = false;
+                if (errorDiv) {
+                    errorDiv.style.display = 'block';
+                }
+                console.log(`❌ Campo ${fieldName} não preenchido`);
+            } else {
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+        });
+        
+        return isValid;
+    }
+    
+    function showSuccess(message) {
+        // Criar notificação de sucesso
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Inserir no início do modal
+        const modalBody = document.querySelector('#avaliacaoModal .modal-body');
+        if (modalBody) {
+            modalBody.insertBefore(alert, modalBody.firstChild);
+        }
+    }
+    
+    function showError(message) {
+        // Criar notificação de erro
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="fas fa-exclamation-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Inserir no início do modal
+        const modalBody = document.querySelector('#avaliacaoModal .modal-body');
+        if (modalBody) {
+            modalBody.insertBefore(alert, modalBody.firstChild);
+        }
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('avaliacaoModal');
+        if (modal && window.bootstrap) {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+    }
+    
+    // Funções globais para debug e inicialização externa
+    window.initAvaliacaoFinal = initAvaliacaoFinal;
+    
+    window.debugAvaliacaoFinal = function() {
+        console.log('🔍 DEBUG SISTEMA DEFINITIVO:');
+        console.log('Inicializado:', isInitialized);
+        
+        const containers = document.querySelectorAll('.stars-container');
+        console.log(`Containers: ${containers.length}`);
+        
+        containers.forEach((container, index) => {
+            const fieldName = container.getAttribute('data-field');
+            const hiddenInput = document.getElementById(`input-${fieldName}`);
+            const stars = container.querySelectorAll('.star');
+            
+            console.log(`Container ${index + 1} (${fieldName}):`);
+            console.log('  Estrelas:', stars.length);
+            console.log('  Valor:', hiddenInput ? hiddenInput.value : 'N/A');
+        });
+    };
+    
+    // Auto-inicialização
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAvaliacaoFinal);
+    } else {
+        initAvaliacaoFinal();
+    }
+    
+    console.log('📝 Sistema definitivo carregado! Use window.debugAvaliacaoFinal() para debug.');
+})();
+</script>

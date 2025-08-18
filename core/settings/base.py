@@ -15,8 +15,8 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-temporary-key-for-development")
 
 # reCAPTCHA
-RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
-RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")
 
 # Modo Debug
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
@@ -86,6 +86,9 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware", # Adicionado para allauth
     "api.middleware.APIVersionMiddleware",  # Middleware de versionamento da API
     "core.middleware.ProfileCompleteMiddleware",  # Reativado com melhorias
+    "core.middleware.lgpd_middleware.LGPDConsentMiddleware",  # LGPD Compliance
+    "core.middleware.lgpd_middleware.LGPDDataMinimizationMiddleware",  # LGPD Data Minimization
+    "core.middleware.lgpd_middleware.LGPDResponseHeadersMiddleware",  # LGPD Security Headers
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -224,31 +227,184 @@ REST_FRAMEWORK = {
     'URL_FIELD_NAME': 'url',
 }
 
-# SPECTACULAR
+# SPECTACULAR - Configuração da Documentação da API
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'API Indicai',
+    'TITLE': 'API Indicai - Marketplace de Necessidades',
     'DESCRIPTION': '''
-    API de integração do sistema Indicai.
+# 🏪 API Indicai - Marketplace de Necessidades
 
-    Esta API fornece acesso às principais funcionalidades do sistema, incluindo:
-    - Autenticação JWT (dj-rest-auth)
-    - Gerenciamento de usuários
-    - Categorias e subcategorias
-    - Necessidades (anúncios)
-    - Orçamentos
-    - Avaliações
+Bem-vindo à documentação oficial da API do **Indicai**, o marketplace que conecta pessoas que precisam de serviços com profissionais qualificados.
 
-    1. **Faça login** no endpoint `/api/v1/auth/login/` com email e senha
-    2. **Copie o access token** da resposta
-    3. **Clique em "Authorize"** no topo da página
-    4. **Cole o token** no campo "Value" (apenas o token, sem "Bearer")
-    5. **Clique em "Authorize"** novamente
-    6. **Use os endpoints** normalmente por 1 hora (duração do token)
+## 🚀 Como Usar Esta API
 
-    A API utiliza versionamento via URL. A versão atual é **v1**.
+### 🔐 Autenticação JWT
 
-    A API utiliza autenticação JWT. O token de acesso tem duração de 1 hora.
+Esta API utiliza autenticação **JWT (JSON Web Token)**. Para começar a usar:
+
+1. **📧 Faça login** no endpoint `/api/v1/auth/login/` com seu email e senha
+2. **📋 Copie o access_token** retornado na resposta
+3. **🔑 Clique em "Authorize"** no topo desta página  
+4. **📝 Cole o token** no campo "Value" (apenas o token, sem a palavra "Bearer")
+5. **✅ Clique em "Authorize"** novamente
+6. **🎯 Use todos os endpoints** normalmente por 1 hora (duração do token)
+
+> **💡 Dica**: O token expira em 1 hora. Use o `refresh_token` para renovar automaticamente.
+
+### 📊 Principais Funcionalidades
+
+| Módulo | Descrição | Endpoints |
+|--------|-----------|-----------|
+| **👥 Usuários** | Gestão de perfis de clientes e fornecedores | `/api/v1/users/` |
+| **🏷️ Categorias** | Organização e classificação de serviços | `/api/v1/categorias/` |
+| **📢 Necessidades** | Sistema de anúncios e solicitações | `/api/v1/necessidades/` |
+| **💰 Orçamentos** | Propostas de fornecedores para necessidades | `/api/v1/orcamentos/` |
+| **⭐ Avaliações** | Sistema de reputação e feedback | `/api/v1/avaliacoes/` |
+| **📍 Endereços** | Geolocalização e busca por CEP | `/api/v1/address/` |
+
+### 🔗 Versionamento
+
+A API utiliza **versionamento via URL**:
+- **Versão atual**: `v1`
+- **Base URL**: `/api/v1/`
+- **Compatibilidade**: Mantemos suporte para versões anteriores
+
+### 🌐 Ambientes
+
+| Ambiente | URL Base | Documentação |
+|----------|----------|--------------|
+| **🚀 Produção** | `https://necessito.online/api/` | `https://necessito.online/api/docs/` |
+| **⚡ Desenvolvimento** | `http://localhost:8000/api/` | `http://localhost:8000/api/docs/` |
+
+### 📱 Códigos de Status HTTP
+
+| Código | Significado | Descrição |
+|--------|-------------|-----------|
+| **200** | ✅ OK | Requisição bem-sucedida |
+| **201** | ✅ Created | Recurso criado com sucesso |
+| **400** | ❌ Bad Request | Dados inválidos na requisição |
+| **401** | 🔒 Unauthorized | Token de autenticação necessário |
+| **403** | 🚫 Forbidden | Permissão insuficiente |
+| **404** | 🔍 Not Found | Recurso não encontrado |
+| **500** | ⚠️ Server Error | Erro interno do servidor |
+
+### 🛠️ Suporte Técnico
+
+Para dúvidas técnicas sobre a API:
+- **📧 Email**: dev@necessito.online
+- **📚 Documentação**: Esta página
+- **🌐 Site**: https://necessito.online
+
+---
+*Documentação gerada automaticamente com Swagger/OpenAPI 3.0*
     ''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PUBLIC': True,
+    'CONTACT': {
+        'name': 'Equipe Indicai',
+        'email': 'dev@necessito.online',
+        'url': 'https://necessito.online',
+    },
+    'LICENSE': {
+        'name': 'Proprietary License',
+        'url': 'https://necessito.online/termos-de-uso/',
+    },
+    'SERVERS': [
+        {
+            'url': 'https://necessito.online/api/',
+            'description': 'Servidor de Produção'
+        },
+        {
+            'url': 'http://localhost:8000/api/',
+            'description': 'Servidor de Desenvolvimento'
+        },
+    ],
+    'TAGS': [
+        {
+            'name': '00 - SISTEMA - INFORMAÇÕES GERAIS',
+            'description': 'Endpoints de informações do sistema e versões da API'
+        },
+        {
+            'name': '01 - USUÁRIOS - GESTÃO DE PERFIS',
+            'description': 'Cadastro, autenticação e gestão de perfis de usuários (clientes e fornecedores)'
+        },
+        {
+            'name': '02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS',
+            'description': 'Categorias principais para organização de serviços e produtos'
+        },
+        {
+            'name': '03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS',
+            'description': 'Subcategorias específicas dentro de cada categoria principal'
+        },
+        {
+            'name': '04 - NECESSIDADES - ANÚNCIOS DE DEMANDA',
+            'description': 'Sistema de criação, gestão e busca de necessidades/anúncios'
+        },
+        {
+            'name': '05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES',
+            'description': 'Propostas de fornecedores para necessidades publicadas'
+        },
+        {
+            'name': '06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO',
+            'description': 'Sistema de avaliações e construção de reputação entre usuários'
+        },
+        {
+            'name': '07 - ENDEREÇOS - GEOLOCALIZAÇÃO',
+            'description': 'Busca por CEP, endereços e funcionalidades de geolocalização'
+        },
+    ],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+        'filter': True,
+        'tryItOutEnabled': True,
+        'supportedSubmitMethods': ['get', 'post', 'put', 'patch', 'delete'],
+        'defaultModelsExpandDepth': 2,
+        'defaultModelExpandDepth': 2,
+        'docExpansion': 'list',
+        'operationsSorter': 'alpha',
+        'tagsSorter': 'alpha',
+        'layout': 'BaseLayout',
+        'displayRequestDuration': True,
+        'syntaxHighlight': {
+            'activate': True,
+            'theme': 'agate'
+        },
+    },
+    'SWAGGER_UI_FAVICON_HREF': '/static/img/favicon.ico',
+    'REDOC_UI_SETTINGS': {
+        'theme': {
+            'colors': {
+                'primary': {
+                    'main': '#007bff'
+                },
+                'success': {
+                    'main': '#28a745'
+                }
+            },
+            'typography': {
+                'fontSize': '14px',
+                'lineHeight': '1.5',
+                'code': {
+                    'fontSize': '13px'
+                }
+            }
+        },
+        'hideDownloadButton': False,
+        'hideHostname': False,
+        'expandResponses': '200,201',
+        'requiredPropsFirst': True,
+        'sortPropsAlphabetically': True,
+        'showExtensions': True,
+        'pathInMiddlePanel': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    'SCHEMA_PATH_PREFIX': '/api/v1/',
+    'SCHEMA_PATH_PREFIX_TRIM': True,
+    'PREPROCESSING_HOOKS': [],
+    'POSTPROCESSING_HOOKS': [],
 }
 
 # Allauth
@@ -341,5 +497,43 @@ CELERY_BEAT_SCHEDULE = {
     'cleanup-expired-necessidades': {
         'task': 'ads.tasks.cleanup_expired_necessidades',
         'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM
+    },
+    'verificar-anuncios-expirados': {
+        'task': 'ads.tasks.verificar_anuncios_expirados',
+        'schedule': crontab(minute=0, hour=0),  # Daily at midnight
+    },
+}
+
+# Configuração de logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'rankings': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }

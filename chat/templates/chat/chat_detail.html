@@ -241,20 +241,28 @@
                 
                 <!-- Área de digitação -->
                 <div class="border-top p-3 bg-white chat-input">
+                    {% if not chat_disponivel %}
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Chat indisponível. O anúncio precisa estar "Em Atendimento" ou "Em Disputa" para enviar mensagens.
+                    </div>
+                    {% endif %}
+                    
                     <form id="message-form" enctype="multipart/form-data">
                         <div class="row g-2">
                             <div class="col">
                                 <textarea 
                                     id="message-input" 
                                     class="form-control" 
-                                    placeholder="Digite sua mensagem..." 
+                                    placeholder="{% if chat_disponivel %}Digite sua mensagem...{% else %}Chat indisponível{% endif %}" 
                                     rows="2"
                                     maxlength="2000"
+                                    {% if not chat_disponivel %}disabled{% endif %}
                                 ></textarea>
                                 <div class="d-flex justify-content-between mt-1">
                                     <div>
                                         <input type="file" id="file-input" class="form-control-file d-none" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('file-input').click()">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('file-input').click()" {% if not chat_disponivel %}disabled{% endif %}>
                                             <i class="fas fa-paperclip"></i> Anexar
                                         </button>
                                         <span id="file-selected" class="small text-muted ms-2"></span>
@@ -265,7 +273,7 @@
                                 </div>
                             </div>
                             <div class="col-auto align-self-end">
-                                <button type="submit" class="btn btn-primary" id="send-button">
+                                <button type="submit" class="btn btn-primary" id="send-button" {% if not chat_disponivel %}disabled{% endif %}>
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
                             </div>

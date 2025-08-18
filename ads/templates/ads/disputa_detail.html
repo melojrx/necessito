@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disputa #{{ disputa.id }} - {{ disputa.necessidade.titulo }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dispute-detail-page {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+  
+  .dispute-main-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  
+  .dispute-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  
+  .status-aberta { background: rgba(220, 38, 38, 0.2); color: #dc2626; }
+  .status-em_analise { background: rgba(217, 119, 6, 0.2); color: #d97706; }
+  .status-resolvida { background: rgba(5, 150, 105, 0.2); color: #059669; }
+  .status-cancelada { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
+  
+  .section-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  
+  .section-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+  }
+  
+  .section-body {
+    padding: 1.5rem;
+  }
+  
+  .participant-card {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .participant-card.current-user {
+    border-color: #667eea;
+    background: #f8f9ff;
+  }
+  
+  .participant-card.dispute-opener {
+    border-color: #dc2626;
+    background: #fef2f2;
+  }
+  
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0 auto 0.5rem;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #667eea;
+  }
+  
+  .timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 1.25rem;
+    width: 2px;
+    height: calc(100% - 0.75rem);
+    background: #e9ecef;
+  }
+  
+  .timeline-item:last-child::after {
+    display: none;
+  }
+  
+  .evidence-preview {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    border: 2px dashed #dee2e6;
+  }
+  
+  .resolution-box {
+    background: #d1fae5;
+    border: 1px solid #34d399;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  
+  .admin-actions {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 4px solid #fbbf24;
+  }
+  
+  .service-value {
+    font-size: 1.5rem;
+    color: #059669;
+    font-weight: bold;
+  }
+  
+  .days-counter {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .urgente-alert {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 1rem;
+    color: #dc2626;
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dispute-detail-page">
+  <div class="container">
+    <!-- Cabeçalho Principal -->
+    <div class="dispute-main-card">
+      <div class="dispute-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h1><i class="fas fa-balance-scale me-3"></i>Disputa #{{ disputa.id }}</h1>
+            <h3 class="mb-2">{{ disputa.necessidade.titulo }}</h3>
+            <div class="d-flex gap-3 align-items-center">
+              <span class="status-badge status-{{ disputa.status }}">
+                {{ disputa.get_status_display }}
+              </span>
+              {% if disputa.precisa_atencao_admin %}
+                <span class="badge bg-danger">URGENTE</span>
+              {% endif %}
+              <span class="days-counter">{{ disputa.get_dias_em_aberto }} dias em aberto</span>
+            </div>
+          </div>
+          <a href="{% url 'ads:disputa_list' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Voltar à Lista
+          </a>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col-md-4">
+            <small class="text-light">Aberta em:</small><br>
+            <strong>{{ disputa.data_abertura|date:"d/m/Y H:i" }}</strong>
+          </div>
+          {% if disputa.status == 'resolvida' %}
+            <div class="col-md-4">
+              <small class="text-light">Resolvida em:</small><br>
+              <strong>{{ disputa.data_resolucao|date:"d/m/Y H:i" }}</strong>
+            </div>
+          {% endif %}
+          <div class="col-md-4">
+            <small class="text-light">Valor do serviço:</small><br>
+            <span class="service-value">R$ {{ disputa.orcamento.get_total_geral|floatformat:2 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Alerta de Urgência -->
+    {% if disputa.precisa_atencao_admin and user.is_staff %}
+      <div class="urgente-alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Atenção:</strong> Esta disputa está aberta há mais de 48 horas e precisa de resolução urgente.
+      </div>
+    {% endif %}
+    
+    <div class="row">
+      <!-- Coluna Principal -->
+      <div class="col-lg-8">
+        <!-- Participantes -->
+        <div class="section-card">
+          <div class="section-header">
+            <i class="fas fa-users me-2"></i>Participantes
+          </div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="participant-card {% if user == disputa.necessidade.cliente %}current-user{% endif %} {% if disputa.usuario_abertura == disputa.necessidade.cliente %}dispute-opener{% endif %}">
+                  <div class="user-avatar">
+                    {{ disputa.necessidade.cliente.first_name|first|upper }}{{ disputa.necessidade.cliente.last_name|first|upper }}
+                  </div>
+                  <h6>{{ disputa.necessidade.cliente.get_full_name }}</h6>
+                  <small class="text-primary fw-bold">CLIENTE</small>
+                  {% if disputa.usuario_abertura == disputa.necessidade.cliente %}
+                    <br><small class="text-danger">Abriu a disputa</small>
+                  {% endif %}
+                  {% if user == disputa.necessidade.cliente %}
+                    <br><small class="text-success">Você</small>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="participant-card {% if user == disputa.orcamento.fornecedor %}current-user{% endif %} {% if disputa.usuario_abertura == disputa.orcamento.fornecedor %}dispute-opener{% endif %}">
+                  <div class="user-avatar">
+                    {{ disputa.orcamento.fornecedor.first_name|first|upper }}{{ disputa.orcamento.fornecedor.last_name|first|upper }}
+                  </div>
+                  <h6>{{ disputa.orcamento.fornecedor.get_full_name }}</h6>
+                  <small class="text-info fw-bold">FORNECEDOR</small>
+                  {% if disputa.usuario_abertura == disputa.orcamento.fornecedor %}
+                    <br><small class="text-danger">Abriu a disputa</small>
+                  {% endif %}
+                  {% if user == disputa.orcamento.fornecedor %}
+                    <br><small class="text-success">Você</small>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Detalhes da Disputa -->
+        <div class="section-card">
+          <div class="section-header">
+            <i class="fas fa-exclamation-circle me-2"></i>Motivo da Disputa
+          </div>
+          <div class="section-body">
+            <p class="mb-3">{{ disputa.motivo|linebreaks }}</p>
+            
+            {% if disputa.arquivo_evidencia %}
+              <div class="evidence-preview">
+                <i class="fas fa-paperclip fa-2x text-muted mb-2"></i>
+                <h6>Arquivo de Evidência</h6>
+                <a href="{{ disputa.arquivo_evidencia.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-download me-2"></i>Baixar Arquivo
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Resolução (se houver) -->
+        {% if disputa.status == 'resolvida' and disputa.resolucao %}
+          <div class="section-card">
+            <div class="section-header text-success">
+              <i class="fas fa-check-circle me-2"></i>Resolução da Disputa
+            </div>
+            <div class="section-body">
+              <div class="resolution-box">
+                <p class="mb-2">{{ disputa.resolucao|linebreaks }}</p>
+                {% if disputa.resolvida_por %}
+                  <small class="text-muted">
+                    Resolvida por <strong>{{ disputa.resolvida_por.get_full_name }}</strong>
+                    em {{ disputa.data_resolucao|date:"d/m/Y H:i" }}
+                  </small>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        
+        <!-- Timeline -->
+        <div class="section-card">
+          <div class="section-header">
+            <i class="fas fa-history me-2"></i>Histórico
+          </div>
+          <div class="section-body">
+            <div class="timeline-item">
+              <strong>Disputa Aberta</strong>
+              <div class="text-muted">{{ disputa.data_abertura|date:"d/m/Y H:i" }}</div>
+              <small>Por {{ disputa.usuario_abertura.get_full_name }} ({{ disputa.get_tipo_usuario_abertura|capfirst }})</small>
+            </div>
+            
+            {% if disputa.status == 'em_analise' %}
+              <div class="timeline-item">
+                <strong>Disputa em Análise</strong>
+                <div class="text-muted">{{ disputa.data_modificacao|date:"d/m/Y H:i" }}</div>
+                <small>Administração iniciou análise do caso</small>
+              </div>
+            {% endif %}
+            
+            {% if disputa.status == 'resolvida' %}
+              <div class="timeline-item">
+                <strong class="text-success">Disputa Resolvida</strong>
+                <div class="text-muted">{{ disputa.data_resolucao|date:"d/m/Y H:i" }}</div>
+                <small>Resolvida por {{ disputa.resolvida_por.get_full_name }}</small>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <!-- Ações -->
+        {% if user.is_staff or disputa.pode_ser_cancelada_por:user %}
+          <div class="section-card">
+            <div class="section-header">
+              <i class="fas fa-cog me-2"></i>Ações
+            </div>
+            <div class="section-body">
+              {% if user.is_staff %}
+                {% if disputa.esta_ativa %}
+                  <a href="{% url 'ads:disputa_resolver' disputa.pk %}" class="btn btn-warning w-100 mb-2">
+                    <i class="fas fa-gavel me-2"></i>Resolver Disputa
+                  </a>
+                {% endif %}
+                <a href="{% url 'admin:ads_disputa_change' disputa.pk %}" class="btn btn-secondary w-100 mb-2">
+                  <i class="fas fa-edit me-2"></i>Editar no Admin
+                </a>
+              {% endif %}
+              
+              {% if disputa.pode_ser_cancelada_por:user %}
+                <form method="post" action="{% url 'ads:disputa_cancelar' disputa.pk %}" class="d-inline w-100">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger w-100" 
+                          onclick="return confirm('Tem certeza que deseja cancelar esta disputa?')">
+                    <i class="fas fa-times me-2"></i>Cancelar Disputa
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        
+        <!-- Informações do Serviço -->
+        <div class="section-card">
+          <div class="section-header">
+            <i class="fas fa-info-circle me-2"></i>Informações do Serviço
+          </div>
+          <div class="section-body">
+            <p><strong>Categoria:</strong><br>{{ disputa.necessidade.categoria.nome }}</p>
+            <p><strong>Localização:</strong><br>{{ disputa.necessidade.get_cidade_estado_servico }}</p>
+            <p><strong>Status da Necessidade:</strong><br>
+              <span class="badge bg-secondary">{{ disputa.necessidade.get_status_display }}</span>
+            </p>
+            <hr>
+            <p><strong>Valor Total:</strong><br>
+              <span class="text-success fs-5 fw-bold">R$ {{ disputa.orcamento.get_total_geral|floatformat:2 }}</span>
+            </p>
+            <a href="{% url 'ads:necessidade_detail' disputa.necessidade.pk %}" class="btn btn-outline-primary w-100">
+              <i class="fas fa-eye me-2"></i>Ver Necessidade
+            </a>
+          </div>
+        </div>
+        
+        <!-- Suporte -->
+        <div class="section-card">
+          <div class="section-header">
+            <i class="fas fa-life-ring me-2"></i>Precisa de Ajuda?
+          </div>
+          <div class="section-body text-center">
+            <p class="text-muted">Nossa equipe está aqui para ajudar.</p>
+            <div class="d-grid gap-2">
+              <a href="mailto:suporte@indicaai.com" class="btn btn-outline-primary">
+                <i class="fas fa-envelope me-2"></i>E-mail de Suporte
+              </a>
+              <a href="https://wa.me/5511999999999" target="_blank" class="btn btn-outline-success">
+                <i class="fab fa-whatsapp me-2"></i>WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Função para preview de arquivo
+  window.previewFile = function(fileUrl) {
+    const extension = fileUrl.split('.').pop().toLowerCase();
+    
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+      // Preview de imagem
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Preview da Evidência</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+              <img src="${fileUrl}" class="img-fluid" alt="Evidência da disputa">
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const bootstrapModal = new bootstrap.Modal(modal);
+      bootstrapModal.show();
+      
+      modal.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+      });
+    } else {
+      // Para outros tipos, abrir em nova aba
+      window.open(fileUrl, '_blank');
+    }
+  };
+  
+  // Lazy loading das seções
+  if ('IntersectionObserver' in window) {
+    const sections = document.querySelectorAll('.section-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '50px'
+    });
+    
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+  }
+  
+  // Animação da timeline
+  const timelineItems = document.querySelectorAll('.timeline-item');
+  timelineItems.forEach((item, index) => {
+    setTimeout(() => {
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    }, index * 200);
+  });
+  
+  // Melhorar acessibilidade
+  const buttons = document.querySelectorAll('button, a');
+  buttons.forEach(button => {
+    button.addEventListener('focus', function() {
+      this.style.outline = '3px solid rgba(102, 126, 234, 0.5)';
+    });
+    
+    button.addEventListener('blur', function() {
+      this.style.outline = '';
+    });
+  });
+  
+  // Auto-refresh para disputas ativas (apenas para staff)
+  {% if user.is_staff and disputa.esta_ativa %}
+    setInterval(function() {
+      // Verificar se há atualizações
+      fetch(window.location.href, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.text())
+      .then(html => {
+        // Comparar status atual
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(html, 'text/html');
+        const newStatus = newDoc.querySelector('.status-badge');
+        const currentStatus = document.querySelector('.status-badge');
+        
+        if (newStatus && currentStatus && newStatus.textContent !== currentStatus.textContent) {
+          // Status mudou, mostrar notificação e recarregar
+          if (Notification.permission === 'granted') {
+            new Notification('Disputa Atualizada', {
+              body: `Status da disputa #{{ disputa.id }} foi alterado.`,
+              icon: '/static/img/logo.png'
+            });
+          }
+          location.reload();
+        }
+      })
+      .catch(console.error);
+    }, 60000); // Verificar a cada 1 minuto
+  {% endif %}
+  
+  // Solicitar permissão para notificações (apenas para staff)
+  {% if user.is_staff %}
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  {% endif %}
+});
+</script>
+{% endblock %}

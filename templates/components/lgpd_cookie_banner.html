@@ -1,0 +1,153 @@
+<!-- LGPD Cookie Consent Banner -->
+<div id="lgpd-cookie-banner" class="lgpd-banner" style="display: none;">
+    <div class="lgpd-banner-content">
+        <div class="lgpd-banner-text">
+            <div class="lgpd-banner-icon">
+                <i class="fas fa-cookie-bite"></i>
+            </div>
+            <div class="lgpd-banner-message">
+                <h5>Cookies e Privacidade</h5>
+                <p>
+                    Utilizamos cookies essenciais para o funcionamento do site e cookies opcionais para melhorar sua experiência. 
+                    Você pode configurar suas preferências ou aceitar todos os cookies.
+                    <a href="{% url 'privacy_policy' %}" target="_blank" class="lgpd-link">
+                        Leia nossa Política de Privacidade
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="lgpd-banner-actions">
+            <div class="lgpd-action-buttons">
+                <button id="lgpd-reject-optional" class="btn btn-outline-secondary btn-sm">
+                    Apenas Essenciais
+                </button>
+                <button id="lgpd-manage-cookies" class="btn btn-outline-primary btn-sm">
+                    Configurar
+                </button>
+                <button id="lgpd-accept-all" class="btn btn-primary btn-sm">
+                    Aceitar Todos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cookie Preferences Modal -->
+<div class="modal fade" id="lgpd-preferences-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-cog me-2"></i>Configurações de Cookies
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">
+                    Configure suas preferências de cookies. Os cookies essenciais são necessários para o funcionamento básico do site e não podem ser desativados.
+                </p>
+                
+                <!-- Essential Cookies -->
+                <div class="cookie-category">
+                    <div class="cookie-category-header">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="essential-cookies" checked disabled>
+                            <label class="form-check-label" for="essential-cookies">
+                                <strong>Cookies Essenciais</strong>
+                                <span class="badge bg-success ms-2">Sempre Ativo</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="cookie-description">
+                        Necessários para o funcionamento básico do site, incluindo autenticação, segurança e navegação.
+                    </p>
+                    <div class="cookie-details">
+                        <small class="text-muted">
+                            <strong>Duração:</strong> Sessão a 30 dias<br>
+                            <strong>Exemplos:</strong> sessionid, csrftoken, autenticação
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Analytics Cookies -->
+                <div class="cookie-category">
+                    <div class="cookie-category-header">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="analytics-cookies">
+                            <label class="form-check-label" for="analytics-cookies">
+                                <strong>Cookies de Análise</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="cookie-description">
+                        Nos ajudam a entender como você usa o site para melhorar a experiência do usuário.
+                    </p>
+                    <div class="cookie-details">
+                        <small class="text-muted">
+                            <strong>Duração:</strong> Até 2 anos<br>
+                            <strong>Finalidade:</strong> Estatísticas de uso, performance do site
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Marketing Cookies -->
+                <div class="cookie-category">
+                    <div class="cookie-category-header">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="marketing-cookies">
+                            <label class="form-check-label" for="marketing-cookies">
+                                <strong>Cookies de Marketing</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="cookie-description">
+                        Utilizados para personalizar conteúdo e mostrar anúncios relevantes.
+                    </p>
+                    <div class="cookie-details">
+                        <small class="text-muted">
+                            <strong>Duração:</strong> Até 1 ano<br>
+                            <strong>Finalidade:</strong> Personalização, remarketing
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Preferences Cookies -->
+                <div class="cookie-category">
+                    <div class="cookie-category-header">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="preferences-cookies">
+                            <label class="form-check-label" for="preferences-cookies">
+                                <strong>Cookies de Preferências</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="cookie-description">
+                        Lembram suas configurações e preferências para melhorar sua experiência.
+                    </p>
+                    <div class="cookie-details">
+                        <small class="text-muted">
+                            <strong>Duração:</strong> Até 1 ano<br>
+                            <strong>Finalidade:</strong> Configurações de idioma, layout, tema
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" id="save-cookie-preferences" class="btn btn-primary">
+                    Salvar Preferências
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cookie Settings Button (Fixed Position) -->
+<div id="cookie-settings-btn" class="cookie-settings-floating" style="display: none;">
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#lgpd-preferences-modal">
+        <i class="fas fa-cookie-bite me-1"></i>Cookies
+    </button>
+</div>

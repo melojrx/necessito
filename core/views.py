@@ -1,5 +1,19 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
+import json
+import logging
+from datetime import datetime
+from django.shortcuts import render, redirect
+from django.views.generic import TemplateView, FormView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class HelpView(TemplateView):
@@ -219,5 +233,288 @@ class SitemapView(TemplateView):
             'page_description': 'Navegue por todas as páginas e funcionalidades da plataforma Indicaai.com. Encontre rapidamente o que você procura.',
             'page_keywords': 'mapa do site, navegação, páginas, indicaai, sitemap, estrutura, ajuda',
             'canonical_url': self.request.build_absolute_uri(),
+        })
+        return context
+
+
+# LGPD COMPLIANCE VIEWS
+
+class PrivacyCenterView(TemplateView):
+    """Central de Privacidade para gestão de dados pessoais"""
+    template_name = 'legal/privacy_center.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get user's current consent status if logged in
+        user_consent = None
+        if self.request.user.is_authenticated:
+            consent_cookie = self.request.COOKIES.get('lgpd_consent')
+            if consent_cookie:
+                try:
+                    user_consent = json.loads(consent_cookie)
+                except json.JSONDecodeError:
+                    user_consent = None
+        
+        context.update({
+            'page_title': 'Central de Privacidade - Indicaai.com',
+            'page_description': 'Gerencie seus dados pessoais, preferências de cookies e exerça seus direitos de privacidade conforme a LGPD.',
+            'page_keywords': 'privacidade, LGPD, dados pessoais, cookies, consentimento, direitos, exclusão',
+            'canonical_url': self.request.build_absolute_uri(),
+            'user_consent': user_consent,
+        })
+        return context
+
+
+class DataExportView(LoginRequiredMixin, TemplateView):
+    """View para exportação de dados pessoais"""
+    template_name = 'legal/data_export.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Exportar Meus Dados - Indicaai.com',
+            'page_description': 'Exporte todos os seus dados pessoais em formato estruturado conforme seus direitos na LGPD.',
+            'page_keywords': 'exportar dados, portabilidade, LGPD, dados pessoais',
+        })
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        """Generate and send user data export"""
+        try:
+            user = request.user
+            
+            # Collect user data
+            user_data = {
+                'personal_info': {
+                    'id': user.id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'phone': getattr(user, 'telefone', ''),
+                    'cpf': getattr(user, 'cpf', ''),
+                    'cnpj': getattr(user, 'cnpj', ''),
+                    'date_joined': user.date_joined.isoformat(),
+                    'last_login': user.last_login.isoformat() if user.last_login else None,
+                },
+                'address_info': {
+                    'street': getattr(user, 'endereco', ''),
+                    'city': getattr(user, 'cidade', ''),
+                    'state': getattr(user, 'estado', ''),
+                    'cep': getattr(user, 'cep', ''),
+                    'neighborhood': getattr(user, 'bairro', ''),
+                    'latitude': getattr(user, 'lat', ''),
+                    'longitude': getattr(user, 'lon', ''),
+                },
+                'profile_info': {
+                    'bio': getattr(user, 'bio', ''),
+                    'photo_url': user.foto.url if hasattr(user, 'foto') and user.foto else '',
+                    'email_verified': getattr(user, 'email_verified', False),
+                },
+                'preferences': {
+                    'preferred_categories': [cat.nome for cat in user.preferred_categories.all()] if hasattr(user, 'preferred_categories') else [],
+                },
+                'export_info': {
+                    'export_date': datetime.now().isoformat(),
+                    'format': 'JSON',
+                    'lgpd_article': 'Art. 18, V - Direito à portabilidade dos dados',
+                }
+            }
+            
+            # Create JSON response
+            response = JsonResponse(user_data, json_dumps_params={'indent': 2})
+            response['Content-Disposition'] = f'attachment; filename="indicaai_dados_{user.id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+            
+            # Log data export request
+            logger.info(f"LGPD_DATA_EXPORT: User {user.id} exported personal data")
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error exporting user data: {e}")
+            messages.error(request, 'Erro ao exportar dados. Tente novamente ou entre em contato com o suporte.')
+            return redirect('privacy_center')
+
+
+class DataDeletionRequestView(LoginRequiredMixin, FormView):
+    """View para solicitação de exclusão de dados"""
+    template_name = 'legal/data_deletion_request.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Solicitar Exclusão de Dados - Indicaai.com',
+            'page_description': 'Solicite a exclusão dos seus dados pessoais conforme seus direitos na LGPD.',
+            'page_keywords': 'exclusão dados, delete conta, LGPD, direito esquecimento',
+        })
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        """Process data deletion request"""
+        try:
+            user = request.user
+            reason = request.POST.get('deletion_reason', '')
+            confirmation = request.POST.get('confirmation', '') == 'on'
+            
+            if not confirmation:
+                messages.error(request, 'Você deve confirmar que entende as consequências da exclusão.')
+                return self.get(request, *args, **kwargs)
+            
+            # Create deletion request log
+            deletion_request = {
+                'user_id': user.id,
+                'user_email': user.email,
+                'request_date': datetime.now().isoformat(),
+                'reason': reason,
+                'ip_address': self.get_client_ip(request),
+                'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+                'status': 'pending_review',
+            }
+            
+            # Log deletion request
+            logger.info(f"LGPD_DATA_DELETION_REQUEST: {json.dumps(deletion_request)}")
+            
+            # Send email notification to support team
+            try:
+                send_mail(
+                    subject='Solicitação de Exclusão de Dados - LGPD',
+                    message=f'''
+Uma solicitação de exclusão de dados foi recebida:
+
+Usuário ID: {user.id}
+Email: {user.email}
+Nome: {user.first_name} {user.last_name}
+Data da solicitação: {deletion_request['request_date']}
+Motivo: {reason}
+
+Esta solicitação deve ser processada em até 15 dias úteis conforme a LGPD.
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=['dpo@indicaai.com'],
+                    fail_silently=False,
+                )
+            except Exception as email_error:
+                logger.error(f"Error sending deletion request email: {email_error}")
+            
+            # Send confirmation email to user
+            try:
+                send_mail(
+                    subject='Solicitação de Exclusão de Dados Recebida - Indicaai.com',
+                    message=f'''
+Olá {user.first_name},
+
+Recebemos sua solicitação de exclusão de dados pessoais em {deletion_request['request_date']}.
+
+Sua solicitação será processada em até 15 dias úteis conforme estabelecido na Lei Geral de Proteção de Dados (LGPD).
+
+Durante este período:
+- Seus dados permanecerão ativos na plataforma
+- Você pode cancelar esta solicitação entrando em contato conosco
+- Após a confirmação, a exclusão será irreversível
+
+Caso tenha dúvidas, entre em contato com nosso Encarregado de Proteção de Dados através do email dpo@indicaai.com.
+
+Atenciosamente,
+Equipe Indicaai.com
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+            except Exception as user_email_error:
+                logger.error(f"Error sending confirmation email to user: {user_email_error}")
+            
+            messages.success(
+                request, 
+                'Sua solicitação de exclusão foi recebida e será processada em até 15 dias úteis. '
+                'Você receberá uma confirmação por email.'
+            )
+            
+            return redirect('privacy_center')
+            
+        except Exception as e:
+            logger.error(f"Error processing data deletion request: {e}")
+            messages.error(request, 'Erro ao processar solicitação. Tente novamente ou entre em contato com o suporte.')
+            return self.get(request, *args, **kwargs)
+    
+    def get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        else:
+            return request.META.get('REMOTE_ADDR', '')
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class LGPDConsentLogView(TemplateView):
+    """API endpoint for logging LGPD consent interactions"""
+    
+    def post(self, request, *args, **kwargs):
+        """Log consent interactions for compliance audit"""
+        try:
+            data = json.loads(request.body)
+            
+            # Validate required fields
+            required_fields = ['timestamp', 'action']
+            if not all(field in data for field in required_fields):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
+            # Get user information
+            user_id = None
+            if request.user.is_authenticated:
+                user_id = request.user.id
+            
+            # Create log entry
+            log_entry = {
+                'type': 'consent_interaction',
+                'user_id': user_id,
+                'session_key': request.session.session_key if hasattr(request, 'session') else None,
+                'ip_address': self.get_client_ip(request),
+                'interaction_data': data,
+                'logged_at': datetime.now().isoformat()
+            }
+            
+            # Log the consent interaction
+            logger.info(f"LGPD_CONSENT_INTERACTION: {json.dumps(log_entry)}")
+            
+            return JsonResponse({'status': 'logged', 'timestamp': log_entry['logged_at']})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f"Error logging consent interaction: {e}")
+            return JsonResponse({'error': 'Internal server error'}, status=500)
+    
+    def get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        else:
+            return request.META.get('REMOTE_ADDR', '')
+
+
+class CookiePreferencesView(TemplateView):
+    """View for cookie preferences management"""
+    template_name = 'legal/cookie_preferences.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get current consent status
+        consent_cookie = self.request.COOKIES.get('lgpd_consent')
+        current_consent = None
+        if consent_cookie:
+            try:
+                current_consent = json.loads(consent_cookie)
+            except json.JSONDecodeError:
+                current_consent = None
+        
+        context.update({
+            'page_title': 'Preferências de Cookies - Indicaai.com',
+            'page_description': 'Configure suas preferências de cookies e gerencie seu consentimento para diferentes tipos de cookies.',
+            'page_keywords': 'cookies, preferências, consentimento, LGPD, privacidade',
+            'current_consent': current_consent,
         })
         return context

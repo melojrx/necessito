@@ -114,8 +114,8 @@ class StateMachineBase:
                 if transition_key in self.side_effects:
                     self.side_effects[transition_key](user=user, **kwargs)
                 
-                # Save instance
-                self.instance.save()
+                # Save instance (skip validation for automatic state transitions)
+                self.instance.save(skip_validation=True)
                 
                 logger.info(f"State transition successful: {old_state} -> {to_state} for {self.instance}")
                 return True
@@ -179,10 +179,6 @@ class NecessidadeStateMachine(StateMachineBase):
         self.add_transition('em_atendimento', 'cancelado')
         self.add_transition('em_atendimento', 'em_disputa')
         
-        # From em_andamento (legacy state, maps to em_atendimento)
-        self.add_transition('em_andamento', 'em_atendimento')
-        self.add_transition('em_andamento', 'finalizado')
-        self.add_transition('em_andamento', 'cancelado')
         
         # From em_disputa
         self.add_transition('em_disputa', 'em_atendimento')
@@ -199,6 +195,10 @@ class NecessidadeStateMachine(StateMachineBase):
         self.conditions[('aguardando_confirmacao', 'em_atendimento')] = self._condition_budget_confirmed_by_supplier
         self.conditions[('aguardando_confirmacao', 'analisando_orcamentos')] = self._condition_budget_refused_by_supplier
         self.conditions[('em_atendimento', 'finalizado')] = self._condition_service_completed
+        self.conditions[('em_atendimento', 'em_disputa')] = self._condition_can_open_dispute
+        self.conditions[('em_disputa', 'em_atendimento')] = self._condition_dispute_resolved_continue
+        self.conditions[('em_disputa', 'finalizado')] = self._condition_dispute_resolved_complete
+        self.conditions[('em_disputa', 'cancelado')] = self._condition_dispute_resolved_cancel
     
     def _setup_side_effects(self):
         """Define side effects for transitions."""
@@ -211,6 +211,10 @@ class NecessidadeStateMachine(StateMachineBase):
         self.side_effects[('analisando_orcamentos', 'cancelado')] = self._effect_cancelled
         self.side_effects[('aguardando_confirmacao', 'cancelado')] = self._effect_cancelled
         self.side_effects[('em_atendimento', 'cancelado')] = self._effect_cancelled
+        self.side_effects[('em_atendimento', 'em_disputa')] = self._effect_dispute_opened
+        self.side_effects[('em_disputa', 'em_atendimento')] = self._effect_dispute_resolved_continue
+        self.side_effects[('em_disputa', 'finalizado')] = self._effect_dispute_resolved_complete
+        self.side_effects[('em_disputa', 'cancelado')] = self._effect_dispute_resolved_cancel
     
     # Conditions
     def _condition_first_budget_received(self, **kwargs) -> Tuple[bool, str]:
@@ -271,6 +275,65 @@ class NecessidadeStateMachine(StateMachineBase):
         confirmed_budget = self.instance.orcamentos.filter(status='confirmado').first()
         if not confirmed_budget:
             return False, "Deve haver um orçamento confirmado para finalizar"
+        
+        return True, ""
+    
+    def _condition_can_open_dispute(self, user=None, disputa=None, **kwargs) -> Tuple[bool, str]:
+        """Check if a dispute can be opened."""
+        if not user:
+            return False, "Usuário é obrigatório para abrir disputa"
+        
+        # Verificar se usuário é cliente ou fornecedor
+        confirmed_budget = self.instance.orcamentos.filter(status='confirmado').first()
+        if not confirmed_budget:
+            return False, "Não há orçamento confirmado para abrir disputa"
+        
+        if user not in [self.instance.cliente, confirmed_budget.fornecedor]:
+            return False, "Apenas cliente ou fornecedor podem abrir disputas"
+        
+        # Verificar se já existe disputa ativa
+        active_disputes = self.instance.disputas.filter(status__in=['aberta', 'em_analise'])
+        if active_disputes.exists():
+            return False, "Já existe uma disputa ativa para esta necessidade"
+        
+        return True, ""
+    
+    def _condition_dispute_resolved_continue(self, user=None, disputa=None, **kwargs) -> Tuple[bool, str]:
+        """Check if dispute resolution allows continuing service."""
+        if not user or not user.is_staff:
+            return False, "Apenas administradores podem resolver disputas"
+        
+        if not disputa or disputa.status != 'resolvida':
+            return False, "Disputa deve estar resolvida"
+        
+        if disputa.status_final_necessidade != 'em_atendimento':
+            return False, "Resolução da disputa não permite continuar atendimento"
+        
+        return True, ""
+    
+    def _condition_dispute_resolved_complete(self, user=None, disputa=None, **kwargs) -> Tuple[bool, str]:
+        """Check if dispute resolution allows completing service."""
+        if not user or not user.is_staff:
+            return False, "Apenas administradores podem resolver disputas"
+        
+        if not disputa or disputa.status != 'resolvida':
+            return False, "Disputa deve estar resolvida"
+        
+        if disputa.status_final_necessidade != 'finalizado':
+            return False, "Resolução da disputa não permite finalizar necessidade"
+        
+        return True, ""
+    
+    def _condition_dispute_resolved_cancel(self, user=None, disputa=None, **kwargs) -> Tuple[bool, str]:
+        """Check if dispute resolution allows cancelling service."""
+        if not user or not user.is_staff:
+            return False, "Apenas administradores podem resolver disputas"
+        
+        if not disputa or disputa.status != 'resolvida':
+            return False, "Disputa deve estar resolvida"
+        
+        if disputa.status_final_necessidade != 'cancelado':
+            return False, "Resolução da disputa não permite cancelar necessidade"
         
         return True, ""
     
@@ -348,6 +411,46 @@ class NecessidadeStateMachine(StateMachineBase):
         
         self._send_notification('NECESSIDADE_CANCELLED')
     
+    def _effect_dispute_opened(self, user=None, disputa=None, **kwargs):
+        """Execute when a dispute is opened."""
+        # Notificar a contraparte sobre a abertura da disputa
+        confirmed_budget = self.instance.orcamentos.filter(status='confirmado').first()
+        if confirmed_budget:
+            if user == self.instance.cliente:
+                # Cliente abriu disputa, notificar fornecedor
+                target_user = confirmed_budget.fornecedor
+                message = f'O cliente abriu uma disputa sobre o serviço "{self.instance.titulo}".'
+            else:
+                # Fornecedor abriu disputa, notificar cliente
+                target_user = self.instance.cliente
+                message = f'O fornecedor abriu uma disputa sobre o serviço "{self.instance.titulo}".'
+            
+            self._send_notification_to_user(target_user, 'DISPUTE_OPENED', message)
+        
+        # Notificar administradores
+        self._notify_admins_new_dispute(disputa)
+    
+    def _effect_dispute_resolved_continue(self, user=None, disputa=None, **kwargs):
+        """Execute when dispute is resolved and service continues."""
+        self._send_notification('DISPUTE_RESOLVED_CONTINUE')
+    
+    def _effect_dispute_resolved_complete(self, user=None, disputa=None, **kwargs):
+        """Execute when dispute is resolved and service is completed."""
+        # Marcar avaliação como liberada
+        if hasattr(self.instance, 'avaliacao_liberada'):
+            self.instance.avaliacao_liberada = True
+        
+        self._send_notification('DISPUTE_RESOLVED_COMPLETE')
+    
+    def _effect_dispute_resolved_cancel(self, user=None, disputa=None, **kwargs):
+        """Execute when dispute is resolved and service is cancelled."""
+        # Cancelar orçamentos relacionados
+        self.instance.orcamentos.filter(
+            status__in=['confirmado']
+        ).update(status='anuncio_cancelado')
+        
+        self._send_notification('DISPUTE_RESOLVED_CANCEL')
+    
     def _send_notification(self, notification_type: str):
         """Send notification for state transition."""
         try:
@@ -360,6 +463,10 @@ class NecessidadeStateMachine(StateMachineBase):
                 'BUDGET_REFUSED': NotificationType.NEW_BUDGET,
                 'SERVICE_COMPLETED': NotificationType.NEW_END_AD,
                 'NECESSIDADE_CANCELLED': NotificationType.NEW_END_AD,
+                'DISPUTE_OPENED': NotificationType.SYSTEM_MESSAGE,
+                'DISPUTE_RESOLVED_CONTINUE': NotificationType.SYSTEM_MESSAGE,
+                'DISPUTE_RESOLVED_COMPLETE': NotificationType.NEW_END_AD,
+                'DISPUTE_RESOLVED_CANCEL': NotificationType.NEW_END_AD,
             }
             
             if notification_type in type_mapping:
@@ -368,6 +475,46 @@ class NecessidadeStateMachine(StateMachineBase):
                     message=f"Status da necessidade '{self.instance.titulo}' foi atualizado.",
                     notification_type=type_mapping[notification_type],
                     necessidade=self.instance
+                )
+        except ImportError:
+            logger.warning("Notification system not available")
+    
+    def _send_notification_to_user(self, user, notification_type: str, message: str):
+        """Send notification to a specific user."""
+        try:
+            from notifications.models import Notification, NotificationType
+            
+            type_mapping = {
+                'DISPUTE_OPENED': NotificationType.SYSTEM_MESSAGE,
+            }
+            
+            Notification.objects.create(
+                user=user,
+                title='Nova Disputa',
+                message=message,
+                notification_type=type_mapping.get(notification_type, NotificationType.SYSTEM_MESSAGE),
+                necessidade=self.instance
+            )
+        except ImportError:
+            logger.warning("Notification system not available")
+    
+    def _notify_admins_new_dispute(self, disputa=None):
+        """Notify administrators about new dispute."""
+        try:
+            from notifications.models import Notification, NotificationType
+            from django.contrib.auth import get_user_model
+            
+            User = get_user_model()
+            admins = User.objects.filter(is_staff=True)
+            
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    title='Nova Disputa Requer Atenção',
+                    message=f'Uma nova disputa foi aberta para "{self.instance.titulo}" e requer análise administrativa.',
+                    notification_type=NotificationType.SYSTEM_MESSAGE,
+                    necessidade=self.instance,
+                    metadata={'disputa_id': disputa.pk if disputa else None, 'urgente': True}
                 )
         except ImportError:
             logger.warning("Notification system not available")

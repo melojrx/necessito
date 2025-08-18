@@ -1,0 +1,576 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resolver Disputa #{{ disputa.id }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .resolve-page {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+  
+  .admin-header {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dispute-summary {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+  }
+  
+  .summary-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    border-radius: 15px 15px 0 0;
+  }
+  
+  .summary-body {
+    padding: 1.5rem;
+  }
+  
+  .resolve-form {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .form-section:last-child {
+    border-bottom: none;
+  }
+  
+  .participant-row {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .participant-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .status-preview {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    border: 2px dashed #dee2e6;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .status-aberta { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+  .status-em_analise { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+  .status-resolvida { background: #d1fae5; color: #059669; border-color: #86efac; }
+  .status-cancelada { background: #f3f4f6; color: #6b7280; border-color: #d1d5db; }
+  
+  .resolution-preview {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  
+  .final-status-preview {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+  
+  .character-counter {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 0.5rem;
+  }
+  
+  .alert-admin {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border: none;
+    color: white;
+    border-radius: 12px;
+  }
+  
+  .evidence-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .btn-resolve {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-resolve:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resolve-page">
+  <div class="container">
+    <!-- Header Admin -->
+    <div class="admin-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1><i class="fas fa-gavel me-3"></i>Resolver Disputa</h1>
+          <p class="mb-0">Painel administrativo para resolução de conflitos</p>
+        </div>
+        <a href="{% url 'ads:disputa_detail' disputa.pk %}" class="btn btn-light">
+          <i class="fas fa-arrow-left me-2"></i>Voltar aos Detalhes
+        </a>
+      </div>
+    </div>
+    
+    <!-- Alerta Importante -->
+    <div class="alert alert-admin" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <strong>Atenção:</strong> Esta ação irá definir o destino final da necessidade e notificar ambas as partes sobre a resolução.
+    </div>
+    
+    <!-- Resumo da Disputa -->
+    <div class="dispute-summary">
+      <div class="summary-header">
+        <h5><i class="fas fa-clipboard-list me-2"></i>Resumo da Disputa #{{ disputa.id }}</h5>
+      </div>
+      <div class="summary-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Informações Básicas</h6>
+            <p><strong>Necessidade:</strong> {{ disputa.necessidade.titulo }}</p>
+            <p><strong>Valor:</strong> R$ {{ disputa.orcamento.get_total_geral|floatformat:2 }}</p>
+            <p><strong>Aberta há:</strong> {{ disputa.get_dias_em_aberto }} dias</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Participantes</h6>
+            <div class="participant-row">
+              <strong>Cliente:</strong> {{ disputa.necessidade.cliente.get_full_name }}<br>
+              <small class="text-muted">{{ disputa.necessidade.cliente.email }}</small>
+              {% if disputa.usuario_abertura == disputa.necessidade.cliente %}
+                <span class="badge bg-danger ms-2">Abriu a disputa</span>
+              {% endif %}
+            </div>
+            <div class="participant-row">
+              <strong>Fornecedor:</strong> {{ disputa.orcamento.fornecedor.get_full_name }}<br>
+              <small class="text-muted">{{ disputa.orcamento.fornecedor.email }}</small>
+              {% if disputa.usuario_abertura == disputa.orcamento.fornecedor %}
+                <span class="badge bg-danger ms-2">Abriu a disputa</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <h6>Motivo da Disputa</h6>
+        <div class="bg-light p-3 rounded">
+          <p class="mb-0">{{ disputa.motivo|linebreaks }}</p>
+        </div>
+        
+        {% if disputa.arquivo_evidencia %}
+          <div class="evidence-section">
+            <h6><i class="fas fa-paperclip me-2"></i>Evidência Anexada</h6>
+            <a href="{{ disputa.arquivo_evidencia.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-download me-2"></i>Baixar Arquivo
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Formulário de Resolução -->
+    <div class="resolve-form">
+      <form method="post" id="resolveForm">
+        {% csrf_token %}
+        
+        <!-- Status da Disputa -->
+        <div class="form-section">
+          <h5><i class="fas fa-traffic-light me-2"></i>Status da Resolução</h5>
+          <div class="row">
+            <div class="col-md-6">
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.status.errors %}
+                    <small>{{ error }}</small>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <div id="statusPreview" class="status-preview">
+                Selecione um status acima
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Resolução -->
+        <div class="form-section">
+          <h5><i class="fas fa-pen me-2"></i>Resolução da Disputa</h5>
+          <div class="form-floating">
+            {{ form.resolucao }}
+            <label for="{{ form.resolucao.id_for_label }}">{{ form.resolucao.label }}</label>
+          </div>
+          <div class="character-counter">
+            <span id="resolucaoCount">0</span> caracteres
+          </div>
+          {% if form.resolucao.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.resolucao.errors %}
+                <small>{{ error }}</small>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div id="resolucaoPreview" class="resolution-preview">
+            <strong>Prévia da Resolução:</strong>
+            <div id="resolucaoText" class="mt-2"></div>
+          </div>
+        </div>
+        
+        <!-- Status Final da Necessidade -->
+        <div class="form-section">
+          <h5><i class="fas fa-flag-checkered me-2"></i>Destino da Necessidade</h5>
+          <p class="text-muted">Para onde a necessidade deve ir após a resolução?</p>
+          <div class="row">
+            <div class="col-md-6">
+              {{ form.status_final_necessidade }}
+              {% if form.status_final_necessidade.errors %}
+                <div class="text-danger mt-1">
+                  {% for error in form.status_final_necessidade.errors %}
+                    <small>{{ error }}</small>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <div id="finalStatusPreview" class="final-status-preview">
+                <strong>Resultado:</strong>
+                <div id="finalStatusText"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Comentários Internos -->
+        <div class="form-section">
+          <h5><i class="fas fa-comment-medical me-2"></i>Comentários Internos</h5>
+          <small class="text-muted">Visível apenas para administradores</small>
+          <div class="form-floating mt-2">
+            {{ form.comentarios_internos }}
+            <label for="{{ form.comentarios_internos.id_for_label }}">{{ form.comentarios_internos.label }}</label>
+          </div>
+          {% if form.comentarios_internos.errors %}
+            <div class="text-danger mt-2">
+              {% for error in form.comentarios_internos.errors %}
+                <small>{{ error }}</small>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <!-- Botões de Ação -->
+        <div class="form-section text-end">
+          <a href="{% url 'ads:disputa_detail' disputa.pk %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-times me-2"></i>Cancelar
+          </a>
+          <button type="submit" class="btn btn-resolve" id="btnResolve" disabled>
+            <i class="fas fa-check me-2"></i>Aplicar Resolução
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const statusSelect = document.getElementById('id_status');
+  const statusPreview = document.getElementById('statusPreview');
+  const resolucaoTextarea = document.getElementById('id_resolucao');
+  const resolucaoPreview = document.getElementById('resolucaoPreview');
+  const resolucaoText = document.getElementById('resolucaoText');
+  const resolucaoCount = document.getElementById('resolucaoCount');
+  const finalStatusSelect = document.getElementById('id_status_final_necessidade');
+  const finalStatusPreview = document.getElementById('finalStatusPreview');
+  const finalStatusText = document.getElementById('finalStatusText');
+  const btnResolve = document.getElementById('btnResolve');
+  
+  // Templates de resolução
+  const templates = {
+    'favor-cliente': `Após análise detalhada da disputa, constatamos que houve falha por parte do fornecedor no cumprimento do acordo estabelecido.\n\nDECISÃO: Disputa procedente em favor do cliente.\n\nAÇÕES:\n- O fornecedor deve corrigir/refazer o serviço sem custo adicional\n- Prazo para regularização: 7 dias úteis\n- Caso não seja cumprido, o valor será reembolsado\n\nEsta decisão é final e não cabe recurso.`,
+    
+    'favor-fornecedor': `Após análise cuidadosa da situação, verificamos que o fornecedor cumpriu adequadamente os termos acordados.\n\nDECISÃO: Disputa improcedente. O serviço foi executado conforme contratado.\n\nJUSTIFICATÍVA:\n- Serviço entregue dentro do prazo e especificações\n- Fornecedor atendeu todas as solicitações do cliente\n- Evidências comprovam a qualidade do trabalho\n\nO pagamento deve ser liberado integralmente ao fornecedor.`,
+    
+    'acordo': `As partes entraram em acordo para resolução amigável da disputa.\n\nTERMOS DO ACORDO:\n- Ambas as partes concordaram com os ajustes necessários\n- Fornecedor fará as correções solicitadas\n- Cliente aceita o prazo estendido de entrega\n- Valor permanece inalterado\n\nEste acordo foi mediado pela plataforma e é vinculativo para ambas as partes.`,
+    
+    'sem-procedencia': `Após investigação detalhada, não foram encontradas evidências suficientes para caracterizar problemas no serviço prestado.\n\nDECISÃO: Disputa sem procedência.\n\nCONCLUSÃO:\n- Não há violação dos termos contratados\n- Serviço está dentro dos padrões esperados\n- Expectativas do cliente foram alinhadas\n\nO contrato original permanece válido e deve ser cumprido integralmente.`,
+    
+    'reembolso': `Após análise da situação, autorizamos o reembolso solicitado devido à impossibilidade de correção do serviço.\n\nDECISÃO: Reembolso integral autorizado.\n\nDETALHES:\n- Valor a ser reembolsado: R$ {{ disputa.orcamento.get_total_geral|floatformat:2 }}\n- Prazo para processamento: 5 dias úteis\n- Forma de pagamento: mesmo método utilizado na contratação\n\nEsta resolução encerra definitivamente a obrigação contratual.`
+  };
+  
+  // Status labels e classes
+  const statusConfig = {
+    'aberta': { label: 'Aberta', class: 'status-aberta' },
+    'em_analise': { label: 'Em Análise', class: 'status-em_analise' },
+    'resolvida': { label: 'Resolvida', class: 'status-resolvida' },
+    'cancelada': { label: 'Cancelada', class: 'status-cancelada' }
+  };
+  
+  const finalStatusConfig = {
+    'em_atendimento': 'Necessidade volta para Em Atendimento (serviço continua)',
+    'finalizado': 'Necessidade é finalizada (serviço concluído)',
+    'cancelado': 'Necessidade é cancelada (serviço encerrado)'
+  };
+  
+  // Atualizar preview do status
+  function updateStatusPreview() {
+    const selectedValue = statusSelect.value;
+    if (selectedValue && statusConfig[selectedValue]) {
+      statusPreview.textContent = statusConfig[selectedValue].label;
+      statusPreview.className = 'status-preview ' + statusConfig[selectedValue].class;
+    } else {
+      statusPreview.textContent = 'Selecione um status acima';
+      statusPreview.className = 'status-preview';
+    }
+    
+    // Mostrar/esconder campos obrigatórios para "resolvida"
+    const isResolved = selectedValue === 'resolvida';
+    resolucaoTextarea.required = isResolved;
+    finalStatusSelect.required = isResolved;
+    
+    validateForm();
+  }
+  
+  // Atualizar contador e preview da resolução
+  function updateResolucaoPreview() {
+    const text = resolucaoTextarea.value.trim();
+    resolucaoCount.textContent = text.length;
+    
+    if (text.length > 0) {
+      resolucaoText.innerHTML = text.replace(/\n/g, '<br>');
+      resolucaoPreview.style.display = 'block';
+    } else {
+      resolucaoPreview.style.display = 'none';
+    }
+    
+    validateForm();
+  }
+  
+  // Atualizar preview do status final
+  function updateFinalStatusPreview() {
+    const selectedValue = finalStatusSelect.value;
+    if (selectedValue && finalStatusConfig[selectedValue]) {
+      finalStatusText.textContent = finalStatusConfig[selectedValue];
+      finalStatusPreview.style.display = 'block';
+    } else {
+      finalStatusPreview.style.display = 'none';
+    }
+    
+    validateForm();
+  }
+  
+  // Validar formulário
+  function validateForm() {
+    const status = statusSelect.value;
+    const resolucao = resolucaoTextarea.value.trim();
+    const finalStatus = finalStatusSelect.value;
+    
+    let isValid = status !== '';
+    
+    if (status === 'resolvida') {
+      isValid = isValid && resolucao.length >= 20 && finalStatus !== '';
+    }
+    
+    btnResolve.disabled = !isValid;
+  }
+  
+  // Ações rápidas
+  const quickActions = document.querySelectorAll('.quick-action-btn');
+  quickActions.forEach(btn => {
+    btn.addEventListener('click', function() {
+      quickActions.forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      
+      const action = this.dataset.action;
+      
+      if (action !== 'personalizada') {
+        if (action === 'favor-cliente') {
+          statusSelect.value = 'resolvida';
+          finalStatusSelect.value = 'cancelado';
+          resolucaoTextarea.value = templates['favor-cliente'];
+        } else if (action === 'favor-fornecedor') {
+          statusSelect.value = 'resolvida';
+          finalStatusSelect.value = 'finalizado';
+          resolucaoTextarea.value = templates['favor-fornecedor'];
+        } else if (action === 'acordo-mutuo') {
+          statusSelect.value = 'resolvida';
+          finalStatusSelect.value = 'em_atendimento';
+          resolucaoTextarea.value = templates['acordo'];
+        }
+        
+        updateStatusPreview();
+        updateResolucaoPreview();
+        updateFinalStatusPreview();
+        updateFormProgress();
+      }
+    });
+  });
+  
+  // Templates de resolução
+  const templateButtons = document.querySelectorAll('.template-btn');
+  templateButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const template = this.dataset.template;
+      if (templates[template]) {
+        resolucaoTextarea.value = templates[template];
+        updateResolucaoPreview();
+        updateFormProgress();
+        
+        this.style.background = '#10b981';
+        this.style.color = 'white';
+        setTimeout(() => {
+          this.style.background = '';
+          this.style.color = '';
+        }, 1000);
+      }
+    });
+  });
+  
+  // Funções auxiliares
+  window.saveDraft = function() {
+    const formData = {
+      status: statusSelect.value,
+      resolucao: resolucaoTextarea.value,
+      status_final: finalStatusSelect.value,
+      comentarios: document.getElementById('id_comentarios_internos').value
+    };
+    
+    localStorage.setItem(`disputa_draft_{{ disputa.id }}`, JSON.stringify(formData));
+    
+    const btn = document.querySelector('[onclick="saveDraft()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check me-2"></i>Salvo!';
+    btn.classList.add('btn-success');
+    
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.classList.remove('btn-success');
+    }, 2000);
+  };
+  
+  window.previewResolution = function() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Pré-visualização da Resolução</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <strong>Status:</strong> ${statusSelect.options[statusSelect.selectedIndex].text}
+            </div>
+            <div class="alert alert-warning">
+              <strong>Destino da Necessidade:</strong> ${finalStatusSelect.options[finalStatusSelect.selectedIndex].text}
+            </div>
+            <h6>Resolução:</h6>
+            <div class="bg-light p-3 rounded">
+              ${resolucaoTextarea.value.replace(/\\n/g, '<br>')}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="document.getElementById('btnResolve').click()">Confirmar Resolução</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    modal.addEventListener('hidden.bs.modal', function() {
+      document.body.removeChild(modal);
+    });
+  };
+  
+  // Event listeners melhorados
+  statusSelect.addEventListener('change', function() {
+    updateStatusPreview();
+    updateFormProgress();
+  });
+  
+  resolucaoTextarea.addEventListener('input', function() {
+    updateResolucaoPreview();
+    updateFormProgress();
+    
+    clearTimeout(window.draftTimeout);
+    window.draftTimeout = setTimeout(saveDraft, 5000);
+  });
+  
+  finalStatusSelect.addEventListener('change', function() {
+    updateFinalStatusPreview();
+    updateFormProgress();
+  });
+  
+  // Inicializar
+  updateStatusPreview();
+  updateResolucaoPreview();
+  updateFinalStatusPreview();
+  
+  // Confirmação antes de submeter
+  document.getElementById('resolveForm').addEventListener('submit', function(e) {
+    const status = statusSelect.value;
+    let message = 'Tem certeza que deseja aplicar esta resolução?';
+    
+    if (status === 'resolvida') {
+      message = 'Tem certeza que deseja resolver esta disputa? Esta ação irá:\n\n';
+      message += '• Notificar ambas as partes sobre a resolução\n';
+      message += '• Alterar o status da necessidade\n';
+      message += '• Encerrar definitivamente a disputa\n\n';
+      message += 'Esta ação não pode ser desfeita.';
+    }
+    
+    if (!confirm(message)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+});
+</script>
+{% endblock %}

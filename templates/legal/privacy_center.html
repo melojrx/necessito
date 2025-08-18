@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/lgpd-compliance.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+/* Privacy Center Page Styles */
+.privacy-page {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+    padding-top: 0;
+}
+
+.privacy-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+    border-radius: 0 0 30px 30px;
+}
+
+@media (max-width: 768px) {
+    .privacy-hero { 
+        padding: 2rem 0 1.5rem; 
+    }
+    .privacy-hero h1 {
+        font-size: 2rem;
+    }
+    .privacy-page {
+        padding-bottom: 90px; /* Espaço extra para não sobrepor o botão flutuante */
+    }
+    .privacy-center-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .privacy-hero { 
+        padding: 1.5rem 0 1rem; 
+    }
+    .privacy-hero h1 {
+        font-size: 1.75rem;
+    }
+    .privacy-hero p {
+        font-size: 1rem;
+    }
+    .privacy-center-card {
+        padding: 1.25rem;
+    }
+}
+</style>
+
+<div class="privacy-page">
+    <!-- Hero Section -->
+    <div class="privacy-hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-shield-alt me-3"></i>
+                    Central de Privacidade
+                </h1>
+                <p class="lead mb-0 opacity-75">
+                    Gerencie seus dados pessoais e exerça seus direitos de privacidade conforme a LGPD
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+
+    <!-- Privacy Cards -->
+    <div class="row g-4">
+        <!-- Cookie Preferences -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-cookie-bite card-icon"></i>
+                    <h3>Preferências de Cookies</h3>
+                    <p>Configure quais cookies podem ser utilizados durante sua navegação.</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#lgpd-preferences-modal">
+                        <i class="fas fa-cog me-2"></i>Gerenciar Cookies
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Export -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-download card-icon"></i>
+                    <h3>Exportar Meus Dados</h3>
+                    <p>Baixe uma cópia completa de todos os seus dados pessoais.</p>
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'data_export' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-file-export me-2"></i>Exportar Dados
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Correction -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-edit card-icon"></i>
+                    <h3>Corrigir Meus Dados</h3>
+                    <p>Atualize suas informações pessoais e mantenha seu perfil atualizado.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'users:minha_conta_update' pk=user.pk %}" class="btn btn-warning">
+                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Deletion -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-trash-alt card-icon text-danger"></i>
+                    <h3>Excluir Meus Dados</h3>
+                    <p>Solicite a exclusão permanente de todos os seus dados pessoais.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'data_deletion_request' %}" class="btn btn-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Solicitar Exclusão
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact DPO -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-envelope card-icon"></i>
+                    <h3>Contatar DPO</h3>
+                    <p>Entre em contato com nosso Encarregado de Proteção de Dados.</p>
+                    <a href="mailto:dpo@indicaai.com" class="btn btn-info">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Email
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy -->
+        <div class="col-lg-6 col-md-12">
+            <div class="privacy-center-card">
+                <div class="text-center">
+                    <i class="fas fa-file-contract card-icon"></i>
+                    <h3>Política de Privacidade</h3>
+                    <p>Leia nossa política completa de proteção de dados pessoais.</p>
+                    <a href="{% url 'privacy_policy' %}" class="btn btn-secondary">
+                        <i class="fas fa-book-open me-2"></i>Ler Política
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Consent Status -->
+    {% if user_consent %}
+    <div class="mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Status Atual do Consentimento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <strong>Cookies Essenciais</strong>
+                        </div>
+                        <small class="text-muted">Sempre ativos</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            {% if user_consent.analytics %}
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary me-2">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            {% endif %}
+                            <strong>Analytics</strong>
+                        </div>
+                        <small class="text-muted">
+                            {% if user_consent.analytics %}Consentido{% else %}Não consentido{% endif %}
+                        </small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            {% if user_consent.marketing %}
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary me-2">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            {% endif %}
+                            <strong>Marketing</strong>
+                        </div>
+                        <small class="text-muted">
+                            {% if user_consent.marketing %}Consentido{% else %}Não consentido{% endif %}
+                        </small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            {% if user_consent.preferences %}
+                                <span class="badge bg-success me-2">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary me-2">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            {% endif %}
+                            <strong>Preferências</strong>
+                        </div>
+                        <small class="text-muted">
+                            {% if user_consent.preferences %}Consentido{% else %}Não consentido{% endif %}
+                        </small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Data do consentimento:</strong> 
+                            <script>
+                                document.write(new Date({{ user_consent.timestamp }}).toLocaleDateString('pt-BR'));
+                            </script>
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="LGPDConsent.revokeConsent()">
+                            <i class="fas fa-undo me-1"></i>Revogar Consentimento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Your Rights Section -->
+    <div class="mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-balance-scale me-2"></i>Seus Direitos na LGPD
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-eye text-info me-2"></i>Direito de Acesso</h6>
+                        <p class="small text-muted">Você pode solicitar informações sobre quais dados pessoais tratamos sobre você.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-edit text-warning me-2"></i>Direito de Correção</h6>
+                        <p class="small text-muted">Você pode solicitar a correção de dados incompletos, inexatos ou desatualizados.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-download text-success me-2"></i>Direito de Portabilidade</h6>
+                        <p class="small text-muted">Você pode solicitar a transferência de dados para outro prestador de serviços.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-trash text-danger me-2"></i>Direito de Eliminação</h6>
+                        <p class="small text-muted">Você pode solicitar a exclusão de dados desnecessários ou excessivos.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-ban text-secondary me-2"></i>Direito de Oposição</h6>
+                        <p class="small text-muted">Você pode se opor ao tratamento baseado em legítimo interesse.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-undo text-primary me-2"></i>Direito de Revogação</h6>
+                        <p class="small text-muted">Você pode retirar seu consentimento a qualquer momento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center mt-5 pt-4 border-top">
+        <a href="{% url 'ads:home' %}" class="btn btn-primary me-3">
+            <i class="fas fa-home me-2"></i>Voltar ao Início
+        </a>
+        <a href="{% url 'privacy_policy' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-shield-alt me-2"></i>Política de Privacidade
+        </a>
+        <a href="{% url 'terms_of_service' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-file-contract me-2"></i>Termos de Uso
+        </a>
+        </div>
+    </div>
+</div>
+
+{% include 'components/lgpd_cookie_banner.html' %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/lgpd-consent.js' %}"></script>
+{% endblock %}

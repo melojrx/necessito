@@ -260,6 +260,17 @@
                   <span class="text-muted">{{ necessidade.modificado_em|date:"d/m/Y H:i" }}</span>
                 </p>
               {% endif %}
+              {% if necessidade.data_validade %}
+                <p class="mb-2">
+                  <strong>Válido até:</strong> 
+                  <span class="{% if necessidade.esta_proximo_da_expiracao %}text-warning{% elif necessidade.esta_expirado %}text-danger{% else %}text-muted{% endif %}">
+                    {{ necessidade.data_validade|date:"d/m/Y H:i" }}
+                    {% if necessidade.tempo_restante_formatado != "Sem prazo definido" %}
+                      <small class="d-block">{{ necessidade.tempo_restante_formatado }}</small>
+                    {% endif %}
+                  </span>
+                </p>
+              {% endif %}
               <p class="mb-2">
                 <strong>Categoria:</strong> 
                 <span class="text-primary">{{ necessidade.categoria.nome }}</span>
@@ -319,6 +330,10 @@
       {% elif necessidade.status == 'em_atendimento' %}
         <div class="card animate-card mb-4">
           {% include 'components/actions/status_em_atendimento.html' %}
+        </div>
+      {% elif necessidade.status == 'em_disputa' %}
+        <div class="card animate-card mb-4">
+          {% include 'components/actions/status_em_disputa.html' %}
         </div>
       {% elif necessidade.status == 'finalizado' %}
         {% include 'components/actions/status_finalizado.html' %}
@@ -473,7 +488,7 @@
             <p class="text-muted">
               Os orçamentos recebidos são informações confidenciais e só podem ser visualizados pelo anunciante.
             </p>
-            {% if user != necessidade.cliente and necessidade.status in 'ativo,em_andamento' %}
+            {% if user != necessidade.cliente and necessidade.status in 'ativo,em_atendimento' %}
               <a href="{% url 'budgets:submeter_orcamento' necessidade.id %}" class="btn btn-primary">
                 <i class="fas fa-file-invoice-dollar me-2"></i>
                 Enviar Meu Orçamento
@@ -1083,92 +1098,245 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (modalEl && formContainer) {
     modalEl.addEventListener('show.bs.modal', () => {
+      console.log('🔄 Abrindo modal de avaliação...');
       formContainer.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Carregando formulário…</p>';
 
-      fetch('{% url "avaliar_negociacao" necessidade.pk %}', {
+      fetch('{% url "rankings:avaliar_negociacao" necessidade.pk %}', {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
         .then(response => {
+          console.log(`📡 Resposta AJAX recebida: ${response.status}`);
           if (!response.ok) {
             throw new Error('Falha ao carregar o formulário');
           }
           return response.text();
         })
         .then(html => {
+          console.log('📦 HTML do formulário carregado, inserindo...');
           formContainer.innerHTML = html;
-          initializeStarRating();
-          setupFormSubmission();
+          
+          // CORREÇÃO CRÍTICA: Re-inicializar sistema de estrelas após AJAX
+          setTimeout(() => {
+            console.log('🌟 INICIALIZANDO sistema de estrelas pós-AJAX...');
+            
+            // Tenta múltiplas funções de inicialização (para garantir compatibilidade)
+            const initFunctions = [
+              'initAvaliacaoUnificada',
+              'initAvaliacaoFinal',
+              'initSimpleStars', 
+              'initializeStarRating',
+              'window.initializeStarRating'
+            ];
+            
+            let initialized = false;
+            
+            for (const funcName of initFunctions) {
+              try {
+                const func = funcName.includes('window.') ? 
+                  window[funcName.split('.')[1]] : window[funcName];
+                
+                if (typeof func === 'function') {
+                  console.log(`✅ Executando ${funcName}...`);
+                  func();
+                  initialized = true;
+                  break;
+                }
+              } catch (error) {
+                console.warn(`⚠️ Falha ao executar ${funcName}:`, error);
+              }
+            }
+            
+            if (!initialized) {
+              console.log('📋 Nenhuma função de inicialização encontrada, usando sistema manual...');
+              initManualStarSystem();
+            }
+            
+            console.log('🎉 Sistema de estrelas REATIVADO após AJAX!');
+            
+          }, 100); // Pequeno delay para garantir que DOM foi atualizado
         })
         .catch(error => {
-          console.error('Erro:', error);
+          console.error('💥 Erro ao carregar formulário:', error);
           formContainer.innerHTML = '<div class="alert alert-danger">Não foi possível carregar o formulário de avaliação.</div>';
         });
     });
   }
 
-  function setupFormSubmission() {
-    const formAvaliacao = document.getElementById('form-avaliacao');
-    if (formAvaliacao) {
-      formAvaliacao.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const allRatings = formAvaliacao.querySelectorAll('.star-rating');
-        let todosAvaliados = true;
-
-        allRatings.forEach(rating => {
-          const checked = rating.querySelector('input:checked');
-          if (!checked) {
-            todosAvaliados = false;
-            const container = rating.closest('.mb-4');
-            container.classList.add('border', 'border-danger', 'rounded', 'p-2');
-            if (!container.querySelector('.text-danger')) {
-              const errorMsg = document.createElement('small');
-              errorMsg.className = 'text-danger d-block mt-1';
-              errorMsg.textContent = 'Por favor, selecione uma avaliação';
-              container.appendChild(errorMsg);
+  // Sistema manual de estrelas como fallback
+  function initManualStarSystem() {
+    console.log('🛠️ Inicializando sistema manual de estrelas...');
+    
+    const containers = formContainer.querySelectorAll('.stars-container, .star-rating');
+    console.log(`📊 Encontrados ${containers.length} containers no modal`);
+    
+    containers.forEach(function(container) {
+      const stars = container.querySelectorAll('.star, .star-label, span[data-value]');
+      console.log(`⭐ Container com ${stars.length} estrelas`);
+      
+      // CORREÇÃO: Recuperar valor salvo se existir
+      const fieldName = container.getAttribute('data-field') || 
+                       container.closest('[data-field]')?.getAttribute('data-field');
+      
+      let savedValue = 0;
+      if (fieldName) {
+        const hiddenInput = document.getElementById(`input-${fieldName}`) ||
+                           document.getElementById(`hidden-${fieldName}`) ||
+                           container.querySelector(`input[name="${fieldName}"]`);
+        if (hiddenInput && hiddenInput.value) {
+          savedValue = parseInt(hiddenInput.value);
+          console.log(`🔄 Restaurando valor ${savedValue} para ${fieldName}`);
+        }
+      }
+      
+      stars.forEach(function(star, index) {
+        const value = parseInt(star.getAttribute('data-value') || star.getAttribute('data-rating')) || (index + 1);
+        
+        // Remove listeners antigos para evitar duplicação
+        star.onclick = null;
+        star.onmouseenter = null;
+        
+        // CLICK handler
+        star.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          console.log(`🖱️ CLICK detectado na estrela ${value}`);
+          
+          // Encontra input associado
+          const fieldName = container.getAttribute('data-field') || 
+                           container.closest('[data-field]')?.getAttribute('data-field');
+          
+          let hiddenInput = null;
+          
+          // Múltiplas estratégias para encontrar o input
+          if (fieldName) {
+            hiddenInput = document.getElementById(`input-${fieldName}`) ||
+                         document.getElementById(`hidden-${fieldName}`) ||
+                         container.querySelector(`input[name="${fieldName}"]`);
+          }
+          
+          if (!hiddenInput) {
+            hiddenInput = container.querySelector('input[type="hidden"], input[type="radio"]');
+          }
+          
+          if (hiddenInput) {
+            console.log(`📝 Atualizando input: ${hiddenInput.name || hiddenInput.id}`);
+            hiddenInput.value = value;
+            if (hiddenInput.type === 'radio') {
+              hiddenInput.checked = true;
             }
           } else {
-            const container = rating.closest('.mb-4');
-            container.classList.remove('border', 'border-danger', 'rounded', 'p-2');
-            const errorMsg = container.querySelector('.text-danger');
-            if (errorMsg) errorMsg.remove();
+            console.warn('⚠️ Input não encontrado para a estrela');
+          }
+          
+          // Atualizar visual
+          stars.forEach((s, i) => {
+            s.classList.remove('filled');
+            s.style.color = i < value ? '#ffc107' : '#ddd';
+            if (i < value) {
+              s.classList.add('filled');
+            }
+          });
+          
+          console.log(`✅ Estrela ${value} selecionada com sucesso!`);
+        };
+        
+        // HOVER handler
+        star.onmouseenter = function() {
+          stars.forEach((s, i) => {
+            s.style.color = i < value ? '#ffc107' : '#ddd';
+          });
+        };
+      });
+      
+      // Mouse leave handler
+      container.onmouseleave = function() {
+        // CORREÇÃO: Usar valor do input oculto para manter estado
+        let currentValue = 0;
+        if (fieldName) {
+          const hiddenInput = document.getElementById(`input-${fieldName}`) ||
+                             document.getElementById(`hidden-${fieldName}`) ||
+                             container.querySelector(`input[name="${fieldName}"]`);
+          if (hiddenInput && hiddenInput.value) {
+            currentValue = parseInt(hiddenInput.value);
+          }
+        }
+        
+        stars.forEach((s, i) => {
+          s.classList.remove('filled');
+          s.style.color = '#ddd';
+          
+          if (i < currentValue) {
+            s.classList.add('filled');
+            s.style.color = '#ffc107';
           }
         });
-
-        if (!todosAvaliados) {
-          alert('Por favor, avalie todos os critérios antes de enviar.');
-          return false;
-        }
-
-        const formData = new FormData(formAvaliacao);
-        const submitBtn = formAvaliacao.querySelector('#btn-enviar-avaliacao');
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-
-        fetch(formAvaliacao.action, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+      };
+      
+      // CORREÇÃO CRÍTICA: Restaurar estado visual inicial se houver valor salvo
+      if (savedValue > 0) {
+        stars.forEach((s, i) => {
+          s.classList.remove('filled');
+          s.style.color = '#ddd';
+          
+          if (i < savedValue) {
+            s.classList.add('filled');
+            s.style.color = '#ffc107';
           }
-        })
-          .then(response => {
-            if (response.redirected) {
-              window.location.href = response.url;
-            } else {
-              return response.text();
+        });
+        console.log(`✅ Estado visual restaurado: ${savedValue} estrelas para ${fieldName}`);
+      }
+    });
+    
+    console.log('✅ Sistema manual configurado!');
+    
+    // NOVA FUNCIONALIDADE: Monitor de estado visual para garantir persistência
+    const visualMonitor = setInterval(() => {
+      const allContainers = formContainer.querySelectorAll('.stars-container, .star-rating');
+      
+      allContainers.forEach(container => {
+        const fieldName = container.getAttribute('data-field') || 
+                         container.closest('[data-field]')?.getAttribute('data-field');
+        
+        if (fieldName) {
+          const hiddenInput = document.getElementById(`input-${fieldName}`) ||
+                             document.getElementById(`hidden-${fieldName}`) ||
+                             container.querySelector(`input[name="${fieldName}"]`);
+          
+          if (hiddenInput && hiddenInput.value) {
+            const currentValue = parseInt(hiddenInput.value);
+            const stars = container.querySelectorAll('.star, .star-label, span[data-value]');
+            const filledStars = container.querySelectorAll('.filled').length;
+            
+            // Se visual não corresponde ao valor, corrigir
+            if (filledStars !== currentValue) {
+              console.log(`🔧 Corrigindo estado visual de ${fieldName}: ${filledStars} → ${currentValue}`);
+              stars.forEach((s, i) => {
+                s.classList.remove('filled');
+                s.style.color = '#ddd';
+                
+                if (i < currentValue) {
+                  s.classList.add('filled');
+                  s.style.color = '#ffc107';
+                }
+              });
             }
-          })
-          .catch(error => {
-            console.error('Erro ao enviar avaliação:', error);
-            alert('Erro ao enviar avaliação. Por favor, tente novamente.');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Enviar Avaliação';
-          });
+          }
+        }
+      });
+    }, 2000); // Verificar a cada 2 segundos
+    
+    // Limpar monitor quando modal fechar
+    const modal = document.getElementById('avaliacaoModal');
+    if (modal) {
+      modal.addEventListener('hidden.bs.modal', () => {
+        clearInterval(visualMonitor);
+        console.log('🛑 Monitor visual desativado');
       });
     }
   }
+
+  // Função removida - funcionalidade agora está no modal
 
   function initializeStarRating() {
     const starRatings = document.querySelectorAll('.star-rating');

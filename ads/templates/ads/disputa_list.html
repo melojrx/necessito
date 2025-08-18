@@ -1,0 +1,650 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minhas Disputas{% if user.is_staff %} - Painel Administrativo{% endif %}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .disputes-page {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+  
+  .disputes-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .stat-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+  }
+  
+  .dispute-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  
+  .dispute-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .dispute-header-card {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    position: relative;
+  }
+  
+  .dispute-body {
+    padding: 1.5rem;
+  }
+  
+  .dispute-footer {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .status-aberta { background: #fee2e2; color: #dc2626; }
+  .status-em_analise { background: #fef3c7; color: #d97706; }
+  .status-resolvida { background: #d1fae5; color: #059669; }
+  .status-cancelada { background: #f3f4f6; color: #6b7280; }
+  
+  .urgente-badge {
+    background: #dc2626;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  .user-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .user-cliente { background: #dbeafe; color: #1d4ed8; }
+  .user-fornecedor { background: #dcfce7; color: #16a34a; }
+  
+  .days-counter {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .motivo-preview {
+    color: #6b7280;
+    font-style: italic;
+    margin: 0.5rem 0;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+  }
+  
+  .filter-section {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  
+  .active-filters {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .filter-badge {
+    background: #1976d2;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+  }
+  
+  @media (max-width: 768px) {
+    .dispute-card {
+      margin-bottom: 1rem;
+    }
+    
+    .dispute-header-card {
+      padding: 1rem;
+    }
+    
+    .dispute-body {
+      padding: 1rem;
+    }
+    
+    .dispute-footer {
+      padding: 0.75rem 1rem;
+    }
+    
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .stat-card {
+      padding: 1rem;
+    }
+    
+    .stat-number {
+      font-size: 1.5rem;
+    }
+    
+    .disputes-header {
+      padding: 1.5rem;
+    }
+  }
+  
+  /* Animação para loading */
+  .loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
+  /* Melhorias de acessibilidade */
+  .dispute-card:focus-within {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    outline: none;
+  }
+  
+  .btn:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="disputes-page">
+  <div class="container">
+    <!-- Header -->
+    <div class="disputes-header">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h1><i class="fas fa-balance-scale me-3"></i>Disputas</h1>
+          <p class="mb-0">{% if user.is_staff %}Painel administrativo para gerenciar disputas{% else %}Suas disputas abertas e resolvidas{% endif %}</p>
+        </div>
+        {% if not user.is_staff %}
+          <a href="{% url 'ads:necessidade_list' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Voltar às Necessidades
+          </a>
+        {% endif %}
+      </div>
+      
+      <!-- Estatísticas para Admin -->
+      {% if user.is_staff and total_disputas %}
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-number">{{ total_disputas }}</span>
+            <small>Total de Disputas</small>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ disputas_abertas }}</span>
+            <small>Abertas</small>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ disputas_em_analise }}</span>
+            <small>Em Análise</small>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ disputas_resolvidas }}</span>
+            <small>Resolvidas</small>
+          </div>
+          {% if disputas_urgentes %}
+            <div class="stat-card">
+              <span class="stat-number text-warning">{{ disputas_urgentes }}</span>
+              <small>Urgentes (>48h)</small>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Sistema de Filtros -->
+    <div class="filter-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6><i class="fas fa-filter me-2"></i>Filtros</h6>
+        <button class="btn btn-link btn-sm p-0" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false">
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+      
+      <div class="collapse" id="filtersCollapse">
+        <form method="get" id="filterForm" class="row g-3">
+          <!-- Status Filter -->
+          <div class="col-md-3">
+            <label class="form-label small">Status</label>
+            <select class="form-select form-select-sm" name="status">
+              <option value="">Todos os status</option>
+              <option value="aberta" {% if request.GET.status == 'aberta' %}selected{% endif %}>Aberta</option>
+              <option value="em_analise" {% if request.GET.status == 'em_analise' %}selected{% endif %}>Em Análise</option>
+              <option value="resolvida" {% if request.GET.status == 'resolvida' %}selected{% endif %}>Resolvida</option>
+              <option value="cancelada" {% if request.GET.status == 'cancelada' %}selected{% endif %}>Cancelada</option>
+            </select>
+          </div>
+          
+          <!-- Tipo de Usuário Filter (apenas para admin) -->
+          {% if user.is_staff %}
+          <div class="col-md-3">
+            <label class="form-label small">Aberta por</label>
+            <select class="form-select form-select-sm" name="tipo_usuario">
+              <option value="">Cliente ou Fornecedor</option>
+              <option value="cliente" {% if request.GET.tipo_usuario == 'cliente' %}selected{% endif %}>Cliente</option>
+              <option value="fornecedor" {% if request.GET.tipo_usuario == 'fornecedor' %}selected{% endif %}>Fornecedor</option>
+            </select>
+          </div>
+          {% endif %}
+          
+          <!-- Data Range -->
+          <div class="col-md-3">
+            <label class="form-label small">Período</label>
+            <select class="form-select form-select-sm" name="periodo">
+              <option value="">Qualquer período</option>
+              <option value="hoje" {% if request.GET.periodo == 'hoje' %}selected{% endif %}>Hoje</option>
+              <option value="7dias" {% if request.GET.periodo == '7dias' %}selected{% endif %}>Últimos 7 dias</option>
+              <option value="30dias" {% if request.GET.periodo == '30dias' %}selected{% endif %}>Últimos 30 dias</option>
+              <option value="3meses" {% if request.GET.periodo == '3meses' %}selected{% endif %}>Últimos 3 meses</option>
+            </select>
+          </div>
+          
+          <!-- Urgencia Filter (apenas para admin) -->
+          {% if user.is_staff %}
+          <div class="col-md-3">
+            <label class="form-label small">Urgência</label>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" name="urgente" id="urgenteCheck" {% if request.GET.urgente %}checked{% endif %}>
+              <label class="form-check-label small" for="urgenteCheck">
+                Apenas urgentes (>48h)
+              </label>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Botões de Ação -->
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-search me-1"></i>Aplicar Filtros
+            </button>
+            <a href="{% url 'ads:disputa_list' %}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-undo me-1"></i>Limpar
+            </a>
+            {% if user.is_staff %}
+            <button type="button" class="btn btn-outline-info btn-sm ms-auto" onclick="exportDisputas()">
+              <i class="fas fa-download me-1"></i>Exportar
+            </button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Filtros Ativos -->
+    {% if request.GET.status or request.GET.tipo_usuario or request.GET.periodo or request.GET.urgente %}
+      <div class="active-filters">
+        <div class="d-flex flex-wrap align-items-center">
+          <small class="text-muted me-2">Filtros ativos:</small>
+          {% if request.GET.status %}
+            <span class="filter-badge">Status: {{ request.GET.status|capfirst }}</span>
+          {% endif %}
+          {% if request.GET.tipo_usuario %}
+            <span class="filter-badge">Tipo: {{ request.GET.tipo_usuario|capfirst }}</span>
+          {% endif %}
+          {% if request.GET.periodo %}
+            <span class="filter-badge">Período: {{ request.GET.periodo }}</span>
+          {% endif %}
+          {% if request.GET.urgente %}
+            <span class="filter-badge">Apenas Urgentes</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+    
+    <!-- Lista de Disputas -->
+    {% if disputas %}
+      <div class="disputes-list">
+        {% for disputa in disputas %}
+          <div class="dispute-card">
+            <div class="dispute-header-card">
+              <div class="status-badge status-{{ disputa.status }}">
+                {{ disputa.get_status_display }}
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h5 class="mb-1">{{ disputa.necessidade.titulo }}</h5>
+                  <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+                    {% if not user.is_staff %}
+                      <span class="user-type-badge user-{% if user == disputa.necessidade.cliente %}cliente{% else %}fornecedor{% endif %}">
+                        Você: {% if user == disputa.necessidade.cliente %}Cliente{% else %}Fornecedor{% endif %}
+                      </span>
+                    {% endif %}
+                    {% if disputa.precisa_atencao_admin %}
+                      <span class="urgente-badge">URGENTE</span>
+                    {% endif %}
+                    {% if user.is_staff %}
+                      <span class="user-type-badge user-cliente">Cliente: {{ disputa.necessidade.cliente.get_full_name }}</span>
+                      <span class="user-type-badge user-fornecedor">Fornecedor: {{ disputa.orcamento.fornecedor.get_full_name }}</span>
+                    {% endif %}
+                  </div>
+                  <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>Aberta em {{ disputa.data_abertura|date:"d/m/Y H:i" }}
+                    <span class="days-counter ms-3">
+                      <i class="fas fa-clock me-1"></i>{{ disputa.get_dias_em_aberto }} dias em aberto
+                    </span>
+                  </small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="dispute-body">
+              <!-- Informações das partes (apenas se não for staff) -->
+              {% if not user.is_staff %}
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <small class="text-muted">Cliente:</small><br>
+                  <strong>{{ disputa.necessidade.cliente.get_full_name }}</strong>
+                </div>
+                <div class="col-md-6">
+                  <small class="text-muted">Fornecedor:</small><br>
+                  <strong>{{ disputa.orcamento.fornecedor.get_full_name }}</strong>
+                </div>
+              </div>
+              {% endif %}
+              
+              <!-- Preview do motivo -->
+              <p class="motivo-preview">
+                "{{ disputa.motivo|truncatechars:150 }}"
+              </p>
+              
+              <!-- Valor do orçamento -->
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted">Valor do serviço: <strong>R$ {{ disputa.orcamento.get_total_geral|floatformat:2 }}</strong></span>
+                {% if disputa.status == 'resolvida' %}
+                  <small class="text-success">
+                    <i class="fas fa-check me-1"></i>Resolvida em {{ disputa.data_resolucao|date:"d/m/Y" }}
+                  </small>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="dispute-footer">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <a href="{% url 'ads:disputa_detail' disputa.pk %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye me-1"></i>Ver Detalhes
+                  </a>
+                  {% if user.is_staff and disputa.esta_ativa %}
+                    <a href="{% url 'ads:disputa_resolver' disputa.pk %}" class="btn btn-warning btn-sm">
+                      <i class="fas fa-gavel me-1"></i>Resolver
+                    </a>
+                  {% endif %}
+                </div>
+                
+                <small class="text-muted">
+                  Aberta por: 
+                  <strong class="text-{% if disputa.get_tipo_usuario_abertura == 'cliente' %}primary{% else %}info{% endif %}">
+                    {{ disputa.get_tipo_usuario_abertura|capfirst }}
+                  </strong>
+                </small>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Paginação -->
+      {% if is_paginated %}
+        <nav aria-label="Paginação das disputas">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; Primeira</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&lsaquo; Anterior</a>
+              </li>
+            {% endif %}
+            
+            <li class="page-item active">
+              <span class="page-link">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+              </span>
+            </li>
+            
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima &rsaquo;</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última &raquo;</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+      
+    {% else %}
+      <!-- Estado Vazio -->
+      <div class="dispute-card">
+        <div class="empty-state">
+          <i class="fas fa-balance-scale fa-4x mb-3 text-muted"></i>
+          <h4>Nenhuma disputa encontrada</h4>
+          {% if user.is_staff %}
+            <p>Não há disputas registradas no sistema.</p>
+          {% else %}
+            <p>Você não possui disputas abertas ou resolvidas.</p>
+            <a href="{% url 'ads:necessidade_list' %}" class="btn btn-primary mt-3">
+              <i class="fas fa-list me-2"></i>Ver Minhas Necessidades
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-refresh para administradores (a cada 30 segundos)
+  {% if user.is_staff %}
+    let autoRefreshInterval;
+    
+    function startAutoRefresh() {
+      autoRefreshInterval = setInterval(function() {
+        // Apenas refresh se não há modals abertos e usuário não está interagindo
+        if (!document.querySelector('.modal.show') && !document.querySelector('.collapse.show')) {
+          // Adicionar indicador de loading
+          const container = document.querySelector('.disputes-list');
+          if (container) {
+            container.classList.add('loading');
+          }
+          location.reload();
+        }
+      }, 30000);
+    }
+    
+    // Pausar auto-refresh quando usuário está interagindo
+    document.addEventListener('mouseenter', function() {
+      clearInterval(autoRefreshInterval);
+    });
+    
+    document.addEventListener('mouseleave', function() {
+      startAutoRefresh();
+    });
+    
+    startAutoRefresh();
+  {% endif %}
+  
+  // Sistema de filtros com AJAX
+  const filterForm = document.getElementById('filterForm');
+  if (filterForm) {
+    // Auto-submit quando filtros mudam
+    const selects = filterForm.querySelectorAll('select, input[type="checkbox"]');
+    selects.forEach(select => {
+      select.addEventListener('change', function() {
+        // Delay para evitar múltiplas submissions
+        clearTimeout(window.filterTimeout);
+        window.filterTimeout = setTimeout(() => {
+          filterForm.submit();
+        }, 300);
+      });
+    });
+  }
+  
+  // Função de exportação para admins
+  {% if user.is_staff %}
+  window.exportDisputas = function() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    window.open(`${window.location.pathname}?${params.toString()}`, '_blank');
+  };
+  {% endif %}
+  
+  // Adicionar tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+  
+  // Melhorar acessibilidade com navegação por teclado
+  const disputeCards = document.querySelectorAll('.dispute-card');
+  disputeCards.forEach((card, index) => {
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'article');
+    card.setAttribute('aria-label', `Disputa ${index + 1}`);
+    
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const detailLink = card.querySelector('a[href*="disputa_detail"]');
+        if (detailLink) {
+          detailLink.click();
+        }
+      }
+    });
+  });
+  
+  // Lazy loading para listas grandes
+  if ('IntersectionObserver' in window) {
+    const cards = document.querySelectorAll('.dispute-card');
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animated');
+          cardObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '50px'
+    });
+    
+    cards.forEach(card => {
+      cardObserver.observe(card);
+    });
+  }
+});
+
+// Adicionar CSS para animações
+const style = document.createElement('style');
+style.textContent = `
+  .dispute-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  .dispute-card.animated {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .dispute-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .dispute-card {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

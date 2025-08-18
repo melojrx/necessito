@@ -17,6 +17,7 @@
     <!-- Custom CSS for Modern UI -->
     <link rel="stylesheet" href="{% static 'css/necessity-cards.css' %}">
     <link rel="stylesheet" href="{% static 'css/mobile-navigation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/lgpd-compliance.css' %}">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Favicon -->
@@ -198,6 +199,12 @@
         $("#id_cnpj").mask("00.000.000/0000-00");
       });
     </script>
+    
+    <!-- LGPD Cookie Consent Banner -->
+    {% include 'components/lgpd_cookie_banner.html' %}
+    
+    <!-- LGPD Consent Management Script -->
+    <script src="{% static 'js/lgpd-consent.js' %}"></script>
     
     <!-- Mobile Bottom Navigation -->
     {% include 'components/bottom_nav.html' %}

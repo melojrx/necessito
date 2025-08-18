@@ -16,7 +16,12 @@ from core.views import (
     TermsOfServiceView,
     PrivacyPolicyView,
     IntellectualPropertyView,
-    SitemapView
+    SitemapView,
+    PrivacyCenterView,
+    DataExportView,
+    DataDeletionRequestView,
+    LGPDConsentLogView,
+    CookiePreferencesView
 )
 
 urlpatterns = [
@@ -45,6 +50,15 @@ urlpatterns = [
     path('termos-de-uso/', TermsOfServiceView.as_view(), name='terms_of_service'),
     path('politica-de-privacidade/', PrivacyPolicyView.as_view(), name='privacy_policy'),
     path('propriedade-intelectual/', IntellectualPropertyView.as_view(), name='intellectual_property'),
+    
+    # LGPD Compliance
+    path('central-de-privacidade/', PrivacyCenterView.as_view(), name='privacy_center'),
+    path('exportar-dados/', DataExportView.as_view(), name='data_export'),
+    path('solicitar-exclusao/', DataDeletionRequestView.as_view(), name='data_deletion_request'),
+    path('preferencias-cookies/', CookiePreferencesView.as_view(), name='cookie_preferences'),
+    
+    # LGPD API
+    path('api/v1/lgpd/consent-log/', LGPDConsentLogView.as_view(), name='lgpd_consent_log'),
     
     # Central de Ajuda - Página Principal
     path('ajuda/', HelpView.as_view(), name='help'),

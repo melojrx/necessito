@@ -66,7 +66,7 @@
                                     
                                     <!-- Status da necessidade -->
                                     <div class="mb-2">
-                                        <span class="badge {% if chat.necessidade.status == 'ativo' %}bg-success{% elif chat.necessidade.status == 'em_andamento' %}bg-warning{% elif chat.necessidade.status == 'finalizado' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        <span class="badge {% if chat.necessidade.status == 'ativo' %}bg-success{% elif chat.necessidade.status == 'em_atendimento' %}bg-warning{% elif chat.necessidade.status == 'finalizado' %}bg-info{% else %}bg-secondary{% endif %}">
                                             {{ chat.necessidade.get_status_display }}
                                         </span>
                                     </div>

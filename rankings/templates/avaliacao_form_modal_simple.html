@@ -1,0 +1,188 @@
+{% load static %}
+
+<style>
+.rating-criteria {
+    margin-bottom: 2rem;
+}
+
+.rating-criteria .mb-3 {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.rating-criteria .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.rating-labels {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* ESTRELAS SUPER SIMPLES */
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.star {
+    font-size: 30px;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.star:hover,
+.star.filled {
+    color: #ffc107;
+}
+
+.star:hover {
+    transform: scale(1.1);
+}
+</style>
+  
+<form method="post" action="{% url 'rankings:avaliar_negociacao' necessidade.pk %}">
+  {% csrf_token %}
+
+  <p class="mb-3">
+    {% if tipo_avaliacao == 'fornecedor' %}
+      Avalie o <strong>fornecedor</strong> com base nos seguintes critérios:
+    {% else %}
+      Avalie o <strong>cliente</strong> com base nos seguintes critérios:
+    {% endif %}
+  </p>
+
+  <div class="rating-criteria">
+    {% for field in form %}
+      {% if field.name|slice:":9" == "criterio_" %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          
+          <!-- SISTEMA SUPER SIMPLES COM UNICODE -->
+          <div class="star-rating" data-field="{{ field.name }}">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+          
+          <!-- Input hidden para enviar o valor -->
+          <input type="hidden" name="{{ field.name }}" value="" id="hidden-{{ field.name }}">
+          
+          <div class="rating-labels d-flex justify-content-between">
+            <small>Nada satisfeito</small>
+            <small>Muito satisfeito</small>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+    <button type="submit" class="btn btn-primary">Enviar Avaliação</button>
+  </div>
+</form>
+
+<script>
+// SISTEMA ULTRA BÁSICO COM UNICODE
+console.log('🌟 Sistema de estrelas UNICODE carregando...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    initSimpleStars();
+});
+
+// Também exporta globalmente para AJAX
+window.initSimpleStars = initSimpleStars;
+
+function initSimpleStars() {
+    console.log('⭐ Inicializando estrelas simples...');
+    
+    const containers = document.querySelectorAll('.star-rating');
+    console.log(`📊 Encontrados ${containers.length} containers`);
+    
+    containers.forEach(function(container) {
+        const fieldName = container.getAttribute('data-field');
+        const stars = container.querySelectorAll('.star');
+        const hiddenInput = document.getElementById(`hidden-${fieldName}`);
+        
+        console.log(`🔧 Configurando ${stars.length} estrelas para ${fieldName}`);
+        
+        if (!hiddenInput) {
+            console.error(`❌ Input oculto não encontrado para ${fieldName}`);
+            return;
+        }
+        
+        stars.forEach(function(star, index) {
+            const value = parseInt(star.getAttribute('data-value'));
+            
+            // CLICK
+            star.onclick = function() {
+                console.log(`🖱️ Click na estrela ${value} do campo ${fieldName}`);
+                
+                // Remove filled de todas
+                stars.forEach(s => s.classList.remove('filled'));
+                
+                // Adiciona filled até a estrela clicada
+                for (let i = 0; i < value; i++) {
+                    stars[i].classList.add('filled');
+                }
+                
+                // Atualiza input oculto
+                hiddenInput.value = value;
+                
+                console.log(`✅ Valor ${value} definido para ${fieldName}`);
+            };
+            
+            // HOVER
+            star.onmouseenter = function() {
+                stars.forEach((s, i) => {
+                    if (i < value) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = s.classList.contains('filled') ? '#ffc107' : '#ddd';
+                    }
+                });
+            };
+        });
+        
+        // MOUSE LEAVE - restaura estado
+        container.onmouseleave = function() {
+            stars.forEach(s => {
+                s.style.color = s.classList.contains('filled') ? '#ffc107' : '#ddd';
+            });
+        };
+    });
+    
+    console.log('🎉 Estrelas simples inicializadas!');
+}
+
+// Validação
+document.querySelector('form').onsubmit = function(e) {
+    const hiddens = document.querySelectorAll('input[type="hidden"][name^="criterio_"]');
+    let missing = [];
+    
+    hiddens.forEach(function(input) {
+        if (!input.value) {
+            missing.push(input.name);
+        }
+    });
+    
+    if (missing.length > 0) {
+        e.preventDefault();
+        alert(`Por favor, avalie todos os critérios: ${missing.join(', ')}`);
+        return false;
+    }
+};
+
+console.log('📝 Sistema completo carregado!');
+</script>

@@ -57,6 +57,48 @@
             </button>
           </div>
           
+          <!-- Seção de Resolução de Problemas -->
+          <div class="problem-resolution-section mb-3">
+            <div class="section-header">
+              <h6 class="mb-2">
+                <i class="fas fa-shield-alt me-2 text-warning"></i>
+                Problemas com o Serviço?
+              </h6>
+              <p class="small text-muted mb-3">Tente resolver primeiro conversando, mas se necessário, podemos ajudar</p>
+            </div>
+            
+            <div class="resolution-options">
+              <!-- Chat Prioritário -->
+              <div class="resolution-option chat-option">
+                <div class="option-icon">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <div class="option-content">
+                  <div class="option-title">Converse Primeiro</div>
+                  <div class="option-description">90% dos problemas são resolvidos no diálogo</div>
+                </div>
+                <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="option-action btn btn-sm btn-outline-primary">
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+              
+              <!-- Mediação -->
+              <div class="resolution-option dispute-option">
+                <div class="option-icon warning">
+                  <i class="fas fa-balance-scale"></i>
+                </div>
+                <div class="option-content">
+                  <div class="option-title">Solicitar Mediação</div>
+                  <div class="option-description">Nossa equipe analisará a situação</div>
+                </div>
+                <button type="button" class="option-action btn btn-sm btn-outline-warning" 
+                        data-bs-toggle="modal" data-bs-target="#disputeInfoModal">
+                  <i class="fas fa-gavel"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
           <div class="alert alert-info small">
             <i class="fas fa-info-circle me-1"></i>
             <strong>Próximo passo:</strong> Após receber o serviço/produto, clique em "Finalizar Serviço" para liberar a avaliação.
@@ -115,6 +157,48 @@
               <i class="fas fa-file-alt me-1"></i>
               Ver Contrato
             </a>
+          </div>
+          
+          <!-- Seção de Resolução de Problemas para Fornecedor -->
+          <div class="problem-resolution-section mb-3">
+            <div class="section-header">
+              <h6 class="mb-2">
+                <i class="fas fa-handshake me-2 text-success"></i>
+                Dificuldades na Execução?
+              </h6>
+              <p class="small text-muted mb-3">Mantenha o cliente informado ou solicite ajuda se necessário</p>
+            </div>
+            
+            <div class="resolution-options">
+              <!-- Chat Prioritário -->
+              <div class="resolution-option chat-option">
+                <div class="option-icon">
+                  <i class="fas fa-comments"></i>
+                </div>
+                <div class="option-content">
+                  <div class="option-title">Comunicar com Cliente</div>
+                  <div class="option-description">Mantenha o diálogo sempre aberto</div>
+                </div>
+                <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="option-action btn btn-sm btn-outline-primary">
+                  <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+              
+              <!-- Mediação -->
+              <div class="resolution-option dispute-option">
+                <div class="option-icon warning">
+                  <i class="fas fa-life-ring"></i>
+                </div>
+                <div class="option-content">
+                  <div class="option-title">Solicitar Ajuda</div>
+                  <div class="option-description">Se houver impasse, podemos mediar</div>
+                </div>
+                <button type="button" class="option-action btn btn-sm btn-outline-warning" 
+                        data-bs-toggle="modal" data-bs-target="#disputeInfoModal">
+                  <i class="fas fa-gavel"></i>
+                </button>
+              </div>
+            </div>
           </div>
           
           <div class="alert alert-warning small">
@@ -226,6 +310,139 @@
 </div>
 {% endif %}
 
+<!-- Modal Informativo sobre Mediação -->
+<div class="modal fade" id="disputeInfoModal" tabindex="-1" aria-labelledby="disputeInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="disputeInfoModalLabel">
+          <i class="fas fa-balance-scale me-2 text-warning"></i>
+          Solicitar Mediação
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mediation-info">
+          <!-- Processo de Mediação -->
+          <div class="info-section mb-4">
+            <h6 class="info-title">
+              <i class="fas fa-info-circle me-2 text-primary"></i>
+              Como Funciona a Mediação?
+            </h6>
+            <div class="process-steps">
+              <div class="process-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <strong>Solicitação:</strong> Você descreve o problema em detalhes
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <strong>Análise:</strong> Nossa equipe especializada investiga o caso
+                </div>
+              </div>
+              <div class="process-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <strong>Resolução:</strong> Buscamos a melhor solução para ambas as partes
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quando Usar -->
+          <div class="info-section mb-4">
+            <h6 class="info-title">
+              <i class="fas fa-question-circle me-2 text-success"></i>
+              Quando Solicitar Mediação?
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="use-case good">
+                  <i class="fas fa-check-circle me-2"></i>
+                  <strong>Use quando:</strong>
+                  <ul class="mt-2">
+                    <li>Não conseguir resolver por chat</li>
+                    <li>Houver descumprimento de acordo</li>
+                    <li>Surgirem mal-entendidos sérios</li>
+                    <li>Precisar de ajuda imparcial</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="use-case avoid">
+                  <i class="fas fa-times-circle me-2"></i>
+                  <strong>Evite usar para:</strong>
+                  <ul class="mt-2">
+                    <li>Dúvidas simples</li>
+                    <li>Pequenos ajustes</li>
+                    <li>Comunicação rotineira</li>
+                    <li>Questões já resolvidas</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Importante Saber -->
+          <div class="info-section mb-4">
+            <h6 class="info-title">
+              <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+              O Que Acontece Durante a Mediação?
+            </h6>
+            <div class="alert alert-warning">
+              <ul class="mb-0">
+                <li><strong>O serviço é pausado</strong> temporariamente</li>
+                <li><strong>Ambas as partes são notificadas</strong> sobre a solicitação</li>
+                <li><strong>O chat permanece ativo</strong> para comunicação</li>
+                <li><strong>Nossa equipe analisa</strong> documentos e conversas</li>
+                <li><strong>Decisão é tomada</strong> em até 3 dias úteis</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Alternativas -->
+          <div class="info-section">
+            <h6 class="info-title">
+              <i class="fas fa-lightbulb me-2 text-info"></i>
+              Antes de Prosseguir - Que Tal Tentar:
+            </h6>
+            <div class="alternatives">
+              <div class="alternative-option">
+                <i class="fas fa-comments text-primary"></i>
+                <div>
+                  <strong>Conversar mais uma vez</strong>
+                  <p class="small text-muted mb-0">Explique claramente suas preocupações</p>
+                </div>
+                <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-sm btn-outline-primary ms-auto">Ir para Chat</a>
+              </div>
+              <div class="alternative-option">
+                <i class="fas fa-phone text-success"></i>
+                <div>
+                  <strong>Ligar ou usar vídeo</strong>
+                  <p class="small text-muted mb-0">Comunicação direta pode resolver rapidamente</p>
+                </div>
+                <small class="text-muted ms-auto">Use o chat para combinar</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>
+          Vou tentar conversar mais
+        </button>
+        <a href="{% url 'ads:disputa_create' necessidade.pk %}" class="btn btn-warning">
+          <i class="fas fa-gavel me-2"></i>
+          Continuar com Mediação
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
 .timeline-container {
   display: flex;
@@ -270,5 +487,257 @@
 @keyframes working {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
+}
+
+/* Estilos para Seção de Resolução de Problemas */
+.problem-resolution-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.section-header h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.resolution-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resolution-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.resolution-option:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.option-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.chat-option .option-icon {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.dispute-option .option-icon.warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.option-content {
+  flex-grow: 1;
+}
+
+.option-title {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.option-description {
+  color: #6c757d;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.option-action {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.option-action:hover {
+  transform: scale(1.1);
+}
+
+/* Estilos do Modal */
+.mediation-info {
+  font-size: 0.95rem;
+}
+
+.info-section {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1.5rem;
+}
+
+.info-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.process-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.process-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  color: #495057;
+  line-height: 1.4;
+}
+
+.use-case {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.use-case.good {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.use-case.avoid {
+  background: #f8d7da;
+  border: 1px solid #f1c2c7;
+  color: #721c24;
+}
+
+.use-case ul {
+  margin-bottom: 0;
+  padding-left: 1.2rem;
+}
+
+.use-case li {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alternative-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.alternative-option i {
+  font-size: 1.2rem;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.alternative-option div {
+  flex-grow: 1;
+}
+
+.alternative-option strong {
+  display: block;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .problem-resolution-section {
+    padding: 1rem;
+  }
+  
+  .resolution-option {
+    padding: 0.75rem;
+  }
+  
+  .option-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .option-title {
+    font-size: 0.9rem;
+  }
+  
+  .option-description {
+    font-size: 0.8rem;
+  }
+  
+  .process-steps {
+    gap: 0.75rem;
+  }
+  
+  .step-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+  
+  .use-case {
+    padding: 0.75rem;
+  }
+  
+  .alternative-option {
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+  }
+  
+  .alternative-option .btn {
+    align-self: center;
+    margin-top: 0.5rem;
+  }
 }
 </style>

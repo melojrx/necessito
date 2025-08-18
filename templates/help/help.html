@@ -1,27 +1,232 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}{{ page_title }}{% endblock %}
-
-{% block meta_description %}{{ page_description }}{% endblock %}
-{% block meta_keywords %}{{ page_keywords }}{% endblock %}
-
-{% block content %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Central de Ajuda" }} - Necessito</title>
+    <meta name="description" content="{{ page_description|default:"Central de ajuda completa da plataforma Indicaai. Tutoriais, dúvidas frequentes e suporte para usuários." }}">
+    <meta name="keywords" content="{{ page_keywords|default:"ajuda, suporte, tutorial, FAQ, dúvidas, Indicaai" }}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Variáveis do Design System */
+        :root {
+            --primary-color: #007BFF;
+            --primary-gradient: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --shadow-medium: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+            --shadow-strong: 0 16px 48px 0 rgba(31, 38, 135, 0.55);
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-elastic: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --text-accent: #007BFF;
+        }
+        
+        /* Reset e Base */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header Standalone */
+        .standalone-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-soft);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+        
+        .standalone-header .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .standalone-header .navbar-brand img {
+            height: 50px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+        
+        .standalone-header .brand-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin-left: 0.5rem;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav-link {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: var(--transition-smooth);
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-accent);
+            background: rgba(0, 123, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .cta-button {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: var(--transition-elastic);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .cta-button:hover {
+            background: #0056b3;
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+            text-decoration: none;
+        }
+        
+        /* Footer Standalone */
+        .standalone-footer {
+            background: linear-gradient(135deg, #0d1421 0%, #1a2332 50%, #2c3e50 100%);
+            color: #ffffff;
+            border-top: 4px solid;
+            border-image: linear-gradient(90deg, #0d6efd 0%, #28a745 25%, #17a2b8 50%, #6f42c1 75%, #fd7e14 100%) 1;
+        }
+        
+        .standalone-footer .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .standalone-footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .standalone-footer a:hover {
+            color: #28a745;
+        }
+        
+        /* Responsividade Mobile */
+        @media (max-width: 768px) {
+            .standalone-header .brand-text {
+                font-size: 1.5rem;
+            }
+            
+            .nav-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+                margin-top: 1rem;
+            }
+            
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Standalone -->
+    <header class="standalone-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'ads:home' %}">
+                    <img src="{% static 'img/logo2.png' %}" alt="Indicaai">
+                    <span class="brand-text">Indicaai</span>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav ms-auto">
+                        <div class="nav-actions">
+                            <a href="{% url 'ads:home' %}" class="nav-link">
+                                <i class="fas fa-home me-2"></i>Início
+                            </a>
+                            <a href="{% url 'search:necessidade_search_all' %}" class="nav-link">
+                                <i class="fas fa-search me-2"></i>Buscar
+                            </a>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'users:minha_conta_detail' user.pk %}" class="nav-link">
+                                <i class="fas fa-user me-2"></i>Minha Conta
+                            </a>
+                            {% else %}
+                            <a href="{% url 'users:login' %}" class="nav-link">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'ads:necessidade_create' %}" class="cta-button">
+                                <i class="fas fa-bullhorn"></i>
+                                <span>Anunciar grátis</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Conteúdo Principal -->
+<div class="help-page">
 <style>
-/* Central de Ajuda - Estilos Padronizados */
+/* Central de Ajuda - Estilos Padronizados seguindo padrão do privacy-center */
+.help-page {
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    min-height: 100vh;
+}
+
 .help-container {
-    padding-top: 2rem;
     padding-bottom: 2rem;
 }
 
 .help-hero {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     color: white;
-    padding: 4rem 0 3rem;
-    margin-bottom: 3rem;
-    border-radius: 15px;
+    padding: 3rem 0 2rem;
+    margin-bottom: 1.375rem; /* 2rem - 10px (0.625rem) */
+    border-radius: 0 0 30px 30px;
 }
 
 .help-breadcrumb {
@@ -41,21 +246,26 @@
     text-decoration: underline;
 }
 
-.help-section-card {
+.help-section-card,
+.help-category-card {
     border: none;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     margin-bottom: 2rem;
     height: 100%;
+    padding: 2rem;
+    background: white;
+    text-align: center;
 }
 
-.help-section-card:hover {
+.help-section-card:hover,
+.help-category-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.help-section-icon {
+.help-category-icon {
     width: 80px;
     height: 80px;
     background: rgba(0, 123, 255, 0.1);
@@ -66,6 +276,14 @@
     margin: 0 auto 1.5rem;
     flex-shrink: 0;
 }
+
+.card-start .help-category-icon { background: rgba(40, 167, 69, 0.1); }
+.card-announce .help-category-icon { background: rgba(13, 110, 253, 0.1); }
+.card-budget .help-category-icon { background: rgba(255, 193, 7, 0.1); }
+.card-chat .help-category-icon { background: rgba(23, 162, 184, 0.1); }
+.card-rating .help-category-icon { background: rgba(253, 126, 20, 0.1); }
+.card-support .help-category-icon { background: rgba(108, 117, 125, 0.1); }
+
 
 .help-card-title {
     color: #333;
@@ -80,12 +298,24 @@
     line-height: 1.6;
 }
 
-.btn-help {
+.btn-help,
+.help-action-btn {
     border-radius: 25px;
     padding: 0.75rem 1.5rem;
     font-weight: 500;
     text-decoration: none;
     transition: all 0.3s ease;
+    background: #007bff;
+    color: white;
+    border: none;
+}
+
+.help-action-btn:hover,
+.btn-help:hover {
+    background: #0056b3;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
 }
 
 .search-container {
@@ -96,19 +326,26 @@
     margin-bottom: 3rem;
 }
 
-.search-input {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 1rem;
-    font-size: 1.1rem;
-    width: 100%;
-    box-shadow: none;
-    transition: border-color 0.3s ease;
+.help-hero .input-group {
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.search-input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.help-hero .input-group-text {
+    border: none;
+    padding: 1rem;
+}
+
+.help-hero .form-control {
+    border: none;
+    padding: 1rem;
+    font-size: 1.1rem;
+    box-shadow: none;
+}
+
+.help-hero .form-control:focus {
+    box-shadow: none;
     outline: none;
 }
 
@@ -197,13 +434,18 @@
 }
 
 /* Responsividade melhorada */
+
 @media (max-width: 768px) {
-    .help-hero {
-        padding: 2rem 0;
-        margin-bottom: 2rem;
+    .help-hero { 
+        padding: 2rem 0 1.5rem; 
     }
-    
-    .help-section-icon {
+    .help-hero h1 {
+        font-size: 2rem;
+    }
+    .help-page {
+        padding-bottom: 90px; /* Espaço extra para mobile como no privacy-center */
+    }
+    .help-category-icon {
         width: 60px;
         height: 60px;
     }
@@ -214,10 +456,15 @@
     
     .search-container {
         padding: 1.5rem;
+        margin-bottom: 1rem;
     }
     
-    .search-input {
+    .help-hero .form-control {
         font-size: 1rem;
+        padding: 0.875rem;
+    }
+    
+    .help-hero .input-group-text {
         padding: 0.875rem;
     }
     
@@ -233,19 +480,23 @@
 }
 
 @media (max-width: 576px) {
-    .help-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+    .help-hero { 
+        padding: 1.5rem 0 1rem; 
+    }
+    .help-hero h1 {
+        font-size: 1.75rem;
+    }
+    .help-hero p {
+        font-size: 1rem;
     }
     
-    .help-hero {
-        border-radius: 10px;
-        padding: 1.5rem 0;
+    .help-container {
+        padding-bottom: 1rem; /* Remove padding-top desnecessário */
     }
     
     .search-container {
         border-radius: 10px;
-        padding: 1rem;
+        padding: 1.25rem;
     }
 }
 
@@ -273,7 +524,9 @@
 }
 </style>
 
-<div class="help-page">
+<!-- Container principal como minha-conta -->
+<div class="container">
+    
     <!-- Hero Section -->
     <div class="help-hero">
         <div class="container">
@@ -288,17 +541,21 @@
                 
                 <!-- Barra de Busca -->
                 <div class="position-relative mx-auto" style="max-width: 500px;">
-                    <i class="fas fa-search help-search-icon"></i>
-                    <input type="text" class="form-control help-search-input" 
-                           placeholder="Busque por tutoriais, dúvidas frequentes..." 
-                           id="helpSearchInput">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" 
+                               placeholder="Busque por tutoriais, dúvidas frequentes..." 
+                               id="helpSearchInput">
+                    </div>
                     <div class="search-results" id="searchResults" style="display: none;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container py-5">
+    <!-- Container do conteúdo seguindo padrão minha-conta -->
         <!-- Cards de Categorias -->
         <div class="row g-4 mb-5">
             <!-- Card 1: Começar -->
@@ -596,87 +853,115 @@
                 </a>
             </div>
         </div>
-    </div>
+    
+</div> <!-- Fecha container principal -->
+
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Busca inteligente
-    const searchInput = document.getElementById('helpSearchInput');
-    const searchResults = document.getElementById('searchResults');
     
-    const searchData = [
-        { title: 'Como criar uma conta', category: 'Começar' },
-        { title: 'Publicar primeiro anúncio', category: 'Anunciar' },
-        { title: 'Enviar orçamento', category: 'Orçamentos' },
-        { title: 'Como usar o chat', category: 'Comunicação' },
-        { title: 'Sistema de avaliações', category: 'Avaliações' },
-        { title: 'Problemas técnicos', category: 'Suporte' }
-    ];
-    
-    let searchTimeout;
-    
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        const query = this.value.trim().toLowerCase();
-        
-        if (query.length < 2) {
-            searchResults.style.display = 'none';
-            return;
-        }
-        
-        searchTimeout = setTimeout(() => {
-            const results = searchData.filter(item => 
-                item.title.toLowerCase().includes(query) || 
-                item.category.toLowerCase().includes(query)
-            ).slice(0, 5);
-            
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div class="p-3 text-center text-muted">Nenhum resultado encontrado</div>';
-            } else {
-                searchResults.innerHTML = results.map(result => 
-                    `<div class="p-3 border-bottom">
-                        <strong>${result.title}</strong><br>
-                        <small class="text-muted">${result.category}</small>
-                    </div>`
-                ).join('');
-            }
-            
-            searchResults.style.display = 'block';
-            searchResults.style.position = 'absolute';
-            searchResults.style.top = '100%';
-            searchResults.style.left = '0';
-            searchResults.style.right = '0';
-            searchResults.style.background = 'white';
-            searchResults.style.borderRadius = '12px';
-            searchResults.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
-            searchResults.style.zIndex = '1000';
-            searchResults.style.marginTop = '0.5rem';
-        }, 300);
-    });
-    
-    // Fechar resultados ao clicar fora
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.position-relative')) {
-            searchResults.style.display = 'none';
-        }
-    });
-});
-</script>
-{% endblock %}
-
-<section class="hero-section bg-primary text-white">
-    <div class="container py-5">
-        <div class="row align-items-center">
-            <div class="col-lg-8 mx-auto text-center">
-                <div class="hero-icon mb-4">
-                    <i class="fas fa-life-ring display-1 text-white opacity-75"></i>
+    <!-- Footer Standalone -->
+    <footer class="standalone-footer mt-auto">
+        <div class="container">
+            <div class="row py-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% static 'img/logo1.png' %}" alt="Logo Indicaai" height="40" class="me-3">
+                        <span class="h5 mb-0">Indicaai</span>
+                    </div>
+                    <p class="text-muted">A plataforma que conecta pessoas e negócios</p>
                 </div>
-                <h1 class="display-4 fw-bold mb-3">Central de Ajuda</h1>
-                <p class="lead mb-4 opacity-90">
-                    Encontre respostas, tutoriais e dicas para aproveitar ao máximo nossa plataforma
-                </p>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-3">
+                        <a href="{% url 'ads:home' %}" class="text-muted me-3">Home</a>
+                        <a href="{% url 'privacy_policy' %}" class="text-muted me-3">Privacidade</a>
+                        <a href="{% url 'terms_of_service' %}" class="text-muted">Termos</a>
+                    </div>
+                    <p class="text-muted small mb-0">© 2025 Indicaai - Todos os direitos reservados</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript da página -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Busca inteligente
+        const searchInput = document.getElementById('helpSearchInput');
+        const searchResults = document.getElementById('searchResults');
+        
+        const searchData = [
+            { title: 'Como criar uma conta', category: 'Começar' },
+            { title: 'Publicar primeiro anúncio', category: 'Anunciar' },
+            { title: 'Enviar orçamento', category: 'Orçamentos' },
+            { title: 'Como usar o chat', category: 'Comunicação' },
+            { title: 'Sistema de avaliações', category: 'Avaliações' },
+            { title: 'Problemas técnicos', category: 'Suporte' }
+        ];
+        
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim().toLowerCase();
+                
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    const results = searchData.filter(item => 
+                        item.title.toLowerCase().includes(query) || 
+                        item.category.toLowerCase().includes(query)
+                    ).slice(0, 5);
+                    
+                    if (results.length === 0) {
+                        searchResults.innerHTML = '<div class="p-3 text-center text-muted">Nenhum resultado encontrado</div>';
+                    } else {
+                        searchResults.innerHTML = results.map(result => 
+                            `<div class="p-3 border-bottom">
+                                <strong>${result.title}</strong><br>
+                                <small class="text-muted">${result.category}</small>
+                            </div>`
+                        ).join('');
+                    }
+                    
+                    searchResults.style.display = 'block';
+                    searchResults.style.position = 'absolute';
+                    searchResults.style.top = '100%';
+                    searchResults.style.left = '0';
+                    searchResults.style.right = '0';
+                    searchResults.style.background = 'white';
+                    searchResults.style.borderRadius = '12px';
+                    searchResults.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+                    searchResults.style.zIndex = '1000';
+                    searchResults.style.marginTop = '0.5rem';
+                }, 300);
+            });
+            
+            // Fechar resultados ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.position-relative')) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        }
+        
+        // Animações suaves para botões
+        const buttons = document.querySelectorAll('.cta-button, .help-action-btn');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.05)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

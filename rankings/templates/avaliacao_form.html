@@ -1,30 +1,55 @@
 <!-- rankings/templates/rankings/avaliacao_form.html -->
 {% load static %}
 <style>
-  .star-rating {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: center;
-      direction: rtl;
-  }
-  
-  .star-rating input {
-      display: none;
-  }
-  
-  .star-rating label {
-      width: 30px;
-      height: 30px;
-      background: url('/static/img/star-empty.svg') no-repeat center center;
-      background-size: contain;
-  }
-  
-  .star-rating input:checked ~ label,
-  .star-rating label:hover,
-  .star-rating label:hover ~ label {
-      background-image: url('/static/img/star-filled.svg');
-  }
-  </style>
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    width: 35px;
+    height: 35px;
+    background: url('/static/img/star-empty.svg') no-repeat center center;
+    background-size: contain;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    filter: grayscale(0.3);
+}
+
+.star-rating label:hover {
+    transform: scale(1.1);
+    filter: grayscale(0);
+}
+
+.rating-criteria {
+    margin-bottom: 2rem;
+}
+
+.rating-criteria .mb-3 {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.rating-criteria .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.rating-labels {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+</style>
 <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <!-- Cabeçalho do modal -->
@@ -35,7 +60,7 @@
   
       <!-- Corpo do modal -->
       <div class="modal-body">
-        <form method="post" action="{% url 'avaliar_negociacao' necessidade.pk %}">
+        <form method="post" action="{% url 'rankings:avaliar_negociacao' necessidade.pk %}">
           {% csrf_token %}
   
           <!-- Texto introdutório com base no tipo de avaliação -->
@@ -74,4 +99,71 @@
       </div>
     </div>
   </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona funcionalidade interativa às estrelas
+    document.querySelectorAll('.star-rating').forEach(function(starContainer) {
+        const inputs = starContainer.querySelectorAll('input[type="radio"]');
+        const labels = starContainer.querySelectorAll('label');
+        
+        // Função para atualizar visual das estrelas
+        function updateStars(rating = 0, isHover = false) {
+            inputs.forEach(function(input, index) {
+                const label = input.nextElementSibling;
+                const starValue = parseInt(input.value);
+                const isFilled = starValue <= rating;
+                
+                if (isFilled) {
+                    label.style.backgroundImage = "url('/static/img/star-filled.svg')";
+                    label.style.opacity = isHover ? '0.8' : '1';
+                    label.style.filter = 'grayscale(0)';
+                } else {
+                    label.style.backgroundImage = "url('/static/img/star-empty.svg')";
+                    label.style.opacity = isHover ? '0.3' : '1';
+                    label.style.filter = 'grayscale(0.3)';
+                }
+            });
+        }
+        
+        // Event listeners para hover e clique
+        labels.forEach(function(label) {
+            label.addEventListener('mouseenter', function() {
+                const input = this.previousElementSibling;
+                const rating = parseInt(input.value);
+                updateStars(rating, true);
+            });
+            
+            label.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                input.checked = true;
+                const rating = parseInt(input.value);
+                updateStars(rating, false);
+                // Trigger change event
+                input.dispatchEvent(new Event('change'));
+            });
+        });
+        
+        // Event listener para mouse leave
+        starContainer.addEventListener('mouseleave', function() {
+            const checkedInput = starContainer.querySelector('input:checked');
+            const currentRating = checkedInput ? parseInt(checkedInput.value) : 0;
+            updateStars(currentRating, false);
+        });
+        
+        // Event listeners para clique/seleção
+        inputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                const rating = parseInt(this.value);
+                updateStars(rating, false);
+            });
+        });
+        
+        // Inicialização: mostra estado inicial
+        const checkedInput = starContainer.querySelector('input:checked');
+        const initialRating = checkedInput ? parseInt(checkedInput.value) : 0;
+        updateStars(initialRating, false);
+    });
+});
+</script>
   

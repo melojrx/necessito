@@ -48,7 +48,7 @@ def get_valores_metrics():
     # 3️⃣ Valor Total de Transações em Andamento: orçamentos aceitos vinculados a anúncios NÃO finalizados
     valor_total_transacoes_andamento = OrcamentoItem.objects.filter(
         orcamento__status='confirmado',
-        orcamento__anuncio__status__in=['em_andamento', 'em_atendimento']
+        orcamento__anuncio__status__in=['em_atendimento']
     ).aggregate(
         total=Coalesce(
             Sum(F('quantidade') * F('valor_unitario')), 

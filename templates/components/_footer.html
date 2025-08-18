@@ -459,6 +459,9 @@
                         <a href="{% url 'help' %}" class="footer-link">
                             <i class="fas fa-chevron-right"></i>Como funciona
                         </a>
+                        <a href="https://necessito.online/api/docs/" class="footer-link" target="_blank">
+                            <i class="fas fa-code"></i>API para Desenvolvedores
+                        </a>
                     </div>
                 </div>
 
@@ -494,12 +497,6 @@
                         <a href="#" class="footer-link">
                             <i class="fas fa-chevron-right"></i>Dicas de orçamento
                         </a>
-                        <a href="#" class="footer-link">
-                            <i class="fas fa-chevron-right"></i>Programa de destaque
-                        </a>
-                        <a href="#" class="footer-link">
-                            <i class="fas fa-chevron-right"></i>Central do fornecedor
-                        </a>
                     </div>
                 </div>
 
@@ -512,6 +509,9 @@
                         </a>
                         <a href="{% url 'privacy_policy' %}" class="footer-link">
                             <i class="fas fa-chevron-right"></i>Política de privacidade
+                        </a>
+                        <a href="{% url 'privacy_center' %}" class="footer-link">
+                            <i class="fas fa-chevron-right"></i>Central de privacidade
                         </a>
                         <a href="{% url 'intellectual_property' %}" class="footer-link">
                             <i class="fas fa-chevron-right"></i>Propriedade intelectual
@@ -664,6 +664,7 @@
                 <div class="footer-legal-links">
                     <a href="{% url 'terms_of_service' %}">Termos</a>
                     <a href="{% url 'privacy_policy' %}">Privacidade</a>
+                    <a href="{% url 'privacy_center' %}">Central de Privacidade</a>
                     <a href="{% url 'security_tips' %}">Segurança</a>
                     <a href="{% url 'help' %}">Ajuda</a>
                 </div>

@@ -499,6 +499,11 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="dropdown-item" href="{% url 'ads:disputa_list' %}">
+                                    <i class="fas fa-balance-scale"></i> Minhas Disputas
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="{% url 'ads:dashboard' %}">
                                     <i class="fas fa-tachometer-alt"></i> Dashboard
                                 </a>
@@ -621,6 +626,11 @@
             <li class="list-group-item border-0 px-0">
                 <a class="nav-link d-flex align-items-center" href="{% url 'budgets:budget_list' %}">
                     <i class="fas fa-file-invoice-dollar me-3"></i>Meus Orçamentos
+                </a>
+            </li>
+            <li class="list-group-item border-0 px-0">
+                <a class="nav-link d-flex align-items-center" href="{% url 'ads:disputa_list' %}">
+                    <i class="fas fa-balance-scale me-3"></i>Minhas Disputas
                 </a>
             </li>
             {% if user.is_staff %}

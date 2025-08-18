@@ -18,7 +18,11 @@
             {% endif %}
             <div class="card-footer-info">
                 <span class="date-text">{{ anuncio.data_criacao|date:"d/m/Y" }}</span>
-                {% if anuncio.duracao %}
+                {% if anuncio.data_validade and not anuncio.esta_expirado %}
+                <span class="app-badge {% if anuncio.esta_proximo_da_expiracao %}badge-warning{% else %}badge-info{% endif %}" title="Válido até {{ anuncio.data_validade|date:'d/m/Y H:i' }}">
+                    {{ anuncio.tempo_restante_formatado }}
+                </span>
+                {% elif anuncio.duracao %}
                 <span class="app-badge">{{ anuncio.duracao }}</span>
                 {% elif anuncio.status and show_status %}
                 <span class="app-badge badge-{{ anuncio.status }}">{{ anuncio.get_status_display }}</span>

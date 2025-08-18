@@ -1,8 +1,14 @@
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 from users.models import User
 from categories.models import Categoria, SubCategoria
 from decimal import Decimal
+from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Necessidade(models.Model):
     cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="necessidades")
@@ -57,7 +63,6 @@ class Necessidade(models.Model):
         ('ativo', 'Ativo'), # Anúncio ativo e disponível para orçamentos
         ('analisando_orcamentos', 'Analisando orçamentos'), # Já recebeu pelo menos um orçamento. O cliente está analisando as propostas.
         ('aguardando_confirmacao', 'Aguardando confirmação'), # Cliente aceitou um orçamento. Aguardando a confirmação do fornecedor.
-        ('em_andamento', 'Em andamento'), # Anúncio com orçamento em andamento disparado após o aceite pelo anunciate.
         ('em_atendimento', 'Em atendimento'), # Anúncio com orçamento aceito pelo anunciante e pelo fornecedor. 
         ('finalizado', 'Finalizado'), # Após a entrega do serviço ou produto, o anúncio é finalizado manualmente pelo anunciante.
         ('cancelado', 'Cancelado'), # Anúncio cancelado pelo anunciante.
@@ -66,6 +71,12 @@ class Necessidade(models.Model):
     ], default='ativo')
     ip_usuario = models.GenericIPAddressField(blank=True, null=True, help_text="Endereço IP do usuário que cadastrou o anúncio")
     duracao = models.CharField(max_length=20, blank=True, null=True, help_text="Duração do serviço ou entrega (ex.: 7 dias, 3 horas)")
+    data_validade = models.DateTimeField(
+        "Data de validade",
+        null=True,
+        blank=True,
+        help_text="Data e hora em que o anúncio expirará automaticamente. Se não informado, será definido automaticamente para 30 dias após a criação."
+    )
     
     # ==================== CAMPOS DE ENDEREÇO DO SERVIÇO ====================
     usar_endereco_usuario = models.BooleanField(
@@ -323,6 +334,88 @@ class Necessidade(models.Model):
     def get_confirmed_budget(self):
         """Retorna o orçamento confirmado (se houver)."""
         return self.orcamentos.filter(status='confirmado').first()
+    
+    # ==================== MÉTODOS DE DATA DE VALIDADE ====================
+    
+    def clean(self):
+        """Validação customizada do modelo."""
+        super().clean()
+        # Pular validação se for uma operação de expiração automática
+        if hasattr(self, '_skip_validation'):
+            return
+            
+        if self.data_validade and self.data_validade <= timezone.now():
+            raise ValidationError({
+                'data_validade': 'A data de validade deve ser no futuro.'
+            })
+    
+    def save(self, *args, **kwargs):
+        """Override do save para definir data_validade automaticamente se não informada."""
+        # Se é uma nova instância e não tem data_validade definida, define para 30 dias
+        if not self.pk and not self.data_validade:
+            self.data_validade = timezone.now() + timedelta(days=30)
+        
+        # Chama validação antes de salvar (apenas se não for para pular)
+        if not kwargs.pop('skip_validation', False):
+            self.clean()
+        super().save(*args, **kwargs)
+    
+    def dias_restantes(self):
+        """Calcula quantos dias restam até a expiração."""
+        if not self.data_validade:
+            return None
+        
+        diferenca = self.data_validade - timezone.now()
+        if diferenca.total_seconds() <= 0:
+            return 0
+        
+        return diferenca.days
+    
+    def horas_restantes(self):
+        """Calcula quantas horas restam até a expiração."""
+        if not self.data_validade:
+            return None
+        
+        diferenca = self.data_validade - timezone.now()
+        if diferenca.total_seconds() <= 0:
+            return 0
+        
+        return int(diferenca.total_seconds() / 3600)
+    
+    def esta_expirado(self):
+        """Verifica se o anúncio está expirado."""
+        if not self.data_validade:
+            return False
+        return timezone.now() > self.data_validade
+    
+    def esta_proximo_da_expiracao(self, dias=3):
+        """Verifica se o anúncio está próximo da expiração (padrão: 3 dias)."""
+        if not self.data_validade:
+            return False
+        diferenca = self.data_validade - timezone.now()
+        return 0 < diferenca.total_seconds() <= (dias * 24 * 3600)
+    
+    def tempo_restante_formatado(self):
+        """Retorna o tempo restante formatado de forma legível."""
+        if not self.data_validade:
+            return "Sem prazo definido"
+        
+        if self.esta_expirado():
+            return "Expirado"
+        
+        dias = self.dias_restantes()
+        horas = self.horas_restantes() % 24
+        
+        if dias > 0:
+            if dias == 1:
+                return f"{dias} dia restante"
+            return f"{dias} dias restantes"
+        elif horas > 0:
+            if horas == 1:
+                return f"{horas} hora restante"
+            return f"{horas} horas restantes"
+        else:
+            return "Expira em breve"
 
     def __str__(self):
         return self.titulo
@@ -340,3 +433,301 @@ class AnuncioImagem(models.Model):
 
     def __str__(self):
         return f"Imagem {self.id} - {self.anuncio.titulo}"
+
+
+class Disputa(models.Model):
+    """
+    Model para sistema de disputas entre clientes e fornecedores.
+    Permite mediação de conflitos durante o atendimento de necessidades.
+    """
+    
+    # Relacionamentos principais
+    necessidade = models.ForeignKey(
+        Necessidade, 
+        on_delete=models.CASCADE, 
+        related_name='disputas',
+        verbose_name='Necessidade em disputa'
+    )
+    orcamento = models.ForeignKey(
+        'budgets.Orcamento', 
+        on_delete=models.CASCADE, 
+        related_name='disputas',
+        verbose_name='Orçamento relacionado',
+        help_text='Orçamento que estava sendo executado quando a disputa foi aberta'
+    )
+    
+    # Usuário que iniciou a disputa
+    usuario_abertura = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='disputas_abertas',
+        verbose_name='Usuário que abriu a disputa'
+    )
+    
+    # Detalhes da disputa
+    motivo = models.TextField(
+        'Motivo da disputa',
+        help_text='Descreva detalhadamente o problema ou conflito'
+    )
+    
+    STATUS_CHOICES = [
+        ('aberta', 'Aberta'),
+        ('em_analise', 'Em análise'),
+        ('resolvida', 'Resolvida'),
+        ('cancelada', 'Cancelada'),
+    ]
+    status = models.CharField(
+        'Status da disputa',
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='aberta'
+    )
+    
+    # Resolução da disputa (preenchido pelo admin)
+    resolucao = models.TextField(
+        'Resolução da disputa',
+        blank=True,
+        help_text='Resolução ou comentários do administrador'
+    )
+    
+    # Usuário admin que resolveu a disputa
+    resolvida_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='disputas_resolvidas',
+        verbose_name='Resolvida por',
+        help_text='Administrador que resolveu a disputa'
+    )
+    
+    # Status final da necessidade após resolução
+    STATUS_FINAL_CHOICES = [
+        ('em_atendimento', 'Voltar para Em Atendimento'),
+        ('finalizado', 'Finalizar Necessidade'),
+        ('cancelado', 'Cancelar Necessidade'),
+    ]
+    status_final_necessidade = models.CharField(
+        'Status final da necessidade',
+        max_length=20,
+        choices=STATUS_FINAL_CHOICES,
+        blank=True,
+        help_text='Para onde a necessidade deve ir após resolução da disputa'
+    )
+    
+    # Anexos/evidências
+    arquivo_evidencia = models.FileField(
+        'Arquivo de evidência',
+        upload_to='disputas/evidencias/%Y/%m/%d/',
+        null=True,
+        blank=True,
+        help_text='Anexe arquivos que comprovem sua alegação (fotos, documentos, etc.)'
+    )
+    
+    # Timestamps
+    data_abertura = models.DateTimeField('Data de abertura', auto_now_add=True)
+    data_resolucao = models.DateTimeField('Data de resolução', null=True, blank=True)
+    data_modificacao = models.DateTimeField('Última modificação', auto_now=True)
+    
+    # Metadados para auditoria
+    ip_usuario_abertura = models.GenericIPAddressField(
+        'IP do usuário',
+        blank=True, 
+        null=True,
+        help_text="IP do usuário que abriu a disputa"
+    )
+    
+    # Comentários internos (visível apenas para admins)
+    comentarios_internos = models.TextField(
+        'Comentários internos',
+        blank=True,
+        help_text='Comentários visíveis apenas para administradores'
+    )
+    
+    class Meta:
+        verbose_name = 'Disputa'
+        verbose_name_plural = 'Disputas'
+        ordering = ['-data_abertura']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['data_abertura']),
+            models.Index(fields=['necessidade', 'status']),
+            models.Index(fields=['usuario_abertura']),
+        ]
+    
+    def __str__(self):
+        return f"Disputa #{self.pk} - {self.necessidade.titulo}"
+    
+    def clean(self):
+        """Validações customizadas do modelo."""
+        super().clean()
+        
+        # Validar se a necessidade está em status válido para disputa
+        if self.necessidade.status != 'em_atendimento':
+            raise ValidationError({
+                'necessidade': 'Disputas só podem ser abertas para necessidades em atendimento.'
+            })
+        
+        # Validar se o orçamento está relacionado à necessidade
+        if self.orcamento.anuncio != self.necessidade:
+            raise ValidationError({
+                'orcamento': 'O orçamento deve estar relacionado à necessidade em disputa.'
+            })
+        
+        # Validar se o orçamento está confirmado
+        if self.orcamento.status != 'confirmado':
+            raise ValidationError({
+                'orcamento': 'Só é possível abrir disputa para orçamentos confirmados.'
+            })
+        
+        # Validar se o usuário pode abrir disputa (cliente ou fornecedor)
+        if self.usuario_abertura not in [self.necessidade.cliente, self.orcamento.fornecedor]:
+            raise ValidationError({
+                'usuario_abertura': 'Apenas cliente ou fornecedor podem abrir disputas.'
+            })
+    
+    def save(self, *args, **kwargs):
+        """Override do save para controlar transições de estado."""
+        is_new = not self.pk
+        old_status = None
+        
+        if not is_new:
+            old_instance = Disputa.objects.get(pk=self.pk)
+            old_status = old_instance.status
+        
+        # Definir data de resolução quando status muda para resolvida
+        if self.status == 'resolvida' and old_status != 'resolvida':
+            if not self.data_resolucao:
+                from django.utils import timezone
+                self.data_resolucao = timezone.now()
+        
+        # Chama validação antes de salvar
+        self.clean()
+        super().save(*args, **kwargs)
+        
+        # Se é nova disputa, atualizar status da necessidade
+        if is_new:
+            self._atualizar_status_necessidade_para_disputa()
+        
+        # Se disputa foi resolvida, executar ações pós-resolução
+        if self.status == 'resolvida' and old_status != 'resolvida':
+            self._executar_pos_resolucao()
+    
+    def _atualizar_status_necessidade_para_disputa(self):
+        """Atualiza status da necessidade para 'em_disputa' quando disputa é aberta."""
+        try:
+            state_machine = self.necessidade.get_state_machine()
+            state_machine.transition_to('em_disputa')
+            logger.info(f"Necessidade {self.necessidade.pk} movida para 'em_disputa' devido à disputa {self.pk}")
+        except Exception as e:
+            logger.error(f"Erro ao atualizar status da necessidade para disputa: {e}")
+    
+    def _executar_pos_resolucao(self):
+        """Executa ações após resolução da disputa."""
+        if not self.status_final_necessidade:
+            logger.warning(f"Disputa {self.pk} resolvida sem status final definido")
+            return
+        
+        try:
+            state_machine = self.necessidade.get_state_machine()
+            state_machine.transition_to(self.status_final_necessidade, user=self.resolvida_por)
+            
+            # Enviar notificações
+            self._enviar_notificacoes_resolucao()
+            
+            logger.info(f"Disputa {self.pk} resolvida. Necessidade movida para '{self.status_final_necessidade}'")
+        except Exception as e:
+            logger.error(f"Erro ao executar pós-resolução da disputa {self.pk}: {e}")
+    
+    def _enviar_notificacoes_resolucao(self):
+        """Envia notificações quando disputa é resolvida."""
+        try:
+            from notifications.models import Notification, NotificationType
+            
+            # Notificar cliente
+            Notification.objects.create(
+                user=self.necessidade.cliente,
+                title='Disputa Resolvida',
+                message=f'A disputa sobre "{self.necessidade.titulo}" foi resolvida pela administração.',
+                notification_type=NotificationType.SYSTEM_MESSAGE,
+                necessidade=self.necessidade,
+                metadata={'disputa_id': self.pk, 'resolucao': self.resolucao}
+            )
+            
+            # Notificar fornecedor
+            Notification.objects.create(
+                user=self.orcamento.fornecedor,
+                title='Disputa Resolvida',
+                message=f'A disputa sobre "{self.necessidade.titulo}" foi resolvida pela administração.',
+                notification_type=NotificationType.SYSTEM_MESSAGE,
+                necessidade=self.necessidade,
+                metadata={'disputa_id': self.pk, 'resolucao': self.resolucao}
+            )
+            
+        except ImportError:
+            logger.warning("Sistema de notificações não disponível")
+    
+    # Métodos de permissão e estado
+    def pode_ser_resolvida_por(self, user):
+        """Verifica se usuário pode resolver a disputa."""
+        return user.is_staff or user.is_superuser
+    
+    def pode_ser_cancelada_por(self, user):
+        """Verifica se usuário pode cancelar a disputa."""
+        # Apenas quem abriu pode cancelar (se ainda estiver aberta)
+        return (self.usuario_abertura == user and self.status == 'aberta') or user.is_staff
+    
+    def pode_ser_visualizada_por(self, user):
+        """Verifica se usuário pode visualizar a disputa."""
+        return (
+            user == self.necessidade.cliente or 
+            user == self.orcamento.fornecedor or 
+            user.is_staff
+        )
+    
+    def get_contraparte(self, user):
+        """Retorna a contraparte na disputa (cliente ou fornecedor)."""
+        if user == self.necessidade.cliente:
+            return self.orcamento.fornecedor
+        elif user == self.orcamento.fornecedor:
+            return self.necessidade.cliente
+        return None
+    
+    def get_tipo_usuario_abertura(self):
+        """Retorna se quem abriu foi cliente ou fornecedor."""
+        if self.usuario_abertura == self.necessidade.cliente:
+            return 'cliente'
+        elif self.usuario_abertura == self.orcamento.fornecedor:
+            return 'fornecedor'
+        return 'outro'
+    
+    def get_dias_em_aberto(self):
+        """Retorna quantos dias a disputa está em aberto."""
+        from django.utils import timezone
+        if self.status in ['resolvida', 'cancelada']:
+            data_fim = self.data_resolucao or self.data_modificacao
+        else:
+            data_fim = timezone.now()
+        
+        diferenca = data_fim - self.data_abertura
+        return diferenca.days
+    
+    def get_absolute_url(self):
+        """Retorna URL absoluta da disputa."""
+        from django.urls import reverse
+        return reverse('ads:disputa_detail', args=[str(self.pk)])
+    
+    @property
+    def esta_ativa(self):
+        """Verifica se a disputa está ativa (não resolvida nem cancelada)."""
+        return self.status in ['aberta', 'em_analise']
+    
+    @property
+    def precisa_atencao_admin(self):
+        """Verifica se a disputa precisa de atenção administrativa."""
+        if self.status != 'aberta':
+            return False
+        
+        # Disputas abertas há mais de 48 horas precisam de atenção
+        from django.utils import timezone
+        return (timezone.now() - self.data_abertura).total_seconds() > 48 * 3600

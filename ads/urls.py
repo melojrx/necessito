@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (
     FinalizarAnuncioView, HomeView, NecessidadeListView, NecessidadeCreateView,
-    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView, DashboardView, anuncios_geolocalizados, enviar_mensagem, geolocalizar_usuario, dados_compartilhamento
+    NecessidadeDetailView, NecessidadeUpdateView, NecessidadeDeleteView, AnunciosPorCategoriaListView, DashboardView, anuncios_geolocalizados, enviar_mensagem, geolocalizar_usuario, dados_compartilhamento,
+    # Views de Disputas
+    DisputaCreateView, DisputaListView, DisputaDetailView, DisputaResolverView, DisputaCancelarView
 )
 
 app_name = 'ads'
@@ -20,6 +22,13 @@ urlpatterns = [
     path('necessidade/<int:pk>/compartilhar/', dados_compartilhamento, name='dados_compartilhamento'),
     path('api/anuncios-geolocalizados/', anuncios_geolocalizados, name='anuncios_geolocalizados'),
     path('api/geolocalizar-usuario/', geolocalizar_usuario, name='geolocalizar_usuario'),
+    
+    # URLs de Disputas
+    path('disputas/', DisputaListView.as_view(), name='disputa_list'),
+    path('disputas/<int:pk>/', DisputaDetailView.as_view(), name='disputa_detail'),
+    path('disputas/<int:pk>/resolver/', DisputaResolverView.as_view(), name='disputa_resolver'),
+    path('disputas/<int:pk>/cancelar/', DisputaCancelarView.as_view(), name='disputa_cancelar'),
+    path('necessidades/<int:necessidade_pk>/disputas/nova/', DisputaCreateView.as_view(), name='disputa_create'),
 
 ]
 

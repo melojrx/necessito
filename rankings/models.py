@@ -78,7 +78,7 @@ class Avaliacao(models.Model):
     )  # Média das estrelas atribuídas
 
     class Meta:
-        unique_together = ('usuario', 'avaliado', 'anuncio', 'tipo_avaliacao')
+        unique_together = ('usuario', 'anuncio', 'tipo_avaliacao')
         verbose_name = 'Avaliação'
         verbose_name_plural = 'Avaliações'
 

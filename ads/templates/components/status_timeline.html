@@ -35,10 +35,10 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
             </div>
             
             <!-- Linha de conexão -->
-            <div class="timeline-line {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <div class="timeline-line {% if current_status == 'analisando_orcamentos' or current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
             <!-- Recebendo Propostas -->
-            <div class="timeline-step {% if current_status == 'analisando_orcamentos' %}current{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+            <div class="timeline-step {% if current_status == 'analisando_orcamentos' %}current{% elif current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
                 <div class="step-icon">
                     <i class="fas fa-search"></i>
                 </div>
@@ -51,10 +51,10 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
             </div>
             
             <!-- Linha de conexão -->
-            <div class="timeline-line {% if current_status == 'aguardando_confirmacao' or current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <div class="timeline-line {% if current_status == 'aguardando_confirmacao' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
             <!-- Aguardando Confirmação -->
-            <div class="timeline-step {% if current_status == 'aguardando_confirmacao' %}current{% elif current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
+            <div class="timeline-step {% if current_status == 'aguardando_confirmacao' %}current{% elif current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}">
                 <div class="step-icon">
                     <i class="fas fa-clock"></i>
                 </div>
@@ -67,10 +67,10 @@ Usage: {% include 'components/status_timeline.html' with necessidade=necessidade
             </div>
             
             <!-- Linha de conexão -->
-            <div class="timeline-line {% if current_status == 'em_andamento' or current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
+            <div class="timeline-line {% if current_status == 'em_atendimento' or current_status == 'finalizado' %}completed{% endif %}"></div>
             
             <!-- Em Atendimento -->
-            {% if current_status == 'em_andamento' %}
+            {% if current_status == 'em_atendimento' %}
             <div class="timeline-step current">
                 <div class="step-icon">
                     <i class="fas fa-cogs"></i>

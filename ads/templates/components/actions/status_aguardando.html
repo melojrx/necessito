@@ -55,10 +55,10 @@
               <i class="fas fa-times me-1"></i>
               Cancelar Anúncio
             </button>
-            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-primary flex-fill">
+            <button class="btn btn-secondary flex-fill" disabled title="Chat disponível apenas quando o serviço estiver 'Em Atendimento'">
               <i class="fas fa-comments me-1"></i>
-              Conversar
-            </a>
+              Chat Indisponível
+            </button>
           </div>
           {% endif %}
           {% endwith %}
@@ -107,10 +107,10 @@
             </button>
           </div>
           
-          <a href="{% url 'chat:iniciar_chat' necessidade.id %}" class="btn btn-outline-primary w-100">
+          <button class="btn btn-outline-secondary w-100" disabled title="Chat disponível apenas quando o serviço estiver 'Em Atendimento'">
             <i class="fas fa-comments me-1"></i>
-            Conversar com Cliente
-          </a>
+            Chat Indisponível
+          </button>
         </div>
       </div>
     </div>

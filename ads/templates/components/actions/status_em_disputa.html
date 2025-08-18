@@ -1,0 +1,917 @@
+{# Componente de ações para status EM DISPUTA - Versão Otimizada #}
+<div class="status-actions-container" data-status="em_disputa">
+  <div class="row g-3">
+    
+    <!-- Indicador de Status Principal -->
+    <div class="col-12">
+      <div class="dispute-status-indicator">
+        <div class="d-flex align-items-center">
+          <div class="status-icon-animated">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div class="ms-3 flex-grow-1">
+            <h6 class="mb-1 text-danger">Disputa em Andamento</h6>
+            <small class="text-muted">O serviço foi pausado para análise administrativa</small>
+          </div>
+          <div class="dispute-timer" id="disputeTimer">
+            <small class="text-muted">Tempo decorrido:</small>
+            <div class="timer-display"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {# Card principal para todas as partes #}
+    {% if user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-warning shadow-lg dispute-main-card">
+        <div class="card-header bg-gradient text-white position-relative">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="fas fa-gavel me-2 fa-lg"></i>
+              Processo de Mediação Ativo
+            </h6>
+            <div class="dispute-badge">
+              <i class="fas fa-clock me-1"></i>
+              Em Análise
+            </div>
+          </div>
+          <div class="progress-indicator">
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% with disputa_ativa=necessidade.disputas.all|first %}
+          {% if disputa_ativa and disputa_ativa.status != 'resolvida' and disputa_ativa.status != 'cancelada' %}
+          <!-- Alert Moderno -->
+          <div class="modern-alert mb-3">
+            <div class="alert-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="alert-content">
+              <h6 class="alert-title">Mediação em Andamento</h6>
+              <p class="alert-text mb-0">Nossa equipe especializada está analisando esta situação. Vamos buscar a melhor solução para ambas as partes.</p>
+            </div>
+          </div>
+          
+          <!-- Informações da Disputa Melhoradas -->
+          <div class="dispute-info-grid mb-3">
+            <div class="info-card">
+              <div class="info-icon bg-danger">
+                <i class="fas fa-hashtag"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">#{{ disputa_ativa.id }}</div>
+                <div class="info-label">Número do Protocolo</div>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon bg-warning">
+                <i class="fas fa-hourglass-half"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">{{ disputa_ativa.get_status_display }}</div>
+                <div class="info-label">Status Atual</div>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <div class="info-icon bg-info">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">{{ disputa_ativa.get_dias_em_aberto }}</div>
+                <div class="info-label">Dias em Aberto</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Timeline Modernizada -->
+          <div class="modern-timeline mb-3">
+            <div class="timeline-step completed">
+              <div class="step-indicator">
+                <i class="fas fa-play"></i>
+              </div>
+              <div class="step-content">
+                <div class="step-title">Disputa Iniciada</div>
+                <div class="step-time">{{ disputa_ativa.data_abertura|date:"d/m/Y H:i" }}</div>
+                <div class="step-description">Por {% if disputa_ativa.usuario_abertura == necessidade.cliente %}cliente{% else %}fornecedor{% endif %}</div>
+              </div>
+            </div>
+            
+            {% if disputa_ativa.status == 'em_analise' %}
+            <div class="timeline-step active">
+              <div class="step-indicator pulsing">
+                <i class="fas fa-search"></i>
+              </div>
+              <div class="step-content">
+                <div class="step-title">Análise Especializada</div>
+                <div class="step-time">Agora</div>
+                <div class="step-description">Nossa equipe está investigando o caso</div>
+              </div>
+            </div>
+            {% endif %}
+            
+            <div class="timeline-step pending">
+              <div class="step-indicator">
+                <i class="fas fa-flag-checkered"></i>
+              </div>
+              <div class="step-content">
+                <div class="step-title">Resolução</div>
+                <div class="step-description">Aguardando conclusão da análise</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ações Melhoradas -->
+          <div class="action-buttons-modern mb-3">
+            <a href="{% url 'ads:disputa_detail' disputa_ativa.pk %}" 
+               class="action-btn primary">
+              <div class="btn-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="btn-content">
+                <div class="btn-title">Ver Detalhes Completos</div>
+                <div class="btn-subtitle">Timeline e documentos</div>
+              </div>
+              <div class="btn-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+            
+            <a href="{% url 'chat:iniciar_chat' necessidade.id %}" 
+               class="action-btn secondary">
+              <div class="btn-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="btn-content">
+                <div class="btn-title">Continuar Conversa</div>
+                <div class="btn-subtitle">Chat permanece ativo</div>
+              </div>
+              <div class="btn-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+          </div>
+          
+          <!-- Botão Cancelar Melhorado -->
+          {% if disputa_ativa.usuario_abertura == user and disputa_ativa.status == 'aberta' %}
+            <div class="cancel-section mb-3">
+              <div class="cancel-info">
+                <i class="fas fa-info-circle me-2 text-info"></i>
+                <small class="text-muted">Você pode cancelar esta disputa enquanto ela não estiver em análise</small>
+              </div>
+              <form method="post" action="{% url 'ads:disputa_cancelar' disputa_ativa.pk %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100 cancel-btn"
+                        data-bs-toggle="modal" data-bs-target="#cancelDisputeModal">
+                  <i class="fas fa-times me-1"></i>
+                  Cancelar Solicitação de Mediação
+                </button>
+              </form>
+            </div>
+          {% endif %}
+          
+          {% else %}
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-1"></i>
+            A disputa anterior foi resolvida. O serviço pode continuar normalmente.
+          </div>
+          
+          <div class="d-flex gap-2 mb-3">
+            <a href="{% url 'ads:disputa_list' %}" class="btn btn-outline-primary flex-fill">
+              <i class="fas fa-history me-1"></i>
+              Ver Histórico de Disputas
+            </a>
+          </div>
+          {% endif %}
+          {% endwith %}
+          
+          <div class="alert alert-info small">
+            <i class="fas fa-gavel me-1"></i>
+            <strong>Importante:</strong> Durante a disputa, o chat permanece disponível para comunicação entre as partes.
+            Nossa equipe analisará o caso e entrará em contato em breve.
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card para visitantes não logados #}
+    {% if not user.is_authenticated %}
+    <div class="col-12">
+      <div class="card border-warning shadow-sm">
+        <div class="card-header bg-warning text-dark">
+          <h6 class="mb-0">
+            <i class="fas fa-balance-scale me-2"></i>
+            Disputa em Andamento
+          </h6>
+        </div>
+        <div class="card-body text-center">
+          <i class="fas fa-gavel fa-2x text-warning mb-2"></i>
+          <p class="text-muted mb-3">
+            Este anúncio está em processo de mediação administrativa.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="{% url 'users:login' %}?next={{ request.path }}" 
+               class="btn btn-secondary flex-fill">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              Entrar
+            </a>
+            <a href="{% url 'users:register' %}" 
+               class="btn btn-outline-secondary flex-fill">
+              <i class="fas fa-user-plus me-1"></i>
+              Cadastrar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Card de informações do status #}
+    <div class="col-12">
+      <div class="card bg-light border-0">
+        <div class="card-body py-2">
+          <div class="d-flex align-items-center">
+            <div class="status-indicator bg-warning me-2 pulse-animation"></div>
+            <small class="text-muted">
+              <strong>Status:</strong> Disputa em análise - Aguardando resolução administrativa
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cancelamento -->
+{% if disputa_ativa.usuario_abertura == user and disputa_ativa.status == 'aberta' %}
+<div class="modal fade" id="cancelDisputeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cancelar Mediação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+        </div>
+        <h6>Tem certeza que deseja cancelar?</h6>
+        <p class="text-muted">Ao cancelar esta solicitação de mediação:</p>
+        <ul class="text-muted">
+          <li>O serviço voltará ao status anterior</li>
+          <li>A conversa entre as partes será retomada</li>
+          <li>Esta ação não poderá ser desfeita</li>
+        </ul>
+        <div class="alert alert-info">
+          <small><strong>Dica:</strong> Se mudou de ideia, é melhor conversar diretamente com a outra parte primeiro.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não, manter mediação</button>
+        <button type="button" class="btn btn-danger" onclick="confirmCancelDispute()">Sim, cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+/* Novos Estilos Modernos */
+.dispute-status-indicator {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: 1px solid #f59e0b;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dispute-status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.status-icon-animated {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  animation: pulse-scale 2s infinite;
+}
+
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.dispute-timer {
+  text-align: center;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.timer-display {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: bold;
+  color: #dc2626;
+  font-size: 1.1rem;
+}
+
+.dispute-main-card {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.dispute-main-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.dispute-badge {
+  background: rgba(255,255,255,0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.progress-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.3);
+}
+
+.progress-bar {
+  height: 100%;
+  width: 60%;
+  background: rgba(255,255,255,0.8);
+  animation: progress-slide 3s infinite;
+}
+
+@keyframes progress-slide {
+  0% { width: 30%; }
+  50% { width: 80%; }
+  100% { width: 60%; }
+}
+
+.modern-alert {
+  background: #fef9e7;
+  border: 1px solid #f7d794;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.alert-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.alert-title {
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.alert-text {
+  color: #78350f;
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.dispute-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.info-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.info-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-timeline {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.timeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.timeline-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  width: 2px;
+  height: calc(100% + 0.5rem);
+  background: #e5e7eb;
+}
+
+.timeline-step.completed::after {
+  background: #10b981;
+}
+
+.timeline-step.active::after {
+  background: linear-gradient(to bottom, #f59e0b, #e5e7eb);
+}
+
+.step-indicator {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timeline-step.completed .step-indicator {
+  background: #10b981;
+}
+
+.timeline-step.active .step-indicator {
+  background: #f59e0b;
+}
+
+.timeline-step.pending .step-indicator {
+  background: #9ca3af;
+}
+
+.step-indicator.pulsing {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+
+.step-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.step-time {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.step-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.action-buttons-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.action-btn.secondary {
+  background: #f8fafc;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.action-btn:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  text-decoration: none;
+}
+
+.action-btn.primary:hover {
+  color: white;
+}
+
+.action-btn.secondary:hover {
+  background: white;
+  color: #1f2937;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.action-btn.primary .btn-icon {
+  background: rgba(255,255,255,0.2);
+}
+
+.action-btn.secondary .btn-icon {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.btn-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.btn-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.btn-arrow {
+  margin-left: auto;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover .btn-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.cancel-section {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.cancel-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.cancel-btn {
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .dispute-status-indicator {
+    padding: 1rem;
+  }
+  
+  .dispute-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .modern-timeline {
+    padding: 1rem;
+  }
+  
+  .action-btn {
+    padding: 0.75rem;
+  }
+  
+  .btn-title {
+    font-size: 0.9rem;
+  }
+  
+  .btn-subtitle {
+    font-size: 0.75rem;
+  }
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.1);
+  }
+}
+
+.dispute-info {
+  background: #fff3cd;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 4px solid #ffc107;
+}
+
+.timeline-dispute {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.dispute-actions .btn {
+  transition: all 0.3s ease;
+}
+
+.dispute-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Animações de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dispute-main-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.info-card {
+  animation: fadeInUp 0.6s ease-out;
+  animation-delay: calc(var(--delay, 0) * 0.1s);
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+
+<script>
+// JavaScript para funcionalidades melhoradas
+document.addEventListener('DOMContentLoaded', function() {
+  // Timer da disputa
+  const disputeTimer = document.getElementById('disputeTimer');
+  if (disputeTimer) {
+    const startDate = new Date('{{ disputa_ativa.data_abertura|date:"c" }}');
+    
+    function updateTimer() {
+      const now = new Date();
+      const diff = now - startDate;
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      const timerDisplay = disputeTimer.querySelector('.timer-display');
+      if (timerDisplay) {
+        timerDisplay.textContent = `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    updateTimer();
+    setInterval(updateTimer, 60000); // Atualizar a cada minuto
+  }
+  
+  // Animações dos cards de informação
+  const infoCards = document.querySelectorAll('.info-card');
+  infoCards.forEach((card, index) => {
+    card.style.setProperty('--delay', index);
+  });
+  
+  // Função para confirmar cancelamento
+  window.confirmCancelDispute = function() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('cancelDisputeModal'));
+    if (modal) {
+      modal.hide();
+    }
+    
+    // Encontrar e submeter o formulário
+    const form = document.querySelector('form[action*="disputa_cancelar"]');
+    if (form) {
+      // Adicionar confirmação final
+      if (confirm('Esta é sua confirmação final. Deseja realmente cancelar a mediação?')) {
+        form.submit();
+      }
+    }
+  };
+  
+  // Interceptar clique no botão cancelar para mostrar modal ao invés de confirmar diretamente
+  const cancelBtn = document.querySelector('.cancel-btn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      // O modal será aberto pelo data-bs-toggle
+    });
+  }
+  
+  // Efeitos visuais nos botões de ação
+  const actionBtns = document.querySelectorAll('.action-btn');
+  actionBtns.forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateX(4px) scale(1.02)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateX(0) scale(1)';
+    });
+  });
+  
+  // Notificação de status
+  const showStatusNotification = function(message, type = 'info') {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Status da Disputa', {
+        body: message,
+        icon: '/static/img/logo.png',
+        badge: '/static/img/favicon.ico'
+      });
+    }
+  };
+  
+  // Verificar mudanças de status (polling simples)
+  const currentStatus = '{{ disputa_ativa.status }}';
+  let statusCheckInterval;
+  
+  if (currentStatus === 'em_analise') {
+    statusCheckInterval = setInterval(function() {
+      fetch(window.location.href, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.text())
+      .then(html => {
+        // Verificar se o status mudou
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(html, 'text/html');
+        const newStatusElement = newDoc.querySelector('[data-status]');
+        
+        if (newStatusElement && newStatusElement.dataset.status !== 'em_disputa') {
+          clearInterval(statusCheckInterval);
+          showStatusNotification('A disputa foi resolvida! Recarregando a página...');
+          setTimeout(() => location.reload(), 2000);
+        }
+      })
+      .catch(console.error);
+    }, 60000); // Verificar a cada minuto
+  }
+  
+  // Solicitar permissão para notificações
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+  
+  // Intersection Observer para animações
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '50px'
+    });
+    
+    // Observar elementos que devem animar
+    document.querySelectorAll('.info-card, .timeline-step, .action-btn').forEach(el => {
+      observer.observe(el);
+    });
+  }
+  
+  // Atualizar progress bar baseado no tempo
+  const progressBar = document.querySelector('.progress-bar');
+  if (progressBar) {
+    const diasEmAberto = {{ disputa_ativa.get_dias_em_aberto|default:0 }};
+    const progressPercent = Math.min((diasEmAberto / 7) * 100, 100); // 7 dias = 100%
+    progressBar.style.width = progressPercent + '%';
+    
+    if (diasEmAberto > 2) {
+      progressBar.style.background = 'rgba(239, 68, 68, 0.8)'; // Vermelho para urgente
+    } else if (diasEmAberto > 1) {
+      progressBar.style.background = 'rgba(245, 158, 11, 0.8)'; // Amarelo para atenção
+    }
+  }
+});
+</script>

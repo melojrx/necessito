@@ -12,13 +12,13 @@ from django.views.generic import TemplateView, ListView, CreateView, DetailView,
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import requests
-from ads.forms import AdsForms
+from ads.forms import AdsForms, DisputaForm, DisputaResolverForm
 from django.core.mail import send_mail
 from budgets.models import Orcamento
 from notifications.models import Notification
 from rankings.forms import AvaliacaoForm
 from rankings.models import Avaliacao
-from .models import AnuncioImagem, Necessidade
+from .models import AnuncioImagem, Necessidade, Disputa
 from categories.models import Categoria
 from itertools import islice
 from django.views.generic import TemplateView
@@ -96,13 +96,13 @@ class HomeView(TemplateView):
 
         if user.is_authenticated and getattr(user, "cidade", None):
             anuncios_proximos = Necessidade.objects.filter(
-                status__in=["ativo", "analisando_orcamentos", "em_andamento"],
+                status__in=["ativo", "analisando_orcamentos", "em_atendimento"],
                 cliente__cidade=user.cidade,
             ).order_by("-data_criacao")[:5]
 
             if not anuncios_proximos.exists() and getattr(user, "estado", None):
                 anuncios_estado = Necessidade.objects.filter(
-                    status__in=["ativo", "analisando_orcamentos", "em_andamento"],
+                    status__in=["ativo", "analisando_orcamentos", "em_atendimento"],
                     cliente__estado=user.estado,
                 ).order_by("-data_criacao")[:5]
 
@@ -293,13 +293,32 @@ class NecessidadeDetailView(DetailView):
             ja_avaliou_usuario_atual = False
             avaliacao_form = None
 
+        # REGRA CRÍTICA: Chat disponível APENAS em status 'em_atendimento' ou 'em_disputa'
+        pode_ver_chat = (
+            self.request.user.is_authenticated and
+            necessidade.status in ['em_atendimento', 'em_disputa'] and
+            self.request.user != necessidade.cliente and
+            Orcamento.objects.filter(
+                anuncio=necessidade, 
+                fornecedor=self.request.user
+            ).exists()
+        )
+        
+        # Verificar se é o cliente e tem orçamento confirmado
+        if (self.request.user.is_authenticated and 
+            self.request.user == necessidade.cliente and 
+            necessidade.status in ['em_atendimento', 'em_disputa']):
+            pode_ver_chat = True
+        
         # Passar flags no contexto
         context.update({
             'avaliacao_cliente': avaliacao_cliente,
             'avaliacao_fornecedor': avaliacao_fornecedor,
             'ja_avaliou_usuario_atual': ja_avaliou_usuario_atual,
             'avaliacao_form': avaliacao_form,
-            'orcamento_aceito': orcamento_aceito
+            'orcamento_aceito': orcamento_aceito,
+            'pode_ver_chat': pode_ver_chat,
+            'user_is_owner': self.request.user == necessidade.cliente if self.request.user.is_authenticated else False
         })
 
         return context
@@ -369,7 +388,7 @@ class AnunciosPorCategoriaListView(ListView):
         
         return Necessidade.objects.filter(
             categoria=self.categoria,
-            status__in=['ativo', 'analisando_orcamentos', 'em_andamento']
+            status__in=['ativo', 'analisando_orcamentos', 'em_atendimento']
         ).order_by('-data_criacao')  # Ordena pelos mais recentes
 
     def get_context_data(self, **kwargs):
@@ -532,3 +551,274 @@ def dados_compartilhamento(request, pk):
     
     # Para requisições normais, retorna contexto para template
     return render(request, 'compartilhamento_preview.html', {'dados': dados})
+
+
+# ==================== VIEWS DE DISPUTAS ====================
+
+class DisputaCreateView(LoginRequiredMixin, CreateView):
+    """View para criar uma nova disputa."""
+    model = Disputa
+    form_class = DisputaForm
+    template_name = 'ads/disputa_create.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """Verificar permissões antes de processar a requisição."""
+        self.necessidade = get_object_or_404(Necessidade, pk=kwargs['necessidade_pk'])
+        
+        # Verificar se pode abrir disputa
+        if not self._pode_abrir_disputa(request.user):
+            messages.error(request, "Você não tem permissão para abrir disputa para esta necessidade.")
+            return redirect('ads:necessidade_detail', pk=self.necessidade.pk)
+        
+        return super().dispatch(request, *args, **kwargs)
+    
+    def _pode_abrir_disputa(self, user):
+        """Verifica se o usuário pode abrir disputa."""
+        # Necessidade deve estar em atendimento
+        if self.necessidade.status != 'em_atendimento':
+            return False
+        
+        # Usuário deve ser cliente ou fornecedor
+        confirmed_budget = self.necessidade.orcamentos.filter(status='confirmado').first()
+        if not confirmed_budget:
+            return False
+        
+        if user not in [self.necessidade.cliente, confirmed_budget.fornecedor]:
+            return False
+        
+        # Não deve existir disputa ativa
+        active_disputes = self.necessidade.disputas.filter(status__in=['aberta', 'em_analise'])
+        if active_disputes.exists():
+            return False
+        
+        return True
+    
+    def form_valid(self, form):
+        """Processar form válido."""
+        # Obter orçamento confirmado
+        confirmed_budget = self.necessidade.orcamentos.filter(status='confirmado').first()
+        if not confirmed_budget:
+            messages.error(self.request, "Não foi possível abrir disputa: orçamento confirmado não encontrado.")
+            return self.form_invalid(form)
+        
+        # Configurar instância
+        form.instance.necessidade = self.necessidade
+        form.instance.orcamento = confirmed_budget
+        form.instance.usuario_abertura = self.request.user
+        form.instance.ip_usuario_abertura = self._get_client_ip()
+        
+        try:
+            # Salvar disputa (irá atualizar status da necessidade automaticamente)
+            response = super().form_valid(form)
+            
+            messages.success(
+                self.request, 
+                "Disputa aberta com sucesso. A administração analisará o caso em breve."
+            )
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao abrir disputa: {e}")
+            messages.error(self.request, "Erro ao abrir disputa. Tente novamente.")
+            return self.form_invalid(form)
+    
+    def _get_client_ip(self):
+        """Obter IP do cliente."""
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = self.request.META.get('REMOTE_ADDR')
+        return ip
+    
+    def get_context_data(self, **kwargs):
+        """Adicionar dados ao contexto."""
+        context = super().get_context_data(**kwargs)
+        context['necessidade'] = self.necessidade
+        context['orcamento'] = self.necessidade.orcamentos.filter(status='confirmado').first()
+        return context
+    
+    def get_success_url(self):
+        """URL de redirecionamento após sucesso."""
+        return reverse('ads:necessidade_detail', kwargs={'pk': self.necessidade.pk})
+
+
+class DisputaListView(LoginRequiredMixin, ListView):
+    """View para listar disputas do usuário."""
+    model = Disputa
+    template_name = 'ads/disputa_list.html'
+    context_object_name = 'disputas'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        """Filtrar disputas do usuário."""
+        user = self.request.user
+        
+        # Se é admin, mostrar todas as disputas
+        if user.is_staff:
+            return (Disputa.objects
+                   .select_related('necessidade', 'orcamento', 'usuario_abertura', 'resolvida_por')
+                   .prefetch_related('necessidade__orcamentos')
+                   .order_by('-data_abertura'))
+        
+        # Para usuários normais, mostrar apenas disputas relacionadas a eles
+        from django.db.models import Q
+        
+        return (Disputa.objects
+               .select_related('necessidade', 'orcamento', 'usuario_abertura', 'resolvida_por')
+               .prefetch_related('necessidade__orcamentos')
+               .filter(
+                   Q(necessidade__cliente=user) |
+                   Q(orcamento__fornecedor=user)
+               )
+               .order_by('-data_abertura'))
+    
+    def get_context_data(self, **kwargs):
+        """Adicionar dados ao contexto."""
+        context = super().get_context_data(**kwargs)
+        
+        # Estatísticas para admins
+        if self.request.user.is_staff:
+            queryset = self.get_queryset()
+            context.update({
+                'total_disputas': queryset.count(),
+                'disputas_abertas': queryset.filter(status='aberta').count(),
+                'disputas_em_analise': queryset.filter(status='em_analise').count(),
+                'disputas_resolvidas': queryset.filter(status='resolvida').count(),
+                'disputas_urgentes': queryset.filter(
+                    status='aberta',
+                    data_abertura__lt=timezone.now() - timezone.timedelta(hours=48)
+                ).count(),
+            })
+        
+        return context
+
+
+class DisputaDetailView(LoginRequiredMixin, DetailView):
+    """View para visualizar detalhes de uma disputa."""
+    model = Disputa
+    template_name = 'ads/disputa_detail.html'
+    context_object_name = 'disputa'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """Verificar permissões."""
+        disputa = self.get_object()
+        
+        if not disputa.pode_ser_visualizada_por(request.user):
+            messages.error(request, "Você não tem permissão para visualizar esta disputa.")
+            return redirect('ads:disputa_list')
+        
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        """Adicionar dados ao contexto."""
+        context = super().get_context_data(**kwargs)
+        disputa = self.object
+        
+        context.update({
+            'necessidade': disputa.necessidade,
+            'orcamento': disputa.orcamento,
+            'contraparte': disputa.get_contraparte(self.request.user),
+            'tipo_usuario': 'cliente' if self.request.user == disputa.necessidade.cliente else 'fornecedor',
+            'pode_resolver': disputa.pode_ser_resolvida_por(self.request.user),
+            'pode_cancelar': disputa.pode_ser_cancelada_por(self.request.user),
+        })
+        
+        return context
+
+
+class DisputaResolverView(AdminRequiredMixin, UpdateView):
+    """View para administradores resolverem disputas."""
+    model = Disputa
+    form_class = DisputaResolverForm
+    template_name = 'ads/disputa_resolver.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """Verificar se disputa pode ser resolvida."""
+        disputa = self.get_object()
+        
+        if not disputa.pode_ser_resolvida_por(request.user):
+            messages.error(request, "Você não tem permissão para resolver esta disputa.")
+            return redirect('ads:disputa_detail', pk=disputa.pk)
+        
+        if disputa.status not in ['aberta', 'em_analise']:
+            messages.error(request, "Esta disputa já foi resolvida ou cancelada.")
+            return redirect('ads:disputa_detail', pk=disputa.pk)
+        
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        """Processar resolução da disputa."""
+        disputa = form.instance
+        
+        # Validar se status final foi informado quando resolvendo
+        if disputa.status == 'resolvida' and not disputa.status_final_necessidade:
+            form.add_error('status_final_necessidade', 
+                          'Status final da necessidade é obrigatório ao resolver disputa.')
+            return self.form_invalid(form)
+        
+        # Definir quem resolveu
+        disputa.resolvida_por = self.request.user
+        
+        try:
+            response = super().form_valid(form)
+            messages.success(
+                self.request,
+                f"Disputa {disputa.get_status_display().lower()} com sucesso."
+            )
+            return response
+            
+        except Exception as e:
+            logger.error(f"Erro ao resolver disputa {disputa.pk}: {e}")
+            messages.error(self.request, "Erro ao processar resolução da disputa.")
+            return self.form_invalid(form)
+    
+    def get_context_data(self, **kwargs):
+        """Adicionar dados ao contexto."""
+        context = super().get_context_data(**kwargs)
+        disputa = self.object
+        
+        context.update({
+            'necessidade': disputa.necessidade,
+            'orcamento': disputa.orcamento,
+        })
+        
+        return context
+    
+    def get_success_url(self):
+        """URL após resolver disputa."""
+        return reverse('ads:disputa_detail', kwargs={'pk': self.object.pk})
+
+
+class DisputaCancelarView(LoginRequiredMixin, View):
+    """View para cancelar uma disputa."""
+    
+    def post(self, request, pk):
+        """Processar cancelamento da disputa."""
+        disputa = get_object_or_404(Disputa, pk=pk)
+        
+        # Verificar permissões
+        if not disputa.pode_ser_cancelada_por(request.user):
+            messages.error(request, "Você não tem permissão para cancelar esta disputa.")
+            return redirect('ads:disputa_detail', pk=disputa.pk)
+        
+        if disputa.status != 'aberta':
+            messages.error(request, "Apenas disputas abertas podem ser canceladas.")
+            return redirect('ads:disputa_detail', pk=disputa.pk)
+        
+        try:
+            # Cancelar disputa
+            disputa.status = 'cancelada'
+            disputa.save()
+            
+            # Voltar necessidade para em_atendimento
+            state_machine = disputa.necessidade.get_state_machine()
+            state_machine.transition_to('em_atendimento', user=request.user)
+            
+            messages.success(request, "Disputa cancelada com sucesso.")
+            
+        except Exception as e:
+            logger.error(f"Erro ao cancelar disputa {disputa.pk}: {e}")
+            messages.error(request, "Erro ao cancelar disputa.")
+        
+        return redirect('ads:necessidade_detail', pk=disputa.necessidade.pk)

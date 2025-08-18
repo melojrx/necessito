@@ -1,17 +1,19 @@
-<!-- Modal: Avaliação -->
+<!-- Modal: Avaliação DEFINITIVO -->
 <div class="modal fade" id="avaliacaoModal" tabindex="-1" aria-labelledby="avaliacaoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="avaliacaoModalLabel"><i class="fas fa-star-half-alt me-2"></i>Avaliar Negociação</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="avaliacaoModalLabel">
+                    <i class="fas fa-star-half-alt me-2"></i>Avaliar Negociação
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div id="avaliacao-form-container" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Carregando...</span>
                     </div>
-                    <p class="mt-2">Carregando formulário de avaliação...</p>
+                    <p class="mt-2 text-muted">Carregando formulário de avaliação...</p>
                 </div>
             </div>
         </div>
@@ -19,44 +21,110 @@
 </div>
 
 <script>
+// SISTEMA DE CARREGAMENTO DEFINITIVO DO MODAL
+console.log('🔧 Configurando modal de avaliação definitivo...');
+
 document.addEventListener('DOMContentLoaded', function() {
     const avaliacaoModal = document.getElementById('avaliacaoModal');
     const formContainer = document.getElementById('avaliacao-form-container');
 
-    if (avaliacaoModal && formContainer) {
-        avaliacaoModal.addEventListener('show.bs.modal', function () {
-            // Mostra o spinner sempre que o modal for aberto
-            formContainer.innerHTML = `
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                    <p class="mt-2">Carregando formulário de avaliação...</p>
-                </div>`;
-
-            // Busca o formulário via AJAX
-            fetch("{% url 'rankings:avaliar_negociacao' necessidade.pk %}", {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Falha ao carregar o formulário.');
-                return response.text();
-            })
-            .then(html => {
-                formContainer.innerHTML = html;
-                // O script para submissão do formulário de avaliação
-                // e para o sistema de estrelas deve estar no template do formulário
-                // para garantir que ele seja executado após o carregamento do conteúdo.
-            })
-            .catch(error => {
-                console.error('Erro ao carregar formulário de avaliação:', error);
-                formContainer.innerHTML = `
-                    <div class="alert alert-danger text-center">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Não foi possível carregar o formulário. Por favor, tente novamente mais tarde.
-                    </div>`;
-            });
-        });
+    if (!avaliacaoModal || !formContainer) {
+        console.error('❌ Elementos do modal não encontrados!');
+        return;
     }
+
+    avaliacaoModal.addEventListener('show.bs.modal', function () {
+        console.log('🔄 Abrindo modal de avaliação...');
+        
+        // Reset do container com loading
+        formContainer.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2 text-muted">Carregando formulário de avaliação...</p>
+            </div>`;
+
+        // Carregar formulário via AJAX
+        fetch("{% url 'rankings:avaliar_negociacao' necessidade.pk %}", {
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => {
+            console.log(`📡 Resposta recebida: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            console.log('✅ HTML do formulário carregado');
+            
+            // Inserir HTML no container
+            formContainer.innerHTML = html;
+            
+            // Aguarda DOM ser atualizado e executa inicialização
+            setTimeout(() => {
+                console.log('🎯 Inicializando sistema definitivo...');
+                
+                // Tenta inicializar com a função definitiva
+                if (typeof window.initAvaliacaoFinal === 'function') {
+                    window.initAvaliacaoFinal();
+                    console.log('✅ Sistema definitivo inicializado!');
+                } else {
+                    console.warn('⚠️ Função initAvaliacaoFinal não encontrada, aguardando...');
+                    
+                    // Fallback com múltiplas tentativas
+                    let attempts = 0;
+                    const maxAttempts = 20;
+                    
+                    const tryInit = () => {
+                        attempts++;
+                        
+                        if (typeof window.initAvaliacaoFinal === 'function') {
+                            window.initAvaliacaoFinal();
+                            console.log('✅ Sistema definitivo inicializado após tentativas!');
+                            return;
+                        }
+                        
+                        if (attempts < maxAttempts) {
+                            setTimeout(tryInit, 100);
+                        } else {
+                            console.error('❌ Falha ao inicializar após múltiplas tentativas');
+                        }
+                    };
+                    
+                    tryInit();
+                }
+                
+                // Notificar conclusão
+                document.dispatchEvent(new CustomEvent('avaliacaoModalLoaded', {
+                    detail: { 
+                        success: true, 
+                        container: formContainer,
+                        timestamp: Date.now()
+                    }
+                }));
+                
+            }, 100);
+        })
+        .catch(error => {
+            console.error('💥 Erro ao carregar formulário:', error);
+            
+            formContainer.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Erro ao carregar formulário</strong><br>
+                    <small class="text-muted">${error.message}</small><br>
+                    <button class="btn btn-sm btn-outline-danger mt-2" onclick="location.reload()">
+                        Recarregar Página
+                    </button>
+                </div>`;
+        });
+    });
+    
+    console.log('✅ Modal de avaliação configurado com sucesso!');
 });
 </script>

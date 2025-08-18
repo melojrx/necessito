@@ -6,6 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -14,6 +16,45 @@ from core.services.address_service import AddressService, BrazilianStates
 import json
 
 
+@extend_schema(
+    tags=['07 - ENDEREÇOS - GEOLOCALIZAÇÃO'],
+    summary="Buscar endereço por CEP",
+    parameters=[
+        OpenApiParameter(
+            name='cep',
+            location=OpenApiParameter.QUERY,
+            type=OpenApiTypes.STR,
+            description='CEP a ser consultado (formato: 12345-678 ou 12345678)',
+            examples=[
+                OpenApiExample(
+                    'CEP válido',
+                    value='01310-100'
+                )
+            ]
+        )
+    ],
+    responses={
+        200: {
+            'type': 'object',
+            'properties': {
+                'success': {'type': 'boolean'},
+                'data': {
+                    'type': 'object',
+                    'properties': {
+                        'cep': {'type': 'string'},
+                        'logradouro': {'type': 'string'},
+                        'bairro': {'type': 'string'},
+                        'cidade': {'type': 'string'},
+                        'estado': {'type': 'string'},
+                        'uf': {'type': 'string'}
+                    }
+                }
+            }
+        },
+        400: {'description': 'CEP não informado'},
+        404: {'description': 'CEP não encontrado'}
+    }
+)
 @api_view(['GET'])
 @permission_classes([])  # Permitir acesso público para busca de CEP
 def search_cep(request):

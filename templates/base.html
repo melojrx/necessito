@@ -20,8 +20,12 @@
     <link rel="stylesheet" href="{% static 'css/lgpd-compliance.css' %}">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <!-- Favicon com cache busting -->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}?v=2025">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v=2025">
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}?v=2025">
+    <link rel="icon" sizes="32x32" href="{% static 'img/favicon-96x96.png' %}?v=2025">
+    <link rel="icon" sizes="96x96" href="{% static 'img/favicon-96x96.png' %}?v=2025">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="{% static 'manifest.json' %}">
@@ -30,7 +34,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Indicai">
-    <link rel="apple-touch-icon" href="{% static 'img/icons/icon-192x192.svg' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/icons/icon-192x192.svg' %}?v=2025">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}?v=2025">
     <!-- Leaflet JS moved to end of body with defer for performance -->
     <!-- ChartJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

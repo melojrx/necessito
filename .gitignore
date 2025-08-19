@@ -20,6 +20,7 @@ models/
 .env.dev
 .env_hlm
 .env.prod
+.env.production
 env/
 core/settings/__init__.py
 

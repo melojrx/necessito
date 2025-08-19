@@ -1,0 +1,275 @@
+<!-- Desktop Filters Sidebar Component -->
+<div class="filters-sidebar card shadow-sm h-fit">
+  <div class="card-header bg-white border-bottom">
+    <div class="d-flex align-items-center justify-content-between">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-sliders-h text-primary me-2"></i>
+        Filtros
+      </h5>
+      {% if term or local or cliente or campos or status_selecionados|length > 1 or status_selecionados.0 != 'ativo' %}
+      <a href="?state={{ state }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-undo me-1"></i>
+        Limpar
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="card-body">
+    <form method="get" action="{% url 'search:necessidade_search_all' %}" class="filters-form">
+      <!-- Hidden fields -->
+      <input type="hidden" name="lat" id="lat" value="{{ lat }}">
+      <input type="hidden" name="lon" id="lon" value="{{ lon }}">
+      
+      <!-- Search Field -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex align-items-center mb-2">
+          <i class="fas fa-search text-primary me-2"></i>
+          Buscar por
+        </label>
+        <input type="text" 
+               name="q" 
+               class="form-control" 
+               placeholder="Título, descrição, categoria..."
+               value="{{ term }}" 
+               autocomplete="off">
+      </div>
+
+      <!-- Location Filters -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex align-items-center mb-2">
+          <i class="fas fa-map-marker-alt text-success me-2"></i>
+          Localização
+        </label>
+        
+        <!-- Estado -->
+        <select name="state" class="form-select mb-2" id="estadoSelect">
+          <option value="todos" {% if state == 'TODOS' or state == 'todos' %}selected{% endif %}>
+            Todos os estados
+          </option>
+          <option value="AC" {% if state == 'AC' %}selected{% endif %}>Acre</option>
+          <option value="AL" {% if state == 'AL' %}selected{% endif %}>Alagoas</option>
+          <option value="AP" {% if state == 'AP' %}selected{% endif %}>Amapá</option>
+          <option value="AM" {% if state == 'AM' %}selected{% endif %}>Amazonas</option>
+          <option value="BA" {% if state == 'BA' %}selected{% endif %}>Bahia</option>
+          <option value="CE" {% if state == 'CE' %}selected{% endif %}>Ceará</option>
+          <option value="DF" {% if state == 'DF' %}selected{% endif %}>Distrito Federal</option>
+          <option value="ES" {% if state == 'ES' %}selected{% endif %}>Espírito Santo</option>
+          <option value="GO" {% if state == 'GO' %}selected{% endif %}>Goiás</option>
+          <option value="MA" {% if state == 'MA' %}selected{% endif %}>Maranhão</option>
+          <option value="MT" {% if state == 'MT' %}selected{% endif %}>Mato Grosso</option>
+          <option value="MS" {% if state == 'MS' %}selected{% endif %}>Mato Grosso do Sul</option>
+          <option value="MG" {% if state == 'MG' %}selected{% endif %}>Minas Gerais</option>
+          <option value="PA" {% if state == 'PA' %}selected{% endif %}>Pará</option>
+          <option value="PB" {% if state == 'PB' %}selected{% endif %}>Paraíba</option>
+          <option value="PR" {% if state == 'PR' %}selected{% endif %}>Paraná</option>
+          <option value="PE" {% if state == 'PE' %}selected{% endif %}>Pernambuco</option>
+          <option value="PI" {% if state == 'PI' %}selected{% endif %}>Piauí</option>
+          <option value="RJ" {% if state == 'RJ' %}selected{% endif %}>Rio de Janeiro</option>
+          <option value="RN" {% if state == 'RN' %}selected{% endif %}>Rio Grande do Norte</option>
+          <option value="RS" {% if state == 'RS' %}selected{% endif %}>Rio Grande do Sul</option>
+          <option value="RO" {% if state == 'RO' %}selected{% endif %}>Rondônia</option>
+          <option value="RR" {% if state == 'RR' %}selected{% endif %}>Roraima</option>
+          <option value="SC" {% if state == 'SC' %}selected{% endif %}>Santa Catarina</option>
+          <option value="SP" {% if state == 'SP' %}selected{% endif %}>São Paulo</option>
+          <option value="SE" {% if state == 'SE' %}selected{% endif %}>Sergipe</option>
+          <option value="TO" {% if state == 'TO' %}selected{% endif %}>Tocantins</option>
+        </select>
+
+        <!-- Cidade -->
+        <select name="local" class="form-select mb-2" id="cidadeSelect" disabled>
+          <option value="">Primeiro selecione um estado</option>
+        </select>
+        
+        <!-- Geolocation Button -->
+        <div class="d-grid">
+          <button type="button" 
+                  class="btn btn-outline-success btn-sm" 
+                  id="btn-localizacao"
+                  onclick="usarLocalizacaoAtual()">
+            <i class="fas fa-crosshairs me-2"></i>
+            Usar minha localização
+          </button>
+        </div>
+        
+        <small class="text-muted mt-1 d-block cidade-help-text">
+          Ou digite sua cidade
+        </small>
+      </div>
+
+      <!-- Status Filters -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex align-items-center mb-2">
+          <i class="fas fa-flag text-warning me-2"></i>
+          Status dos Anúncios
+        </label>
+        
+        <div class="status-filter-options">
+          {% for opcao in opcoes_status %}
+          <div class="form-check mb-2">
+            <input class="form-check-input" 
+                   type="checkbox" 
+                   name="status" 
+                   value="{{ opcao.value }}" 
+                   id="desktop_status_{{ opcao.value }}" 
+                   {% if opcao.value in status_selecionados %}checked{% endif %}>
+            <label class="form-check-label small d-flex align-items-center" for="desktop_status_{{ opcao.value }}">
+              <span class="status-icon me-2">
+                {% if opcao.value == 'ativo' %}
+                  <i class="fas fa-play-circle text-success"></i>
+                {% elif opcao.value == 'analisando_orcamentos' %}
+                  <i class="fas fa-search-dollar text-info"></i>
+                {% elif opcao.value == 'aguardando_confirmacao' %}
+                  <i class="fas fa-clock text-warning"></i>
+                {% elif opcao.value == 'em_atendimento' %}
+                  <i class="fas fa-cogs text-primary"></i>
+                {% elif opcao.value == 'finalizado' %}
+                  <i class="fas fa-check-circle text-success"></i>
+                {% elif opcao.value == 'cancelado' %}
+                  <i class="fas fa-times-circle text-danger"></i>
+                {% elif opcao.value == 'expirado' %}
+                  <i class="fas fa-calendar-times text-secondary"></i>
+                {% elif opcao.value == 'em_disputa' %}
+                  <i class="fas fa-exclamation-triangle text-warning"></i>
+                {% endif %}
+              </span>
+              {{ opcao.label }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Additional Filters -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex align-items-center mb-2">
+          <i class="fas fa-user text-secondary me-2"></i>
+          Anunciante
+        </label>
+        <input type="text" 
+               name="cliente" 
+               class="form-control" 
+               placeholder="Nome do anunciante"
+               value="{{ cliente }}">
+      </div>
+
+      <!-- Search In Fields -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold d-flex align-items-center mb-2">
+          <i class="fas fa-crosshairs text-info me-2"></i>
+          Buscar em
+        </label>
+        
+        <div class="search-fields-options">
+          {% for op in opcoes_campos %}
+          <div class="form-check mb-2">
+            <input class="form-check-input" 
+                   type="checkbox" 
+                   name="campos" 
+                   value="{{ op }}" 
+                   id="desktop_campo_{{ op }}" 
+                   {% if op in campos %}checked{% endif %}>
+            <label class="form-check-label small d-flex align-items-center" for="desktop_campo_{{ op }}">
+              {% if op == 'titulo' %}
+                <i class="fas fa-heading me-2 text-primary"></i>Título
+              {% elif op == 'descricao' %}
+                <i class="fas fa-align-left me-2 text-secondary"></i>Descrição
+              {% elif op == 'categoria' %}
+                <i class="fas fa-tags me-2 text-success"></i>Categoria
+              {% elif op == 'subcategoria' %}
+                <i class="fas fa-tag me-2 text-info"></i>Subcategoria
+              {% endif %}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-search me-2"></i>
+          Aplicar Filtros
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.filters-sidebar {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.75rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.filters-sidebar .form-control,
+.filters-sidebar .form-select {
+  border-radius: 0.5rem;
+  border: 2px solid #e1e5e9;
+  transition: all 0.3s ease;
+}
+
+.filters-sidebar .form-control:focus,
+.filters-sidebar .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+  transform: translateY(-1px);
+}
+
+.filters-sidebar .form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.filters-sidebar .status-icon {
+  width: 20px;
+  text-align: center;
+}
+
+.h-fit {
+  height: fit-content;
+}
+
+.filters-sidebar .btn {
+  transition: all 0.3s ease;
+}
+
+.filters-sidebar .btn:hover {
+  transform: translateY(-2px);
+}
+
+.filters-form .form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.cidade-help-text {
+  transition: all 0.3s ease;
+}
+
+.cidade-help-text.success {
+  color: #28a745 !important;
+}
+
+.cidade-help-text.error {
+  color: #dc3545 !important;
+}
+
+.loading-spinner {
+  transition: opacity 0.3s ease;
+}
+
+.form-select:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.form-select.loading {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+}
+</style>

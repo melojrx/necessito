@@ -30,7 +30,29 @@ from .permissions import (
 from .filters import NecessidadeFilter, OrcamentoFilter, AvaliacaoFilter
 from .versions import CURRENT_API_VERSION, SUPPORTED_VERSIONS, VERSION_METADATA
 
-# ViewSets simplificados sem decoradores drf_yasg
+
+class BaseModelViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet base com configurações comuns para a API Indicai.
+    """
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    
+    def get_queryset(self):
+        """
+        Filtragem padrão para usuários não-staff.
+        Override em classes filhas para filtros específicos.
+        """
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff:
+            queryset = self._filter_for_regular_user(queryset)
+        return queryset
+    
+    def _filter_for_regular_user(self, queryset):
+        """
+        Método a ser sobrescrito pelas classes filhas para aplicar
+        filtros específicos para usuários não-staff.
+        """
+        return queryset
 
 @extend_schema_view(
     list=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
@@ -40,11 +62,10 @@ from .versions import CURRENT_API_VERSION, SUPPORTED_VERSIONS, VERSION_METADATA
     partial_update=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
     destroy=extend_schema(tags=['01 - USUÁRIOS - GESTÃO DE PERFIS']),
 )
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(BaseModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['is_client', 'is_supplier', 'cidade', 'estado']
     search_fields = ['first_name', 'last_name', 'email']
 
@@ -53,11 +74,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserDetailSerializer
         return UserSerializer
 
-    def get_queryset(self):
-        queryset = User.objects.all()
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(is_active=True)
-        return queryset
+    def _filter_for_regular_user(self, queryset):
+        return queryset.filter(is_active=True)
 
 @extend_schema_view(
     list=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
@@ -67,7 +85,7 @@ class UserViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
     destroy=extend_schema(tags=['02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS']),
 )
-class CategoriaViewSet(viewsets.ModelViewSet):
+class CategoriaViewSet(BaseModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
@@ -82,11 +100,10 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
     destroy=extend_schema(tags=['03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS']),
 )
-class SubCategoriaViewSet(viewsets.ModelViewSet):
+class SubCategoriaViewSet(BaseModelViewSet):
     queryset = SubCategoria.objects.all()
     serializer_class = SubCategoriaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['categoria']
     search_fields = ['nome', 'descricao']
 
@@ -98,11 +115,10 @@ class SubCategoriaViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
     destroy=extend_schema(tags=['04 - NECESSIDADES - ANÚNCIOS DE DEMANDA']),
 )
-class NecessidadeViewSet(viewsets.ModelViewSet):
+class NecessidadeViewSet(BaseModelViewSet):
     queryset = Necessidade.objects.all()
     serializer_class = NecessidadeSerializer
     permission_classes = [NecessidadePermission]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = NecessidadeFilter
     search_fields = ['titulo', 'descricao']
 
@@ -111,11 +127,8 @@ class NecessidadeViewSet(viewsets.ModelViewSet):
             return NecessidadeDetailSerializer
         return NecessidadeSerializer
 
-    def get_queryset(self):
-        queryset = Necessidade.objects.all()
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(status='ativo')
-        return queryset
+    def _filter_for_regular_user(self, queryset):
+        return queryset.filter(status='ativo')
 
     def perform_create(self, serializer):
         serializer.save(cliente=self.request.user)
@@ -128,22 +141,18 @@ class NecessidadeViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
     destroy=extend_schema(tags=['05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES']),
 )
-class OrcamentoViewSet(viewsets.ModelViewSet):
+class OrcamentoViewSet(BaseModelViewSet):
     queryset = Orcamento.objects.all()
     serializer_class = OrcamentoSerializer
     permission_classes = [OrcamentoPermission]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = OrcamentoFilter
     search_fields = ['descricao']
 
-    def get_queryset(self):
-        queryset = Orcamento.objects.all()
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(
-                models.Q(fornecedor=self.request.user) |
-                models.Q(anuncio__cliente=self.request.user)
-            ).distinct()
-        return queryset
+    def _filter_for_regular_user(self, queryset):
+        return queryset.filter(
+            models.Q(fornecedor=self.request.user) |
+            models.Q(anuncio__cliente=self.request.user)
+        ).distinct()
 
     def perform_create(self, serializer):
         serializer.save(fornecedor=self.request.user)
@@ -156,7 +165,7 @@ class OrcamentoViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
     destroy=extend_schema(tags=['06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO']),
 )
-class AvaliacaoViewSet(viewsets.ModelViewSet):
+class AvaliacaoViewSet(BaseModelViewSet):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
     permission_classes = [AvaliacaoPermission]

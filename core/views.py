@@ -390,7 +390,7 @@ Motivo: {reason}
 Esta solicitação deve ser processada em até 15 dias úteis conforme a LGPD.
                     ''',
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['dpo@indicaai.com'],
+                    recipient_list=['suporteindicaai@hotmail.com'],
                     fail_silently=False,
                 )
             except Exception as email_error:
@@ -412,7 +412,7 @@ Durante este período:
 - Você pode cancelar esta solicitação entrando em contato conosco
 - Após a confirmação, a exclusão será irreversível
 
-Caso tenha dúvidas, entre em contato com nosso Encarregado de Proteção de Dados através do email dpo@indicaai.com.
+Caso tenha dúvidas, entre em contato com nosso Encarregado de Proteção de Dados através do email suporteindicaai@hotmail.com.
 
 Atenciosamente,
 Equipe Indicaai.com

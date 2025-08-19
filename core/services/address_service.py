@@ -24,7 +24,7 @@ class AddressService:
     
     # Headers para requisições
     HEADERS = {
-        'User-Agent': 'Indicai-Marketplace/1.0 (contato@indicai.com)'
+        'User-Agent': 'Indicai-Marketplace/1.0 (suporteindicaai@hotmail.com)'
     }
     
     @classmethod

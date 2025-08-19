@@ -236,11 +236,50 @@ class NecessidadeCreateView(ClientRequiredMixin, EmailVerifiedRequiredMixin, Cre
             # O anúncio continua sendo criado mesmo sem imagem
 
     def get_client_ip(self):
+        """
+        Obtém o IP do cliente. Tenta primeiro pelos headers HTTP,
+        depois pela API externa como fallback.
+        """
+        # Primeiro tenta obter do request (mais eficiente)
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            # Se há múltiplos IPs, pega o primeiro (IP real do cliente)
+            ip = x_forwarded_for.split(',')[0].strip()
+            if self._is_valid_ip(ip):
+                return ip
+        
+        # Tenta outros headers comuns
+        headers_to_check = [
+            'HTTP_X_REAL_IP',
+            'HTTP_CF_CONNECTING_IP',  # Cloudflare
+            'REMOTE_ADDR'
+        ]
+        
+        for header in headers_to_check:
+            ip = self.request.META.get(header)
+            if ip and self._is_valid_ip(ip):
+                return ip
+        
+        # Fallback para API externa (apenas se outros métodos falharam)
         try:
-            response = requests.get("https://api64.ipify.org?format=json", timeout=3)
-            return response.json().get("ip", "Desconhecido")
+            response = requests.get("https://api64.ipify.org?format=json", timeout=2)
+            ip = response.json().get("ip")
+            if ip and self._is_valid_ip(ip):
+                return ip
         except Exception:
-            return "Desconhecido"
+            pass
+        
+        # Se nada funcionar, retorna None (banco aceita NULL)
+        return None
+    
+    def _is_valid_ip(self, ip):
+        """Valida se uma string é um IP válido."""
+        import ipaddress
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
 
 class NecessidadeDetailView(DetailView):
     model = Necessidade
@@ -623,13 +662,38 @@ class DisputaCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
     
     def _get_client_ip(self):
-        """Obter IP do cliente."""
+        """Obter IP do cliente de forma segura."""
+        # Primeiro tenta obter do request (mais eficiente)
         x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = self.request.META.get('REMOTE_ADDR')
-        return ip
+            # Se há múltiplos IPs, pega o primeiro (IP real do cliente)
+            ip = x_forwarded_for.split(',')[0].strip()
+            if self._is_valid_ip_simple(ip):
+                return ip
+        
+        # Tenta outros headers comuns
+        headers_to_check = [
+            'HTTP_X_REAL_IP',
+            'HTTP_CF_CONNECTING_IP',  # Cloudflare
+            'REMOTE_ADDR'
+        ]
+        
+        for header in headers_to_check:
+            ip = self.request.META.get(header)
+            if ip and self._is_valid_ip_simple(ip):
+                return ip
+        
+        # Se nada funcionar, retorna None (banco aceita NULL)
+        return None
+    
+    def _is_valid_ip_simple(self, ip):
+        """Valida se uma string é um IP válido."""
+        import ipaddress
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
     
     def get_context_data(self, **kwargs):
         """Adicionar dados ao contexto."""

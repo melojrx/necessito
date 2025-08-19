@@ -17,7 +17,7 @@ A API Indicai é uma interface RESTful moderna e robusta que permite integraçã
 - [Rate Limiting](#rate-limiting)
 - [Códigos de Status](#códigos-de-status)
 - [Exemplos Práticos](#exemplos-práticos)
-- [SDKs e Bibliotecas](#sdks-e-bibliotecas)
+- [Arquitetura e Otimizações](#arquitetura-e-otimizações)
 - [Suporte](#suporte)
 
 ---
@@ -32,6 +32,7 @@ A API Indicai é uma interface RESTful moderna e robusta que permite integraçã
 - **Segura**: Autenticação JWT e sistema de permissões granular
 - **Performática**: Paginação automática e filtros otimizados
 - **Monitorada**: Logs detalhados e métricas de performance
+- **Otimizada**: Arquitetura modular com classes base reutilizáveis
 
 ### URLs Base
 
@@ -43,7 +44,7 @@ Desenvolvimento: http://localhost:8000/api/v1/
 
 ### Documentação Interativa
 
-- **Swagger UI**: `/api/swagger/` - Interface interativa para testar endpoints
+- **Swagger UI**: `/api/docs/` - Interface interativa para testar endpoints
 - **ReDoc**: `/api/redoc/` - Documentação detalhada em formato limpo
 - **Schema OpenAPI**: `/api/schema/` - Especificação OpenAPI 3.0 em JSON
 
@@ -51,7 +52,7 @@ Desenvolvimento: http://localhost:8000/api/v1/
 
 ## 🔐 Autenticação
 
-A API Indicai utiliza autenticação JWT (JSON Web Tokens). Siga o fluxo abaixo para autenticar-se no Swagger:
+A API Indicai utiliza autenticação JWT (JSON Web Tokens) com endpoint customizado otimizado para CORS.
 
 ### 🚀 Fluxo de Autenticação no Swagger
 
@@ -66,7 +67,7 @@ A API Indicai utiliza autenticação JWT (JSON Web Tokens). Siga o fluxo abaixo 
 
 ### 1. JWT (JSON Web Tokens) - Recomendado
 
-Método principal para aplicações móveis e integrações de terceiros.
+Método principal para aplicações móveis e integrações de terceiros com endpoint customizado otimizado.
 
 #### Obter Token
 
@@ -80,7 +81,12 @@ Content-Type: application/json
 }
 ```
 
-**Nota importante**: O endpoint usa apenas `email` e `password`. Não é necessário fornecer `username`.
+**Características do endpoint customizado:**
+- ✅ Resolve problemas de CORS automaticamente
+- ✅ Headers `Access-Control-Allow-Origin` configurados
+- ✅ Suporte nativo a requisições OPTIONS (preflight)
+- ✅ Validação robusta de credenciais
+- ✅ Respostas de erro padronizadas
 
 #### Resposta
 
@@ -123,26 +129,7 @@ Content-Type: application/json
 - **Rotação**: Novo refresh token é gerado a cada renovação
 - **Blacklist**: Refresh tokens anteriores são invalidados automaticamente
 
-**Recomendação**: Implemente renovação automática do access token quando ele estiver próximo do vencimento.
-
-### 2. Autenticação de Sessão
-
-Para uso no navegador web (interface administrativa).
-
-```http
-POST /api/v1/auth/login/
-Content-Type: application/json
-X-CSRFToken: [csrf-token]
-
-{
-    "email": "usuario@exemplo.com",
-    "password": "senha_segura"
-}
-```
-
-**Nota**: Mesmo endpoint, mesmos campos. A diferença é que a autenticação de sessão também cria um cookie de sessão além do JWT.
-
-### 3. Registro de Usuários
+### 2. Registro de Usuários
 
 ```http
 POST /api/v1/auth/registration/
@@ -193,7 +180,7 @@ GET /api/version/
 
 ## 📊 Estrutura de Resposta
 
-### Resposta de Sucesso
+### Resposta de Sucesso (Lista Paginada)
 
 ```json
 {
@@ -216,16 +203,16 @@ GET /api/version/
 
 ```json
 {
-    "error": {
-        "code": "VALIDATION_ERROR",
-        "message": "Dados inválidos fornecidos",
-        "details": {
-            "email": ["Este campo é obrigatório."],
-            "password": ["A senha deve ter pelo menos 8 caracteres."]
-        },
-        "timestamp": "2025-01-10T14:30:00Z",
-        "request_id": "req_123456789"
-    }
+    "error": "Credenciais inválidas"
+}
+```
+
+**ou para erros de validação:**
+
+```json
+{
+    "email": ["Este campo é obrigatório."],
+    "password": ["A senha deve ter pelo menos 8 caracteres."]
 }
 ```
 
@@ -233,15 +220,14 @@ GET /api/version/
 
 ## 🏗️ Módulos da API
 
-A API está organizada em 8 módulos principais:
+A API está organizada em 7 módulos principais com arquitetura otimizada:
 
 ### 00 - SISTEMA - INFORMAÇÕES GERAIS
 
 Endpoints para informações do sistema e monitoramento.
 
 - `GET /api/version/` - Informações de versão
-- `GET /api/health/` - Status de saúde do sistema
-- `GET /api/stats/` - Estatísticas gerais
+- `GET /api/logout-redirect/` - Utilitário de logout
 
 ### 01 - USUÁRIOS - GESTÃO DE PERFIS
 
@@ -258,10 +244,14 @@ DELETE /api/v1/users/{id}/      # Excluir usuário
 
 **Campos principais:**
 - `id`, `email`, `first_name`, `last_name`
-- `tipo_usuario` (cliente/fornecedor)
-- `telefone`, `endereco`, `cidade`, `estado`
-- `foto_perfil`, `descricao_perfil`
-- `email_verificado`, `ativo`
+- `is_client`, `is_supplier`, `cidade`, `estado`
+- `telefone`, `endereco`, `foto_perfil`
+- `is_active`, `email_verificado`
+
+**Filtros disponíveis:**
+- `is_client`, `is_supplier` - Filtrar por tipo de usuário
+- `cidade`, `estado` - Filtrar por localização
+- `search` - Busca em nome e email
 
 ### 02 - CATEGORIAS - CLASSIFICAÇÃO DE SERVIÇOS
 
@@ -269,11 +259,11 @@ Gestão das categorias principais de serviços.
 
 ```http
 GET    /api/v1/categorias/           # Listar categorias
-POST   /api/v1/categorias/           # Criar categoria
+POST   /api/v1/categorias/           # Criar categoria (Admin)
 GET    /api/v1/categorias/{id}/      # Detalhes da categoria
-PUT    /api/v1/categorias/{id}/      # Atualizar categoria
-PATCH  /api/v1/categorias/{id}/      # Atualização parcial
-DELETE /api/v1/categorias/{id}/      # Excluir categoria
+PUT    /api/v1/categorias/{id}/      # Atualizar categoria (Admin)
+PATCH  /api/v1/categorias/{id}/      # Atualização parcial (Admin)
+DELETE /api/v1/categorias/{id}/      # Excluir categoria (Admin)
 ```
 
 **Campos principais:**
@@ -281,22 +271,24 @@ DELETE /api/v1/categorias/{id}/      # Excluir categoria
 - `icone`, `imagem_local`, `url_imagem_externa`
 - `ativa`, `ordem`
 
+**Permissões:** IsAuthenticatedOrReadOnly + IsAdminOrReadOnly
+
 ### 03 - SUBCATEGORIAS - ESPECIALIZAÇÃO DE SERVIÇOS
 
 Gestão das subcategorias para especialização de serviços.
 
 ```http
 GET    /api/v1/subcategorias/           # Listar subcategorias
-POST   /api/v1/subcategorias/           # Criar subcategoria
+POST   /api/v1/subcategorias/           # Criar subcategoria (Admin)
 GET    /api/v1/subcategorias/{id}/      # Detalhes da subcategoria
-PUT    /api/v1/subcategorias/{id}/      # Atualizar subcategoria
-PATCH  /api/v1/subcategorias/{id}/      # Atualização parcial
-DELETE /api/v1/subcategorias/{id}/      # Excluir subcategoria
+PUT    /api/v1/subcategorias/{id}/      # Atualizar subcategoria (Admin)
+PATCH  /api/v1/subcategorias/{id}/      # Atualização parcial (Admin)
+DELETE /api/v1/subcategorias/{id}/      # Excluir subcategoria (Admin)
 ```
 
 **Filtros disponíveis:**
 - `categoria` - Filtrar por categoria pai
-- `ativa` - Apenas subcategorias ativas
+- `search` - Busca em nome e descrição
 
 ### 04 - NECESSIDADES - ANÚNCIOS DE DEMANDA
 
@@ -313,18 +305,19 @@ DELETE /api/v1/necessidades/{id}/      # Excluir necessidade
 
 **Campos principais:**
 - `id`, `titulo`, `descricao`
-- `cliente`, `categoria`, `subcategoria`
+- `cliente` (atribuído automaticamente ao criar)
+- `categoria`, `subcategoria`
 - `quantidade`, `unidade`, `valor_estimado`
 - `prazo_execucao`, `endereco_execucao`
 - `status` (ativo/pausado/finalizado)
-- `imagens`, `created_at`, `updated_at`
 
-**Filtros e busca:**
-- `status` - Filtrar por status
-- `categoria` - Filtrar por categoria
-- `subcategoria` - Filtrar por subcategoria
-- `cliente` - Filtrar por cliente
-- `search` - Busca em título e descrição
+**Filtros automáticos:**
+- Usuários não-staff só veem necessidades com `status='ativo'`
+- Cliente sempre atribuído automaticamente na criação
+
+**Serializers diferenciados:**
+- Lista: `NecessidadeSerializer` (campos básicos)
+- Detalhes: `NecessidadeDetailSerializer` (informações completas)
 
 ### 05 - ORÇAMENTOS - PROPOSTAS DE FORNECEDORES
 
@@ -340,11 +333,14 @@ DELETE /api/v1/orcamentos/{id}/      # Excluir orçamento
 ```
 
 **Campos principais:**
-- `id`, `necessidade`, `fornecedor`
+- `id`, `necessidade`, `fornecedor` (atribuído automaticamente)
 - `valor`, `descricao`, `prazo_execucao`
 - `status` (enviado/aceito/rejeitado/finalizado)
 - `anexos`, `observacoes`
-- `created_at`, `updated_at`
+
+**Filtros de segurança:**
+- Usuários só veem orçamentos onde são fornecedores OU clientes da necessidade
+- Query otimizada: `Q(fornecedor=user) | Q(anuncio__cliente=user)`
 
 ### 06 - AVALIAÇÕES - SISTEMA DE REPUTAÇÃO
 
@@ -360,17 +356,16 @@ DELETE /api/v1/avaliacoes/{id}/      # Excluir avaliação
 ```
 
 **Campos principais:**
-- `id`, `avaliador`, `avaliado`, `orcamento`
+- `id`, `usuario` (avaliador - atribuído automaticamente), `avaliado`, `orcamento`
 - `nota` (1-5), `comentario`
 - `tipo_avaliacao` (cliente_para_fornecedor/fornecedor_para_cliente)
-- `created_at`
 
 ### 07 - AUTENTICAÇÃO - ACESSO AO SISTEMA
 
 Endpoints para autenticação e gestão de sessões.
 
 ```http
-POST   /api/v1/auth/login/              # Login
+POST   /api/v1/auth/login/              # Login customizado (CORS otimizado)
 POST   /api/v1/auth/logout/             # Logout
 POST   /api/v1/auth/registration/       # Registro
 POST   /api/v1/auth/password/change/    # Alterar senha
@@ -383,69 +378,118 @@ GET    /api/v1/auth/user/               # Dados do usuário atual
 
 ## 🔒 Permissões e Segurança
 
-### Sistema de Permissões
+### Sistema de Permissões Customizadas
 
-A API implementa um sistema granular de permissões:
+A API implementa permissões específicas para cada recurso:
 
-#### 1. Permissões de Propriedade
-- **IsOwnerOrReadOnly**: Usuários só podem editar seus próprios recursos
-- **IsOwnerOrRelatedUser**: Acesso restrito a proprietários ou usuários relacionados
+#### 1. Permissões por Recurso
+- **NecessidadePermission**: Controle específico para necessidades
+- **OrcamentoPermission**: Controle específico para orçamentos  
+- **AvaliacaoPermission**: Controle específico para avaliações
+- **IsAdminOrReadOnly**: Apenas admins podem modificar recursos do sistema
 
-#### 2. Permissões de Tipo de Usuário
-- **ClientePermission**: Restrições específicas para clientes
-- **FornecedorPermission**: Restrições específicas para fornecedores
+#### 2. Filtros Automáticos de Segurança (BaseModelViewSet)
 
-#### 3. Permissões de Admin
-- **IsAdminOrReadOnly**: Apenas administradores podem modificar recursos do sistema
+Implementados na classe base para todos os ViewSets:
 
-### Filtros Automáticos de Segurança
+```python
+class BaseModelViewSet(viewsets.ModelViewSet):
+    """ViewSet base com configurações comuns e filtros de segurança automáticos"""
+    
+    def get_queryset(self):
+        # Filtragem automática para usuários não-staff
+        if not self.request.user.is_staff:
+            return self._filter_for_regular_user(queryset)
+        return queryset
+```
 
-- **Usuários**: Só veem seus próprios dados
-- **Necessidades**: Clientes veem suas necessidades, fornecedores veem necessidades públicas
-- **Orçamentos**: Acesso restrito ao fornecedor e cliente relacionados
-- **Avaliações**: Visíveis publicamente, mas criação restrita aos envolvidos
+**Filtros específicos por modelo:**
+- **Usuários**: `is_active=True` (só usuários ativos)
+- **Necessidades**: `status='ativo'` (só necessidades ativas)
+- **Orçamentos**: `Q(fornecedor=user) | Q(anuncio__cliente=user)` (só relacionados)
+- **Avaliações**: Sem filtro adicional (visíveis publicamente)
+
+#### 3. Atribuição Automática de Propriedade
+
+```python
+def perform_create(self, serializer):
+    # Atribuição automática do usuário atual
+    serializer.save(usuario_field=self.request.user)
+```
+
+- **Necessidades**: `cliente` atribuído automaticamente
+- **Orçamentos**: `fornecedor` atribuído automaticamente  
+- **Avaliações**: `usuario` (avaliador) atribuído automaticamente
 
 ### Validações de Segurança
 
-- Validação de propriedade em todas as operações de escrita
-- Sanitização automática de dados de entrada
-- Rate limiting por usuário e IP
-- Logs de auditoria para operações sensíveis
+- ✅ Validação de propriedade em todas as operações
+- ✅ Filtros automáticos por tipo de usuário
+- ✅ Sanitização de dados de entrada
+- ✅ Logs de auditoria para operações sensíveis
 
 ---
 
-## ⚡ Rate Limiting
+## ⚡ Performance e Otimizações
 
-Para garantir a qualidade do serviço, a API implementa rate limiting:
+### Arquitetura Modular Otimizada
 
-### Limites por Tipo de Usuário
+#### 1. BaseModelViewSet - Classe Base Reutilizável
 
-- **Usuários autenticados**: 1000 requests/hora
-- **Usuários não autenticados**: 100 requests/hora
-- **Usuários premium**: 5000 requests/hora
+Todos os ViewSets herdam da `BaseModelViewSet` que fornece:
 
-### Headers de Rate Limit
-
-```http
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 999
-X-RateLimit-Reset: 1641024000
+```python
+class BaseModelViewSet(viewsets.ModelViewSet):
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    
+    def get_queryset(self):
+        """Filtragem automática para usuários não-staff"""
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff:
+            queryset = self._filter_for_regular_user(queryset)
+        return queryset
 ```
 
-### Resposta de Rate Limit Excedido
+**Benefícios:**
+- ✅ Eliminação de código duplicado
+- ✅ Configuração consistente de filtros
+- ✅ Lógica de segurança centralizada
+- ✅ Manutenção simplificada
 
-```json
-{
-    "error": {
-        "code": "RATE_LIMIT_EXCEEDED",
-        "message": "Taxa de requisições excedida",
-        "details": {
-            "limit": 1000,
-            "reset_time": "2025-01-10T15:00:00Z"
-        }
-    }
-}
+#### 2. Estrutura de Arquivos Otimizada
+
 ```
+api/
+├── views.py          # ViewSets principais (6 classes, ~190 linhas)
+├── auth_views.py     # Autenticação customizada (~120 linhas)
+├── v1/
+│   └── address_views.py  # Views específicas de endereço
+├── serializers.py    # Serializers organizados
+├── permissions.py    # Permissões customizadas
+├── filters.py        # Filtros específicos
+└── docs/
+    └── README.md     # Documentação (este arquivo)
+```
+
+**Otimizações implementadas:**
+- 🗑️ Removido `views_old.py` (930 linhas de código legado)
+- 📁 Renomeado `views_clean.py` → `auth_views.py` (melhor nomenclatura)
+- 🔄 Refatorado todos ViewSets para usar `BaseModelViewSet`
+- 📚 Documentação atualizada e reorganizada
+
+#### 3. Filtros e Buscas Otimizados
+
+- **DjangoFilterBackend**: Filtros eficientes via query parameters
+- **SearchFilter**: Busca otimizada em campos específicos
+- **Paginação automática**: Performance melhorada em listas grandes
+- **Queryset filtering**: Redução de dados desnecessários
+
+### Performance Features
+
+- **Serializers diferenciados**: Lista vs. Detail para reduzir payload
+- **Filtros automáticos**: Redução de queries desnecessárias  
+- **Lazy loading**: Carregamento otimizado de relacionamentos
+- **Query optimization**: Filtros aplicados no banco de dados
 
 ---
 
@@ -465,7 +509,6 @@ X-RateLimit-Reset: 1641024000
 - `404 Not Found` - Recurso não encontrado
 - `409 Conflict` - Conflito de dados
 - `422 Unprocessable Entity` - Erro de validação
-- `429 Too Many Requests` - Rate limit excedido
 
 ### Códigos de Erro do Servidor
 
@@ -480,7 +523,7 @@ X-RateLimit-Reset: 1641024000
 ### 1. Fluxo Completo: Cliente Criando Necessidade
 
 ```javascript
-// 1. Autenticação
+// 1. Autenticação com endpoint customizado
 const loginResponse = await fetch('/api/v1/auth/login/', {
     method: 'POST',
     headers: {
@@ -494,16 +537,11 @@ const loginResponse = await fetch('/api/v1/auth/login/', {
 
 const { access } = await loginResponse.json();
 
-// 2. Listar categorias
-const categoriasResponse = await fetch('/api/v1/categorias/', {
-    headers: {
-        'Authorization': `Bearer ${access}`
-    }
-});
-
+// 2. Listar categorias (sem autenticação necessária)
+const categoriasResponse = await fetch('/api/v1/categorias/');
 const categorias = await categoriasResponse.json();
 
-// 3. Criar necessidade
+// 3. Criar necessidade (cliente atribuído automaticamente)
 const necessidadeResponse = await fetch('/api/v1/necessidades/', {
     method: 'POST',
     headers: {
@@ -519,6 +557,7 @@ const necessidadeResponse = await fetch('/api/v1/necessidades/', {
         unidade: 'un',
         valor_estimado: 15000.00,
         prazo_execucao: '2025-02-15'
+        // cliente é atribuído automaticamente
     })
 });
 
@@ -531,7 +570,7 @@ const necessidade = await necessidadeResponse.json();
 import requests
 
 # Autenticação
-auth_response = requests.post('https://indicaai.com/api/v1/auth/login/', json={
+auth_response = requests.post('http://localhost:8000/api/v1/auth/login/', json={
     'email': 'fornecedor@exemplo.com',
     'password': 'senha123'
 })
@@ -539,23 +578,24 @@ auth_response = requests.post('https://indicaai.com/api/v1/auth/login/', json={
 token = auth_response.json()['access']
 headers = {'Authorization': f'Bearer {token}'}
 
-# Buscar necessidades ativas
+# Buscar necessidades ativas (filtradas automaticamente)
 necessidades = requests.get(
-    'https://indicaai.com/api/v1/necessidades/?status=ativo',
+    'http://localhost:8000/api/v1/necessidades/',
     headers=headers
 ).json()
 
-# Enviar orçamento
+# Enviar orçamento (fornecedor atribuído automaticamente)
 orcamento_data = {
     'necessidade': 123,
     'valor': 12500.00,
     'descricao': 'Proposta para reforma completa da cozinha...',
     'prazo_execucao': '2025-02-10',
     'observacoes': 'Inclui material e mão de obra'
+    # fornecedor é atribuído automaticamente
 }
 
 orcamento_response = requests.post(
-    'https://indicaai.com/api/v1/orcamentos/',
+    'http://localhost:8000/api/v1/orcamentos/',
     json=orcamento_data,
     headers=headers
 )
@@ -571,6 +611,7 @@ const avaliacaoData = {
     nota: 5,
     comentario: 'Excelente trabalho! Muito profissional e pontual.',
     tipo_avaliacao: 'cliente_para_fornecedor'
+    // usuario (avaliador) é atribuído automaticamente
 };
 
 const avaliacaoResponse = await fetch('/api/v1/avaliacoes/', {
@@ -581,64 +622,6 @@ const avaliacaoResponse = await fetch('/api/v1/avaliacoes/', {
     },
     body: JSON.stringify(avaliacaoData)
 });
-```
-
----
-
-## 🛠️ SDKs e Bibliotecas
-
-### JavaScript/TypeScript
-
-```bash
-npm install @indicaai/api-client
-```
-
-```javascript
-import { IndicaiAPI } from '@indicaai/api-client';
-
-const api = new IndicaiAPI({
-    baseURL: 'https://indicaai.com/api/v1/',
-    token: 'seu_jwt_token'
-});
-
-// Usar a API
-const necessidades = await api.necessidades.list();
-const novaAvaliacao = await api.avaliacoes.create(avaliacaoData);
-```
-
-### Python
-
-```bash
-pip install indicaai-api
-```
-
-```python
-from indicaai_api import IndicaiClient
-
-client = IndicaiClient(
-    base_url='https://indicaai.com/api/v1/',
-    token='seu_jwt_token'
-)
-
-# Usar a API
-necessidades = client.necessidades.list()
-nova_avaliacao = client.avaliacoes.create(avaliacao_data)
-```
-
-### React Native
-
-```bash
-npm install @indicaai/react-native-sdk
-```
-
-```javascript
-import { useIndicaiAPI } from '@indicaai/react-native-sdk';
-
-function MyComponent() {
-    const { necessidades, loading, error } = useIndicaiAPI('necessidades');
-    
-    // Componente React Native
-}
 ```
 
 ---
@@ -666,14 +649,22 @@ Monitore o status em tempo real: [status.indicaai.com](https://status.indicaai.c
 
 ## 📄 Changelog
 
+### v1.0.1 (2025-01-19)
+
+- 🔧 **Otimização da arquitetura**: Criação da `BaseModelViewSet` para reduzir duplicação de código
+- 🗑️ **Limpeza de código**: Removido arquivo legado `views_old.py` (930 linhas)
+- 📁 **Reorganização**: Renomeado `views_clean.py` → `auth_views.py` para melhor nomenclatura
+- ⚡ **Performance**: Filtros automáticos de segurança otimizados
+- 🔒 **Segurança**: Atribuição automática de propriedade em todos os recursos
+- 📚 **Documentação**: Atualização completa da documentação com exemplos práticos
+
 ### v1.0.0 (2025-01-10)
 
 - 🎉 Lançamento inicial da API
 - ✅ Autenticação JWT implementada
 - ✅ Sistema de permissões granular
 - ✅ Documentação Swagger completa
-- ✅ Rate limiting implementado
-- ✅ 8 módulos principais disponíveis
+- ✅ 7 módulos principais disponíveis
 
 ---
 

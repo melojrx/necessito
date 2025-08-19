@@ -12,7 +12,7 @@ from .views import (
     api_version_info,
     api_logout_redirect,
 )
-from .views_clean import CustomLoginView
+from .auth_views import CustomLoginView
 from .v1.address_views import (
     search_cep, search_addresses, geocode_address, 
     get_states, get_user_address,

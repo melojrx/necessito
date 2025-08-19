@@ -1,0 +1,445 @@
+<!-- Mobile Filters Component -->
+<div class="mobile-filters d-md-none mb-3">
+  <div class="container">
+    <!-- State and Quick Filters Row -->
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <select name="state" class="form-select" id="estadoSelectMobile" form="mobile-search-form">
+          <option value="todos" {% if state == 'TODOS' or state == 'todos' %}selected{% endif %}>
+            Todos os estados
+          </option>
+          <option value="AC" {% if state == 'AC' %}selected{% endif %}>Acre</option>
+          <option value="AL" {% if state == 'AL' %}selected{% endif %}>Alagoas</option>
+          <option value="AP" {% if state == 'AP' %}selected{% endif %}>Amapá</option>
+          <option value="AM" {% if state == 'AM' %}selected{% endif %}>Amazonas</option>
+          <option value="BA" {% if state == 'BA' %}selected{% endif %}>Bahia</option>
+          <option value="CE" {% if state == 'CE' %}selected{% endif %}>Ceará</option>
+          <option value="DF" {% if state == 'DF' %}selected{% endif %}>Distrito Federal</option>
+          <option value="ES" {% if state == 'ES' %}selected{% endif %}>Espírito Santo</option>
+          <option value="GO" {% if state == 'GO' %}selected{% endif %}>Goiás</option>
+          <option value="MA" {% if state == 'MA' %}selected{% endif %}>Maranhão</option>
+          <option value="MT" {% if state == 'MT' %}selected{% endif %}>Mato Grosso</option>
+          <option value="MS" {% if state == 'MS' %}selected{% endif %}>Mato Grosso do Sul</option>
+          <option value="MG" {% if state == 'MG' %}selected{% endif %}>Minas Gerais</option>
+          <option value="PA" {% if state == 'PA' %}selected{% endif %}>Pará</option>
+          <option value="PB" {% if state == 'PB' %}selected{% endif %}>Paraíba</option>
+          <option value="PR" {% if state == 'PR' %}selected{% endif %}>Paraná</option>
+          <option value="PE" {% if state == 'PE' %}selected{% endif %}>Pernambuco</option>
+          <option value="PI" {% if state == 'PI' %}selected{% endif %}>Piauí</option>
+          <option value="RJ" {% if state == 'RJ' %}selected{% endif %}>Rio de Janeiro</option>
+          <option value="RN" {% if state == 'RN' %}selected{% endif %}>Rio Grande do Norte</option>
+          <option value="RS" {% if state == 'RS' %}selected{% endif %}>Rio Grande do Sul</option>
+          <option value="RO" {% if state == 'RO' %}selected{% endif %}>Rondônia</option>
+          <option value="RR" {% if state == 'RR' %}selected{% endif %}>Roraima</option>
+          <option value="SC" {% if state == 'SC' %}selected{% endif %}>Santa Catarina</option>
+          <option value="SP" {% if state == 'SP' %}selected{% endif %}>São Paulo</option>
+          <option value="SE" {% if state == 'SE' %}selected{% endif %}>Sergipe</option>
+          <option value="TO" {% if state == 'TO' %}selected{% endif %}>Tocantins</option>
+        </select>
+      </div>
+      
+      <div class="col-6">
+        <button type="button" 
+                class="btn btn-outline-primary w-100" 
+                data-bs-toggle="offcanvas" 
+                data-bs-target="#mobileFiltersOffcanvas">
+          <i class="fas fa-sliders-h me-2"></i>
+          Filtros
+          {% if term or local or cliente or campos or status_selecionados|length > 1 %}
+          <span class="badge bg-primary ms-1">
+            {% if term %}1{% else %}0{% endif %}
+            {% if local %}1{% else %}0{% endif %}
+            {% if cliente %}1{% else %}0{% endif %}
+            {% if campos %}{{ campos|length }}{% else %}0{% endif %}
+            {% if status_selecionados|length > 1 %}{{ status_selecionados|length }}{% endif %}
+          </span>
+          {% endif %}
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Filters Chips -->
+    {% if term or local or cliente or campos or status_selecionados|length > 1 %}
+    <div class="active-filters mb-3">
+      <div class="d-flex flex-wrap gap-2">
+        {% if term %}
+        <span class="badge bg-primary rounded-pill px-3 py-2">
+          <i class="fas fa-search me-1"></i>
+          "{{ term|truncatechars:20 }}"
+          <button type="button" 
+                  class="btn-close btn-close-white ms-2 small" 
+                  onclick="removeFilter('q')"
+                  aria-label="Remover busca"></button>
+        </span>
+        {% endif %}
+        
+        {% if local %}
+        <span class="badge bg-success rounded-pill px-3 py-2">
+          <i class="fas fa-map-marker-alt me-1"></i>
+          {{ local|truncatechars:15 }}
+          <button type="button" 
+                  class="btn-close btn-close-white ms-2 small" 
+                  onclick="removeFilter('local')"
+                  aria-label="Remover local"></button>
+        </span>
+        {% endif %}
+        
+        {% if cliente %}
+        <span class="badge bg-info rounded-pill px-3 py-2">
+          <i class="fas fa-user me-1"></i>
+          {{ cliente|truncatechars:12 }}
+          <button type="button" 
+                  class="btn-close btn-close-white ms-2 small" 
+                  onclick="removeFilter('cliente')"
+                  aria-label="Remover cliente"></button>
+        </span>
+        {% endif %}
+        
+        {% if status_selecionados|length > 1 %}
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+          <i class="fas fa-flag me-1"></i>
+          {{ status_selecionados|length }} status
+          <button type="button" 
+                  class="btn-close ms-2 small" 
+                  onclick="removeFilter('status')"
+                  aria-label="Remover status"></button>
+        </span>
+        {% endif %}
+        
+        {% if campos %}
+        {% for campo in campos %}
+        <span class="badge bg-secondary rounded-pill px-3 py-2">
+          <i class="fas fa-crosshairs me-1"></i>
+          {{ campo|title }}
+          <button type="button" 
+                  class="btn-close btn-close-white ms-2 small" 
+                  onclick="removeFieldFilter('{{ campo }}')"
+                  aria-label="Remover campo {{ campo }}"></button>
+        </span>
+        {% endfor %}
+        {% endif %}
+        
+        <button type="button" 
+                class="badge bg-light text-dark border rounded-pill px-3 py-2 text-decoration-none" 
+                onclick="clearAllFilters()">
+          <i class="fas fa-times me-1"></i>
+          Limpar todos
+        </button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Mobile Filters Offcanvas -->
+<div class="offcanvas offcanvas-bottom mobile-filters-offcanvas" 
+     tabindex="-1" 
+     id="mobileFiltersOffcanvas" 
+     aria-labelledby="mobileFiltersOffcanvasLabel">
+  <div class="offcanvas-header bg-primary text-white">
+    <h5 class="offcanvas-title fw-bold" id="mobileFiltersOffcanvasLabel">
+      <i class="fas fa-sliders-h me-2"></i>
+      Filtros Avançados
+    </h5>
+    <button type="button" 
+            class="btn-close btn-close-white" 
+            data-bs-dismiss="offcanvas" 
+            aria-label="Fechar"></button>
+  </div>
+  
+  <div class="offcanvas-body">
+    <form method="get" action="{% url 'search:necessidade_search_all' %}" id="mobile-filters-form">
+      <!-- Preserve current search term and state -->
+      <input type="hidden" name="q" value="{{ term }}">
+      <input type="hidden" name="state" value="{{ state }}">
+      <input type="hidden" name="lat" value="{{ lat }}">
+      <input type="hidden" name="lon" value="{{ lon }}">
+      
+      <!-- City Field -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          <i class="fas fa-city text-success me-2"></i>
+          Cidade
+        </label>
+        <select name="local" class="form-select" id="cidadeSelectMobile" disabled>
+          <option value="">Primeiro selecione um estado</option>
+        </select>
+        <div class="form-text">
+          <small class="text-muted">Ou use sua localização atual</small>
+        </div>
+      </div>
+
+      <!-- Publisher Field -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          <i class="fas fa-user text-secondary me-2"></i>
+          Anunciante
+        </label>
+        <input type="text" 
+               name="cliente" 
+               class="form-control" 
+               placeholder="Nome do anunciante"
+               value="{{ cliente }}">
+      </div>
+
+      <!-- Status Filters -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          <i class="fas fa-flag text-warning me-2"></i>
+          Status dos Anúncios
+        </label>
+        <div class="row g-2">
+          {% for opcao in opcoes_status %}
+          <div class="col-6">
+            <div class="form-check">
+              <input class="form-check-input" 
+                     type="checkbox" 
+                     name="status" 
+                     value="{{ opcao.value }}" 
+                     id="mobile_status_{{ opcao.value }}" 
+                     {% if opcao.value in status_selecionados %}checked{% endif %}>
+              <label class="form-check-label small d-flex align-items-center" 
+                     for="mobile_status_{{ opcao.value }}">
+                {% if opcao.value == 'ativo' %}
+                  <i class="fas fa-play-circle text-success me-2"></i>
+                {% elif opcao.value == 'analisando_orcamentos' %}
+                  <i class="fas fa-search-dollar text-info me-2"></i>
+                {% elif opcao.value == 'aguardando_confirmacao' %}
+                  <i class="fas fa-clock text-warning me-2"></i>
+                {% elif opcao.value == 'em_atendimento' %}
+                  <i class="fas fa-cogs text-primary me-2"></i>
+                {% elif opcao.value == 'finalizado' %}
+                  <i class="fas fa-check-circle text-success me-2"></i>
+                {% elif opcao.value == 'cancelado' %}
+                  <i class="fas fa-times-circle text-danger me-2"></i>
+                {% elif opcao.value == 'expirado' %}
+                  <i class="fas fa-calendar-times text-secondary me-2"></i>
+                {% elif opcao.value == 'em_disputa' %}
+                  <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                {% endif %}
+                <span class="status-text">{{ opcao.label }}</span>
+              </label>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Search Fields -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          <i class="fas fa-crosshairs text-info me-2"></i>
+          Buscar em
+        </label>
+        <div class="row g-2">
+          {% for op in opcoes_campos %}
+          <div class="col-6">
+            <div class="form-check">
+              <input class="form-check-input" 
+                     type="checkbox" 
+                     name="campos" 
+                     value="{{ op }}" 
+                     id="mobile_campo_{{ op }}" 
+                     {% if op in campos %}checked{% endif %}>
+              <label class="form-check-label small d-flex align-items-center" 
+                     for="mobile_campo_{{ op }}">
+                {% if op == 'titulo' %}
+                  <i class="fas fa-heading me-2 text-primary"></i>Título
+                {% elif op == 'descricao' %}
+                  <i class="fas fa-align-left me-2 text-secondary"></i>Descrição
+                {% elif op == 'categoria' %}
+                  <i class="fas fa-tags me-2 text-success"></i>Categoria
+                {% elif op == 'subcategoria' %}
+                  <i class="fas fa-tag me-2 text-info"></i>Subcategoria
+                {% endif %}
+              </label>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="offcanvas-footer bg-light p-3 border-top">
+    <div class="row g-2">
+      <div class="col-6">
+        <button type="button" 
+                class="btn btn-outline-secondary w-100" 
+                onclick="clearMobileFilters()">
+          <i class="fas fa-times me-2"></i>
+          Limpar
+        </button>
+      </div>
+      <div class="col-6">
+        <button type="button" 
+                class="btn btn-primary w-100" 
+                onclick="applyMobileFilters()">
+          <i class="fas fa-search me-2"></i>
+          Aplicar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for filter operations -->
+<form id="mobile-search-form" method="get" action="{% url 'search:necessidade_search_all' %}" style="display: none;">
+  <input type="hidden" name="q" value="{{ term }}">
+  <input type="hidden" name="state" value="{{ state }}">
+  <input type="hidden" name="local" value="{{ local }}">
+  <input type="hidden" name="cliente" value="{{ cliente }}">
+  <input type="hidden" name="lat" value="{{ lat }}">
+  <input type="hidden" name="lon" value="{{ lon }}">
+  {% for campo in campos %}
+  <input type="hidden" name="campos" value="{{ campo }}">
+  {% endfor %}
+  {% for status in status_selecionados %}
+  <input type="hidden" name="status" value="{{ status }}">
+  {% endfor %}
+</form>
+
+<style>
+.mobile-filters .form-select {
+  border-radius: 0.5rem;
+  border: 2px solid #e1e5e9;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.mobile-filters .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.mobile-filters .btn {
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.active-filters .badge {
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.active-filters .btn-close {
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+.active-filters .btn-close:hover {
+  opacity: 1;
+}
+
+.mobile-filters-offcanvas {
+  max-height: 85vh;
+}
+
+.mobile-filters-offcanvas .form-control,
+.mobile-filters-offcanvas .form-select {
+  border-radius: 0.5rem;
+  border: 2px solid #e1e5e9;
+  transition: all 0.3s ease;
+}
+
+.mobile-filters-offcanvas .form-control:focus,
+.mobile-filters-offcanvas .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+  transform: translateY(-1px);
+}
+
+.mobile-filters-offcanvas .form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.offcanvas-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+}
+
+@media (max-width: 576px) {
+  .mobile-filters-offcanvas {
+    max-height: 90vh;
+  }
+  
+  .active-filters .badge {
+    font-size: 0.75rem;
+  }
+}
+</style>
+
+<script>
+// Mobile filter management functions
+window.removeFilter = function(filterType) {
+  const form = document.getElementById('mobile-search-form');
+  const input = form.querySelector(`input[name="${filterType}"]`);
+  if (input) {
+    input.value = '';
+    form.submit();
+  }
+};
+
+window.removeFieldFilter = function(fieldValue) {
+  const form = document.getElementById('mobile-search-form');
+  const inputs = form.querySelectorAll(`input[name="campos"]`);
+  inputs.forEach(input => {
+    if (input.value === fieldValue) {
+      input.remove();
+    }
+  });
+  form.submit();
+};
+
+window.clearAllFilters = function() {
+  const stateInput = document.getElementById('estadoSelectMobile');
+  const currentState = stateInput ? stateInput.value : 'todos';
+  window.location.href = `?state=${currentState}`;
+};
+
+window.clearMobileFilters = function() {
+  const form = document.getElementById('mobile-filters-form');
+  form.querySelectorAll('input[type="text"]').forEach(input => {
+    if (input.name !== 'q' && input.name !== 'state' && input.name !== 'lat' && input.name !== 'lon') {
+      input.value = '';
+    }
+  });
+  form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  form.querySelectorAll('select').forEach(select => {
+    if (select.name !== 'state') {
+      select.selectedIndex = 0;
+    }
+  });
+};
+
+window.applyMobileFilters = function() {
+  const form = document.getElementById('mobile-filters-form');
+  const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('mobileFiltersOffcanvas'));
+  if (offcanvas) {
+    offcanvas.hide();
+  }
+  form.submit();
+};
+
+// State change handler for mobile
+document.addEventListener('DOMContentLoaded', function() {
+  const estadoSelectMobile = document.getElementById('estadoSelectMobile');
+  if (estadoSelectMobile) {
+    estadoSelectMobile.addEventListener('change', function() {
+      const form = document.getElementById('mobile-search-form');
+      const stateInput = form.querySelector('input[name="state"]');
+      if (stateInput) {
+        stateInput.value = this.value;
+        form.submit();
+      }
+    });
+  }
+});
+</script>

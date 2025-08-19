@@ -1,0 +1,521 @@
+<!-- Search Results Component - Mobile First -->
+<div class="search-results">
+  {% if anuncios %}
+  <!-- Results Grid - Responsive -->
+  <div class="results-grid">
+    <div class="row g-3 g-md-4">
+      {% for ad in anuncios %}
+      <div class="col-lg-3 col-md-4 col-sm-6 d-flex mb-4">
+        <article class="result-card w-100">
+          <div class="search-card-container">
+            <a href="{{ ad.get_absolute_url }}" 
+               class="text-decoration-none h-100 d-flex"
+               aria-label="Ver detalhes: {{ ad.titulo }}">
+              <div class="card h-100 shadow-sm border-0 search-result-card">
+              <!-- Image -->
+              <div class="card-img-wrapper">
+                {% with img=ad.imagens.all.0 %}
+                {% if img %}
+                <img src="{{ img.imagem.url }}" 
+                     class="card-img-top" 
+                     alt="{{ ad.titulo }}"
+                     loading="lazy">
+                {% else %}
+                <div class="card-img-placeholder">
+                  <i class="fas fa-image text-muted"></i>
+                </div>
+                {% endif %}
+                {% endwith %}
+                
+                <!-- Status Badge -->
+                <div class="status-badge-wrapper">
+                  <span class="badge status-badge
+                    {% if ad.status == 'ativo' %}bg-success
+                    {% elif ad.status == 'analisando_orcamentos' %}bg-info
+                    {% elif ad.status == 'aguardando_confirmacao' %}bg-warning text-dark
+                    {% elif ad.status == 'em_atendimento' %}bg-primary
+                    {% elif ad.status == 'finalizado' %}bg-success
+                    {% elif ad.status == 'cancelado' %}bg-danger
+                    {% elif ad.status == 'expirado' %}bg-secondary
+                    {% elif ad.status == 'em_disputa' %}bg-warning text-dark
+                    {% else %}bg-light text-dark{% endif %}">
+                    {% if ad.status == 'ativo' %}
+                      <i class="fas fa-play-circle me-1"></i>Ativo
+                    {% elif ad.status == 'analisando_orcamentos' %}
+                      <i class="fas fa-search-dollar me-1"></i>Análise
+                    {% elif ad.status == 'aguardando_confirmacao' %}
+                      <i class="fas fa-clock me-1"></i>Aguardando
+                    {% elif ad.status == 'em_atendimento' %}
+                      <i class="fas fa-cogs me-1"></i>Atendimento
+                    {% elif ad.status == 'finalizado' %}
+                      <i class="fas fa-check-circle me-1"></i>Finalizado
+                    {% elif ad.status == 'cancelado' %}
+                      <i class="fas fa-times-circle me-1"></i>Cancelado
+                    {% elif ad.status == 'expirado' %}
+                      <i class="fas fa-calendar-times me-1"></i>Expirado
+                    {% elif ad.status == 'em_disputa' %}
+                      <i class="fas fa-exclamation-triangle me-1"></i>Disputa
+                    {% else %}
+                      <i class="fas fa-question-circle me-1"></i>{{ ad.get_status_display }}
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Card Body -->
+              <div class="card-body p-3">
+                <!-- Title -->
+                <h3 class="card-title h6 fw-semibold text-truncate-2 mb-2">
+                  {{ ad.titulo }}
+                </h3>
+                
+                <!-- Meta Info -->
+                <div class="card-meta mb-2">
+                  <div class="d-flex align-items-center justify-content-between text-muted small">
+                    <span class="location text-truncate" style="max-width: 60%;">
+                      <i class="fas fa-map-marker-alt me-1"></i>
+                      {{ ad.cliente.estado|upper }}
+                      {% if ad.cliente.cidade %}
+                        <span class="d-none d-md-inline">, {{ ad.cliente.cidade|truncatechars:12 }}</span>
+                      {% endif %}
+                    </span>
+                    <span class="date flex-shrink-0">
+                      <i class="fas fa-calendar me-1"></i>
+                      {{ ad.data_criacao|date:"d/m/Y" }}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Quantity and Category -->
+                <div class="card-details mb-auto">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                    <span class="quantity-badge badge bg-light text-primary fw-normal">
+                      <i class="fas fa-cube me-1"></i>
+                      {{ ad.quantidade }} {{ ad.get_unidade_display }}
+                    </span>
+                    
+                    {% if ad.categoria %}
+                    <span class="category-badge badge bg-light text-secondary small text-truncate" style="max-width: 50%;">
+                      <i class="fas fa-tag me-1"></i>
+                      {{ ad.categoria.nome|truncatechars:15 }}
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <!-- Publisher Info -->
+                <div class="publisher-info mt-2 pt-2 border-top mt-auto">
+                  <div class="d-flex align-items-center">
+                    <div class="publisher-avatar me-2 flex-shrink-0">
+                      {% if ad.cliente.foto %}
+                      <img src="{{ ad.cliente.foto.url }}" 
+                           alt="{{ ad.cliente.get_full_name }}"
+                           class="rounded-circle"
+                           width="24" height="24">
+                      {% else %}
+                      <div class="default-avatar">
+                        <i class="fas fa-user"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="publisher-name flex-grow-1">
+                      <span class="small text-muted text-truncate d-block">
+                        {{ ad.cliente.get_full_name|truncatechars:18 }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>
+            </a>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <nav class="pagination-nav mt-4" aria-label="Navegação de páginas">
+    <div class="d-flex justify-content-center">
+      <ul class="pagination pagination-modern mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" 
+             href="?q={{ term }}&state={{ state }}&local={{ local }}&cliente={{ cliente }}{% for status in status_selecionados %}&status={{ status }}{% endfor %}{% for campo in campos %}&campos={{ campo }}{% endfor %}&lat={{ lat }}&lon={{ lon }}&page={{ page_obj.previous_page_number }}"
+             aria-label="Página anterior">
+            <i class="fas fa-chevron-left"></i>
+            <span class="d-none d-sm-inline ms-1">Anterior</span>
+          </a>
+        </li>
+        {% endif %}
+        
+        {% for num in paginator.page_range %}
+          {% if page_obj.number == num %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+          {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+          <li class="page-item">
+            <a class="page-link" 
+               href="?q={{ term }}&state={{ state }}&local={{ local }}&cliente={{ cliente }}{% for status in status_selecionados %}&status={{ status }}{% endfor %}{% for campo in campos %}&campos={{ campo }}{% endfor %}&lat={{ lat }}&lon={{ lon }}&page={{ num }}">
+              {{ num }}
+            </a>
+          </li>
+          {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" 
+             href="?q={{ term }}&state={{ state }}&local={{ local }}&cliente={{ cliente }}{% for status in status_selecionados %}&status={{ status }}{% endfor %}{% for campo in campos %}&campos={{ campo }}{% endfor %}&lat={{ lat }}&lon={{ lon }}&page={{ page_obj.next_page_number }}"
+             aria-label="Próxima página">
+            <span class="d-none d-sm-inline me-1">Próxima</span>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+    
+    <!-- Pagination Info -->
+    <div class="pagination-info text-center mt-3">
+      <small class="text-muted">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} 
+        ({{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados)
+      </small>
+    </div>
+  </nav>
+  {% endif %}
+  
+  {% else %}
+  <!-- No Results -->
+  <div class="no-results text-center py-5">
+    <div class="no-results-icon mb-4">
+      <i class="fas fa-search text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+    </div>
+    
+    <h3 class="h5 text-muted mb-3">Nenhum anúncio encontrado</h3>
+    
+    <p class="text-muted mb-4">
+      Não encontramos anúncios que correspondam aos seus critérios de busca.
+    </p>
+    
+    <div class="suggestions">
+      <p class="small text-muted mb-3">
+        <strong>Sugestões:</strong>
+      </p>
+      <ul class="list-unstyled text-muted small">
+        <li class="mb-1">• Verifique a ortografia dos termos de busca</li>
+        <li class="mb-1">• Tente palavras-chave mais gerais</li>
+        <li class="mb-1">• Remova alguns filtros aplicados</li>
+        <li class="mb-1">• Considere buscar em outros estados</li>
+      </ul>
+      
+      <div class="mt-4">
+        <a href="?state={{ state }}" class="btn btn-outline-primary">
+          <i class="fas fa-undo me-2"></i>
+          Limpar Filtros
+        </a>
+        <a href="/" class="btn btn-link">
+          <i class="fas fa-home me-2"></i>
+          Voltar ao Início
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+/* Search Results Cards - Optimized Layout */
+.search-result-card {
+  border-radius: 16px !important;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.search-card-container {
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-result-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border-color: var(--bs-primary);
+}
+
+/* Card Image */
+.card-img-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+  background: #f8f9fa;
+  flex-shrink: 0;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.search-result-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  font-size: 2rem;
+}
+
+/* Status Badge */
+.status-badge-wrapper {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Content */
+.card-body {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.card-title {
+  line-height: 1.3;
+  color: #2c3e50;
+  height: 2.6em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.card-meta {
+  border-bottom: 1px solid #f1f1f1;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-meta .location,
+.card-meta .date {
+  font-size: 0.8rem;
+}
+
+.card-meta .location {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quantity-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.category-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-details {
+  margin-bottom: 1rem;
+}
+
+/* Publisher Info */
+.publisher-info {
+  background: rgba(248, 249, 250, 0.5);
+  margin: 0 -0.75rem -0.75rem;
+  padding: 0.5rem 0.75rem 0.75rem;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.publisher-avatar .default-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #6c757d;
+}
+
+.publisher-name {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.publisher-name .text-truncate {
+  max-width: 100%;
+}
+
+/* Text Truncation Helper */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Modern Pagination */
+.pagination-modern {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-modern .page-item .page-link {
+  border: none;
+  padding: 0.75rem 1rem;
+  color: #495057;
+  background: white;
+  transition: all 0.3s ease;
+  border-right: 1px solid #dee2e6;
+}
+
+.pagination-modern .page-item:last-child .page-link {
+  border-right: none;
+}
+
+.pagination-modern .page-item .page-link:hover {
+  background: var(--bs-primary);
+  color: white;
+  transform: translateY(-2px);
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.pagination-modern .page-item.active .page-link {
+  background: var(--bs-primary);
+  color: white;
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .search-card-container {
+    height: auto;
+  }
+  
+  .card-img-wrapper {
+    height: 140px !important;
+  }
+  
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .publisher-info {
+    margin: 0 -0.75rem -0.75rem;
+    padding: 0.4rem 0.75rem 0.75rem;
+  }
+  
+  .status-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .pagination-modern .page-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 991px) {
+  .card-img-wrapper {
+    height: 160px;
+  }
+}
+
+@media (min-width: 992px) {
+  .card-img-wrapper {
+    height: 180px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .search-card-container {
+    height: 420px;
+  }
+  
+  .card-img-wrapper {
+    height: 200px;
+  }
+}
+
+/* No Results Styling */
+.no-results {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-results .suggestions ul {
+  text-align: left;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Animation for results loading */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.result-card:nth-child(even) {
+  animation-delay: 0.1s;
+}
+
+.result-card:nth-child(3n) {
+  animation-delay: 0.2s;
+}
+</style>

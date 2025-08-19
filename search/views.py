@@ -45,8 +45,9 @@ class NecessidadeSearchAllView(ListView):
         status_raw = self.request.GET.getlist("status")
         self.status_selecionados = validate_status_list(status_raw)
         
-        # Aplicar filtro de status
-        qs = qs.filter(status__in=self.status_selecionados)
+        # Aplicar filtro de status apenas se houver status específicos selecionados
+        if self.status_selecionados is not None:
+            qs = qs.filter(status__in=self.status_selecionados)
 
         # Validação segura de estado
         state_raw = self.request.GET.get("state", "todos").strip().upper()
@@ -144,7 +145,7 @@ class NecessidadeSearchAllView(ListView):
         ctx["opcoes_campos"] = ["titulo", "descricao", "categoria", "subcategoria"]
         
         # Contexto para filtro de status
-        ctx["status_selecionados"] = getattr(self, 'status_selecionados', ['ativo'])
+        ctx["status_selecionados"] = getattr(self, 'status_selecionados', None) or []
         ctx["opcoes_status"] = [
             {'value': choice[0], 'label': choice[1]} 
             for choice in Necessidade.status.field.choices

@@ -271,20 +271,24 @@ def validate_status_list(status_list):
         status_list (list): Lista de status a validar
         
     Returns:
-        list: Lista de status válidos
+        list: Lista de status válidos (None significa todos os status)
     """
     if not status_list:
-        return ['ativo']
+        # Por padrão, mostrar todos os anúncios independente do status
+        return None
     
-    # Status válidos definidos no modelo
-    valid_statuses = ['ativo', 'inativo', 'finalizado', 'pausado']
+    # Status válidos definidos no modelo Necessidade
+    valid_statuses = [
+        'ativo', 'analisando_orcamentos', 'aguardando_confirmacao', 
+        'em_atendimento', 'finalizado', 'cancelado', 'expirado', 'em_disputa'
+    ]
     
     # Filtrar apenas status válidos
     validated = [s for s in status_list if s in valid_statuses]
     
-    # Se nenhum status válido, usar padrão
+    # Se nenhum status válido, mostrar todos
     if not validated:
-        validated = ['ativo']
+        return None
         
     return validated
 

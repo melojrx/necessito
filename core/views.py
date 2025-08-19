@@ -161,6 +161,23 @@ class HelpSupportView(TemplateView):
         return context
 
 
+class HelpBusinessRulesView(TemplateView):
+    """View para a seção 'Regras de Negócio' da central de ajuda"""
+    template_name = 'help/help_business_rules.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': '📖 Regras de Negócio - Central de Ajuda',
+            'page_description': 'Entenda as regras de negócio da plataforma: ciclo de vida dos anúncios, sistema de orçamentos, comunicação e avaliações',
+            'page_keywords': 'regras de negócio, anúncios, orçamentos, status, ciclo de vida, disputas, avaliações',
+            'section_name': 'Regras de Negócio',
+            'section_icon': 'gavel',
+            'section_color': '#ffc107',
+        })
+        return context
+
+
 def help_view(request):
     """
     View baseada em função para a página de ajuda.

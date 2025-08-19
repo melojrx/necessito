@@ -12,6 +12,7 @@ from core.views import (
     HelpCommunicationView, 
     HelpRatingsView, 
     HelpSupportView,
+    HelpBusinessRulesView,
     SecurityTipsView,
     TermsOfServiceView,
     PrivacyPolicyView,
@@ -72,6 +73,7 @@ urlpatterns = [
     path('ajuda/comunicacao/', HelpCommunicationView.as_view(), name='help_communication'),
     path('ajuda/avaliacoes/', HelpRatingsView.as_view(), name='help_ratings'),
     path('ajuda/suporte/', HelpSupportView.as_view(), name='help_support'),
+    path('ajuda/regras-de-negocio/', HelpBusinessRulesView.as_view(), name='help_business_rules'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

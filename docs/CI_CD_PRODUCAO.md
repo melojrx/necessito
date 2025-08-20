@@ -1,6 +1,6 @@
-# 🚀 Plano CI/CD Produção – Necessito (Coexistindo com UrbanLive)
+# 🚀 Plano CI/CD Produção – Indicaai (Coexistindo com UrbanLive)
 
-Este documento descreve, de forma prática e incremental, como implantar um pipeline de **build → teste → publicação → deploy** para o projeto **Necessito**, compartilhando a mesma VPS onde já roda **UrbanLive**, sem causar indisponibilidade ou conflitos.
+Este documento descreve, de forma prática e incremental, como implantar um pipeline de **build → teste → publicação → deploy** para o projeto **Indicaai**, compartilhando a mesma VPS onde já roda **UrbanLive**, sem causar indisponibilidade ou conflitos.
 
 ---
 > NOTA SOBRE USO DE USUÁRIO: Neste momento os procedimentos serão executados como **usuário `root`** (decisão operacional atual). Em um hardening futuro recomenda-se criar um usuário não‑root (ex: `deploy`) pertencente ao grupo `docker` e remover acesso direto de root via SSH. As instruções abaixo já estão ajustadas para root.

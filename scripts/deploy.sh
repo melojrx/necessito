@@ -16,7 +16,7 @@ warn(){ echo -e "${YELLOW}[WARN]${NC} $*"; }
 err(){ echo -e "${RED}[ERR]${NC} $*"; }
 
 COMPOSE_FILE="docker-compose_prod.yml"
-COMPOSE="docker compose"
+COMPOSE="docker compose -f $COMPOSE_FILE"
 
 [[ -f $COMPOSE_FILE ]] || { err "Arquivo $COMPOSE_FILE não encontrado"; exit 1; }
 [[ -f .env.prod ]] || { err "Arquivo .env.prod não encontrado"; exit 1; }
@@ -27,13 +27,9 @@ if [[ -z "$REGISTRY_IMAGE" || -z "$IMAGE_TAG" ]]; then
   err "Defina REGISTRY_IMAGE e IMAGE_TAG (ex: export REGISTRY_IMAGE=ghcr.io/org/necessito-web IMAGE_TAG=abcdef1)"; exit 1;
 fi
 
-log "Atualizando imagens (${REGISTRY_IMAGE}:${IMAGE_TAG})"
-if grep -q 'build: .' "$COMPOSE_FILE"; then
-  sed -i.bak \
-    -e "s|build: .|image: ${REGISTRY_IMAGE}:${IMAGE_TAG}|" \
-    -e "s|container_name: necessito-web_prod-1|container_name: necessito-web_prod|" \
-    $COMPOSE_FILE
-fi
+log "Configurando variáveis de ambiente para imagens"
+export REGISTRY_IMAGE="${REGISTRY_IMAGE}"
+export IMAGE_TAG="${IMAGE_TAG}"
 
 log "Pull da imagem"
 $COMPOSE pull web || true

@@ -22,11 +22,13 @@ from core.views import (
     DataExportView,
     DataDeletionRequestView,
     LGPDConsentLogView,
-    CookiePreferencesView
+    CookiePreferencesView,
+    health_check
 )
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health/", health_check, name="health_check"),
     path("", include("ads.urls")),
     path("users/", include('users.urls')),
     path('categorias/', include('categories.urls')),

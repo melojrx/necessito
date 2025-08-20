@@ -12,7 +12,8 @@ REGISTRY_IMAGE=${REGISTRY_IMAGE:-}
 [[ -n "$REGISTRY_IMAGE" ]] || { err "Defina REGISTRY_IMAGE"; exit 1; }
 
 log "Rollback para tag $TAG"
-sed -i.bak -e "s|image: ${REGISTRY_IMAGE}:.*|image: ${REGISTRY_IMAGE}:${TAG}|" docker-compose_prod.yml
-docker compose pull web || true
-docker compose up -d web celery celery-beat nginx
+export REGISTRY_IMAGE="${REGISTRY_IMAGE}"
+export IMAGE_TAG="${TAG}"
+docker compose -f docker-compose_prod.yml pull web || true
+docker compose -f docker-compose_prod.yml up -d web celery celery-beat nginx
 ok "Rollback aplicado"

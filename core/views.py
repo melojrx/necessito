@@ -11,6 +11,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth import get_user_model
+from django.db import connection
+from django.core.cache import cache
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -535,3 +537,46 @@ class CookiePreferencesView(TemplateView):
             'current_consent': current_consent,
         })
         return context
+
+
+def health_check(request):
+    """
+    Health check endpoint for monitoring and deployment verification.
+    Returns JSON response with system status information.
+    """
+    try:
+        # Check database connectivity
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "healthy"
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        db_status = "unhealthy"
+    
+    # Check Redis/cache connectivity
+    try:
+        cache.set('health_check_test', 'ok', 30)
+        cache_test = cache.get('health_check_test')
+        cache_status = "healthy" if cache_test == 'ok' else "unhealthy"
+    except Exception as e:
+        logger.error(f"Cache health check failed: {e}")
+        cache_status = "unhealthy"
+    
+    # Overall status
+    overall_status = "healthy" if db_status == "healthy" and cache_status == "healthy" else "unhealthy"
+    
+    health_data = {
+        "status": overall_status,
+        "timestamp": datetime.now().isoformat(),
+        "version": getattr(settings, 'VERSION', '1.0.0'),
+        "environment": getattr(settings, 'ENVIRONMENT', 'production'),
+        "checks": {
+            "database": db_status,
+            "cache": cache_status
+        }
+    }
+    
+    # Return appropriate HTTP status code
+    status_code = 200 if overall_status == "healthy" else 503
+    
+    return JsonResponse(health_data, status=status_code)

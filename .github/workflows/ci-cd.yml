@@ -114,4 +114,4 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
         run: |
-          ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "curl -fsS http://localhost/health/ || curl -fsS http://localhost:8000/health/"
+          ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "curl -fsS https://necessito.online/health/ || curl -fsS http://localhost:8000/health/"

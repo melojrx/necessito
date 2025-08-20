@@ -1,4 +1,4 @@
-# 🏪 Indicai - Marketplace de Necessidades
+# 🏪 Indicaai - Marketplace de Necessidades
 
 <div align="center">
   <img src="static/img/logo1.png" alt="Indicai Logo" width="300" />
@@ -12,7 +12,7 @@
 
 ## 📋 Sobre o Projeto
 
-**Indicai** é uma plataforma marketplace inovadora que conecta pessoas com necessidades a fornecedores qualificados. O sistema permite que usuários publiquem suas demandas por produtos ou serviços e recebam orçamentos de profissionais cadastrados na plataforma.
+**Indicaai** é uma plataforma marketplace inovadora que conecta pessoas com necessidades a fornecedores qualificados. O sistema permite que usuários publiquem suas demandas por produtos ou serviços e recebam orçamentos de profissionais cadastrados na plataforma.
 
 ### 🎯 Principais Funcionalidades
 
@@ -321,8 +321,8 @@ Este projeto é proprietário e confidencial. Todos os direitos reservados.
 
 ## 📞 Contato
 
-- Email: contato@indicai.com.br
-- Website: [www.indicai.com.br](https://www.indicai.com.br)
+- Email: suporteindicaai@hotmail.com
+- Website: [https://necessito.online/](https://necessito.online/)
 
 ## 🙏 Agradecimentos
 

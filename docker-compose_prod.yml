@@ -3,18 +3,22 @@ version: '3.8'
 services:
   db:
     image: postgres:17
-    container_name: necessito-db_prod-1
+    container_name: necessito-db_prod
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-necessito_prod}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+    # Porta não exposta externamente (acesso via rede interna ou túnel SSH)
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
       - ./backups:/backups
     networks:
       - necessito_app_network_prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-necessito_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -25,12 +29,16 @@ services:
   redis:
     image: redis:7-alpine
     container_name: necessito-redis-prod
-    ports:
-      - "6379:6379"
+    # Porta não exposta externamente
     volumes:
       - redis_data_prod:/data
     networks:
       - necessito_app_network_prod
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -39,9 +47,11 @@ services:
         max-file: "3"
 
   web:
+    # Substituir build local por imagem publicada no pipeline:
+    # image: ghcr.io/ORG/necessito-web:latest
     build: .
-    container_name: necessito-web_prod-1
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    container_name: necessito-web_prod
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
     volumes:
       - media_data_prod:/app/media
       - ./staticfiles:/app/staticfiles
@@ -65,7 +75,7 @@ services:
         max-file: "3"
 
   celery:
-    build: .
+    build: . # substituir por mesma imagem de web quando pipeline ativo
     container_name: necessito-celery-prod
     command: celery -A core worker -l info --concurrency=2
     volumes:

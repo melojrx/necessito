@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 # Hosts permitidos
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-# CSRF Trusted Origins
+# CSRF Trusted Origins (dev + produção agregada via variável)
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
@@ -33,6 +33,11 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
+PROD_CSRF_ORIGINS = os.environ.get("CSRF_PROD_ORIGINS", "https://necessito.online,https://www.necessito.online").split(",")
+for _origin in PROD_CSRF_ORIGINS:
+    _origin = _origin.strip()
+    if _origin and _origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_origin)
 
 # Usuário customizado
 AUTH_USER_MODEL = 'users.User'
@@ -118,15 +123,15 @@ TEMPLATES[0]["OPTIONS"]["context_processors"] += [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-# Banco de dados
+# Banco de dados (aceita prefixo DB_* ou POSTGRES_*)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get('DB_NAME'),
-        "USER": os.environ.get('DB_USER'),
-        "PASSWORD": os.environ.get('DB_PASSWORD'),
-        "HOST": os.environ.get('DB_HOST'),
-        "PORT": os.environ.get('DB_PORT'),
+        "NAME": os.environ.get('DB_NAME') or os.environ.get('POSTGRES_DB'),
+        "USER": os.environ.get('DB_USER') or os.environ.get('POSTGRES_USER'),
+        "PASSWORD": os.environ.get('DB_PASSWORD') or os.environ.get('POSTGRES_PASSWORD'),
+        "HOST": os.environ.get('DB_HOST') or os.environ.get('POSTGRES_HOST') or 'db',
+        "PORT": os.environ.get('DB_PORT') or os.environ.get('POSTGRES_PORT') or '5432',
     }
 }
 

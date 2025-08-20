@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from ads.models import Necessidade
-from core import settings
+from django.conf import settings
 
 class NotificationType(models.TextChoices):
     # Necessidade lifecycle

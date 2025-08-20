@@ -7,12 +7,14 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").sp
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False  # Nginx global já gerencia SSL
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Reconhecer esquema HTTPS vindo do Nginx global / proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 # HSTS Security Headers
 SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))

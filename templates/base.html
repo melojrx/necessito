@@ -157,30 +157,31 @@
     <!-- (1) jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- (2) jQuery Mask Plugin -->
+    <!-- (2) Scripts do Bootstrap via CDN - DEVE vir ANTES do Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+            crossorigin="anonymous"></script>
+
+    <!-- (3) jQuery Mask Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
-    <!-- Leaflet JS -->
+    <!-- (4) Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet MarkerCluster JS -->
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
     {% block extra_scripts %}{% endblock %}
-    <!-- Scripts do Bootstrap via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-            crossorigin="anonymous"></script>
     
-    <!-- Performance Optimizations -->
+    <!-- (5) Performance Optimizations -->
     <script src="{% static 'js/performance-optimizations.js' %}" defer></script>
     
-    <!-- Alpine.js Components (load first) -->
-    <script src="{% static 'js/alpine-components.js' %}"></script>
-    
-    <!-- Alpine.js for Real-Time Updates -->
+    <!-- (6) Alpine.js for Real-Time Updates - CORE LIBRARY -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
-    <!-- Real-Time Store and Advanced Features (load after Alpine.js) -->
+    <!-- (7) Alpine.js Components (load AFTER Alpine.js core) -->
+    <script src="{% static 'js/alpine-components.js' %}" defer></script>
+    
+    <!-- (8) Real-Time Store and Advanced Features (load LAST) -->
     <script src="{% static 'js/alpine-realtime.js' %}" defer></script>
     
     <!-- Current User Data for Real-Time -->

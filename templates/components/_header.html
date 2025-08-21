@@ -200,11 +200,12 @@
 
 .user-dropdown {
     position: relative;
-    z-index: 1040;
+    z-index: 1030;
 }
 
 .user-dropdown .dropdown-menu {
-    z-index: 1055;
+    z-index: 1060 !important;
+    position: absolute !important;
 }
 
 .user-btn {
@@ -290,14 +291,24 @@
 
 /* Dropdown moderno */
 .dropdown-menu {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 15px;
-    box-shadow: var(--shadow-medium);
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    z-index: 1050;
-    position: absolute;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 15px !important;
+    box-shadow: var(--shadow-medium) !important;
+    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    z-index: 1060 !important;
+    position: absolute !important;
+    min-width: 200px !important;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease !important;
+}
+
+.dropdown-menu.show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    display: block !important;
 }
 
 .dropdown-item {
@@ -391,14 +402,7 @@
 
 /* Body offset para header fixo - já definido no base.html */
 
-/* Dropdown coordination styles */
-.user-dropdown .dropdown-menu {
-    z-index: 1055 !important;
-}
-
-.notification-dropdown {
-    z-index: 1056 !important;
-}
+/* Dropdown coordination styles - removido, já definido acima */
 
 /* Mobile dropdown optimization */
 @media (max-width: 768px) {
@@ -468,7 +472,7 @@
 
                     <!-- Notificações -->
                     <button class="notification-btn" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasNotifications">
+                            data-bs-target="#offcanvasNotifications" aria-controls="offcanvasNotifications">
                         <i class="fas fa-bell"></i>
                         {% if unread_notifications_count > 0 %}
                         <span class="notification-badge">{{ unread_notifications_count }}</span>
@@ -478,11 +482,11 @@
                     {% if user.is_authenticated %}
                     <!-- Dropdown do usuário -->
                     <div class="user-dropdown dropdown ms-2">
-                        <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="userDropdownBtn">
+                        <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="userDropdownBtn">
                             <i class="fas fa-user"></i>
                             <span>Olá, {{ user.first_name|capfirst }}!</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdownBtn">
                             <li>
                                 <a class="dropdown-item" href="{% url 'users:minha_conta_detail' user.pk %}">
                                     <i class="fas fa-user"></i> Minha Conta
@@ -652,6 +656,46 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Garantir que Bootstrap dropdowns funcionem corretamente
+    console.log('Inicializando dropdowns do Bootstrap...');
+    
+    // Inicializar dropdown do usuário explicitamente
+    const userDropdownBtn = document.getElementById('userDropdownBtn');
+    if (userDropdownBtn) {
+        // Remover qualquer inicialização anterior
+        const existingDropdown = bootstrap.Dropdown.getInstance(userDropdownBtn);
+        if (existingDropdown) {
+            existingDropdown.dispose();
+        }
+        
+        // Criar nova instância do dropdown
+        try {
+            const dropdown = new bootstrap.Dropdown(userDropdownBtn, {
+                boundary: 'viewport',
+                display: 'dynamic'
+            });
+            console.log('Dropdown do usuário inicializado com sucesso');
+            
+            // Adicionar listeners para debug
+            userDropdownBtn.addEventListener('show.bs.dropdown', function () {
+                console.log('Dropdown sendo aberto');
+            });
+            
+            userDropdownBtn.addEventListener('shown.bs.dropdown', function () {
+                console.log('Dropdown aberto com sucesso');
+            });
+            
+            userDropdownBtn.addEventListener('hide.bs.dropdown', function () {
+                console.log('Dropdown sendo fechado');
+            });
+            
+        } catch (error) {
+            console.error('Erro ao inicializar dropdown:', error);
+        }
+    } else {
+        console.warn('Botão do dropdown do usuário não encontrado');
+    }
+
     // Header scroll effect
     const header = document.getElementById('modernHeader');
     let lastScrollTop = 0;

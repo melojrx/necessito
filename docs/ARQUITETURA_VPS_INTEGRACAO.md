@@ -1,7 +1,7 @@
 # 🏗️ Arquitetura VPS Multi-Aplicação - Documentação Completa
 
-**Última atualização:** 20 de Agosto de 2025  
-**Versão:** 2.0 - Produção Completa com SSL e CI/CD  
+**Última atualização:** 21 de Agosto de 2025  
+**Versão:** 3.0 - Produção com AdSense, reCAPTCHA e CSP Otimizado  
 **Status:** ✅ **TOTALMENTE FUNCIONAL**
 
 ## 📊 Visão Geral da Arquitetura
@@ -411,11 +411,59 @@ docker compose -f docker-compose_prod.yml up -d --force-recreate [service_name]
 ```nginx
 # Configurados em /root/nginx-global/conf/test_ssl.conf
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-add_header X-Frame-Options "DENY" always;
+add_header X-Frame-Options "SAMEORIGIN" always;  # Permitir reCAPTCHA
 add_header X-Content-Type-Options "nosniff" always;
-add_header Referrer-Policy "same-origin" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 add_header X-XSS-Protection "1; mode=block" always;
 ```
+
+### Content Security Policy (CSP)
+
+```nginx
+# Configurado em /root/necessito/nginx/prod.conf
+add_header Content-Security-Policy "
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+    https://cdn.jsdelivr.net 
+    https://code.jquery.com 
+    https://cdnjs.cloudflare.com 
+    https://unpkg.com 
+    https://www.google.com 
+    https://www.gstatic.com 
+    https://pagead2.googlesyndication.com 
+    https://googleads.g.doubleclick.net 
+    https://tpc.googlesyndication.com 
+    https://adservice.google.com 
+    https://adservice.google.com.br;
+  style-src 'self' 'unsafe-inline' 
+    https://cdn.jsdelivr.net 
+    https://cdnjs.cloudflare.com 
+    https://fonts.googleapis.com 
+    https://unpkg.com;
+  font-src 'self' 
+    https://fonts.gstatic.com 
+    https://cdnjs.cloudflare.com 
+    data:;
+  img-src 'self' data: https: blob:;
+  connect-src 'self' 
+    https://api.github.com 
+    https://www.google.com 
+    https://www.gstatic.com;
+  frame-src 'self' 
+    https://www.google.com 
+    https://googleads.g.doubleclick.net 
+    https://tpc.googlesyndication.com 
+    https://recaptcha.google.com;
+  child-src 'self' 
+    https://www.google.com 
+    https://recaptcha.google.com;
+" always;
+```
+
+#### Considerações sobre CSP e Bootstrap 5
+- Bootstrap 5 usa Popper.js para dropdowns, que requer `'unsafe-inline'` e `'unsafe-eval'`
+- O CSP foi otimizado para permitir todos os CDNs necessários
+- Mantém segurança bloqueando scripts de domínios não autorizados
 
 ### Firewall (UFW)
 
@@ -435,6 +483,45 @@ ufw enable
 - Senhas fortes geradas com 32+ caracteres
 - Rotação de credenciais a cada 90 dias recomendada
 - Backup seguro das credenciais em local externo
+
+### Configurações de Autenticação e Monetização
+
+#### Google reCAPTCHA v2
+```env
+# Configurado em .env.prod
+RECAPTCHA_PUBLIC_KEY=6LfQweQqAAAAAG9KzydFgZAochOCI3e0hacUmnJ-
+RECAPTCHA_PRIVATE_KEY=6LfQweQqAAAAAP4mHz7BiAu_NOg26ECwysV59_ud
+```
+
+- Implementado nas páginas de login e registro
+- Proteção contra bots e ataques automatizados
+- Widget checkbox v2 com tema light
+
+#### Google AdSense
+```html
+<!-- Adicionado em todos os templates -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4753781804493115"
+     crossorigin="anonymous"></script>
+```
+
+- Client ID: ca-pub-4753781804493115
+- Script adicionado no `<head>` de todas as páginas
+- CSP configurado para permitir domínios do AdSense
+
+### CSRF Configuration
+```python
+# core/settings/prod.py
+CSRF_COOKIE_HTTPONLY = False  # Permitir acesso JavaScript
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = [
+    "https://necessito.online",
+    "https://www.necessito.online",
+    "http://necessito.online",
+    "http://www.necessito.online",
+    "http://31.97.17.10:8080",
+    "https://31.97.17.10:8080"
+]
+```
 
 ## 📊 Monitoramento
 
@@ -485,6 +572,10 @@ tail -f /root/engage_hub/logs/django.log
 - [x] Estáticos coletados
 - [x] HTTPS funcionando
 - [x] Admin acessível
+- [x] Google reCAPTCHA configurado e funcionando
+- [x] Google AdSense integrado
+- [x] CSP otimizado para Bootstrap 5
+- [x] Dropdowns e menus mobile funcionando
 
 ### ✅ Aplicação UrbanLive
 - [x] Containers rodando (web, db, redis)
@@ -504,6 +595,13 @@ tail -f /root/engage_hub/logs/django.log
 - [x] Scripts de deploy funcionais
 - [x] Backup automático agendado
 - [x] Rollback testado
+
+### ✅ Segurança e Monetização
+- [x] Content Security Policy (CSP) configurado
+- [x] CSRF Protection otimizado
+- [x] Google reCAPTCHA v2 ativo
+- [x] Google AdSense implementado
+- [x] Headers de segurança LGPD compliant
 
 ## 🔄 Processo de Atualização
 
@@ -547,6 +645,17 @@ docker logs necessito-web_prod --tail 100
 4. **Logs**: Rotacionados automaticamente para evitar estouro de disco
 5. **Monitoramento**: Health checks disponíveis para ambas aplicações
 6. **Segurança**: Headers de segurança e HSTS configurados
+7. **CSP**: Otimizado para Bootstrap 5, AdSense e reCAPTCHA
+8. **CSRF**: Configurado para permitir todos os domínios necessários
+9. **Monetização**: Google AdSense ativo em todas as páginas
+10. **Proteção**: reCAPTCHA v2 em formulários de autenticação
+
+## 🔑 Credenciais de Acesso
+
+### Superusuário Necessito
+- **Email**: admin@necessito.online
+- **Senha**: LaKb!PLaCJ@M#5FN
+- **URL Admin**: https://necessito.online/admin/
 
 ## 🆘 Suporte e Contatos
 
@@ -555,8 +664,23 @@ docker logs necessito-web_prod --tail 100
 - **Logs de Deploy**: `/root/necessito/logs/deploy.log`
 - **Email Suporte**: suporteindicaai@hotmail.com
 
+## 📈 Histórico de Mudanças
+
+### Versão 3.0 (21/08/2025)
+- Adicionado Google AdSense em todas as páginas
+- Configurado Google reCAPTCHA v2 para autenticação
+- Otimizado CSP para Bootstrap 5 e serviços Google
+- Corrigido problema de dropdowns e menus mobile
+- Atualizado CSRF_TRUSTED_ORIGINS
+- Documentado superusuário de produção
+
+### Versão 2.0 (20/08/2025)
+- SSL/TLS configurado com Let's Encrypt
+- CI/CD pipeline implementado
+- Backup automático configurado
+
 ---
 
-**Última verificação de funcionamento:** 20 de Agosto de 2025 - 23:00  
+**Última verificação de funcionamento:** 21 de Agosto de 2025 - 00:45  
 **Próxima renovação SSL:** 18 de Novembro de 2025  
-**Versão do documento:** 2.0
+**Versão do documento:** 3.0

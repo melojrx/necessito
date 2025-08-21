@@ -34,9 +34,16 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CSRF Security
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Precisa ser False para JavaScript acessar
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_PROD_ORIGINS", "https://necessito.online").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    "https://necessito.online",
+    "https://www.necessito.online", 
+    "http://necessito.online",
+    "http://www.necessito.online",
+    "http://31.97.17.10:8080",
+    "https://31.97.17.10:8080"
+]
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = os.environ.get("ALLOWED_CORS_ORIGINS", "https://necessito.online").split(",")

@@ -64,12 +64,41 @@ class UserDetailView(DetailView):
     context_object_name = 'user'
     success_url = reverse_lazy('users:minha_conta_detail')
 
+    def dispatch(self, request, *args, **kwargs):
+        # Verificar autenticação no dispatch (antes de qualquer processamento)
+        if not request.user.is_authenticated:
+            return redirect('users:login')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_object(self, queryset=None):
-        return self.request.user
+        # Pegar o ID da URL
+        pk = self.kwargs.get('pk')
+        
+        # Verificar se o usuário está autenticado
+        if not self.request.user.is_authenticated:
+            from django.http import Http404
+            raise Http404("Usuário não autenticado")
+        
+        # Buscar o usuário pelo ID
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            from django.http import Http404
+            raise Http404("Usuário não encontrado")
+        
+        # Verificar se o usuário pode ver este perfil
+        # Por enquanto, permitir que qualquer usuário autenticado veja qualquer perfil
+        # Você pode adicionar lógica de permissão aqui se necessário
+        
+        return user
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.get_object()
+        # Usar self.object que já foi definido pelo Django DetailView
+        user = self.object
+        
+        # Não precisa verificar is_authenticated pois User objects sempre são authenticated
+        # apenas AnonymousUser não é authenticated
 
         avaliacoes = Avaliacao.objects.filter(avaliado=user)
         total_avaliacoes = avaliacoes.count()

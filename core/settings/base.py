@@ -113,8 +113,9 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.media",
-                "core.context_processors.unread_notifications",
-                "core.context_processors.unread_messages",
+                # Temporariamente desabilitados para debug
+                # "core.context_processors.unread_notifications",
+                # "core.context_processors.unread_messages",
             ],
         },
     },

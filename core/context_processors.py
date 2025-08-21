@@ -17,13 +17,17 @@ def unread_messages(request):
             from django.db.models import Q
             from chat.models import ChatRoom, ChatMessage
             
-            count = ChatMessage.objects.filter(
-                chat_room__in=ChatRoom.objects.filter(
-                    Q(cliente=request.user) | Q(fornecedor=request.user),
-                    ativo=True
-                ),
-                lida=False
-            ).exclude(remetente=request.user).count()
+            # Verificação adicional: se user não tem id, não pode fazer query
+            if not request.user.id:
+                count = 0
+            else:
+                count = ChatMessage.objects.filter(
+                    chat_room__in=ChatRoom.objects.filter(
+                        Q(cliente=request.user) | Q(fornecedor=request.user),
+                        ativo=True
+                    ),
+                    lida=False
+                ).exclude(remetente=request.user).count()
         except Exception:
             # Se houver qualquer erro, retornar 0
             count = 0

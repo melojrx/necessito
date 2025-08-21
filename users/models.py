@@ -13,7 +13,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.db.models import Avg 
 from categories.models import Categoria
-from core import settings
+from django.conf import settings
 from users.utils import validate_cpf
 
 
@@ -190,7 +190,8 @@ class User(AbstractUser):
         """
         Retorna URL da foto de perfil ou um avatar padrão.
         """
-        return self.foto.url if self.foto else f"{settings.MEDIA_URL}fotos_usuarios/avatar.png"
+        from django.conf import settings as django_settings
+        return self.foto.url if self.foto else f"{django_settings.MEDIA_URL}fotos_usuarios/avatar.png"
 
     @property
     def result_type(self) -> str:

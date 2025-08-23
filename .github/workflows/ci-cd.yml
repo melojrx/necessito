@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag da imagem a implantar (ex: latest ou sha curto)'
+        required: false
+        default: 'latest'
 
 permissions:
   contents: read
@@ -13,6 +18,14 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: core.settings.dev
+      PYTHONPATH: .
+      DB_NAME: test
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
     services:
       postgres:
         image: postgres:17
@@ -36,18 +49,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('requirements_base.txt') }}
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements_*.txt') }}
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_base.txt
+          # Ferramenta de lint rápida
+          pip install ruff
+      - name: Lint (ruff)
+        run: |
+          ruff check .
+      - name: Migrate
+        run: |
+          python manage.py migrate --noinput
       - name: Django checks
         run: |
-          export DB_NAME=test DB_USER=test DB_PASSWORD=test DB_HOST=127.0.0.1 DB_PORT=5432
           python manage.py check
       - name: Run tests (smoke)
         run: |
-          export DB_NAME=test DB_USER=test DB_PASSWORD=test DB_HOST=127.0.0.1 DB_PORT=5432
           python manage.py test --noinput || python manage.py test --noinput || exit 1
 
   build_push:
@@ -81,12 +100,23 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: build_push
     runs-on: ubuntu-latest
-    environment: production
     env:
       REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/necessito-web
+      IMAGE_TAG: ${{ github.event.inputs.image_tag }}
     steps:
+      - name: Verificar secrets requeridas
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.SSH_KEY }}" ] && echo "Faltando secret SSH_KEY" && MISSING=1 || true
+            [ -z "${{ secrets.SSH_HOST }}" ] && echo "Faltando secret SSH_HOST" && MISSING=1 || true
+            [ -z "${{ secrets.SSH_USER }}" ] && echo "Faltando secret SSH_USER" && MISSING=1 || true
+          if [ "$MISSING" -eq 1 ]; then exit 1; fi
+      - name: Validar tag
+        run: |
+          echo "Usando tag: ${IMAGE_TAG:-latest}"
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -97,21 +127,22 @@ jobs:
             ssh-private-key: ${{ secrets.SSH_KEY }}
       - name: Known hosts
         run: |
-          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+          PORT=22
+          ssh-keyscan -p "$PORT" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
       - name: Deploy
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
         run: |
-          SHA=${GITHUB_SHA::12}
-          echo "Deploying $SHA"
-          rsync -avz -e "ssh -p $SSH_PORT" scripts/ $SSH_USER@$SSH_HOST:~/necessito/scripts/
-          ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "cd necessito && REGISTRY_IMAGE=$REGISTRY_IMAGE IMAGE_TAG=$SHA ./scripts/deploy.sh"
+          PORT=22
+          TAG=${IMAGE_TAG:-latest}
+          echo "Deploying tag $TAG"
+          rsync -avz -e "ssh -p $PORT" scripts/ $SSH_USER@$SSH_HOST:~/necessito/scripts/
+          ssh -p $PORT $SSH_USER@$SSH_HOST "cd necessito && REGISTRY_IMAGE=$REGISTRY_IMAGE IMAGE_TAG=$TAG ./scripts/deploy.sh"
       - name: Health check (remote)
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
         run: |
-          ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "curl -fsS https://necessito.online/health/ || curl -fsS http://localhost:8000/health/"
+          PORT=22
+          ssh -p $PORT $SSH_USER@$SSH_HOST "curl -fsS https://necessito.online/health/ || curl -fsS http://localhost:8000/health/"

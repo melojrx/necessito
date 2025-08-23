@@ -48,7 +48,7 @@ services:
 
   web:
     # Imagem será substituída dinamicamente pelo script de deploy
-    image: ${REGISTRY_IMAGE:-ghcr.io/necessito/necessito-web}:${IMAGE_TAG:-latest}
+    image: ${REGISTRY_IMAGE:-ghcr.io/melojrx/necessito-web}:${IMAGE_TAG:-latest}
     container_name: necessito-web_prod
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
     volumes:
@@ -74,7 +74,7 @@ services:
         max-file: "3"
 
   celery:
-    image: ${REGISTRY_IMAGE:-ghcr.io/necessito/necessito-web}:${IMAGE_TAG:-latest}
+    image: ${REGISTRY_IMAGE:-ghcr.io/melojrx/necessito-web}:${IMAGE_TAG:-latest}
     container_name: necessito-celery-prod
     command: celery -A core worker -l info --concurrency=2
     volumes:
@@ -97,7 +97,7 @@ services:
         max-file: "3"
 
   celery-beat:
-    image: ${REGISTRY_IMAGE:-ghcr.io/necessito/necessito-web}:${IMAGE_TAG:-latest}
+    image: ${REGISTRY_IMAGE:-ghcr.io/melojrx/necessito-web}:${IMAGE_TAG:-latest}
     container_name: necessito-celery-beat-prod
     command: celery -A core beat -l info
     volumes:

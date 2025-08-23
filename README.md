@@ -1,18 +1,26 @@
-# 🏪 Indicaai - Marketplace de Necessidades
+# 🏪 Necessito - Marketplace de Necessidades
 
 <div align="center">
-  <img src="static/img/logo1.png" alt="Indicai Logo" width="300" />
+  <img src="static/img/logo1.png" alt="Necessito Logo" width="300" />
 </div>
 
-[![Django](https://img.shields.io/badge/Django-5.1.10-green.svg)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/Django-5.1.4-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue.svg)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
+[![Production](https://img.shields.io/badge/Production-Active-brightgreen.svg)](https://necessito.online)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
 
 ## 📋 Sobre o Projeto
 
-**Indicaai** é uma plataforma marketplace inovadora que conecta pessoas com necessidades a fornecedores qualificados. O sistema permite que usuários publiquem suas demandas por produtos ou serviços e recebam orçamentos de profissionais cadastrados na plataforma.
+**Necessito** é uma plataforma marketplace B2B/B2C inovadora que conecta pessoas e empresas com necessidades a fornecedores qualificados. O sistema permite que usuários publiquem suas demandas por produtos ou serviços e recebam orçamentos personalizados de profissionais cadastrados na plataforma.
+
+### 🌐 Produção
+- **Website**: [https://necessito.online](https://necessito.online)
+- **API**: [https://necessito.online/api/v1/](https://necessito.online/api/v1/)
+- **Documentação API**: [https://necessito.online/api/docs/](https://necessito.online/api/docs/)
+- **Status**: ✅ **TOTALMENTE FUNCIONAL**
 
 ### 🎯 Principais Funcionalidades
 
@@ -28,22 +36,30 @@
 ## 🚀 Tecnologias Utilizadas
 
 ### Backend
-- **Django 5.1.10** - Framework web Python
+- **Django 5.1.4** - Framework web Python
 - **Django REST Framework** - API REST robusta
-- **PostgreSQL** - Banco de dados relacional
-- **Redis** - Cache e message broker
-- **Celery** - Processamento assíncrono
-- **WebSocket** - Comunicação em tempo real
+- **PostgreSQL 17** - Banco de dados relacional principal
+- **Redis 7** - Cache e message broker
+- **Celery** - Processamento assíncrono e tarefas agendadas
+- **WebSocket** - Comunicação em tempo real (chat)
+- **Gunicorn** - Servidor WSGI ASGI para produção
 
-### Infraestrutura
-- **Docker & Docker Compose** - Containerização
-- **Nginx** - Servidor web e proxy reverso
-- **Gunicorn** - Servidor WSGI para produção
+### Infraestrutura e DevOps
+- **Docker & Docker Compose** - Containerização completa
+- **Nginx** - Proxy reverso global com SSL/TLS
+- **GitHub Actions** - CI/CD automatizado
+- **VPS Ubuntu** - Servidor de produção (31.97.17.10)
+- **Let's Encrypt** - Certificados SSL gratuitos
+- **Zero Downtime Deployment** - Deploy sem interrupção
 
 ### Segurança
 - **JWT** - Autenticação de API
+- **SSL/TLS** - HTTPS em produção
+- **HSTS** - HTTP Strict Transport Security
+- **Security Headers** - X-Frame-Options, X-Content-Type-Options
 - **Django CORS Headers** - Controle de CORS
 - **reCAPTCHA** - Proteção contra bots
+- **Firewall UFW** - Proteção de rede
 
 ## 📦 Instalação e Configuração
 
@@ -274,38 +290,126 @@ coverage run --source='.' manage.py test
 coverage report
 ```
 
-## 🚢 Deploy em Produção
+## 🏗️ Arquitetura de Produção
 
-### Com Docker
+### Visão Geral da Infraestrutura
 
-1. Configure as variáveis de ambiente de produção:
-```bash
-cp .env.example .env.prod
-# Configure com valores de produção
+O sistema está hospedado em uma VPS Ubuntu que orquestra duas aplicações independentes através de um proxy NGINX global com SSL/TLS:
+
+```
+Internet (HTTPS/443 | HTTP/80)
+            ↓
+    NGINX GLOBAL (SSL/TLS)
+    Let's Encrypt Certificates
+            ↓
+    ┌─────────────────────────┐
+    │    NECESSITO APP        │
+    │  🛒 Marketplace B2B/B2C  │
+    │                         │
+    │ nginx-necessito:80      │
+    │        ↓                │
+    │ necessito-web:8000      │
+    │        ↓                │
+    │ PostgreSQL 17           │
+    │ Redis 7                 │
+    │ Celery Workers          │
+    └─────────────────────────┘
 ```
 
-2. Execute o deploy:
-```bash
-./deploy_prod.sh
+### Containers em Produção
+
+| **Container** | **Função** | **Rede** | **Status** |
+|---------------|------------|----------|------------|
+| nginx-global | SSL/TLS Proxy | global-network | ✅ Ativo |
+| nginx-necessito | App Proxy | necessito + global | ✅ Ativo |
+| necessito-web_prod | Django App | necessito | ✅ Ativo |
+| necessito-db_prod | PostgreSQL 17 | necessito | ✅ Ativo |
+| necessito-redis-prod | Redis 7 | necessito | ✅ Ativo |
+| necessito-celery-prod | Celery Worker | necessito | ✅ Ativo |
+| necessito-celery-beat-prod | Celery Scheduler | necessito | ✅ Ativo |
+
+### Domínios e SSL
+
+- **Domínios**: necessito.online, www.necessito.online
+- **Certificados**: Let's Encrypt (válidos até 18/11/2025)
+- **Renovação**: Automática via cron (diariamente às 00:00 e 12:00)
+- **Headers**: HSTS, X-Frame-Options, X-Content-Type-Options
+
+## 🚀 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+O projeto utiliza GitHub Actions para CI/CD automatizado:
+
+```yaml
+Trigger: Push to main branch
+├── 1. Tests
+│   ├── Python 3.12 setup
+│   ├── Dependencies install
+│   ├── Django tests
+│   └── Code quality checks
+│
+├── 2. Build & Push
+│   ├── Docker image build
+│   ├── Push to GitHub Container Registry
+│   └── Tag with latest/commit hash
+│
+└── 3. Deploy
+    ├── SSH to VPS (31.97.17.10)
+    ├── Pull latest image
+    ├── Zero downtime deployment
+    ├── Database migrations
+    ├── Static files collection
+    └── Health check validation
 ```
 
-### Configurações de Segurança
+### Processo de Deploy
 
-Em produção, certifique-se de:
-- Definir `DEBUG=False`
-- Configurar `ALLOWED_HOSTS` corretamente
-- Usar HTTPS (SSL/TLS)
-- Configurar um servidor de email real
-- Usar senhas fortes para banco de dados
-- Configurar backups automáticos
+1. **Desenvolvimento Local** → `git push origin main`
+2. **GitHub Actions** → Testes automáticos
+3. **Build & Push** → Docker image para ghcr.io
+4. **Deploy Automático** → VPS com zero downtime
+5. **Health Check** → Validação de funcionamento
 
-## 📈 Monitoramento
+### Scripts de Deploy
 
-O sistema inclui:
-- Logs estruturados em `/logs/`
-- Métricas de performance
-- Monitoramento de tarefas Celery
-- Alertas de erro via email
+| **Script** | **Função** | **Localização** |
+|------------|------------|----------------|
+| deploy.sh | Deploy principal com zero downtime | /root/necessito/scripts/ |
+| migrate.sh | Migrações de banco | /root/necessito/scripts/ |
+| collectstatic.sh | Arquivos estáticos | /root/necessito/scripts/ |
+| rollback.sh | Rollback para versão anterior | /root/necessito/scripts/ |
+| backup_db.sh | Backup do PostgreSQL | /root/necessito/scripts/ |
+
+## 📊 Monitoramento e Backup
+
+### Health Checks
+- **Endpoint**: https://necessito.online/health/
+- **Monitoramento**: Automático via scripts
+- **Logs**: Centralizados em `/root/necessito/logs/`
+
+### Backup Automático
+```bash
+# Execução diária às 2:00 AM
+0 2 * * * /root/necessito/backup_postgres.sh
+
+# Retenção: 7 dias
+# Localização: /root/necessito/backups/
+# Formato: backup_YYYYMMDD_HHMMSS.sql.gz
+```
+
+### Logs e Debugging
+```bash
+# Logs em tempo real
+docker logs necessito-web_prod --tail 100 -f
+
+# Status dos containers
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Verificar SSL
+curl -I https://necessito.online
+```
+
 
 ## 🤝 Contribuindo
 
@@ -319,17 +423,54 @@ O sistema inclui:
 
 Este projeto é proprietário e confidencial. Todos os direitos reservados.
 
-## 📞 Contato
+## 👨‍💻 Desenvolvedor
 
-- Email: suporteindicaai@hotmail.com
-- Website: [https://necessito.online/](https://necessito.online/)
+**Desenvolvido por Júnior Melo**
 
-## 🙏 Agradecimentos
+- **GitHub**: [@melojrx](https://github.com/melojrx)
+- **LinkedIn**: [Júnior Melo](https://www.linkedin.com/in/j%C3%BAnior-melo-a4817127/)
+- **Email**: suporteindicaai@hotmail.com
 
-- Equipe de desenvolvimento
-- Comunidade Django
-- Todos os contribuidores do projeto
+### 🛠️ Expertise Técnica
+
+- **Fullstack Development**: Django, React, Node.js
+- **DevOps & Infrastructure**: Docker, CI/CD, Linux VPS
+- **Database Design**: PostgreSQL, Redis
+- **Cloud & Deployment**: GitHub Actions, SSL/TLS, Nginx
+
+## 📞 Suporte e Contato
+
+- **Email**: suporteindicaai@hotmail.com
+- **Website**: [https://necessito.online](https://necessito.online)
+- **Documentação**: Ver `ARQUITETURA_VPS_INTEGRACAO.md`
+
+## 🎯 Status do Projeto
+
+| **Ambiente** | **Status** | **URL** | **Última Atualização** |
+|--------------|------------|---------|----------------------|
+| **Produção** | ✅ Ativo | https://necessito.online | 20 de Agosto de 2025 |
+| **API** | ✅ Ativo | https://necessito.online/api/v1/ | Versão 1.0 |
+| **SSL** | ✅ Válido | Let's Encrypt | Renovação até 18/11/2025 |
+| **CI/CD** | ✅ Ativo | GitHub Actions | Deploy automático |
+
+## 📋 Recursos Adicionais
+
+- 📄 **Arquitetura Completa**: `ARQUITETURA_VPS_INTEGRACAO.md`
+- 🤖 **Claude AI Guide**: `CLAUDE.md`
+- 📊 **Logs de Deploy**: `/root/necessito/logs/`
+- 🔄 **Backup Automático**: Diário às 2:00 AM
 
 ---
 
-**Desenvolvido com ❤️ pela equipe Indicai**
+<div align="center">
+  
+**🏪 Necessito - Marketplace de Necessidades**
+  
+*Conectando pessoas com necessidades a fornecedores qualificados*
+
+**Desenvolvido com ❤️ por [Júnior Melo](https://github.com/melojrx)**
+
+[![Production](https://img.shields.io/badge/Production-Online-brightgreen.svg)](https://necessito.online)
+[![CI/CD](https://img.shields.io/badge/Deploy-Automated-blue.svg)](https://github.com/melojrx/necessito)
+
+</div>

@@ -1,6 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase as DRFAPITestCase, APIClient
 from users.models import User
 from categories.models import Categoria, SubCategoria
 from ads.models import Necessidade
@@ -8,7 +8,7 @@ from budgets.models import Orcamento
 from rankings.models import Avaliacao
 
 
-class APITestCase(APITestCase):
+class APISmokeTest(DRFAPITestCase):
     """
     Testes básicos para a API.
     """

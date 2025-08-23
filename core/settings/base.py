@@ -24,9 +24,6 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 # Hosts permitidos
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-# Configuração para evitar redirecionamentos desnecessários
-APPEND_SLASH = True
-
 # CSRF Trusted Origins (dev + produção agregada via variável)
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
@@ -113,9 +110,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.media",
-                # Temporariamente desabilitados para debug
-                # "core.context_processors.unread_notifications",
-                # "core.context_processors.unread_messages",
+                "core.context_processors.unread_notifications",
+                "core.context_processors.unread_messages",
             ],
         },
     },

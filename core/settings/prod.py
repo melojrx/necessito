@@ -7,14 +7,12 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").sp
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SECURE_SSL_REDIRECT = False  # Nginx global já gerencia SSL
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Reconhecer esquema HTTPS vindo do Nginx global / proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_PORT = True
 
 # HSTS Security Headers
 SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
@@ -34,16 +32,9 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CSRF Security
-CSRF_COOKIE_HTTPONLY = False  # Precisa ser False para JavaScript acessar
+CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = [
-    "https://necessito.online",
-    "https://www.necessito.online", 
-    "http://necessito.online",
-    "http://www.necessito.online",
-    "http://31.97.17.10:8080",
-    "https://31.97.17.10:8080"
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_PROD_ORIGINS", "https://necessito.online").split(",")
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = os.environ.get("ALLOWED_CORS_ORIGINS", "https://necessito.online").split(",")

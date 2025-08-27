@@ -6,26 +6,26 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Tag da imagem a implantar (ex: latest ou sha curto)'
+        description: "Tag (default latest)"
         required: false
-        default: 'latest'
+        default: "latest"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   packages: write
-  id-token: write
+
+env:
+  PYTHON_VERSION: "3.11"
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/necessito-web
 
 jobs:
   test:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
-    env:
-      DJANGO_SETTINGS_MODULE: core.settings.dev
-      PYTHONPATH: .
-      DB_NAME: test
-      DB_USER: test
-      DB_PASSWORD: test
-      DB_HOST: 127.0.0.1
-      DB_PORT: 5432
     services:
       postgres:
         image: postgres:17
@@ -33,57 +33,65 @@ jobs:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
           POSTGRES_DB: test
-        ports:
-          - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U test -d test" 
-          --health-interval=5s --health-timeout=5s --health-retries=5
+          --health-cmd="pg_isready -U test -d test" --health-interval=5s --health-timeout=5s --health-retries=5
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=5
+    env:
+      DJANGO_SETTINGS_MODULE: core.settings.dev
+      DB_HOST: postgres
+      DB_NAME: test
+      DB_USER: test
+      DB_PASSWORD: test
+      REDIS_HOST: redis
+      SECRET_KEY: test-secret-key-for-ci
+      GIT_COMMIT_SHA: ${{ github.sha }}
+      BUILD_DATE: ${{ github.run_id }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Setup Python
+        id: py
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        with: 
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache pip
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('requirements_*.txt') }}
+          key: pip-${{ runner.os }}-py${{ steps.py.outputs.python-version }}-${{ hashFiles('requirements_*.txt') }}
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_base.txt
-          # Ferramenta de lint rápida
-          pip install ruff
-      - name: Lint (ruff)
-        run: |
-          ruff check .
-      - name: Migrate
-        run: |
-          python manage.py migrate --noinput
-      - name: Django checks
-        run: |
-          python manage.py check
-      - name: Run tests (smoke)
-        run: |
-          python manage.py test --noinput || python manage.py test --noinput || exit 1
+          pip install ruff bandit
+      - name: Lint
+        run: ruff check .
+      - name: Security check
+        run: bandit -q -r . -ll || true
+      - name: Django system check
+        run: python manage.py check --deploy
+      - name: Run migrations
+        run: python manage.py migrate --noinput
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+      - name: Run tests
+        run: python manage.py test --noinput
 
   build_push:
+    timeout-minutes: 20
     needs: test
     runs-on: ubuntu-latest
-    env:
-      REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/necessito-web
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags)
+      - name: Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -91,58 +99,68 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest
-      - name: Build and push
+      - name: Build & Push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_COMMIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ github.run_id }}
+      - name: Export digest
+        run: echo "${{ steps.build.outputs.digest }}" > digest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-digest
+          path: digest.txt
 
   deploy:
+    timeout-minutes: 10
     if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: build_push
     runs-on: ubuntu-latest
-    env:
-      REGISTRY_IMAGE: ghcr.io/${{ github.repository_owner }}/necessito-web
-      IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+    environment:
+      name: production
+      url: https://necessito.online
     steps:
-      - name: Verificar secrets requeridas
+      - uses: actions/download-artifact@v4
+        with: 
+          name: image-digest
+          path: .
+      - name: Read digest
+        id: dig
+        run: echo "DIGEST=$(cat digest.txt)" >> $GITHUB_OUTPUT
+      - name: Check secrets
         run: |
-          MISSING=0
-          [ -z "${{ secrets.SSH_KEY }}" ] && echo "Faltando secret SSH_KEY" && MISSING=1 || true
-            [ -z "${{ secrets.SSH_HOST }}" ] && echo "Faltando secret SSH_HOST" && MISSING=1 || true
-            [ -z "${{ secrets.SSH_USER }}" ] && echo "Faltando secret SSH_USER" && MISSING=1 || true
-          if [ "$MISSING" -eq 1 ]; then exit 1; fi
-      - name: Validar tag
-        run: |
-          echo "Usando tag: ${IMAGE_TAG:-latest}"
-      - name: Checkout (scripts only)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+          for s in SSH_KEY SSH_HOST SSH_USER; do 
+            [[ -z "${{ secrets[s] }}" ]] && echo "Missing $s" && exit 1 || true
+          done
+      - uses: actions/checkout@v4
+        with: 
+          sparse-checkout: 'scripts'
+          sparse-checkout-cone-mode: false
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
-        with:
-            ssh-private-key: ${{ secrets.SSH_KEY }}
+        with: 
+          ssh-private-key: ${{ secrets.SSH_KEY }}
       - name: Known hosts
-        run: |
-          PORT=22
-          ssh-keyscan -p "$PORT" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+        run: ssh-keyscan -p 22 "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
       - name: Deploy
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
+          REGISTRY_IMAGE: ${{ env.REGISTRY_IMAGE }}
+          IMAGE_DIGEST: ${{ steps.dig.outputs.DIGEST }}
         run: |
-          PORT=22
-          TAG=${IMAGE_TAG:-latest}
-          echo "Deploying tag $TAG"
-          rsync -avz -e "ssh -p $PORT" scripts/ $SSH_USER@$SSH_HOST:~/necessito/scripts/
-          ssh -p $PORT $SSH_USER@$SSH_HOST "cd necessito && REGISTRY_IMAGE=$REGISTRY_IMAGE IMAGE_TAG=$TAG ./scripts/deploy.sh"
-      - name: Health check (remote)
+          # Upload scripts
+          rsync -avz scripts/ $SSH_USER@$SSH_HOST:~/necessito/scripts/
+          # Deploy using digest
+          ssh $SSH_USER@$SSH_HOST "cd necessito && REGISTRY_IMAGE=$REGISTRY_IMAGE IMAGE_DIGEST=$IMAGE_DIGEST ./scripts/deploy.sh"
+      - name: Remote health check
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-        run: |
-          PORT=22
-          ssh -p $PORT $SSH_USER@$SSH_HOST "curl -fsS https://necessito.online/health/ || curl -fsS http://localhost:8000/health/"
+        run: ssh $SSH_USER@$SSH_HOST "curl -fsS https://necessito.online/health/"

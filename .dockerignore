@@ -1,7 +1,48 @@
-.env
-*.pyc
+# Git e controle de versão
+.git
+.gitignore
+.github
+
+# Ambientes Python
 __pycache__/
-*.log
-*.sqlite3
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+
+# Configuração e segurança
+.env
 .env.*
+*.key
+*.pem
+users.md
+
+# Dados de aplicação
+media/
+logs/
+backups/
+*.sqlite3
+*.log
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Build e temporários
 *.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Documentação e desenvolvimento
+docs/
+README.md
+*.md
+
+# Cache e arquivos temporários
+.cache/
+.pytest_cache/
+*.coverage
+htmlcov/

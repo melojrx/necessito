@@ -541,9 +541,11 @@ class CookiePreferencesView(TemplateView):
 
 def health_check(request):
     """
-    Health check endpoint for monitoring and deployment verification.
-    Returns JSON response with system status information.
+    Enhanced health check endpoint for CI/CD pipeline monitoring.
+    Returns JSON response with comprehensive system status information.
     """
+    import os
+    
     try:
         # Check database connectivity
         with connection.cursor() as cursor:
@@ -562,21 +564,48 @@ def health_check(request):
         logger.error(f"Cache health check failed: {e}")
         cache_status = "unhealthy"
     
+    # Check disk space (basic)
+    try:
+        import shutil
+        disk_usage = shutil.disk_usage('/')
+        disk_free_gb = disk_usage.free / (1024**3)
+        disk_status = "healthy" if disk_free_gb > 1.0 else "warning"  # Warning if < 1GB free
+    except Exception:
+        disk_status = "unknown"
+    
     # Overall status
-    overall_status = "healthy" if db_status == "healthy" and cache_status == "healthy" else "unhealthy"
+    critical_checks = [db_status, cache_status]
+    overall_status = "healthy" if all(status == "healthy" for status in critical_checks) else "unhealthy"
     
     health_data = {
         "status": overall_status,
         "timestamp": datetime.now().isoformat(),
+        "uptime": os.getenv("CONTAINER_START_TIME", "unknown"),
         "version": getattr(settings, 'VERSION', '1.0.0'),
         "environment": getattr(settings, 'ENVIRONMENT', 'production'),
+        "commit_sha": os.getenv("GIT_COMMIT_SHA", "unknown"),
+        "build_date": os.getenv("BUILD_DATE", "unknown"),
         "checks": {
             "database": db_status,
-            "cache": cache_status
+            "cache": cache_status,
+            "disk_space": disk_status
+        },
+        "django": {
+            "debug": settings.DEBUG,
+            "database_engine": settings.DATABASES['default']['ENGINE'],
+            "secret_key_configured": bool(settings.SECRET_KEY),
         }
     }
     
     # Return appropriate HTTP status code
     status_code = 200 if overall_status == "healthy" else 503
     
-    return JsonResponse(health_data, status=status_code)
+    response = JsonResponse(health_data, status=status_code)
+    
+    # Add headers for pipeline tracking
+    response['X-Health-Status'] = overall_status
+    response['X-Commit-SHA'] = os.getenv("GIT_COMMIT_SHA", "unknown")
+    response['X-Environment'] = getattr(settings, 'ENVIRONMENT', 'production')
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    
+    return response

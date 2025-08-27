@@ -127,6 +127,7 @@ services:
       - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf
       - ./staticfiles:/app/staticfiles
       - media_data_prod:/app/media
+      - ./ads.txt:/app/ads.txt
     depends_on:
       - web
     networks:

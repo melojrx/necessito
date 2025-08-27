@@ -2,12 +2,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Deploy com tracking por digest - MVP Pipeline v2.0
-# Pressupõe:
+# Deploy simplificado (independente de CI/CD)
+# Modos suportados:
+#  1) Deploy usando imagem remota (forneça REGISTRY_IMAGE e IMAGE_TAG ou IMAGE_DIGEST)
+#  2) Deploy local automático (não define REGISTRY_IMAGE -> script faz build local da imagem)
+# Requisitos:
 #  - docker compose plugin instalado
 #  - arquivo docker-compose_prod.yml no diretório raiz
 #  - .env.prod presente (não versionado)
-#  - Suporte para digest (REGISTRY_IMAGE@sha256:...) ou tag
 
 BLUE='\033[0;34m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 log(){ echo -e "${BLUE}[INFO]${NC} $*"; }
@@ -21,23 +23,36 @@ COMPOSE="docker compose -f $COMPOSE_FILE"
 [[ -f $COMPOSE_FILE ]] || { err "Arquivo $COMPOSE_FILE não encontrado"; exit 1; }
 [[ -f .env.prod ]] || { err "Arquivo .env.prod não encontrado"; exit 1; }
 
-# Suporte para digest (preferido) ou tag tradicional
+# Variáveis opcionais (se não fornecidas, faremos build local)
 REGISTRY_IMAGE=${REGISTRY_IMAGE:-}
 IMAGE_DIGEST=${IMAGE_DIGEST:-}
 IMAGE_TAG=${IMAGE_TAG:-}
 
-# Priorizar digest sobre tag
+LOCAL_BUILD=false
+
+if [[ -z "$REGISTRY_IMAGE" ]]; then
+  LOCAL_BUILD=true
+  REGISTRY_IMAGE="necessito-web"
+  TS_TAG=$(date +%Y%m%d%H%M)
+  IMAGE_TAG="manual-${TS_TAG}"
+  log "Nenhuma imagem remota informada. Realizando build local: ${REGISTRY_IMAGE}:${IMAGE_TAG}"
+  GIT_COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
+  BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  docker build -t ${REGISTRY_IMAGE}:${IMAGE_TAG} \
+    --build-arg GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
+    --build-arg BUILD_DATE="$BUILD_DATE" .
+fi
+
+# Resolver referência (digest tem prioridade se ambos definidos manualmente)
 if [[ -n "$IMAGE_DIGEST" ]]; then
   IMAGE_REF="${REGISTRY_IMAGE}@${IMAGE_DIGEST}"
   IDENTIFIER="$IMAGE_DIGEST"
 elif [[ -n "$IMAGE_TAG" ]]; then
-  IMAGE_REF="${REGISTRY_IMAGE}:${IMAGE_TAG}" 
+  IMAGE_REF="${REGISTRY_IMAGE}:${IMAGE_TAG}"
   IDENTIFIER="$IMAGE_TAG"
 else
-  err "Defina IMAGE_DIGEST (preferido) ou IMAGE_TAG"; exit 1;
+  err "Falha interna: não foi possível determinar IMAGE_REF"; exit 1;
 fi
-
-[[ -n "$REGISTRY_IMAGE" ]] || { err "Defina REGISTRY_IMAGE"; exit 1; }
 
 # Criar diretório de logs se não existir
 mkdir -p logs
@@ -63,17 +78,23 @@ if [[ "${IMAGE_REF}" == "${CURRENT_IMAGE}" ]]; then
   warn "A imagem ${IMAGE_REF} já está em produção. Prosseguindo mesmo assim."
 fi
 
-log "Pull da imagem: ${IMAGE_REF}"
-docker pull "${IMAGE_REF}"
+if [[ "$LOCAL_BUILD" == true ]]; then
+  log "Usando imagem local já construída (${IMAGE_REF})"
+else
+  log "Pull da imagem: ${IMAGE_REF}"
+  if ! docker pull "${IMAGE_REF}"; then
+    err "Falha no pull da imagem ${IMAGE_REF}"
+    exit 1
+  fi
+fi
 
 # Configurar variáveis para docker-compose (usando tag para compatibilidade)
 if [[ -n "$IMAGE_DIGEST" ]]; then
-  # Para digest, usar o short hash como tag
-  export IMAGE_TAG="$DIGEST_SHORT"
+  export IMAGE_TAG="$DIGEST_SHORT"   # digest -> TAG curta p/ compose
 else
-  export IMAGE_TAG="${IMAGE_TAG}"
+  export IMAGE_TAG="${IMAGE_TAG}"    # tag normal (ou gerada local)
 fi
-export REGISTRY_IMAGE="${REGISTRY_IMAGE}"
+export REGISTRY_IMAGE="${REGISTRY_IMAGE}"  # usado pelo docker-compose_prod.yml
 
 log "Subindo dependências (db, redis) se ainda não estiverem ativas"
 $COMPOSE up -d db redis

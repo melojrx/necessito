@@ -1,7 +1,9 @@
-# Guia CI/CD MVP – Pipeline Enxuto e Replicável (Necessito)
+# [DESCONTINUADO] Guia CI/CD MVP – (Histórico)
+
+> AVISO: Este documento descreve um pipeline GitHub Actions que foi REMOVIDO do repositório. O projeto agora opera via deploy manual simplificado (build local ou pull explícito + scripts). Mantenha este arquivo apenas como referência histórica. Para o processo atual consulte `docs/DEPLOY_MANUAL_GUIDE.md`.
 
 Última atualização: 26/08/2025  
-Status: Proposta pronta para implementação  
+Status: Descontinuado (mantido para auditoria)  
 Escopo: Projeto Django (Necessito) – MVP mantido por 1 desenvolvedor Full Stack  
 Ferramentas: GitHub Actions + Docker + Docker Compose + GHCR + VPS (Ubuntu)  
 Público: Agente/CLI (ex: Claude Code CLI) executando tarefas de automação com zelo e profissionalismo.
@@ -28,7 +30,7 @@ Público: Agente/CLI (ex: Claude Code CLI) executando tarefas de automação com
 ## 📦 Componentes do Pipeline
 | Componente | Função | Arquivo / Local |
 |------------|-------|-----------------|
-| Workflow CI/CD | Orquestra test → build → deploy | `.github/workflows/ci-cd.yml` |
+| (REMOVIDO) Workflow CI/CD | Orquestra test → build → deploy | (arquivo excluído) |
 | `.dockerignore` | Reduz contexto / risco | Raiz do projeto |
 | Scripts deploy | Automação Servidor | `scripts/deploy.sh` |
 | Scripts rollback | Reversão rápida | `scripts/rollback.sh` |

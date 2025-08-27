@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script de rollback com suporte a digest - MVP Pipeline v2.0
-# Reverte para a última versão conhecidamente funcional
+# Rollback simplificado (independente de CI/CD)
+# Estratégia:
+#  - Usa digest/tag passado OU
+#  - Usa arquivo last_success_digest (gerado por deploy.sh)
+#  - Assume que a imagem já existe localmente ou é pullable
 
 BLUE='\033[0;34m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 log() { echo -e "${BLUE}[INFO]${NC} $*"; }
@@ -18,8 +21,6 @@ REGISTRY_IMAGE=${REGISTRY_IMAGE:-}
 IMAGE_DIGEST=${IMAGE_DIGEST:-}
 IMAGE_TAG=${IMAGE_TAG:-}
 
-[[ -n "$REGISTRY_IMAGE" ]] || { err "Defina REGISTRY_IMAGE"; exit 1; }
-
 # Se não foi especificado digest ou tag, usar último sucesso conhecido
 if [[ -z "$IMAGE_DIGEST" && -z "$IMAGE_TAG" ]]; then
     if [[ -f last_success_digest ]]; then
@@ -32,6 +33,13 @@ if [[ -z "$IMAGE_DIGEST" && -z "$IMAGE_TAG" ]]; then
     else
         err "Sem digest/tag especificado e sem last_success_digest"; exit 1;
     fi
+fi
+
+# Se REGISTRY_IMAGE vazio, inferir do docker-compose (fallback para 'necessito-web')
+if [[ -z "$REGISTRY_IMAGE" ]]; then
+    REGISTRY_IMAGE=$(grep -E "image:" docker-compose_prod.yml 2>/dev/null | head -1 | awk -F'image:' '{print $2}' | tr -d ' ' | cut -d':' -f1)
+    REGISTRY_IMAGE=${REGISTRY_IMAGE:-necessito-web}
+    warn "REGISTRY_IMAGE não definido. Usando inferido: ${REGISTRY_IMAGE}"
 fi
 
 # Configurar referência da imagem
@@ -57,10 +65,15 @@ echo "$TIMESTAMP ROLLBACK_START $IDENTIFIER" >> logs/deploy.log
 log "Iniciando rollback para: $IMAGE_REF"
 
 # Pull da imagem de rollback
-log "Pull da imagem de rollback"
-if ! docker pull "$IMAGE_REF"; then
-    err "Falha no pull da imagem de rollback: $IMAGE_REF"
-    exit 1
+if [[ "$IMAGE_REF" == *"sha256:"* || -n "$IMAGE_DIGEST" || -n "$IMAGE_TAG" ]]; then
+    log "Verificando disponibilidade local da imagem"
+    if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
+        log "Imagem não existe localmente – tentando pull: $IMAGE_REF"
+        if ! docker pull "$IMAGE_REF"; then
+            err "Falha ao obter imagem para rollback: $IMAGE_REF"
+            exit 1
+        fi
+    fi
 fi
 
 # Aplicar rollback

@@ -2,14 +2,10 @@
 
 ## Pre-Deployment Checklist
 
-### 1. GitHub Repository Setup
-- [ ] Repository secrets configured:
-  - [ ] `SSH_HOST` - VPS IP address
-  - [ ] `SSH_USER` - SSH user (currently root)
-  - [ ] `SSH_KEY` - Private SSH key
-  - [ ] `SSH_PORT` - SSH port (22 if default)
-- [ ] GitHub Container Registry permissions set
-- [ ] Actions have write permissions to packages
+### 1. Repositório (Local ou Git Pull)
+- [ ] Acesso ao repositório via git funcionando (SSH ou HTTPS)
+- [ ] Branch main atualizado (git pull)
+- [ ] Permissões corretas de execução em scripts (`chmod +x scripts/*.sh`)
 
 ### 2. VPS Server Preparation
 - [ ] Docker and Docker Compose installed
@@ -56,13 +52,15 @@ nano .env.prod  # Configure all variables
 chmod +x scripts/*.sh
 ```
 
-### 3. First Deployment
+### 3. Primeiro Deploy
+Opção A (build local):
 ```bash
-# Set registry image variables
-export REGISTRY_IMAGE=ghcr.io/YOUR_USERNAME/necessito-web
+./scripts/deploy.sh
+```
+Opção B (imagem de registry):
+```bash
+export REGISTRY_IMAGE=ghcr.io/SEU_USER/necessito-web
 export IMAGE_TAG=latest
-
-# Run initial deployment
 ./scripts/deploy.sh
 ```
 
@@ -75,20 +73,12 @@ export IMAGE_TAG=latest
 - [ ] Media files upload working
 - [ ] WebSocket connections working (chat)
 
-## Regular Deployment Process
+## Processo Regular de Deploy Manual
 
-### 1. CI/CD Pipeline Trigger
-- [ ] Push to `main` branch or manual workflow dispatch
-- [ ] Tests pass in CI
-- [ ] Docker image builds successfully
-- [ ] Image pushed to GitHub Container Registry
-
-### 2. Automatic Deployment
-- [ ] SSH connection to VPS successful
-- [ ] Scripts uploaded to VPS
-- [ ] Deployment script execution
-- [ ] Health check passes
-- [ ] Services restart successfully
+1. `git pull origin main`
+2. (Se quiser build limpo) remover imagem anterior opcionalmente
+3. Rodar `./scripts/deploy.sh` (com ou sem variáveis de registry)
+4. Confirmar health / logs
 
 ### 3. Post-Deployment Checks
 - [ ] Application accessible
@@ -100,12 +90,10 @@ export IMAGE_TAG=latest
 
 ## Rollback Procedure
 
-### If Deployment Fails
+### Se Deploy Falhar
 ```bash
-# On VPS
 cd /opt/necessito
-export REGISTRY_IMAGE=ghcr.io/YOUR_USERNAME/necessito-web
-./scripts/rollback.sh
+./scripts/rollback.sh   # Usa last_success_digest
 ```
 
 ### Verification After Rollback

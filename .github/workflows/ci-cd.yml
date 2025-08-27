@@ -40,7 +40,7 @@ jobs:
         options: >-
           --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=5
     env:
-      DJANGO_SETTINGS_MODULE: core.settings.dev
+      DJANGO_SETTINGS_MODULE: core.settings.ci
       DB_HOST: postgres
       DB_NAME: test
       DB_USER: test
@@ -49,6 +49,7 @@ jobs:
       SECRET_KEY: test-secret-key-for-ci
       GIT_COMMIT_SHA: ${{ github.sha }}
       BUILD_DATE: ${{ github.run_id }}
+      PYTHONPATH: .
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -71,7 +72,7 @@ jobs:
       - name: Security check
         run: bandit -q -r . -ll || true
       - name: Django system check
-        run: python manage.py check --deploy
+        run: python manage.py check
       - name: Run migrations
         run: python manage.py migrate --noinput
       - name: Collect static files

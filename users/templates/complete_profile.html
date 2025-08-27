@@ -93,40 +93,96 @@
                         <small class="text-muted">Você pode preencher agora ou depois em "Minha Conta"</small>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
+                        <!-- Primeira linha: Telefone e CEP -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
                                 {{ form.telefone }}
                                 {% if form.telefone.errors %}
                                     <div class="text-danger mt-1">{{ form.telefone.errors }}</div>
                                 {% endif %}
                             </div>
-                            <!-- Substituição dos campos de texto por selects dinâmicos (IBGE) -->
-                            <div class="col-md-4 mb-3">
-                                <label for="select_estado" class="form-label">Estado (UF)</label>
-                                <input type="hidden" name="estado" id="id_estado_hidden" value="">
-                                <select id="select_estado" class="form-select">
-                                    <option value="" selected disabled>Selecione o estado…</option>
-                                </select>
+                            <div class="col-md-6">
+                                <label for="{{ form.cep.id_for_label }}" class="form-label">{{ form.cep.label }}</label>
+                                <div class="input-group">
+                                    {{ form.cep }}
+                                    <button type="button" class="btn btn-outline-secondary" id="btn-consultar-cep">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="cep-loading" class="text-muted mt-1" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Consultando CEP...
+                                </div>
+                                <div id="cep-error" class="text-danger mt-1" style="display: none;"></div>
+                                {% if form.cep.errors %}
+                                    <div class="text-danger mt-1">{{ form.cep.errors }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="select_cidade" class="form-label">Cidade</label>
-                                <input type="hidden" name="cidade" id="id_cidade_hidden" value="">
-                                <select id="select_cidade" class="form-select" disabled>
-                                    <option value="" selected>Selecione o estado primeiro</option>
-                                </select>
+                        </div>
+                        
+                        <!-- Segunda linha: Endereço e Número -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="{{ form.endereco.id_for_label }}" class="form-label">{{ form.endereco.label }}</label>
+                                {{ form.endereco }}
+                                {% if form.endereco.errors %}
+                                    <div class="text-danger mt-1">{{ form.endereco.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.numero.id_for_label }}" class="form-label">{{ form.numero.label }}</label>
+                                {{ form.numero }}
+                                {% if form.numero.errors %}
+                                    <div class="text-danger mt-1">{{ form.numero.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Terceira linha: Complemento -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="{{ form.complemento.id_for_label }}" class="form-label">{{ form.complemento.label }}</label>
+                                {{ form.complemento }}
+                                {% if form.complemento.errors %}
+                                    <div class="text-danger mt-1">{{ form.complemento.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Quarta linha: Bairro, Cidade e Estado -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="{{ form.bairro.id_for_label }}" class="form-label">{{ form.bairro.label }}</label>
+                                {{ form.bairro }}
+                                {% if form.bairro.errors %}
+                                    <div class="text-danger mt-1">{{ form.bairro.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.cidade.id_for_label }}" class="form-label">{{ form.cidade.label }}</label>
+                                {{ form.cidade }}
+                                {% if form.cidade.errors %}
+                                    <div class="text-danger mt-1">{{ form.cidade.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger mt-1">{{ form.estado.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Botões de Ação -->
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary btn-lg px-5 me-3">
+                <div class="text-center action-buttons">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 primary-action-btn">
                         <i class="fas fa-check me-2"></i>
                         Completar Perfil
                     </button>
-                    <a href="{% url 'ads:home' %}" class="btn btn-outline-secondary btn-lg px-4">
+                    <a href="{% url 'ads:home' %}" class="btn btn-outline-secondary btn-lg px-4 secondary-action-btn">
                         <i class="fas fa-clock me-2"></i>
                         Pular por agora
                     </a>
@@ -279,6 +335,84 @@
     border-radius: 8px;
     border: none;
 }
+
+/* Estilos dos botões de ação */
+.action-buttons {
+    margin-top: 2rem;
+}
+
+.primary-action-btn,
+.secondary-action-btn {
+    min-height: 48px; /* Área de toque adequada */
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.primary-action-btn {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.primary-action-btn:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
+}
+
+.secondary-action-btn {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.secondary-action-btn:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+}
+
+/* Responsividade para mobile */
+@media (max-width: 767.98px) {
+    .action-buttons {
+        margin-top: 2.5rem;
+    }
+    
+    .primary-action-btn,
+    .secondary-action-btn {
+        display: block;
+        width: 100%;
+        margin: 0 0 1rem 0; /* Espaçamento vertical entre botões */
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        min-height: 52px; /* Área de toque ainda maior em mobile */
+    }
+    
+    .secondary-action-btn {
+        margin-bottom: 0; /* Remove margem do último botão */
+    }
+}
+
+/* Responsividade para tablet */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .action-buttons {
+        margin-top: 2rem;
+    }
+    
+    .primary-action-btn {
+        margin-right: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Desktop - mantém layout horizontal */
+@media (min-width: 992px) {
+    .primary-action-btn {
+        margin-right: 1.5rem;
+    }
+}
 </style>
 
 <script>
@@ -313,93 +447,129 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Estado/Cidade via API do IBGE
-    const estadoHidden = document.getElementById('id_estado_hidden');
-    const cidadeHidden = document.getElementById('id_cidade_hidden');
-    const estadoSelect = document.getElementById('select_estado');
-    const cidadeSelect = document.getElementById('select_cidade');
+    // Funcionalidade de consulta CEP via ViaCEP
+    const cepInput = document.getElementById('id_cep');
+    const btnConsultarCep = document.getElementById('btn-consultar-cep');
+    const cepLoading = document.getElementById('cep-loading');
+    const cepError = document.getElementById('cep-error');
+    
+    // Campos de endereço
+    const enderecoInput = document.getElementById('id_endereco');
+    const bairroInput = document.getElementById('id_bairro');
+    const cidadeInput = document.getElementById('id_cidade');
+    const estadoInput = document.getElementById('id_estado');
 
-    if (estadoSelect && cidadeSelect) {
-        // Carrega estados (ordenados por nome)
-        fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
-            .then(r => r.json())
-            .then(estados => {
-                estados.forEach(uf => {
-                    const opt = document.createElement('option');
-                    opt.value = uf.id; // id numérico para buscar municípios
-                    opt.textContent = `${uf.nome} (${uf.sigla})`;
-                    opt.dataset.sigla = uf.sigla;
-                    estadoSelect.appendChild(opt);
-                });
+    function limparCamposEndereco() {
+        if (enderecoInput) enderecoInput.value = '';
+        if (bairroInput) bairroInput.value = '';
+        if (cidadeInput) cidadeInput.value = '';
+        if (estadoInput) estadoInput.value = '';
+    }
 
-                // Pré-seleciona se houver valor existente (opcional)
-                if (estadoHidden && estadoHidden.value) {
-                    const toSelect = Array.from(estadoSelect.options).find(o => o.dataset.sigla === estadoHidden.value);
-                    if (toSelect) {
-                        estadoSelect.value = toSelect.value;
-                        loadCitiesForState(toSelect.value, toSelect.dataset.sigla);
-                    }
+    function mostrarErro(mensagem) {
+        if (cepError) {
+            cepError.textContent = mensagem;
+            cepError.style.display = 'block';
+        }
+    }
+
+    function esconderErro() {
+        if (cepError) {
+            cepError.style.display = 'none';
+        }
+    }
+
+    function consultarCep() {
+        if (!cepInput) return;
+        
+        const cep = cepInput.value.replace(/\D/g, '');
+        
+        if (cep.length !== 8) {
+            mostrarErro('CEP deve ter 8 dígitos');
+            return;
+        }
+
+        // Mostrar loading
+        if (cepLoading) cepLoading.style.display = 'block';
+        esconderErro();
+        limparCamposEndereco();
+
+        // Buscar CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('{% url "users:consultar_cep" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ cep: cep })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (cepLoading) cepLoading.style.display = 'none';
+            
+            if (data.success) {
+                // Preencher os campos com os dados retornados
+                if (enderecoInput && data.data.logradouro) {
+                    enderecoInput.value = data.data.logradouro;
                 }
-            })
-            .catch(() => {
-                // Poderíamos exibir uma mensagem amigável, mas como é opcional, apenas mantemos o select como está
-            });
+                if (bairroInput && data.data.bairro) {
+                    bairroInput.value = data.data.bairro;
+                }
+                if (cidadeInput && data.data.cidade) {
+                    cidadeInput.value = data.data.cidade;
+                }
+                if (estadoInput && data.data.estado) {
+                    estadoInput.value = data.data.estado;
+                }
+                
+                // Focar no campo número se disponível
+                const numeroInput = document.getElementById('id_numero');
+                if (numeroInput) {
+                    numeroInput.focus();
+                }
+            } else {
+                mostrarErro(data.error || 'Erro ao consultar CEP');
+            }
+        })
+        .catch(error => {
+            if (cepLoading) cepLoading.style.display = 'none';
+            mostrarErro('Erro de conexão. Tente novamente.');
+            console.error('Erro ao consultar CEP:', error);
+        });
+    }
 
-        function clearCidadeSelect(placeholder) {
-            cidadeSelect.innerHTML = '';
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = placeholder || 'Selecione o estado primeiro';
-            opt.selected = true;
-            opt.disabled = false;
-            cidadeSelect.appendChild(opt);
-        }
+    // Event listeners para consulta de CEP
+    if (btnConsultarCep) {
+        btnConsultarCep.addEventListener('click', consultarCep);
+    }
 
-        function loadCitiesForState(stateId, stateSigla) {
-            clearCidadeSelect('Carregando cidades…');
-            cidadeSelect.disabled = true;
-            if (estadoHidden) estadoHidden.value = stateSigla || '';
-
-            fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios?orderBy=nome`)
-                .then(r => r.json())
-                .then(municipios => {
-                    cidadeSelect.innerHTML = '';
-                    const ph = document.createElement('option');
-                    ph.value = '';
-                    ph.textContent = 'Selecione a cidade…';
-                    ph.selected = true;
-                    ph.disabled = true;
-                    cidadeSelect.appendChild(ph);
-
-                    municipios.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.nome; // enviamos o nome da cidade para o backend
-                        opt.textContent = m.nome;
-                        cidadeSelect.appendChild(opt);
-                    });
-
-                    cidadeSelect.disabled = false;
-
-                    // Pré-seleciona cidade se já houver valor (opcional)
-                    if (cidadeHidden && cidadeHidden.value) {
-                        cidadeSelect.value = cidadeHidden.value;
-                    }
-                })
-                .catch(() => {
-                    clearCidadeSelect('Falha ao carregar cidades');
-                });
-        }
-
-        estadoSelect.addEventListener('change', function() {
-            const selected = this.options[this.selectedIndex];
-            const stateId = this.value;
-            const sigla = selected && selected.dataset ? selected.dataset.sigla : '';
-            if (cidadeHidden) cidadeHidden.value = '';
-            loadCitiesForState(stateId, sigla);
+    if (cepInput) {
+        // Formatar CEP enquanto digita
+        cepInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 8) value = value.substring(0, 8);
+            if (value.length > 5) {
+                value = value.substring(0, 5) + '-' + value.substring(5);
+            }
+            this.value = value;
+            esconderErro();
         });
 
-        cidadeSelect.addEventListener('change', function() {
-            if (cidadeHidden) cidadeHidden.value = this.value;
+        // Consultar CEP ao pressionar Enter
+        cepInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                consultarCep();
+            }
+        });
+
+        // Consultar CEP automaticamente quando completar 9 caracteres (formato 00000-000)
+        cepInput.addEventListener('input', function() {
+            if (this.value.length === 9) {
+                setTimeout(consultarCep, 500); // Delay para melhor UX
+            }
         });
     }
 });

@@ -235,16 +235,26 @@ class UserCompletionForm(forms.ModelForm):
     
     class Meta:
         model = User
-        fields = ['user_type', 'telefone', 'cidade', 'estado']
+        fields = ['user_type', 'telefone', 'cep', 'endereco', 'numero', 'complemento', 'bairro', 'cidade', 'estado']
         widgets = {
             'telefone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '(11) 99999-9999'}),
-            'cidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Sua cidade'}),
-            'estado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Seu estado'}),
+            'cep': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '00000-000', 'id': 'id_cep'}),
+            'endereco': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Rua, Avenida, etc.', 'readonly': True}),
+            'numero': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número'}),
+            'complemento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apartamento, bloco, etc.'}),
+            'bairro': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bairro', 'readonly': True}),
+            'cidade': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Cidade', 'readonly': True}),
+            'estado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'UF', 'readonly': True, 'maxlength': '2'}),
         }
         labels = {
             'telefone': 'Telefone (opcional)',
-            'cidade': 'Cidade (opcional)',
-            'estado': 'Estado (opcional)',
+            'cep': 'CEP (opcional)',
+            'endereco': 'Endereço',
+            'numero': 'Número',
+            'complemento': 'Complemento',
+            'bairro': 'Bairro',
+            'cidade': 'Cidade',
+            'estado': 'Estado (UF)',
         }
     
     def save(self, commit=True):

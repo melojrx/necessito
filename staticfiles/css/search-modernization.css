@@ -699,3 +699,87 @@
         padding: 4px 0 !important;
     }
 }
+
+/* ===== OTIMIZAÇÕES DE CARDS - LAYOUT MELHORADO ===== */
+
+/* Força aplicação das classes dos cards otimizados */
+.search-result-card {
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.search-card-container {
+    height: 380px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.search-result-card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Grid layout otimizado - força aplicação */
+.results-grid .col-lg-3 {
+    flex: 0 0 25% !important;
+    max-width: 25% !important;
+}
+
+.results-grid .col-md-4 {
+    flex: 0 0 33.333333% !important;
+    max-width: 33.333333% !important;
+}
+
+.results-grid .col-sm-6 {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+}
+
+/* Card body flexbox */
+.search-result-card .card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    justify-content: space-between !important;
+}
+
+/* Altura de imagem consistente */
+.search-result-card .card-img-wrapper {
+    height: 180px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .search-card-container {
+        height: auto !important;
+    }
+    
+    .search-result-card .card-img-wrapper {
+        height: 140px !important;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 991px) {
+    .search-result-card .card-img-wrapper {
+        height: 160px !important;
+    }
+}
+
+/* Large screens */
+@media (min-width: 1400px) {
+    .search-card-container {
+        height: 420px !important;
+    }
+    
+    .search-result-card .card-img-wrapper {
+        height: 200px !important;
+    }
+}

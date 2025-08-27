@@ -109,6 +109,8 @@ class User(AbstractUser):
     # Informações pessoais / endereço
     data_nascimento = models.DateField("Data de nascimento", null=True, blank=True)
     endereco = models.TextField("Endereço", blank=True)
+    numero = models.CharField("Número", max_length=20, blank=True)
+    complemento = models.CharField("Complemento", max_length=100, blank=True)
     bairro = models.CharField("Bairro", max_length=100, blank=True)
     cep = models.CharField("CEP", max_length=15, blank=True)
     cidade = models.CharField("Cidade", max_length=100, blank=True)

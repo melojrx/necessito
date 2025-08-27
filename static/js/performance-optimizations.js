@@ -249,9 +249,34 @@ class PerformanceOptimizer {
      */
     setupServiceWorkerCache() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js')
+            // Registrar com escopo raiz para garantir controle do start_url e melhor compatibilidade de instalação (ícone, shortcuts etc.)
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
                 .then(registration => {
                     console.log('ServiceWorker registered:', registration);
+                    // Detecta SW novo em waiting
+                    function listenForWaitingServiceWorker(reg) {
+                        if (!reg) return;
+                        if (reg.waiting) {
+                            showUpdateToast(reg);
+                            return;
+                        }
+                        reg.addEventListener('updatefound', () => {
+                            const newSW = reg.installing;
+                            if (newSW) {
+                                newSW.addEventListener('statechange', () => {
+                                    if (newSW.state === 'installed' && reg.waiting) {
+                                        showUpdateToast(reg);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    listenForWaitingServiceWorker(registration);
+                    // Caso a página já esteja controlada, também observar controllerchange
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        const toast = document.getElementById('sw-update-toast');
+                        if (toast) toast.remove();
+                    });
                 })
                 .catch(error => {
                     console.warn('ServiceWorker registration failed:', error);
@@ -441,3 +466,21 @@ window.addEventListener('beforeunload', () => {
 
 // Export for use in other scripts
 window.PerformanceOptimizer = PerformanceOptimizer;
+
+// UI simples para mostrar atualização disponível
+function showUpdateToast(registration) {
+    if (document.getElementById('sw-update-toast')) return; // Avoid duplicates
+    const div = document.createElement('div');
+    div.id = 'sw-update-toast';
+    div.style.cssText = 'position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:#0d6efd;color:#fff;padding:0.75rem 1rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);display:flex;gap:.75rem;align-items:center;z-index:9999;font-family:Nunito,Arial,sans-serif;font-size:.9rem;';
+    div.innerHTML = '<span>Nova versão disponível</span>' +
+        '<button id="sw-refresh-btn" style="background:#fff;color:#0d6efd;border:none;padding:.4rem .8rem;border-radius:6px;cursor:pointer;font-weight:600;">Atualizar</button>' +
+        '<button id="sw-dismiss-btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);padding:.4rem .6rem;border-radius:6px;cursor:pointer;">Depois</button>';
+    document.body.appendChild(div);
+    document.getElementById('sw-refresh-btn').onclick = () => {
+        if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+    };
+    document.getElementById('sw-dismiss-btn').onclick = () => div.remove();
+}

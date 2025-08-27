@@ -434,14 +434,12 @@
                 <span class="modern-logo-text">Indicaai</span>
             </a>
 
-            <!-- Menu hambúrguer APENAS mobile -->
-            {% if user.is_authenticated %}
+            <!-- Menu hambúrguer SEMPRE visível em mobile -->
             <div class="d-lg-none">
-                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileUserOffcanvas" aria-controls="mobileUserOffcanvas">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenuOffcanvas" aria-controls="mobileMenuOffcanvas">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
-            {% endif %}
 
 
             <!-- Menu principal desktop -->
@@ -606,53 +604,87 @@
     </div>
 </div>
 
-<!-- Offcanvas Menu Mobile do Usuário -->
-{% if user.is_authenticated %}
-<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileUserOffcanvas">
+<!-- Offcanvas Menu Mobile Universal -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileMenuOffcanvas">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title">
-            <i class="fas fa-user me-2"></i>Olá, {{ user.first_name|capfirst }}!
+            {% if user.is_authenticated %}
+                <i class="fas fa-user me-2"></i>Olá, {{ user.first_name|capfirst|default:user.email }}!
+            {% else %}
+                <i class="fas fa-bars me-2"></i>Menu
+            {% endif %}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center" href="{% url 'users:minha_conta_detail' user.pk %}">
-                    <i class="fas fa-user me-3"></i>Minha Conta
-                </a>
-            </li>
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center" href="{% url 'ads:necessidade_list' %}">
-                    <i class="fas fa-bullhorn me-3"></i>Meus Anúncios
-                </a>
-            </li>
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center" href="{% url 'budgets:budget_list' %}">
-                    <i class="fas fa-file-invoice-dollar me-3"></i>Meus Orçamentos
-                </a>
-            </li>
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center" href="{% url 'ads:disputa_list' %}">
-                    <i class="fas fa-balance-scale me-3"></i>Minhas Disputas
-                </a>
-            </li>
-            {% if user.is_staff %}
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center" href="{% url 'ads:dashboard' %}">
-                    <i class="fas fa-tachometer-alt me-3"></i>Dashboard
-                </a>
-            </li>
-            {% endif %}
-            <li class="list-group-item border-0 px-0">
-                <a class="nav-link d-flex align-items-center text-danger" href="{% url 'users:logout' %}">
-                    <i class="fas fa-sign-out-alt me-3"></i>Sair
-                </a>
-            </li>
-        </ul>
+        {% if user.is_authenticated %}
+            <!-- Menu para usuários logados -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'users:minha_conta_detail' user.pk %}">
+                        <i class="fas fa-user me-3"></i>Minha Conta
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'ads:necessidade_list' %}">
+                        <i class="fas fa-bullhorn me-3"></i>Meus Anúncios
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'budgets:budget_list' %}">
+                        <i class="far fa-list-alt me-3"></i>Meus Orçamentos
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'ads:disputa_list' %}">
+                        <i class="fas fa-balance-scale me-3"></i>Minhas Disputas
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'ads:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                    </a>
+                </li>
+                {% if user.is_staff %}
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'admin_panel:dashboard' %}">
+                        <i class="fas fa-cogs me-3"></i>Configurações
+                    </a>
+                </li>
+                {% endif %}
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center text-danger" href="{% url 'users:logout' %}">
+                        <i class="fas fa-sign-out-alt me-3"></i>Sair
+                    </a>
+                </li>
+            </ul>
+        {% else %}
+            <!-- Menu para usuários não logados -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'ads:home' %}">
+                        <i class="fas fa-home me-3"></i>Início
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'users:login' %}">
+                        <i class="fas fa-sign-in-alt me-3"></i>Entrar
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'users:register' %}">
+                        <i class="fas fa-user-plus me-3"></i>Cadastrar
+                    </a>
+                </li>
+                <li class="list-group-item border-0 px-0">
+                    <a class="nav-link d-flex align-items-center" href="{% url 'help' %}">
+                        <i class="fas fa-question-circle me-3"></i>Ajuda
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
     </div>
 </div>
-{% endif %}
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

@@ -3,10 +3,12 @@
  * Provides advanced caching and offline capabilities
  */
 
-const CACHE_NAME = 'indicai-v1.2.0';
-const STATIC_CACHE = 'indicai-static-v1';
-const DYNAMIC_CACHE = 'indicai-dynamic-v1';
-const API_CACHE = 'indicai-api-v1';
+// Versão da aplicação para controle de atualização forçada
+const VERSION = 'v1.3.5';
+// NomES de caches versionados (alterar VERSION dispara renovação)
+const STATIC_CACHE = `indicai-static-${VERSION}`;
+const DYNAMIC_CACHE = `indicai-dynamic-${VERSION}`;
+const API_CACHE = `indicai-api-${VERSION}`;
 
 // Files to cache immediately
 const STATIC_ASSETS = [
@@ -16,7 +18,11 @@ const STATIC_ASSETS = [
     '/static/js/performance-optimizations.js',
     '/static/img/logo.png',
     '/static/img/favicon.ico',
-    '/offline.html',
+    '/offline.html'
+];
+
+// External resources to cache on demand
+const EXTERNAL_RESOURCES = [
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
@@ -45,10 +51,15 @@ self.addEventListener('install', event => {
         caches.open(STATIC_CACHE)
             .then(cache => {
                 console.log('Caching static assets...');
-                return cache.addAll(STATIC_ASSETS);
+                const cachePromises = STATIC_ASSETS.map(asset => {
+                    return cache.add(asset).catch(err => {
+                        console.warn(`[SW] Failed to cache ${asset}:`, err);
+                    });
+                });
+                return Promise.all(cachePromises);
             })
             .then(() => {
-                console.log('Static assets cached successfully');
+                console.log('Static assets cached successfully (with potential individual failures).');
                 return self.skipWaiting(); // Force activation
             })
             .catch(error => {
@@ -67,8 +78,7 @@ self.addEventListener('activate', event => {
             caches.keys().then(cacheNames => {
                 return Promise.all(
                     cacheNames.map(cacheName => {
-                        if (cacheName !== CACHE_NAME && 
-                            cacheName !== STATIC_CACHE && 
+                        if (cacheName !== STATIC_CACHE && 
                             cacheName !== DYNAMIC_CACHE && 
                             cacheName !== API_CACHE) {
                             console.log('Deleting old cache:', cacheName);
@@ -79,7 +89,10 @@ self.addEventListener('activate', event => {
             }),
             
             // Take control of all clients
-            self.clients.claim()
+            self.clients.claim(),
+            
+            // Cache external resources in background
+            cacheExternalResources()
         ])
     );
 });
@@ -111,21 +124,17 @@ async function handleFetch(request) {
         if (CACHE_STRATEGIES.static.includes(extension)) {
             return await cacheFirst(request, STATIC_CACHE);
         }
-        
         if (CACHE_STRATEGIES.images.includes(extension)) {
-            return await cacheFirst(request, DYNAMIC_CACHE);
+            return await cacheFirst(request, DYNAMIC_CACHE, { prune: true });
         }
-        
         if (CACHE_STRATEGIES.api.some(pattern => url.pathname.startsWith(pattern))) {
-            return await networkFirst(request, API_CACHE);
+            return await networkFirst(request, API_CACHE, { timeoutMs: 5000, prune: true });
         }
-        
         if (url.origin === self.location.origin) {
-            return await networkFirst(request, DYNAMIC_CACHE);
+            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
         }
-        
-        // For external resources, try network first
-        return await networkFirst(request, DYNAMIC_CACHE);
+        // External: network first com timeout
+        return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
         
     } catch (error) {
         console.error('Fetch error:', error);
@@ -134,7 +143,7 @@ async function handleFetch(request) {
 }
 
 // Cache First Strategy
-async function cacheFirst(request, cacheName) {
+async function cacheFirst(request, cacheName, options = {}) {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
     
@@ -149,6 +158,9 @@ async function cacheFirst(request, cacheName) {
         const networkResponse = await fetch(request);
         if (networkResponse.ok) {
             cache.put(request, networkResponse.clone());
+            if (options.prune) {
+                pruneCache(cacheName, cacheName === DYNAMIC_CACHE ? 100 : 60);
+            }
         }
         return networkResponse;
     } catch (error) {
@@ -157,25 +169,27 @@ async function cacheFirst(request, cacheName) {
 }
 
 // Network First Strategy
-async function networkFirst(request, cacheName) {
+async function networkFirst(request, cacheName, { timeoutMs = 8000, prune = false } = {}) {
     const cache = await caches.open(cacheName);
     
+    const networkPromise = (async () => {
+        const response = await fetch(request);
+        if (response.ok) {
+            cache.put(request, response.clone());
+            if (prune) {
+                pruneCache(cacheName, cacheName === API_CACHE ? 80 : 120);
+            }
+        }
+        return response;
+    })();
+    
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Network timeout')), timeoutMs));
+    
     try {
-        const networkResponse = await fetch(request);
-        
-        if (networkResponse.ok) {
-            // Cache successful responses
-            cache.put(request, networkResponse.clone());
-        }
-        
-        return networkResponse;
+        return await Promise.race([networkPromise, timeoutPromise]);
     } catch (error) {
-        // Network failed, try cache
         const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
+        if (cachedResponse) return cachedResponse;
         throw error;
     }
 }
@@ -287,8 +301,13 @@ function createOfflineResponse() {
 
 function createImagePlaceholder() {
     // Simple 1x1 transparent pixel
-    const pixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    return fetch(pixel);
+    const pixel = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const image = atob(pixel);
+    const buffer = new Uint8Array(image.length);
+    for (let i = 0; i < image.length; i++) {
+        buffer[i] = image.charCodeAt(i);
+    }
+    return new Response(buffer, { headers: { 'Content-Type': 'image/gif' } });
 }
 
 function createAPIErrorResponse() {
@@ -377,6 +396,44 @@ self.addEventListener('message', event => {
 async function cacheUrls(urls) {
     const cache = await caches.open(DYNAMIC_CACHE);
     return cache.addAll(urls);
+}
+
+// Limpeza simples por tamanho máximo (FIFO baseada na ordem de inserção)
+async function pruneCache(cacheName, maxEntries = 100) {
+    try {
+        const cache = await caches.open(cacheName);
+        const keys = await cache.keys();
+        if (keys.length > maxEntries) {
+            const excess = keys.length - maxEntries;
+            for (let i = 0; i < excess; i++) {
+                await cache.delete(keys[i]);
+            }
+            console.log(`[SW] pruneCache(${cacheName}) removed ${excess} entries (now <= ${maxEntries})`);
+        }
+    } catch (e) {
+        console.warn('[SW] pruneCache error', e);
+    }
+}
+
+// Cache external resources in background
+async function cacheExternalResources() {
+    try {
+        const cache = await caches.open(STATIC_CACHE);
+        const cachePromises = EXTERNAL_RESOURCES.map(async (resource) => {
+            try {
+                const response = await fetch(resource);
+                if (response.ok) {
+                    await cache.put(resource, response);
+                    console.log(`[SW] Cached external resource: ${resource}`);
+                }
+            } catch (error) {
+                console.warn(`[SW] Failed to cache external resource ${resource}:`, error);
+            }
+        });
+        await Promise.allSettled(cachePromises);
+    } catch (error) {
+        console.warn('[SW] Error caching external resources:', error);
+    }
 }
 
 console.log('Service Worker loaded successfully');

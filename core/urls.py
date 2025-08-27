@@ -3,6 +3,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.views.static import serve
+from django.http import FileResponse
+import os
 
 from core.views import (
     HelpView, 
@@ -26,8 +29,16 @@ from core.views import (
     health_check
 )
 
+def service_worker_view(request):
+    """Serve service worker from root path"""
+    sw_path = os.path.join(settings.BASE_DIR, 'sw.js')
+    return FileResponse(open(sw_path, 'rb'), content_type='application/javascript')
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # Service Worker - deve vir antes dos outros paths
+    path('sw.js', service_worker_view, name='service_worker'),
     path("health/", health_check, name="health_check"),
     path("", include("ads.urls")),
     path("users/", include('users.urls')),

@@ -246,15 +246,18 @@ class LGPDResponseHeadersMiddleware(MiddlewareMixin):
         
         # Content Security Policy
         if not response.get('Content-Security-Policy'):
+            # CSP com suporte a service worker, ads e recursos externos necessários
             response['Content-Security-Policy'] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com https://unpkg.com https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adservice.google.com https://adservice.google.com.br; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com https://unpkg.com https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adservice.google.com https://adservice.google.com.br https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; "
                 "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://unpkg.com; "
                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; "
                 "img-src 'self' data: https: blob:; "
-                "connect-src 'self' https://api.github.com https://www.google.com https://www.gstatic.com; "
+                "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://api.github.com https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adservice.google.com https://adservice.google.com.br https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; "
                 "frame-src 'self' https://www.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://recaptcha.google.com; "
-                "child-src 'self' https://www.google.com https://recaptcha.google.com"
+                "child-src 'self' https://www.google.com https://recaptcha.google.com; "
+                "worker-src 'self'; "
+                "upgrade-insecure-requests"
             )
         
         # Cookie SameSite policy

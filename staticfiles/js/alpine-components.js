@@ -3,15 +3,19 @@
  * Simple component definitions to avoid loading order issues
  */
 
-// Initialize Alpine components when DOM is ready
+// Initialize Alpine components when Alpine is ready
+document.addEventListener('alpine:init', function() {
+    initializeAlpineComponents();
+});
+
+// Fallback initialization when DOM is ready (se Alpine já estiver carregado)
 document.addEventListener('DOMContentLoaded', function() {
-    // Only proceed if Alpine is available
-    if (typeof window.Alpine !== 'undefined') {
-        initializeAlpineComponents();
-    } else {
-        // Wait for Alpine to load
-        document.addEventListener('alpine:init', initializeAlpineComponents);
-    }
+    // Aguardar um pouco para garantir que Alpine.js carregou
+    setTimeout(() => {
+        if (typeof window.Alpine !== 'undefined' && Alpine.store) {
+            initializeAlpineComponents();
+        }
+    }, 100);
 });
 
 function initializeAlpineComponents() {
@@ -22,6 +26,16 @@ function initializeAlpineComponents() {
         console.log('Alpine not ready, waiting...');
         setTimeout(initializeAlpineComponents, 100);
         return;
+    }
+    
+    // Verificar se o store já foi inicializado para evitar duplicação
+    try {
+        if (Alpine.store('realtime')) {
+            console.log('Alpine store already initialized');
+            return;
+        }
+    } catch (error) {
+        // Store não existe ainda, continuar com inicialização
     }
     
     // Initialize store if not already present

@@ -107,16 +107,10 @@
                 <div class="publisher-info mt-2 pt-2 border-top mt-auto">
                   <div class="d-flex align-items-center">
                     <div class="publisher-avatar me-2 flex-shrink-0">
-                      {% if ad.cliente.foto %}
-                      <img src="{{ ad.cliente.foto.url }}" 
+                      <img src="{{ ad.cliente.foto_url }}" 
                            alt="{{ ad.cliente.get_full_name }}"
                            class="rounded-circle"
                            width="24" height="24">
-                      {% else %}
-                      <div class="default-avatar">
-                        <i class="fas fa-user"></i>
-                      </div>
-                      {% endif %}
                     </div>
                     <div class="publisher-name flex-grow-1">
                       <span class="small text-muted text-truncate d-block">

@@ -193,7 +193,11 @@ class User(AbstractUser):
         Retorna URL da foto de perfil ou um avatar padrão.
         """
         from django.conf import settings as django_settings
-        return self.foto.url if self.foto else f"{django_settings.MEDIA_URL}fotos_usuarios/avatar.png"
+        if self.foto:
+            return self.foto.url
+        else:
+            # Usar avatar padrão da pasta static
+            return f"{django_settings.STATIC_URL}img/avatar.png"
 
     @property
     def result_type(self) -> str:

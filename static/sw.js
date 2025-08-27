@@ -4,7 +4,7 @@
  */
 
 // Versão da aplicação para controle de atualização forçada
-const VERSION = 'v1.3.5';
+const VERSION = 'v1.3.6';
 // NomES de caches versionados (alterar VERSION dispara renovação)
 const STATIC_CACHE = `indicai-static-${VERSION}`;
 const DYNAMIC_CACHE = `indicai-dynamic-${VERSION}`;
@@ -120,6 +120,11 @@ async function handleFetch(request) {
     const extension = getFileExtension(url.pathname);
     
     try {
+        // For authenticated pages (containing user account paths), prefer network
+        if (url.pathname.includes('/users/') || url.pathname.includes('/minha-conta/')) {
+            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 8000, prune: true });
+        }
+        
         // Determine cache strategy based on request type
         if (CACHE_STRATEGIES.static.includes(extension)) {
             return await cacheFirst(request, STATIC_CACHE);
@@ -131,7 +136,7 @@ async function handleFetch(request) {
             return await networkFirst(request, API_CACHE, { timeoutMs: 5000, prune: true });
         }
         if (url.origin === self.location.origin) {
-            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
+            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 8000, prune: true });
         }
         // External: network first com timeout
         return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
@@ -211,14 +216,27 @@ async function updateCache(request, cache) {
 async function handleFetchError(request, error) {
     const url = new URL(request.url);
     
-    // For HTML pages, return offline page
-    if (request.headers.get('Accept')?.includes('text/html')) {
-        const cache = await caches.open(STATIC_CACHE);
-        const offlinePage = await cache.match('/offline.html');
+    // Only show offline page for main navigation requests, not for assets
+    const isMainPageRequest = request.headers.get('Accept')?.includes('text/html') && 
+                             request.mode === 'navigate' &&
+                             !url.pathname.includes('/static/') &&
+                             !url.pathname.includes('/media/');
+    
+    if (isMainPageRequest) {
+        // Check if we have a cached version of the page first
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Only return offline page as last resort
+        const offlineCache = await caches.open(STATIC_CACHE);
+        const offlinePage = await offlineCache.match('/offline.html');
         return offlinePage || createOfflineResponse();
     }
     
-    // For images, return placeholder
+    // For images, return placeholder only if it's actually an image request
     if (CACHE_STRATEGIES.images.includes(getFileExtension(url.pathname))) {
         return createImagePlaceholder();
     }
@@ -228,7 +246,12 @@ async function handleFetchError(request, error) {
         return createAPIErrorResponse();
     }
     
-    // Default error response
+    // For other assets (favicon, etc), fail silently
+    if (url.pathname.includes('/favicon.ico') || url.pathname.includes('/static/')) {
+        return new Response('', { status: 404 });
+    }
+    
+    // Default: re-throw error
     throw error;
 }
 
@@ -300,14 +323,11 @@ function createOfflineResponse() {
 }
 
 function createImagePlaceholder() {
-    // Simple 1x1 transparent pixel
-    const pixel = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    const image = atob(pixel);
-    const buffer = new Uint8Array(image.length);
-    for (let i = 0; i < image.length; i++) {
-        buffer[i] = image.charCodeAt(i);
-    }
-    return new Response(buffer, { headers: { 'Content-Type': 'image/gif' } });
+    // Create a simple SVG placeholder instead of data URI
+    const svgPlaceholder = `<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="transparent"/></svg>`;
+    return new Response(svgPlaceholder, { 
+        headers: { 'Content-Type': 'image/svg+xml' } 
+    });
 }
 
 function createAPIErrorResponse() {

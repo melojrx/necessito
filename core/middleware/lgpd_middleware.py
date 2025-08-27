@@ -253,7 +253,7 @@ class LGPDResponseHeadersMiddleware(MiddlewareMixin):
                 "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://unpkg.com; "
                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; "
                 "img-src 'self' data: https: blob:; "
-                "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://api.github.com https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adservice.google.com https://adservice.google.com.br https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; "
+                "connect-src 'self' data: blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://api.github.com https://www.google.com https://www.gstatic.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://adservice.google.com https://adservice.google.com.br https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; "
                 "frame-src 'self' https://www.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://recaptcha.google.com; "
                 "child-src 'self' https://www.google.com https://recaptcha.google.com; "
                 "worker-src 'self'; "

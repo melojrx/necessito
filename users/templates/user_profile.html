@@ -11,13 +11,8 @@
             <div class="card shadow">
                 <div class="card-body text-center">
 
-                    {% if user.foto and user.foto.url %}
-                    <img src="{{ user.foto.url }}" alt="Foto do usuário" class="rounded-circle"
+                    <img src="{{ user.foto_url }}" alt="Foto do usuário" class="rounded-circle"
                         style="width: 120px; height: 120px; object-fit: cover;" />
-                    {% else %}
-                    <img src="/media/fotos_usuarios/R.jpg" alt="Foto padrão" class="rounded-circle"
-                        style="width: 120px; height: 120px; object-fit: cover;" />
-                    {% endif %}
 
                     <h5 class="card-title mb-1">{{ user.get_full_name|capfirst }}</h5>
                     

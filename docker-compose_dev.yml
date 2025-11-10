@@ -1,0 +1,148 @@
+# ============================================================================
+# NECESSITO - Docker Compose para Desenvolvimento
+# ============================================================================
+# Arquivo otimizado seguindo melhores práticas Django + Docker + PostgreSQL
+#
+# Containers Essenciais:
+#   - db:    PostgreSQL 15 (banco de dados)
+#   - redis: Redis 7 (cache + broker Celery)
+#   - web:   Django 5.1 com runserver (aplicação)
+#
+# Container Opcional (via profile):
+#   - celery: Worker Celery (apenas quando desenvolver features assíncronas)
+#
+# Uso:
+#   docker compose -f docker-compose_dev.yml up       # Modo padrão
+#   docker compose -f docker-compose_dev.yml --profile celery up  # Com Celery
+# ============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # PostgreSQL - Banco de Dados
+  # --------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: necessito-db-dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-necessito_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=pt_BR.UTF-8 --lc-ctype=pt_BR.UTF-8"
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - necessito-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-necessito_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # --------------------------------------------------------------------------
+  # Redis - Cache e Message Broker
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: necessito-redis-dev
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-6379}:6379"
+    volumes:
+      - redis_data_dev:/data
+    networks:
+      - necessito-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # --------------------------------------------------------------------------
+  # Django - Aplicação Web
+  # --------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: necessito-web-dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      # Monta código fonte para hot-reload
+      - .:/app
+      # Volumes nomeados para persistência
+      - media_data_dev:/app/media
+      - static_data_dev:/app/staticfiles
+    ports:
+      - "${DJANGO_PORT:-8000}:8000"
+    env_file:
+      - .env.dev
+    environment:
+      # Forçar settings de desenvolvimento
+      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      # Celery em modo EAGER (síncrono) para desenvolvimento
+      - CELERY_TASK_ALWAYS_EAGER=True
+      - CELERY_TASK_EAGER_PROPAGATES=True
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - necessito-dev
+    restart: unless-stopped
+    stdin_open: true  # Para debugger (pdb)
+    tty: true         # Para debugger (pdb)
+
+  # --------------------------------------------------------------------------
+  # Celery Worker - OPCIONAL (use --profile celery)
+  # --------------------------------------------------------------------------
+  # Para ativar: docker compose -f docker-compose_dev.yml --profile celery up
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: necessito-celery-dev
+    command: celery -A core worker -l info --concurrency=2
+    volumes:
+      - .:/app
+      - media_data_dev:/app/media
+    env_file:
+      - .env.dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.dev
+      # Desabilitar EAGER mode quando usar worker real
+      - CELERY_TASK_ALWAYS_EAGER=False
+    depends_on:
+      - db
+      - redis
+    networks:
+      - necessito-dev
+    restart: unless-stopped
+    profiles:
+      - celery  # Apenas inicia com --profile celery
+
+# ============================================================================
+# Volumes Nomeados
+# ============================================================================
+volumes:
+  postgres_data_dev:
+    name: necessito_postgres_dev
+  redis_data_dev:
+    name: necessito_redis_dev
+  media_data_dev:
+    name: necessito_media_dev
+  static_data_dev:
+    name: necessito_static_dev
+
+# ============================================================================
+# Rede
+# ============================================================================
+networks:
+  necessito-dev:
+    name: necessito-dev-network
+    driver: bridge

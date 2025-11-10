@@ -221,6 +221,12 @@ class MyPasswordResetView(auth_views.PasswordResetView):
 
     # Personaliza o corpo do e-mail (formato texto)
     email_template_name = "password_reset_email.html"
+    
+    # Template HTML para e-mail mais bonito (opcional - fallback para texto se não suportado)
+    html_email_template_name = "password_reset_email_html.html"
+    
+    # URL de sucesso com namespace correto
+    success_url = reverse_lazy('users:password_reset_done')
 
     def form_valid(self, form):
         # Garante domínio dinâmico com base no host atual
@@ -230,6 +236,7 @@ class MyPasswordResetView(auth_views.PasswordResetView):
             from_email=self.from_email,
             email_template_name=self.email_template_name,
             subject_template_name=self.subject_template_name,
+            html_email_template_name=self.html_email_template_name,
             request=self.request,
         )
         return redirect(self.get_success_url())

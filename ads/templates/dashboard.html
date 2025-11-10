@@ -459,18 +459,28 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(async anuncios => {
           console.log(`Carregando ${anuncios.length} anúncios no mapa...`);
-          
+
+          // CORREÇÃO: Função helper para converter coordenadas brasileiras (vírgula) para formato JS (ponto)
+          const parseCoord = (coord) => {
+            if (coord === null || coord === undefined) return null;
+            const coordStr = String(coord).replace(',', '.');
+            const parsed = parseFloat(coordStr);
+            return Number.isFinite(parsed) ? parsed : null;
+          };
+
           for (const anuncio of anuncios) {
-            let lat = anuncio.lat;
-            let lon = anuncio.lon;
-            
+            // CORREÇÃO: Parse das coordenadas com conversão vírgula → ponto
+            let lat = parseCoord(anuncio.lat);
+            let lon = parseCoord(anuncio.lon);
+
             if (lat === null || lon === null) {
               try {
                 const responseGeo = await fetch(`/api/geolocalizar-usuario/?user_id=${anuncio.cliente_id}`);
                 const dataGeo = await responseGeo.json();
                 if (dataGeo.lat && dataGeo.lon) {
-                  lat = dataGeo.lat;
-                  lon = dataGeo.lon;
+                  // CORREÇÃO: Parse das coordenadas retornadas pela API
+                  lat = parseCoord(dataGeo.lat);
+                  lon = parseCoord(dataGeo.lon);
                 } else {
                   lat = -5.203;
                   lon = -39.301;

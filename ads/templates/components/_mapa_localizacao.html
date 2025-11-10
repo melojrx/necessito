@@ -40,11 +40,19 @@ Requer: Leaflet CSS/JS globais no base.html
 
 <script>
 (function() {
+    // Variável global para armazenar a instância do mapa (evita múltiplas inicializações)
+    let mapInstance = null;
+
     function initMap() {
         const el = document.getElementById('map-localizacao');
-        if (!el) return;
-        const lat = parseFloat(el.dataset.lat);
-        const lon = parseFloat(el.dataset.lon);
+        if (!el) {
+            console.warn('Elemento map-localizacao não encontrado');
+            return;
+        }
+
+        // CORREÇÃO CRÍTICA: Substituir vírgula por ponto (formato brasileiro → formato JS)
+        const lat = parseFloat((el.dataset.lat || '').replace(',', '.'));
+        const lon = parseFloat((el.dataset.lon || '').replace(',', '.'));
 
         if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
             el.innerHTML = '<div class="alert alert-light text-center m-3">Localização não disponível.</div>';
@@ -52,42 +60,179 @@ Requer: Leaflet CSS/JS globais no base.html
         }
 
         if (typeof L === 'undefined') {
-            el.innerHTML = '<div class="alert alert-danger text-center m-3">Mapa indisponível no momento.</div>';
-            return;
+            console.warn('Leaflet não carregado ainda, aguardando...');
+            el.innerHTML = '<div class="alert alert-info text-center m-3"><i class="fas fa-spinner fa-spin me-2"></i>Carregando mapa...</div>';
+            return false;
         }
 
-        const map = L.map('map-localizacao', { zoomControl: true }).setView([lat, lon], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        try {
+            // CORREÇÃO 1: Destruir mapa existente antes de criar novo (evita memory leak)
+            if (mapInstance) {
+                console.log('Removendo instância anterior do mapa...');
+                mapInstance.remove();
+                mapInstance = null;
+            }
 
-        // Criar marcador com popup personalizado
-        const marker = L.marker([lat, lon]).addTo(map);
-        
-        // Obter informações do elemento para o popup
-        const cidade = el.dataset.cidade || '';
-        const estado = el.dataset.estado || '';
-        const bairro = el.dataset.bairro || '';
-        
-        let popupContent = '<div class="text-center"><strong>📍 Localização do Serviço</strong><br>';
-        if (cidade && estado) {
-            popupContent += `${cidade}, ${estado}`;
-            if (bairro) popupContent += `<br>Bairro: ${bairro}`;
-        } else {
-            popupContent += 'Localização aproximada';
+            // CORREÇÃO 2: Verificar se o container já tem uma instância (evita erro "Map container is already initialized")
+            if (el._leaflet_id) {
+                console.log('Container já tinha instância do Leaflet, limpando...');
+                delete el._leaflet_id;
+            }
+
+            // CORREÇÃO 3: Configurações otimizadas do mapa
+            mapInstance = L.map('map-localizacao', {
+                zoomControl: true,
+                attributionControl: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: true,
+                dragging: true,
+                tap: true,
+                touchZoom: true,
+                preferCanvas: false, // SVG para melhor qualidade
+                fadeAnimation: true,
+                zoomAnimation: true,
+                markerZoomAnimation: true
+            }).setView([lat, lon], 13);
+
+            // CORREÇÃO 4: Configurar tile layer com retry e error handling
+            const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+                minZoom: 3,
+                tileSize: 256,
+                detectRetina: true, // Suporte a telas retina
+                updateWhenZooming: false, // Melhor performance
+                keepBuffer: 2
+            });
+
+            // Event listener para erros no carregamento de tiles
+            tileLayer.on('tileerror', function(error) {
+                console.warn('Erro ao carregar tile do mapa:', error);
+            });
+
+            tileLayer.addTo(mapInstance);
+
+            // CORREÇÃO 5: Criar marcador com ícone customizado
+            const marker = L.marker([lat, lon], {
+                title: 'Localização do Serviço',
+                alt: 'Marcador de localização',
+                riseOnHover: true
+            }).addTo(mapInstance);
+
+            // Obter informações do elemento para o popup
+            const cidade = el.dataset.cidade || '';
+            const estado = el.dataset.estado || '';
+            const bairro = el.dataset.bairro || '';
+
+            let popupContent = '<div class="text-center" style="min-width: 150px;"><strong>📍 Localização do Serviço</strong><br>';
+            if (cidade && estado) {
+                popupContent += `<span style="font-size: 0.9rem;">${cidade}, ${estado}</span>`;
+                if (bairro) popupContent += `<br><small class="text-muted">Bairro: ${bairro}</small>`;
+            } else {
+                popupContent += '<small>Localização aproximada</small>';
+            }
+            popupContent += '</div>';
+
+            marker.bindPopup(popupContent, {
+                closeButton: true,
+                autoClose: false,
+                className: 'custom-popup'
+            });
+
+            // CORREÇÃO 6: invalidateSize() robusto com múltiplos timings
+            // Necessário para corrigir renderização em tabs, modals, carrosséis, etc.
+            const invalidateSizeTimes = [100, 250, 500, 1000];
+            invalidateSizeTimes.forEach(delay => {
+                setTimeout(() => {
+                    if (mapInstance) {
+                        mapInstance.invalidateSize({ animate: false });
+                    }
+                }, delay);
+            });
+
+            // CORREÇÃO 7: Listener para resize do window
+            const resizeObserver = new ResizeObserver(() => {
+                if (mapInstance) {
+                    mapInstance.invalidateSize({ animate: false });
+                }
+            });
+            resizeObserver.observe(el);
+
+            // CORREÇÃO 8: Listener para quando o elemento se torna visível (tabs, collapse, etc.)
+            const intersectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && mapInstance) {
+                        setTimeout(() => {
+                            mapInstance.invalidateSize({ animate: false });
+                        }, 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+            intersectionObserver.observe(el);
+
+            // CORREÇÃO 9: Event listener para quando o mapa é carregado
+            mapInstance.whenReady(function() {
+                console.log('Mapa Leaflet completamente carregado e pronto');
+                // Ajustar tamanho final
+                setTimeout(() => {
+                    if (mapInstance) {
+                        mapInstance.invalidateSize({ animate: false });
+                    }
+                }, 200);
+            });
+
+            console.log('Mapa inicializado com sucesso:', { lat, lon, cidade, estado, bairro });
+
+            // CORREÇÃO 10: Armazenar instância no elemento para acesso global se necessário
+            el._mapInstance = mapInstance;
+
+            return true;
+
+        } catch (error) {
+            console.error('Erro crítico ao inicializar mapa:', error);
+            el.innerHTML = '<div class="alert alert-danger text-center m-3"><i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar mapa. <small class="d-block mt-1">Tente recarregar a página.</small></div>';
+            return false;
         }
-        popupContent += '</div>';
-        
-        marker.bindPopup(popupContent);
-
-        // Corrige render pós-toggle/aba/carrossel
-        setTimeout(() => { map.invalidateSize(); }, 200);
     }
 
+    // Função que aguarda o Leaflet estar disponível
+    function waitForLeaflet(callback, maxAttempts = 50, interval = 100) {
+        let attempts = 0;
+
+        const checkLeaflet = setInterval(() => {
+            attempts++;
+
+            if (typeof L !== 'undefined') {
+                clearInterval(checkLeaflet);
+                console.log(`Leaflet carregado após ${attempts} tentativa(s)`);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkLeaflet);
+                console.error('Timeout: Leaflet não carregou após ' + (maxAttempts * interval / 1000) + ' segundos');
+                const el = document.getElementById('map-localizacao');
+                if (el) {
+                    el.innerHTML = '<div class="alert alert-danger text-center m-3"><i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar biblioteca de mapas. <small class="d-block mt-1">Verifique sua conexão e recarregue a página.</small></div>';
+                }
+            }
+        }, interval);
+    }
+
+    // CORREÇÃO 11: Cleanup ao sair da página (evita memory leak)
+    window.addEventListener('beforeunload', function() {
+        if (mapInstance) {
+            console.log('Limpando instância do mapa antes de sair da página...');
+            mapInstance.remove();
+            mapInstance = null;
+        }
+    });
+
+    // Inicializar quando o DOM e o Leaflet estiverem prontos
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initMap);
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForLeaflet(initMap);
+        });
     } else {
-        initMap();
+        waitForLeaflet(initMap);
     }
 })();
 </script>
@@ -104,21 +249,107 @@ Requer: Leaflet CSS/JS globais no base.html
     padding: 0.75rem 1rem;
 }
 
+/* CORREÇÃO: Container do mapa com dimensões explícitas e overflow controlado */
 .mapa-localizacao-component .map-container {
     width: 100%;
     height: 350px;
+    position: relative;
+    overflow: hidden; /* Evita scroll interno */
+    background-color: #f0f0f0; /* Cor de fundo enquanto carrega */
 }
 
+/* CORREÇÃO: Garantir que o Leaflet container preencha todo o espaço */
+.mapa-localizacao-component .map-container .leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* CORREÇÃO: Estilo para popups customizados */
+.leaflet-popup.custom-popup .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+}
+
+.leaflet-popup.custom-popup .leaflet-popup-content {
+    margin: 12px 16px;
+    line-height: 1.5;
+}
+
+.leaflet-popup.custom-popup .leaflet-popup-tip {
+    box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+}
+
+/* CORREÇÃO: Melhorar visibilidade dos controles de zoom */
+.mapa-localizacao-component .leaflet-control-zoom {
+    border: 2px solid rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.mapa-localizacao-component .leaflet-control-zoom a {
+    font-size: 18px;
+    line-height: 28px;
+    color: #333;
+}
+
+.mapa-localizacao-component .leaflet-control-zoom a:hover {
+    background-color: #f4f4f4;
+}
+
+/* CORREÇÃO: Animação de loading suave */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.mapa-localizacao-component .map-container:empty::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Responsividade aprimorada */
 @media (max-width: 992px) {
     .mapa-localizacao-component .map-container { height: 280px; }
 }
 
 @media (max-width: 768px) {
-    .mapa-localizacao-component .map-container { height: 220px; }
+    .mapa-localizacao-component .map-container { height: 250px; }
     .mapa-localizacao-component .card-header { padding: 0.5rem 0.75rem; }
+
+    /* Ajustar controles de zoom em mobile */
+    .mapa-localizacao-component .leaflet-control-zoom a {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+    }
 }
 
 @media (max-width: 576px) {
-    .mapa-localizacao-component .map-container { height: 200px; }
+    .mapa-localizacao-component .map-container { height: 220px; }
+
+    /* Popups mais compactos em telas pequenas */
+    .leaflet-popup.custom-popup .leaflet-popup-content {
+        margin: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* CORREÇÃO: Acessibilidade - melhorar foco em elementos interativos */
+.mapa-localizacao-component .leaflet-control-zoom a:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.mapa-localizacao-component .leaflet-marker-icon:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 4px;
+    border-radius: 50%;
 }
 </style>

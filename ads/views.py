@@ -471,10 +471,12 @@ def anuncios_geolocalizados(request):
         'titulo': anuncio.titulo,
         'cidade': anuncio.cliente.cidade,
         'estado': anuncio.cliente.estado,
-        'lat': anuncio.cliente.lat,
-        'lon': anuncio.cliente.lon,
+        # CORREÇÃO CRÍTICA: Forçar float() para evitar serialização com vírgula (locale pt-BR)
+        # Quando USE_L10N=True, Django serializa floats com vírgula, quebrando JavaScript
+        'lat': float(anuncio.cliente.lat) if anuncio.cliente.lat is not None else None,
+        'lon': float(anuncio.cliente.lon) if anuncio.cliente.lon is not None else None,
         'status': anuncio.status,
-        'cliente_id': anuncio.cliente.id  
+        'cliente_id': anuncio.cliente.id
     } for anuncio in anuncios]
 
     return JsonResponse(data, safe=False)
@@ -498,7 +500,11 @@ def geolocalizar_usuario(request):
         return JsonResponse({'erro': 'Usuário não encontrado'}, status=404)
 
     if user.lat and user.lon:
-        return JsonResponse({'lat': user.lat, 'lon': user.lon})
+        # CORREÇÃO: Forçar float() para evitar serialização com vírgula (locale pt-BR)
+        return JsonResponse({
+            'lat': float(user.lat),
+            'lon': float(user.lon)
+        })
 
     # monta endereço
     endereco = f"{user.cidade}, {user.estado}, Brasil"
@@ -513,7 +519,11 @@ def geolocalizar_usuario(request):
             user.lat = float(data[0]['lat'])
             user.lon = float(data[0]['lon'])
             user.save(update_fields=['lat', 'lon'])
-            return JsonResponse({'lat': user.lat, 'lon': user.lon})
+            # CORREÇÃO: Forçar float() para evitar serialização com vírgula (locale pt-BR)
+            return JsonResponse({
+                'lat': float(user.lat),
+                'lon': float(user.lon)
+            })
         else:
             return JsonResponse({'erro': 'Não encontrado no Nominatim'}, status=404)
     except Exception as e:

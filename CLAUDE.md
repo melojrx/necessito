@@ -14,36 +14,72 @@ Sistema marketplace B2B/B2C de necessidades desenvolvido em Django 5.1.4 com API
 
 ## Comandos Essenciais
 
-### Desenvolvimento Local com Docker
+### Desenvolvimento Local com Docker (OTIMIZADO)
 
+**Usando Makefile (Recomendado):**
 ```bash
-# Configurar ambiente completo (primeira vez)
-./setup_dev.sh
+# Ver todos os comandos disponíveis
+make help
 
-# Iniciar serviços
-docker-compose -f docker-compose.dev.yml up -d
+# Iniciar ambiente de desenvolvimento
+make dev
 
 # Parar serviços
-docker-compose -f docker-compose.dev.yml down
+make stop
 
-# Ver logs
-docker-compose -f docker-compose.dev.yml logs -f
+# Ver logs em tempo real
+make logs
 
 # Executar migrações
-docker-compose -f docker-compose.dev.yml exec web python manage.py migrate
+make migrate
+
+# Criar migrations
+make makemigrations
 
 # Criar superusuário
-docker-compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
-
-# Coletar arquivos estáticos
-docker-compose -f docker-compose.dev.yml exec web python manage.py collectstatic --noinput
+make createsuperuser
 
 # Shell Django
-docker-compose -f docker-compose.dev.yml exec web python manage.py shell
+make shell
 
-# Bash no container
-docker-compose -f docker-compose.dev.yml exec web bash
+# Executar testes
+make test
+
+# Iniciar com Celery worker (quando necessário)
+make celery
+
+# Limpar tudo (containers, volumes, networks)
+make clean
 ```
+
+**Usando Docker Compose diretamente:**
+```bash
+# Iniciar serviços (containers essenciais: db, redis, web)
+docker compose -f docker-compose_dev.yml up -d
+
+# Iniciar com Celery worker (opcional)
+docker compose -f docker-compose_dev.yml --profile celery up -d
+
+# Parar serviços
+docker compose -f docker-compose_dev.yml down
+
+# Ver logs
+docker compose -f docker-compose_dev.yml logs -f
+
+# Executar comando no container web
+docker compose -f docker-compose_dev.yml exec necessito-web-dev python manage.py migrate
+```
+
+**Arquitetura de Desenvolvimento Simplificada:**
+- ✅ **db**: PostgreSQL 15 (essencial)
+- ✅ **redis**: Redis 7 (cache + broker Celery)
+- ✅ **web**: Django com runserver (porta 8000)
+- ⚡ **celery**: Worker opcional (use `--profile celery` quando necessário)
+
+**Celery em Modo EAGER:**
+- Por padrão, tasks Celery executam de forma **síncrona** (CELERY_TASK_ALWAYS_EAGER=True)
+- Não requer worker rodando - ideal para desenvolvimento
+- Para testar comportamento assíncrono real: `make celery` ou `--profile celery`
 
 ### Produção (VPS Ubuntu)
 
@@ -179,13 +215,11 @@ Credenciais são definidas via variáveis de ambiente:
 
 ### Serviços Docker
 
-**Desenvolvimento** (docker-compose.dev.yml):
-- **web**: Django 5.1.4 aplicação
-- **db**: PostgreSQL 15
-- **redis**: Redis 7 - cache e message broker
-- **nginx**: Proxy reverso local
-- **celery**: Worker para tarefas assíncronas
-- **celery-beat**: Scheduler para tarefas agendadas
+**Desenvolvimento** (docker-compose_dev.yml - Otimizado):
+- **db**: PostgreSQL 15-alpine (banco de dados)
+- **redis**: Redis 7-alpine (cache + message broker)
+- **web**: Django 5.1 com runserver (aplicação - porta 8000)
+- **celery**: Worker Celery (opcional - use `--profile celery`)
 
 **Produção** (docker-compose_prod.yml):
 - **web**: necessito-web_prod (Django + Gunicorn)
@@ -200,11 +234,11 @@ Credenciais são definidas via variáveis de ambiente:
 
 ### URLs Principais
 
-**Desenvolvimento** (http://localhost):
+**Desenvolvimento** (http://localhost:8000):
 - `/`: Homepage
 - `/admin/`: Admin do Django
 - `/api/v1/`: API REST
-- `/api/docs/`: Documentação da API
+- `/api/docs/`: Documentação da API (Swagger/ReDoc)
 - `/necessidades/`: Listagem de necessidades
 - `/orcamentos/`: Sistema de orçamentos
 - `/chat/`: Sistema de mensagens
@@ -349,9 +383,71 @@ docker-compose -f docker-compose_prod.yml up -d --force-recreate [service_name]
 
 ## 📋 Arquivos de Configuração Importantes
 
-- `docker-compose.dev.yml`: Ambiente de desenvolvimento
+- `docker-compose_dev.yml`: Ambiente de desenvolvimento (otimizado)
 - `docker-compose_prod.yml`: Ambiente de produção
 - `.env.dev` / `.env.prod`: Variáveis de ambiente
+- `Makefile`: Comandos convenientes para desenvolvimento
 - `ARQUITETURA_VPS_INTEGRACAO.md`: Documentação completa da infraestrutura
 - `scripts/deploy.sh`: Script principal de deploy
 - `nginx-global/conf/`: Configurações do NGINX global
+
+## 🎯 Melhores Práticas de Desenvolvimento
+
+### Ambiente de Desenvolvimento Otimizado
+
+O ambiente de desenvolvimento foi otimizado seguindo as melhores práticas Django + Docker:
+
+1. **Containers Essenciais**: Apenas o necessário (db, redis, web)
+2. **Celery EAGER Mode**: Tasks executam de forma síncrona por padrão
+3. **Hot Reload**: Código fonte montado como volume para reload automático
+4. **Makefile**: Comandos convenientes e documentados
+5. **Profile Celery**: Worker opcional via `--profile celery`
+6. **Health Checks**: PostgreSQL e Redis com health checks configurados
+
+### Fluxo de Trabalho Recomendado
+
+```bash
+# 1. Primeira vez - Iniciar ambiente
+make dev
+
+# 2. Aplicar migrations
+make migrate
+
+# 3. Criar superusuário
+make createsuperuser
+
+# 4. Acessar aplicação
+# http://localhost:8000
+
+# 5. Durante desenvolvimento - Ver logs
+make logs
+
+# 6. Quando necessário - Testar Celery real
+make celery
+
+# 7. Ao finalizar
+make stop
+```
+
+### Estrutura de Arquivos
+
+```
+necessito/
+├── docker-compose_dev.yml      # Docker Compose de desenvolvimento
+├── docker-compose_prod.yml     # Docker Compose de produção
+├── Makefile                    # Comandos convenientes
+├── .env.dev                    # Variáveis de ambiente (dev)
+├── .env.prod                   # Variáveis de ambiente (prod)
+├── Dockerfile                  # Imagem Docker da aplicação
+├── requirements_base.txt       # Dependências base
+├── requirements_dev.txt        # Dependências de desenvolvimento
+├── requirements_prod.txt       # Dependências de produção
+├── manage.py                   # Django management
+├── CLAUDE.md                   # Este arquivo
+└── core/
+    ├── settings/
+    │   ├── base.py            # Settings compartilhados
+    │   ├── dev.py             # Settings de desenvolvimento
+    │   └── prod.py            # Settings de produção
+    └── ...
+```

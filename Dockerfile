@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Instalar dependências Python
 COPY requirements_base.txt .
-RUN pip install --upgrade pip && \
+RUN pip install --upgrade pip==25.3 && \
     pip wheel --no-cache-dir -r requirements_base.txt -w /wheels
 
 FROM python:3.11-slim
@@ -52,7 +52,9 @@ WORKDIR /app
 
 # Copiar wheels do stage builder e instalar
 COPY --from=builder /wheels /wheels
-RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+RUN pip install --upgrade pip==25.3 && \
+    pip install --no-cache-dir /wheels/* && \
+    rm -rf /wheels
 
 # Copiar código da aplicação
 COPY . .

@@ -1,7 +1,7 @@
 # Core Django
-Django==5.1.10  # Updated from 5.1.4 to fix security vulnerabilities
+Django==5.1.14  # Updated from 5.1.10 to fix SQL injection and DoS vulnerabilities (GHSA-6w2r-r2m5-xq5w, GHSA-hpr9-3m2g-3j9p, GHSA-q95w-c7qg-hrff, GHSA-qw25-v68c-qjf3, GHSA-frmv-pr5f-9mcr)
 djangorestframework==3.15.2  # Updated to fix security vulnerability
-djangorestframework-simplejwt==5.4.0  # Updated to 5.4.0 to fix security vulnerability
+djangorestframework-simplejwt==5.5.1  # Updated from 5.4.0 to fix information disclosure vulnerability (GHSA-5vcc-86wm-547q)
 
 # Authentication & Authorization
 dj-rest-auth==6.0.0  # REST API authentication built on django-allauth
@@ -30,8 +30,8 @@ requests==2.32.4  # Updated to fix security vulnerability
 urllib3==2.5.0  # Updated to fix security vulnerabilities
 
 # WebSocket Support
-python-socketio==5.13.0
-eventlet==0.37.0
+python-socketio==5.14.0  # Updated from 5.13.0 to fix RCE vulnerability via pickle deserialization (GHSA-g8c6-8fjj-2r4m)
+eventlet==0.40.3  # Updated from 0.37.0 to fix HTTP Request Smuggling vulnerability (GHSA-hw6f-rjfj-j7j7)
 
 # Email
 django-anymail==12.0

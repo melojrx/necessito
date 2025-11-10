@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-[[ -f docker-compose_prod.yml ]] || { echo 'docker-compose_prod.yml não encontrado'; exit 1; }
-docker compose -f docker-compose_prod.yml run --rm web python manage.py migrate --noinput
-echo 'Migrações aplicadas'

@@ -387,10 +387,12 @@
                     </td>
                     <td class="align-middle">
                       <span class="badge 
-                        {% if orcamento.status == 'pendente' %}bg-secondary
-                        {% elif orcamento.status == 'aceito_pelo_cliente' %}bg-warning
+                        {% if orcamento.status == 'enviado' %}bg-info
+                        {% elif orcamento.status == 'aceito_pelo_cliente' %}bg-warning text-dark
                         {% elif orcamento.status == 'confirmado' %}bg-success
-                        {% elif orcamento.status == 'rejeitado' %}bg-danger{% endif %}">
+                        {% elif orcamento.status == 'rejeitado_pelo_cliente' %}bg-danger
+                        {% elif orcamento.status == 'recusado_pelo_fornecedor' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
                         {% if orcamento.status == 'aceito_pelo_cliente' %}
                           Aguardando confirmação
                         {% else %}
@@ -413,7 +415,7 @@
                     </td>
                     <td class="align-middle">
                        <div class="d-flex gap-1" role="group">
-                         {% if orcamento.status == "pendente" %}
+                         {% if orcamento.status == "enviado" %}
                            <button class="btn btn-sm btn-success btn-aceitar" 
                                    data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}"
                                    data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal" 

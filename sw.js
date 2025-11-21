@@ -4,7 +4,7 @@
  */
 
 // Versão da aplicação para controle de atualização forçada
-const VERSION = 'v1.3.6';
+const VERSION = 'v1.3.7';
 // NomES de caches versionados (alterar VERSION dispara renovação)
 const STATIC_CACHE = `indicai-static-${VERSION}`;
 const DYNAMIC_CACHE = `indicai-dynamic-${VERSION}`;
@@ -18,7 +18,11 @@ const STATIC_ASSETS = [
     '/static/js/performance-optimizations.js',
     '/static/img/logo.png',
     '/static/img/favicon.ico',
-    '/offline.html',
+    '/offline.html'
+];
+
+// External resources to cache on demand
+const EXTERNAL_RESOURCES = [
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
@@ -47,10 +51,15 @@ self.addEventListener('install', event => {
         caches.open(STATIC_CACHE)
             .then(cache => {
                 console.log('Caching static assets...');
-                return cache.addAll(STATIC_ASSETS);
+                const cachePromises = STATIC_ASSETS.map(asset => {
+                    return cache.add(asset).catch(err => {
+                        console.warn(`[SW] Failed to cache ${asset}:`, err);
+                    });
+                });
+                return Promise.all(cachePromises);
             })
             .then(() => {
-                console.log('Static assets cached successfully');
+                console.log('Static assets cached successfully (with potential individual failures).');
                 return self.skipWaiting(); // Force activation
             })
             .catch(error => {
@@ -80,7 +89,10 @@ self.addEventListener('activate', event => {
             }),
             
             // Take control of all clients
-            self.clients.claim()
+            self.clients.claim(),
+            
+            // Cache external resources in background
+            cacheExternalResources()
         ])
     );
 });
@@ -89,17 +101,38 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
-    
+
     // Skip non-GET requests
     if (request.method !== 'GET') {
         return;
     }
-    
+
     // Skip chrome extensions and other protocols
     if (!url.protocol.startsWith('http')) {
         return;
     }
-    
+
+    // Skip critical external resources that should never be cached or intercepted
+    const criticalExternalDomains = [
+        'code.jquery.com',
+        'cdn.jsdelivr.net',
+        'cdnjs.cloudflare.com',
+        'fonts.googleapis.com',
+        'fonts.gstatic.com',
+        'google.com',
+        'gstatic.com',
+        'googlesyndication.com',
+        'doubleclick.net',
+        'googleads.g.doubleclick.net',
+        'adservice.google.com',
+        'fundingchoicesmessages.google.com'
+    ];
+
+    if (criticalExternalDomains.some(domain => url.hostname.includes(domain))) {
+        // Let browser handle these requests normally without ServiceWorker intervention
+        return;
+    }
+
     event.respondWith(handleFetch(request));
 });
 
@@ -108,6 +141,11 @@ async function handleFetch(request) {
     const extension = getFileExtension(url.pathname);
     
     try {
+        // For authenticated pages (containing user account paths), prefer network
+        if (url.pathname.includes('/users/') || url.pathname.includes('/minha-conta/')) {
+            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 8000, prune: true });
+        }
+        
         // Determine cache strategy based on request type
         if (CACHE_STRATEGIES.static.includes(extension)) {
             return await cacheFirst(request, STATIC_CACHE);
@@ -119,7 +157,7 @@ async function handleFetch(request) {
             return await networkFirst(request, API_CACHE, { timeoutMs: 5000, prune: true });
         }
         if (url.origin === self.location.origin) {
-            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
+            return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 8000, prune: true });
         }
         // External: network first com timeout
         return await networkFirst(request, DYNAMIC_CACHE, { timeoutMs: 5000, prune: true });
@@ -199,14 +237,27 @@ async function updateCache(request, cache) {
 async function handleFetchError(request, error) {
     const url = new URL(request.url);
     
-    // For HTML pages, return offline page
-    if (request.headers.get('Accept')?.includes('text/html')) {
-        const cache = await caches.open(STATIC_CACHE);
-        const offlinePage = await cache.match('/offline.html');
+    // Only show offline page for main navigation requests, not for assets
+    const isMainPageRequest = request.headers.get('Accept')?.includes('text/html') && 
+                             request.mode === 'navigate' &&
+                             !url.pathname.includes('/static/') &&
+                             !url.pathname.includes('/media/');
+    
+    if (isMainPageRequest) {
+        // Check if we have a cached version of the page first
+        const cache = await caches.open(DYNAMIC_CACHE);
+        const cachedResponse = await cache.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Only return offline page as last resort
+        const offlineCache = await caches.open(STATIC_CACHE);
+        const offlinePage = await offlineCache.match('/offline.html');
         return offlinePage || createOfflineResponse();
     }
     
-    // For images, return placeholder
+    // For images, return placeholder only if it's actually an image request
     if (CACHE_STRATEGIES.images.includes(getFileExtension(url.pathname))) {
         return createImagePlaceholder();
     }
@@ -216,7 +267,12 @@ async function handleFetchError(request, error) {
         return createAPIErrorResponse();
     }
     
-    // Default error response
+    // For other assets (favicon, etc), fail silently
+    if (url.pathname.includes('/favicon.ico') || url.pathname.includes('/static/')) {
+        return new Response('', { status: 404 });
+    }
+    
+    // Default: re-throw error
     throw error;
 }
 
@@ -288,9 +344,11 @@ function createOfflineResponse() {
 }
 
 function createImagePlaceholder() {
-    // Simple 1x1 transparent pixel
-    const pixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    return fetch(pixel);
+    // Create a simple SVG placeholder instead of data URI
+    const svgPlaceholder = `<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="transparent"/></svg>`;
+    return new Response(svgPlaceholder, { 
+        headers: { 'Content-Type': 'image/svg+xml' } 
+    });
 }
 
 function createAPIErrorResponse() {
@@ -395,6 +453,27 @@ async function pruneCache(cacheName, maxEntries = 100) {
         }
     } catch (e) {
         console.warn('[SW] pruneCache error', e);
+    }
+}
+
+// Cache external resources in background
+async function cacheExternalResources() {
+    try {
+        const cache = await caches.open(STATIC_CACHE);
+        const cachePromises = EXTERNAL_RESOURCES.map(async (resource) => {
+            try {
+                const response = await fetch(resource);
+                if (response.ok) {
+                    await cache.put(resource, response);
+                    console.log(`[SW] Cached external resource: ${resource}`);
+                }
+            } catch (error) {
+                console.warn(`[SW] Failed to cache external resource ${resource}:`, error);
+            }
+        });
+        await Promise.allSettled(cachePromises);
+    } catch (error) {
+        console.warn('[SW] Error caching external resources:', error);
     }
 }
 

@@ -5,7 +5,10 @@
 
 {% block title %}{{ necessidade.titulo }} - Indicaai.com{% endblock %}
 
-{% block extra_head %}
+{% block head_extra_content %}
+<!-- CSRF Token para requisições AJAX -->
+<meta name="csrf-token" content="{{ csrf_token }}">
+
 <!-- Meta tags Open Graph para compartilhamento -->
 <meta property="og:title" content="Procuro: {{ necessidade.titulo }} - Indicaai.com" />
 <meta property="og:description" content="{{ necessidade.descricao|truncatechars:160 }}" />
@@ -415,10 +418,11 @@
                     </td>
                     <td class="align-middle">
                        <div class="d-flex gap-1" role="group">
+                         {% comment %}DEBUG: orcamento.id={{ orcamento.id }} status={{ orcamento.status }}{% endcomment %}
                          {% if orcamento.status == "enviado" %}
-                           <button class="btn btn-sm btn-success btn-aceitar" 
+                           <button class="btn btn-sm btn-success btn-aceitar"
                                    data-url="{% url 'budgets:aceitar_orcamento' orcamento.id %}"
-                                   data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal" 
+                                   data-bs-toggle="modal" data-bs-target="#confirmarAceiteModal"
                                    title="Aceitar Orçamento">
                              <i class="fas fa-thumbs-up"></i>
                            </button>
@@ -872,11 +876,37 @@ document.addEventListener('DOMContentLoaded', function () {
   );
   
   window.statusValidator = statusValidator;
-  
+
+  // ==================== FUNÇÃO PARA OBTER CSRF TOKEN ====================
+  function getCSRFToken() {
+    // Tenta primeiro pegar do meta tag (método recomendado)
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag && metaTag.content) {
+      return metaTag.content;
+    }
+
+    // Fallback: tenta pegar do cookie
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, 10) === 'csrftoken=') {
+          cookieValue = decodeURIComponent(cookie.substring(10));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCSRFToken();
+  console.log('[CSRF Debug] Token length:', csrftoken ? csrftoken.length : 0);
+
   // ==================== ACEITAR/REJEITAR ORÇAMENTO ====================
   let aceitarUrl = null;
   let rejeitarUrl = null;
-  
+
   const btnAceitar = document.querySelectorAll('.btn-aceitar');
   const btnRejeitar = document.querySelectorAll('.btn-rejeitar');
   const confirmarAceiteBtn = document.getElementById('confirmarAceiteBtn');
@@ -889,13 +919,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     confirmarAceiteBtn.addEventListener('click', () => {
       if (!aceitarUrl) return;
+
+      console.log('[Accept Budget] Sending request to:', aceitarUrl);
+      console.log('[Accept Budget] CSRF Token:', csrftoken);
+
       fetch(aceitarUrl, {
         method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json'
+        },
       })
-        .then(res => res.json())
-        .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao aceitar.'))
-        .catch(err => alert('Erro inesperado: ' + err));
+        .then(res => {
+          console.log('[Accept Budget] Response status:', res.status);
+          if (!res.ok) {
+            // Se não for sucesso, tenta ler o texto da resposta
+            return res.text().then(text => {
+              console.error('[Accept Budget] Error response:', text);
+              throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
+            });
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.error || 'Erro ao aceitar.');
+          }
+        })
+        .catch(err => {
+          console.error('[Accept Budget] Erro:', err);
+          alert('Erro inesperado: ' + err.message);
+        });
     });
   }
 
@@ -908,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!rejeitarUrl) return;
       fetch(rejeitarUrl, {
         method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+        headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
       })
         .then(res => res.json())
         .then(data => data.success ? location.reload() : alert(data.error || 'Erro ao rejeitar.'))
@@ -1417,4 +1473,31 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
+
+{# Script para forçar atualização do Service Worker - executa apenas uma vez #}
+<script src="{% static 'js/sw-force-update-once.js' %}"></script>
+
+{# Fallback inline caso o arquivo externo não carregue #}
+<script>
+(function() {
+    const key = 'sw_v137_updated';
+    if (localStorage.getItem(key)) return;
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+            if (regs.length > 0) {
+                console.log('[SW Cleanup] Limpando Service Worker antigo...');
+                Promise.all([
+                    ...regs.map(r => r.unregister()),
+                    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))))
+                ]).then(() => {
+                    localStorage.setItem(key, '1');
+                    setTimeout(() => location.reload(true), 500);
+                });
+            }
+        });
+    }
+})();
+</script>
+
 {% endblock %}

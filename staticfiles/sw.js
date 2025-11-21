@@ -4,7 +4,7 @@
  */
 
 // Versão da aplicação para controle de atualização forçada
-const VERSION = 'v1.3.6';
+const VERSION = 'v1.3.7';
 // NomES de caches versionados (alterar VERSION dispara renovação)
 const STATIC_CACHE = `indicai-static-${VERSION}`;
 const DYNAMIC_CACHE = `indicai-dynamic-${VERSION}`;
@@ -101,17 +101,38 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
-    
+
     // Skip non-GET requests
     if (request.method !== 'GET') {
         return;
     }
-    
+
     // Skip chrome extensions and other protocols
     if (!url.protocol.startsWith('http')) {
         return;
     }
-    
+
+    // Skip critical external resources that should never be cached or intercepted
+    const criticalExternalDomains = [
+        'code.jquery.com',
+        'cdn.jsdelivr.net',
+        'cdnjs.cloudflare.com',
+        'fonts.googleapis.com',
+        'fonts.gstatic.com',
+        'google.com',
+        'gstatic.com',
+        'googlesyndication.com',
+        'doubleclick.net',
+        'googleads.g.doubleclick.net',
+        'adservice.google.com',
+        'fundingchoicesmessages.google.com'
+    ];
+
+    if (criticalExternalDomains.some(domain => url.hostname.includes(domain))) {
+        // Let browser handle these requests normally without ServiceWorker intervention
+        return;
+    }
+
     event.respondWith(handleFetch(request));
 });
 

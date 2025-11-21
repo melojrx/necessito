@@ -468,13 +468,30 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+// Function to request notification permission (must be called from user gesture)
+window.requestNotificationPermission = function() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission);
+            if (permission === 'granted') {
+                new Notification('Indicaai', {
+                    body: 'Você receberá notificações sobre suas necessidades e orçamentos!',
+                    icon: '/static/img/logo.png'
+                });
+            }
+        });
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+        console.log('Notifications already enabled');
+    } else if ('Notification' in window && Notification.permission === 'denied') {
+        alert('Notificações foram bloqueadas. Habilite nas configurações do navegador.');
+    }
+};
+
 // Initialize when document is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Request notification permission
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-    
+    // Notification permission is now requested only via user interaction
+    // Call window.requestNotificationPermission() from a button click
+
     // Initialize real-time features after Alpine is loaded
     setTimeout(() => {
         if (window.Alpine && Alpine.store('realtime')) {
